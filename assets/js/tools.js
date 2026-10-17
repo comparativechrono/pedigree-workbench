@@ -243,7 +243,7 @@
         { key: 'lookup', type: 'select', label: 'Look up names without a term', def: 'no', options: [['no', 'no – use the terms file only'], ['ols', 'yes, on EBI’s Ontology Lookup Service (online)'], ['local', 'yes, in copies of the ontologies on this computer']] },
         { key: 'hpo', type: 'file', label: 'HPO (hp.obo)', kinds: ['obo'], optional: true, none: 'none', show: (v) => v.lookup === 'local' },
         { key: 'mondo', type: 'file', label: 'Mondo (mondo.obo)', kinds: ['obo'], optional: true, none: 'none', show: (v) => v.lookup === 'local' },
-        { key: 'threshold', type: 'number', label: 'Accept a looked-up match from', def: 0.9, min: 0.5, max: 1, step: 0.05, show: (v) => v.lookup !== 'no', help: 'How close the best match must be (1 = exact) to be used without asking.' },
+        { key: 'threshold', type: 'number', label: 'Accept a looked-up match from', def: 0.98, min: 0.5, max: 1, step: 0.01, show: (v) => v.lookup !== 'no', help: 'The lowest score at which a looked-up term is used: 0.98, the default, takes only a term whose name or synonym is the condition\'s name. Below 0.98 it is a guess, to be checked.' },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}.normalised.json` }
       ],
       argv: (v) => ['phenotk', 'normalise', v.input, '-o', v.out, '--log', v.out.replace(/\.json$/, '') + '.log.json', ...optArgs(v.mapping, '--mapping', v.mapping), ...(v.lookup === 'no' ? ['--no-online'] : ['--backend', v.lookup, '--threshold', String(v.threshold)]), ...optArgs(v.lookup === 'local' && v.hpo, '--hpo-file', v.hpo), ...optArgs(v.lookup === 'local' && v.mondo, '--mondo-file', v.mondo)],
@@ -256,7 +256,7 @@
           '',
           `doc = ptk.read(${pyq(v.input)})`,
           v.mapping ? `mapping = json.load(open(${pyq(v.mapping)}))` : 'mapping = None',
-          `new, log = normalise(doc, mapping=mapping, threshold=${Number(v.threshold) || 0.9}, backend=${pyq(v.lookup === 'no' ? 'auto' : v.lookup)}, use_ontology=${v.lookup === 'no' ? 'False' : 'True'}${v.lookup === 'local' && v.hpo ? `, hpo_file=${pyq(v.hpo)}` : ''}${v.lookup === 'local' && v.mondo ? `, mondo_file=${pyq(v.mondo)}` : ''})`,
+          `new, log = normalise(doc, mapping=mapping, threshold=${Number(v.threshold) || 0.98}, backend=${pyq(v.lookup === 'no' ? 'auto' : v.lookup)}, use_ontology=${v.lookup === 'no' ? 'False' : 'True'}${v.lookup === 'local' && v.hpo ? `, hpo_file=${pyq(v.hpo)}` : ''}${v.lookup === 'local' && v.mondo ? `, mondo_file=${pyq(v.mondo)}` : ''})`,
           `ptk.write(new, ${pyq(v.out)})`,
           `with open(${pyq(v.out.replace(/\.json$/, '') + '.log.json')}, "w") as fh:`,
           '    fh.write(log.to_json())',

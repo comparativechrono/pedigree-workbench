@@ -8,7 +8,7 @@
 <p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. The check applies its rules:</p>
 <ul>
   <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
-  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>.</li>
+  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>, with all six of the resource's fields filled in. phenopacket-tools reads an empty field as a missing one.</li>
   <li><b>Values</b>: ages are ISO 8601 durations (<code>P45Y</code>), dates and times are in the right form.</li>
 </ul>
 <h3>And for a GA4GH Pedigree</h3>
@@ -16,6 +16,12 @@
   <li>Every id in the relationships and the index patients is the subject of one of the individuals, and no two individuals share an id.</li>
   <li>Every relation is a current KIN term, written with KIN's own label; retired codes from earlier drafts of KIN are reported.</li>
   <li>No one is related to themselves; a biological mother is female and a father male; no one has more than two genetic parents; no one is their own ancestor.</li>
+</ul>
+<h3>And for a Family</h3>
+<ul>
+  <li>Everyone with a Phenopacket – the proband and the relatives – is in the pedigree, and no one is in it twice or has two Phenopackets.</li>
+  <li>Every father and mother in the pedigree is a person in it; a father is not recorded as female, nor a mother as male; no one is both someone's father and their mother; no one is their own ancestor.</li>
+  <li>No one's id is <code>0</code>, which a PED file uses for “no parent”: their children would read as having none.</li>
 </ul>
 <h3>And one mistake of older files</h3>
 <ul>

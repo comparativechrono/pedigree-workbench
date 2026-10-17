@@ -144,13 +144,15 @@ def phenotypic_feature(curie: str, label: str, *, excluded: bool = False,
 
 
 def metadata(*, created_by: str, prefixes: Iterable[str] = (), versions: Optional[Dict[str, str]] = None,
-             created: Optional[str] = None, submitted_by: Optional[str] = None) -> Dict:
+             created: Optional[str] = None, submitted_by: Optional[str] = None,
+             known: Optional[Dict[str, Dict[str, str]]] = None) -> Dict:
     """``MetaData`` declaring a resource for each ontology prefix used.
 
     ``versions`` maps a prefix to the release its terms came from (for example
     ``{"HP": "2025-05-06"}``); prefixes without one are recorded as "unknown".
-    ``resources`` is left out when no ontology is used, as an empty list is not
-    allowed.
+    ``known`` gives resources read from a file, for prefixes this package does
+    not know itself. ``resources`` is left out when no ontology is used, as an
+    empty list is not allowed.
     """
     if not created_by or not created_by.strip():
         raise ValueError("metaData needs createdBy (who or what made the file)")
@@ -160,7 +162,7 @@ def metadata(*, created_by: str, prefixes: Iterable[str] = (), versions: Optiona
     out: Dict = {"created": ts, "createdBy": created_by.strip()}
     if submitted_by:
         out["submittedBy"] = submitted_by
-    res = ontology.resources_for(prefixes, versions)
+    res = ontology.resources_for(prefixes, versions, known)
     if res:
         out["resources"] = res
     out["phenopacketSchemaVersion"] = SCHEMA_VERSION
@@ -183,7 +185,7 @@ def prefixes_used(packet: Dict) -> List[str]:
 def phenopacket(packet_id: str, subject: Dict, *, diseases: Sequence[Dict] = (),
                 phenotypic_features: Sequence[Dict] = (), created_by: str,
                 versions: Optional[Dict[str, str]] = None, created: Optional[str] = None,
-                extra: Optional[Dict] = None) -> Dict:
+                extra: Optional[Dict] = None, known: Optional[Dict[str, Dict[str, str]]] = None) -> Dict:
     """A complete Phenopacket with its own ``metaData``.
 
     ``extra`` carries other Phenopacket fields (measurements, interpretations,
@@ -200,7 +202,7 @@ def phenopacket(packet_id: str, subject: Dict, *, diseases: Sequence[Dict] = (),
             out[key] = extra[key]
     md_extra = (extra or {}).get("metaData") or {}
     out["metaData"] = metadata(created_by=created_by, prefixes=prefixes_used(out), versions=versions,
-                               created=created, submitted_by=md_extra.get("submittedBy"))
+                               created=created, submitted_by=md_extra.get("submittedBy"), known=known)
     for key in ("updates", "externalReferences"):
         if md_extra.get(key):
             out["metaData"][key] = md_extra[key]
@@ -222,7 +224,8 @@ def ped_person(family_id: str, individual_id: str, *, paternal_id: str = "0", ma
 
 def family(family_id: str, *, proband: Dict, relatives: Sequence[Dict], persons: Sequence[Dict],
            consanguineous_parents: bool, created_by: str, versions: Optional[Dict[str, str]] = None,
-           created: Optional[str] = None, files: Sequence[Dict] = ()) -> Dict:
+           created: Optional[str] = None, files: Sequence[Dict] = (),
+           known: Optional[Dict[str, Dict[str, str]]] = None) -> Dict:
     """A Phenopackets ``Family``.
 
     The Family's ``metaData`` declares every ontology used anywhere in it, as
@@ -238,5 +241,5 @@ def family(family_id: str, *, proband: Dict, relatives: Sequence[Dict], persons:
     if files:
         out["files"] = list(files)
     out["metaData"] = metadata(created_by=created_by, prefixes=prefixes_used(out), versions=versions,
-                               created=created)
+                               created=created, known=known)
     return out

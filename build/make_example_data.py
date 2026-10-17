@@ -20,6 +20,7 @@ Run:  python3 build/make_example_data.py   (then python3 build/make_page.py)
 """
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -67,8 +68,10 @@ def main():
     shutil.copyfile(os.path.join(SRC, "example-terms.json"), os.path.join(OUT, "example-terms.json"))
     # (named so that their kind shows in the name, as the workbench's tools name their files)
     for f in sorted(os.listdir(os.path.join(SRC, "legacy"))):
-        name = f.replace("_ga4gh.json", "_ga4gh-pedigree.json").replace("_family.json", "_phenopackets-family.json") \
-                .replace("_phenopackets.json", "_phenopackets-family.json")
+        # abusua2ga4gh-0.2_family_no-names.json -> abusua2ga4gh-0.2-no-names_phenopackets-family.json
+        name = re.sub(r"^(.*)_(ga4gh|family|phenopackets)_(.+)\.json$", r"\1-\3_\2.json", f)
+        name = name.replace("_ga4gh.json", "_ga4gh-pedigree.json").replace("_family.json", "_phenopackets-family.json") \
+                   .replace("_phenopackets.json", "_phenopackets-family.json")
         shutil.copyfile(os.path.join(SRC, "legacy", f), os.path.join(OUT, "older", name))
     with open(os.path.join(SRC, "example-terms.json"), encoding="utf-8") as fh:
         terms = json.load(fh)

@@ -9,14 +9,14 @@ Python 3.9 or later: unzip it, put the folder on `PYTHONPATH`, and run
 
 | Package | Version | Where it comes from |
 |---|---|---|
-| `studio2ped` | **0.2.0** | 0.1.0 on PyPI; people named by pedigree numbers, and the markers left out |
+| `studio2ped` | **0.2.0** | 0.1.0 on PyPI; people named by pedigree numbers, the markers left out, and only genetic parents in the parent columns |
 | `ped2studio` | **0.2.2** | 0.2.1 on PyPI; families that reuse ids kept apart |
 | `mpedtools` | 0.1.0 | the release on PyPI, unchanged |
-| `hponorm` | **1.1.0** | 1.0.0 on PyPI; results scored by how well they match, and a faster local search |
+| `hponorm` | **1.1.0** | 1.0.0 on PyPI; results scored by how well they match, opposites (hypo- and hyper-) and different subtypes never scored as close spellings, and a faster local search |
 | `mondonorm` | **1.1.0** | 1.0.0 on PyPI; the same changes as hponorm |
 | `studio2ga4gh` | **0.4.0** | 0.3.0 on PyPI; rewritten to write through `pedigree_ga4gh` |
 | `ga4gh2studio` | **0.4.0** | 0.3.0 on PyPI; changed to read through `pedigree_ga4gh` |
-| `phenopacket_toolkit` (phenotk) | **0.4.0** | 0.3.0 on PyPI; without its “dialects”, reading and writing through `pedigree_ga4gh`, and with faults fixed |
+| `phenopacket_toolkit` (phenotk) | **0.4.0** | 0.3.0 on PyPI; without its “dialects”, reading and writing through `pedigree_ga4gh`, with faults fixed, and accepting only exact matches by default when it looks terms up |
 | `pedigree_ga4gh` | **1.0.0** | new: the one GA4GH implementation the others share |
 | `pedwb` | 1.0.0 | new: runs the programs for the terminal (`python -m pedwb NAME …`), and holds the small functions the Tools tab calls (`pedwb.gui`) |
 

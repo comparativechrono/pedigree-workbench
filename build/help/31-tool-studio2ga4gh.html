@@ -6,8 +6,8 @@
 <h2>The form</h2>
 <dl>
   <dt>The drawing</dt><dd>A Pedigree Studio file, or the drawing in the Studio tab.</dd>
-  <dt>Terms for its conditions</dt><dd>A terms file giving each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition with an id in the key itself, such as <i>Condition X [MONDO:0009061]</i>, needs no terms file. A condition without a term is left out, because a GA4GH file has no place for a condition without one: <b>Match them to terms…</b> under the table opens the tool that finds them.</dd>
-  <dt>People are named by</dt><dd><b>pedigree numbers</b> such as II-3 (the default, and the safe choice); <b>the labels in the drawing</b>, which are often names; or <b>Pedigree Studio's own ids</b>.</dd>
+  <dt>Terms for its conditions</dt><dd>A terms file giving each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition with an id in the key itself, such as <i>Condition X [MONDO:0009061]</i>, needs no terms file; only an ontology's id counts, so <i>Hypertension (BP:160/95)</i> is just a name. A condition without a term is left out, because a GA4GH file has no place for a condition without one: <b>Match them to terms…</b> under the table opens the tool that finds them.</dd>
+  <dt>People are named by</dt><dd><b>pedigree numbers</b> such as II-3 (the default, and the safe choice); <b>the labels in the drawing</b>, which are often names; or <b>Pedigree Studio's own ids</b>. A label becomes an id as studio2ped makes it (<i>J. Mensah</i> becomes <code>J_Mensah</code>), so a person has the same id in both tools' files, and an id that would be empty, <code>0</code> or shared falls back to the pedigree number, with a note.</dd>
   <dt>Family id</dt><dd>FAM gives FAM1, and FAM2 and so on when the drawing holds more than one family.</dd>
   <dt>Files to write</dt><dd>Both files, or one of them.</dd>
   <dt>Save in, Start of the file names</dt><dd>The files are <code><i>start</i>_ga4gh-pedigree.json</code> and <code><i>start</i>_phenopackets-family.json</code>, in <code>~/results</code> unless you choose another folder.</dd>
@@ -40,7 +40,7 @@
 <table>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>-t FILE</code>, <code>--terms FILE</code></td><td>the terms file</td></tr>
-<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder (default: beside the drawing) and the start of the file names (default: the drawing's name)</td></tr>
+<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder (default: beside the drawing; made if it does not exist) and the start of the file names (default: the drawing's name)</td></tr>
 <tr><td><code>--ids numbers|drawing|studio</code></td><td>how people are named</td></tr>
 <tr><td><code>--family-id ID</code>, <code>--created-by TEXT</code></td><td>the family's id; who made the files, for <code>metaData.createdBy</code></td></tr>
 <tr><td><code>--only pedigree|family</code></td><td>write one of the two files</td></tr>

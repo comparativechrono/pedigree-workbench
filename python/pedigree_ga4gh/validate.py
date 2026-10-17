@@ -19,7 +19,7 @@ from typing import Dict, List, Optional
 
 from . import kin, ontology
 from .phenopackets import is_iso_duration, is_partial_date, is_timestamp
-from .schema import (MESSAGES, MIN_ITEMS, ONEOF_REQUIRED, REQUIRED, camelise, enum_values, field,
+from .schema import (MESSAGES, MIN_ITEMS, ONEOF_REQUIRED, REQUIRED, camelise, enum_values,
                      fields, is_message, ontology_classes, walk)
 
 ERROR, WARNING, INFO = "error", "warning", "info"
@@ -212,11 +212,12 @@ def _structure(data: dict, message: str, out: List[Finding]) -> None:
                 if _is_int(obj.get(key)) and int(obj[key]) < 0:
                     out.append(Finding(ERROR, "bad-value", "{} cannot be negative".format(key), here))
         elif msg == "Resource":
-            for key in ("url", "iriPrefix", "name"):
+            for key in ontology.RESOURCE_FIELDS:
                 if key in obj and isinstance(obj[key], str) and not obj[key].strip():
-                    out.append(Finding(WARNING, "empty-resource-field",
-                                       "resource {} has an empty {}".format(obj.get("namespacePrefix", "?"), key),
-                                       here))
+                    # phenopacket-tools reads an empty string as a missing field, and all six are required
+                    out.append(Finding(ERROR, "empty-resource-field",
+                                       "resource {} has an empty {}, which phenopacket-tools reads as missing".format(
+                                           obj.get("namespacePrefix", "?"), key), here))
             if obj.get("version") == ontology.UNKNOWN_VERSION:
                 out.append(Finding(INFO, "unknown-version",
                                    "the release of {} that the terms came from is not recorded".format(
@@ -342,6 +343,10 @@ def _ped_persons(persons: list, out: List[Finding]) -> None:
         if iid in by_id:
             out.append(Finding(ERROR, "duplicate-person", "{} is in the pedigree twice".format(iid),
                                "pedigree.persons[{}]".format(i)))
+        if iid == "0":
+            # in PED form 0 means "no parent", so a child of this person would read as having none
+            out.append(Finding(ERROR, "zero-id", "a person's id is 0, which a PED-style pedigree uses for "
+                               "\"no parent\"; give them another id", "pedigree.persons[{}]".format(i)))
         by_id[iid] = p
     if len(fam_ids) > 1:
         out.append(Finding(INFO, "several-families", "the pedigree mixes family ids: {}".format(

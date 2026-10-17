@@ -8,10 +8,10 @@
   <dt>The file</dt><dd>A GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
   <dt>Terms file</dt><dd>Names and their terms (<a href="#h-terms">terms files</a>). The names are matched without regard to case, and the terms file's releases are recorded in the file's resources.</dd>
   <dt>Look up names without a term</dt><dd><b>No</b> (the terms file only), or on <b>EBI's Ontology Lookup Service</b> (online), or in <b>copies of the ontologies</b> on this computer (choose <code>hp.obo</code> and <code>mondo.obo</code>).</dd>
-  <dt>Accept a looked-up match from</dt><dd>How close the best match must be, from 0.5 to 1 (1 is exact). A name whose best match is less close is left without a term, and listed. A terms file's entries are always used.</dd>
+  <dt>Accept a looked-up match from</dt><dd>The lowest score, from 0.5 to 1, at which a term that is found is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name less, so the default, 0.98, takes only a term that the condition's name names. A name whose best match is less close is left without a term, and listed. A terms file's entries are always used.</dd>
   <dt>Save as</dt><dd><code>~/results/<i>name</i>.normalised.json</code>, with a log of every decision beside it, <code>….normalised.log.json</code>.</dd>
 </dl>
-<p>Nothing is guessed: a name that neither the terms file nor a close enough match gives a term keeps its empty id, and the summary lists it. Look at the log before you rely on a looked-up match.</p>
+<p>Nothing is guessed: a name that neither the terms file nor a look-up gives a term keeps its empty id, and the summary lists it. You can lower the threshold to take close matches as well, but each of those is a guess, and the log asks for it to be checked: names spelt almost alike can mean opposite things, and <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>
 <p>A term goes where its kind belongs: older tools wrote every condition as a disease, so a “disease” that is given an HPO term (<i>Hearing loss from birth</i>, <code>HP:0000365</code>) moves to the phenotypic features, and a phenotype given a Mondo term moves to the diseases. The summary notes each move.</p>
 
 <h2>In the terminal</h2>
@@ -22,7 +22,7 @@ pedigree-ga4gh validate ~/results/older.normalised.json</code></pre>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>--mapping FILE</code></td><td>a terms file, or the log of an earlier run</td></tr>
 <tr><td><code>--no-online</code></td><td>the terms file only: no look-ups</td></tr>
-<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and how close a match must be</td></tr>
+<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and the lowest score accepted (default 0.98: the term's own name or synonym)</td></tr>
 <tr><td><code>--terms-only</code>, <code>--structure-only</code></td><td>only fill in terms, or only tidy the structure</td></tr>
 <tr><td><code>--log FILE</code>, <code>-o FILE</code>, <code>--in-place</code></td><td>where the log and the new file go</td></tr>
 </table>

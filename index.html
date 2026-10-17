@@ -410,7 +410,7 @@ pedigree-ga4gh validate ~/results/abusua_phenopackets-family.json</code></pre>
 <p><b>Save</b> writes the terms file, <code>~/terms/price-terms.json</code> for the Price family. Tick <b>Also write the ids into the drawing's colour key</b> to make a copy of the drawing whose key reads <i>Breast cancer [MONDO:0007254]</i>: a drawing like that carries its terms wherever it goes, and converts without a terms file. Then <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file chosen.</p>
 
 <h2>For a GA4GH file: Fill in missing terms</h2>
-<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one the id from a terms file, matching the names without regard to case. It can also look up names the terms file does not have, and use the best match when it is close enough (the threshold: 1 is an exact match). What it decided goes in a log beside the new file, <code>….normalised.log.json</code>.</p>
+<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one the id from a terms file, matching the names without regard to case. It can also look up names the terms file does not have, and use a term it finds whose name, or one of whose synonyms, is the condition's name, whatever the case and punctuation; a lower threshold takes close matches too, each a guess to check. What it decided goes in a log beside the new file, <code>….normalised.log.json</code>.</p>
 <p>A file made by an older tool must be upgraded first, and the tool says so if it needs to be. To try it: upgrade the older example, then fill in its terms from the examples' terms file (the tool chooses your newest file, which is the upgraded one).</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">1 · Upgrade the older example</button> <button class="do" type="button" data-tool="normalise" data-mapping="/data/examples/example-terms.json">2 · Fill in missing terms</button></div>
 
@@ -560,8 +560,8 @@ for c in index.search("breast cancer", limit=5):
 <h2>The form</h2>
 <dl>
   <dt>The drawing</dt><dd>A Pedigree Studio file, or the drawing in the Studio tab.</dd>
-  <dt>Terms for its conditions</dt><dd>A terms file giving each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition with an id in the key itself, such as <i>Condition X [MONDO:0009061]</i>, needs no terms file. A condition without a term is left out, because a GA4GH file has no place for a condition without one: <b>Match them to terms…</b> under the table opens the tool that finds them.</dd>
-  <dt>People are named by</dt><dd><b>pedigree numbers</b> such as II-3 (the default, and the safe choice); <b>the labels in the drawing</b>, which are often names; or <b>Pedigree Studio's own ids</b>.</dd>
+  <dt>Terms for its conditions</dt><dd>A terms file giving each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition with an id in the key itself, such as <i>Condition X [MONDO:0009061]</i>, needs no terms file; only an ontology's id counts, so <i>Hypertension (BP:160/95)</i> is just a name. A condition without a term is left out, because a GA4GH file has no place for a condition without one: <b>Match them to terms…</b> under the table opens the tool that finds them.</dd>
+  <dt>People are named by</dt><dd><b>pedigree numbers</b> such as II-3 (the default, and the safe choice); <b>the labels in the drawing</b>, which are often names; or <b>Pedigree Studio's own ids</b>. A label becomes an id as studio2ped makes it (<i>J. Mensah</i> becomes <code>J_Mensah</code>), so a person has the same id in both tools' files, and an id that would be empty, <code>0</code> or shared falls back to the pedigree number, with a note.</dd>
   <dt>Family id</dt><dd>FAM gives FAM1, and FAM2 and so on when the drawing holds more than one family.</dd>
   <dt>Files to write</dt><dd>Both files, or one of them.</dd>
   <dt>Save in, Start of the file names</dt><dd>The files are <code><i>start</i>_ga4gh-pedigree.json</code> and <code><i>start</i>_phenopackets-family.json</code>, in <code>~/results</code> unless you choose another folder.</dd>
@@ -594,7 +594,7 @@ for c in index.search("breast cancer", limit=5):
 <table>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>-t FILE</code>, <code>--terms FILE</code></td><td>the terms file</td></tr>
-<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder (default: beside the drawing) and the start of the file names (default: the drawing's name)</td></tr>
+<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder (default: beside the drawing; made if it does not exist) and the start of the file names (default: the drawing's name)</td></tr>
 <tr><td><code>--ids numbers|drawing|studio</code></td><td>how people are named</td></tr>
 <tr><td><code>--family-id ID</code>, <code>--created-by TEXT</code></td><td>the family's id; who made the files, for <code>metaData.createdBy</code></td></tr>
 <tr><td><code>--only pedigree|family</code></td><td>write one of the two files</td></tr>
@@ -648,7 +648,7 @@ for note in result.warnings:
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>ga4gh2studio /data/examples/okafor_ga4gh-pedigree.json -o ~/pedigrees/okafor-back.studio.json
 studio --tidy ~/pedigrees/okafor-back.studio.json</code></pre>
-<p>Without <code>-o</code>, the drawing is written beside the file, which for an example is not possible (the examples cannot be changed). Version 0.3's <code>-g FILE</code> and <code>-p FILE</code> still work.</p>
+<p>Without <code>-o</code>, the drawing is written beside the file and named after it (<code>okafor.studio.json</code> for <code>okafor_ga4gh-pedigree.json</code>), which for an example is not possible (the examples cannot be changed). That name is often the drawing's the file was made from, which holds names and notes the file does not, so a file of that name is never replaced unless you add <code>--force</code>: the tool stops and says so. A file you name with <code>-o</code> is replaced. Version 0.3's <code>-g FILE</code> and <code>-p FILE</code> still work.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>from ga4gh2studio import convert_file
@@ -682,11 +682,12 @@ for note in result.warnings:
 </dl>
 
 <h2>What it writes</h2>
-<p>One line per person: family, person, father, mother, sex (1 male, 2 female, 0 unknown) and, for each condition, 1 unaffected, 2 affected, or 3 for a carrier in an MPED file. Each condition's column is named after it in the colour key (<i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>), without an ontology id written after it (<i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>). <a href="#h-ped">PED and MPED files</a> has the details.</p>
+<p>One line per person: family, person, father, mother, sex (1 male, 2 female, 0 unknown) and, for each condition, 1 unaffected, 2 affected, or 3 for a carrier in an MPED file. Each condition's column is named after it in the colour key (<i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>), without an ontology id written after it (<i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>). Only an ontology's id comes off: <i>Hypertension (BP:160/95)</i> keeps its brackets, as <code>Hypertension_BP16095</code>. <a href="#h-ped">PED and MPED files</a> has the details.</p>
+<p>The father and mother are the genetic parents, which is how linkage programs read them. A child joined to a couple by a dashed line (an adoption), and a child carried by a surrogate (a parent marked S), get 0 in place of those parents, with a note; the GA4GH Family's pedigree does the same. A donor (D) is a genetic parent, and is written as one.</p>
 <p>After writing, the tool checks the file with mpedtools and shows the result under it.</p>
 
 <div class="callout"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>The ids</div>
-<p>People are named by their pedigree numbers, <code>II-3</code>, as in the GA4GH files. The other choices can give names: the text under a symbol (<code>Grace_78</code> for <i>Grace, 78</i>) often is one, and so may a label. Check those before the file leaves you. An id that two people would share, or an empty one, falls back to the person's pedigree number, and the tool says so.</p></div>
+<p>People are named by their pedigree numbers, <code>II-3</code>, as in the GA4GH files. The other choices can give names: the text under a symbol (<code>Grace_78</code> for <i>Grace, 78</i>) often is one, and so may a label. Check those before the file leaves you. A label becomes an id with spaces turned into underscores and other punctuation dropped (<i>J. Mensah</i> becomes <code>J_Mensah</code>), as studio2ga4gh makes it, so a person has the same id in both tools' files. An id that two people would share, an empty one, or <code>0</code> (which a PED file reads as “no parent”) falls back to the person's pedigree number, and the tool says so.</p></div>
 <p>The <i>no children</i> and <i>infertility</i> bars, which Pedigree Studio stores as children of the couple, are not people, so they are left out; the notes say which couple had them. (Version 0.1 wrote them as children of unknown sex.)</p>
 
 <h2>In the terminal</h2>
@@ -897,10 +898,10 @@ for c in index.search("hearing loss from birth", limit=6):
   <dt>The file</dt><dd>A GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
   <dt>Terms file</dt><dd>Names and their terms (<a href="#h-terms">terms files</a>). The names are matched without regard to case, and the terms file's releases are recorded in the file's resources.</dd>
   <dt>Look up names without a term</dt><dd><b>No</b> (the terms file only), or on <b>EBI's Ontology Lookup Service</b> (online), or in <b>copies of the ontologies</b> on this computer (choose <code>hp.obo</code> and <code>mondo.obo</code>).</dd>
-  <dt>Accept a looked-up match from</dt><dd>How close the best match must be, from 0.5 to 1 (1 is exact). A name whose best match is less close is left without a term, and listed. A terms file's entries are always used.</dd>
+  <dt>Accept a looked-up match from</dt><dd>The lowest score, from 0.5 to 1, at which a term that is found is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name less, so the default, 0.98, takes only a term that the condition's name names. A name whose best match is less close is left without a term, and listed. A terms file's entries are always used.</dd>
   <dt>Save as</dt><dd><code>~/results/<i>name</i>.normalised.json</code>, with a log of every decision beside it, <code>….normalised.log.json</code>.</dd>
 </dl>
-<p>Nothing is guessed: a name that neither the terms file nor a close enough match gives a term keeps its empty id, and the summary lists it. Look at the log before you rely on a looked-up match.</p>
+<p>Nothing is guessed: a name that neither the terms file nor a look-up gives a term keeps its empty id, and the summary lists it. You can lower the threshold to take close matches as well, but each of those is a guess, and the log asks for it to be checked: names spelt almost alike can mean opposite things, and <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>
 <p>A term goes where its kind belongs: older tools wrote every condition as a disease, so a “disease” that is given an HPO term (<i>Hearing loss from birth</i>, <code>HP:0000365</code>) moves to the phenotypic features, and a phenotype given a Mondo term moves to the diseases. The summary notes each move.</p>
 
 <h2>In the terminal</h2>
@@ -911,7 +912,7 @@ pedigree-ga4gh validate ~/results/older.normalised.json</code></pre>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>--mapping FILE</code></td><td>a terms file, or the log of an earlier run</td></tr>
 <tr><td><code>--no-online</code></td><td>the terms file only: no look-ups</td></tr>
-<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and how close a match must be</td></tr>
+<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and the lowest score accepted (default 0.98: the term's own name or synonym)</td></tr>
 <tr><td><code>--terms-only</code>, <code>--structure-only</code></td><td>only fill in terms, or only tidy the structure</td></tr>
 <tr><td><code>--log FILE</code>, <code>-o FILE</code>, <code>--in-place</code></td><td>where the log and the new file go</td></tr>
 </table>
@@ -948,7 +949,7 @@ print(log.summary())</code></pre>
 <p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. The check applies its rules:</p>
 <ul>
   <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
-  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>.</li>
+  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>, with all six of the resource's fields filled in. phenopacket-tools reads an empty field as a missing one.</li>
   <li><b>Values</b>: ages are ISO 8601 durations (<code>P45Y</code>), dates and times are in the right form.</li>
 </ul>
 <h3>And for a GA4GH Pedigree</h3>
@@ -956,6 +957,12 @@ print(log.summary())</code></pre>
   <li>Every id in the relationships and the index patients is the subject of one of the individuals, and no two individuals share an id.</li>
   <li>Every relation is a current KIN term, written with KIN's own label; retired codes from earlier drafts of KIN are reported.</li>
   <li>No one is related to themselves; a biological mother is female and a father male; no one has more than two genetic parents; no one is their own ancestor.</li>
+</ul>
+<h3>And for a Family</h3>
+<ul>
+  <li>Everyone with a Phenopacket – the proband and the relatives – is in the pedigree, and no one is in it twice or has two Phenopackets.</li>
+  <li>Every father and mother in the pedigree is a person in it; a father is not recorded as female, nor a mother as male; no one is both someone's father and their mother; no one is their own ancestor.</li>
+  <li>No one's id is <code>0</code>, which a PED file uses for “no parent”: their children would read as having none.</li>
 </ul>
 <h3>And one mistake of older files</h3>
 <ul>
@@ -1589,7 +1596,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <ul>
   <li>The proband is the drawing's proband (the index patient); the relatives are the other people with a condition. A relative with nothing to record is in the pedigree but has no Phenopacket.</li>
   <li>The pedigree's parents are the genetic ones: biological parents, and egg and sperm donors. Adoptive, foster and step-parents are not genetic parents, and are not written there.</li>
-  <li><code>consanguinousParents</code> is worked out from the relationships: true when the proband's parents are marked consanguineous or share an ancestor.</li>
+  <li><code>consanguinousParents</code> is worked out from the relationships: true when the proband's parents are marked consanguineous, or are related as second cousins or closer, which is what KIN means by consanguineous partners.</li>
   <li>Each Phenopacket has its own <code>metaData</code>, and so has the Family.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_phenopackets-family.json">Look at the Okafor Family</button> <button class="do" type="button" data-tool="view" data-input="/data/examples/okafor_phenopackets-family.json">See it as a table</button></div>
@@ -1599,6 +1606,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <pre class="code"><code>"resources": [{"id": "hp", "name": "human phenotype ontology", "url": "http://purl.obolibrary.org/obo/hp.owl",
                "version": "2026-09-01", "namespacePrefix": "HP", "iriPrefix": "http://purl.obolibrary.org/obo/HP_"}]</code></pre>
 <p>Every term's prefix (<code>HP</code> in <code>HP:0000365</code>) must be declared there: that is the rule of phenopacket-tools that files most often break. The release comes from the terms file, the ontology file searched, or EBI's service; it is <code>unknown</code> when none of them says.</p>
+<p>The workbench knows the resources of 24 ontologies, from the HPO and Mondo to SNOMED CT and ICD-10-CM, and keeps any other that a file it reads declares in full. A term from an ontology it cannot declare is left out, with a warning, rather than making the file invalid.</p>
 
 <h2>In JSON</h2>
 <p>Phenopackets are defined in Protocol Buffers, and written as JSON the way proto3 writes it: field names in camelCase (<code>phenotypicFeatures</code>), values that are their defaults may be left out, and readers accept the proto spelling (<code>phenotypic_features</code>) too. The workbench writes camelCase and reads both.</p>
@@ -1726,7 +1734,7 @@ pedigree-ga4gh kin | grep -i sibling</code></pre>
 <tr><th>Column</th><th>Holds</th></tr>
 <tr><td>1 · family</td><td>the family's id: <code>FAM1</code></td></tr>
 <tr><td>2 · person</td><td>the person's id, unique within the family</td></tr>
-<tr><td>3 · father, 4 · mother</td><td>the parents' ids, or <code>0</code> for a founder (no parents in the file)</td></tr>
+<tr><td>3 · father, 4 · mother</td><td>the genetic parents' ids, or <code>0</code> for a founder (no parents in the file); adoptive parents and a surrogate are not genetic parents, so studio2ped writes <code>0</code> for them</td></tr>
 <tr><td>5 · sex</td><td><code>1</code> male, <code>2</code> female, <code>0</code> unknown</td></tr>
 <tr><td>6 · status</td><td><code>1</code> unaffected, <code>2</code> affected, <code>0</code> unknown</td></tr>
 </table>
@@ -1780,7 +1788,7 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 
 <h2>Where a condition gets its term</h2>
 <ol>
-  <li><b>In the drawing's colour key</b>: an id in brackets after the name – <i>Condition X [MONDO:0009061]</i>. The drawing then carries its term wherever it goes. <a href="#h-tool-terms">Match conditions to terms</a> can write the ids into a copy of the drawing.</li>
+  <li><b>In the drawing's colour key</b>: an id in brackets after the name – <i>Condition X [MONDO:0009061]</i>. It must be an ontology's id: <i>Hypertension (BP:160/95)</i> is read as a name. The drawing then carries its term wherever it goes. <a href="#h-tool-terms">Match conditions to terms</a> can write the ids into a copy of the drawing.</li>
   <li><b>In a terms file</b>, given to Drawing → GA4GH or to Fill in missing terms.</li>
 </ol>
 
@@ -2237,9 +2245,9 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <noscript><p style="padding:20px">This page needs JavaScript.</p></noscript>
 
-<script>window.WB_EXAMPLES = [{"p":"README.md","s":2029},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":523},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224}];
+<script>window.WB_EXAMPLES = [{"p":"README.md","s":2029},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":523},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224}];
 window.WB_STARTERS = [{"p":"notebooks/pedigree-tools.ipynb"}];
-window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"a90e44263ca0ef25cc5c34b76d5d706fb843eb2210b84ca8bccecf30959a82d8","bytes":198961,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
+window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"6b7684db52c16c0dd227a7e35f60ce6f43098591e3be6401800a9722fe6ee478","bytes":211129,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
 window.WB_STUDIO = "9e6b524d4469";
 window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/ga4gh/pedigree_family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/pedigree_family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/ga4gh/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href=\"https://github.com/comparativechrono/pedigree-workbench\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-workbench<\/a>"};</script>
 <script src="assets/js/config.js"></script>

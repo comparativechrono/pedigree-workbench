@@ -20,7 +20,9 @@ abusua2ga4gh up to 0.2, GA4GH Pedigree
 Both, Phenopackets
     Conditions with an empty ontology id; studio2ga4gh also left ``metaData``
     out of the embedded Phenopackets and ``phenopacketSchemaVersion`` out of
-    ``metaData``, and abusua2ga4gh put ``name`` in ``subject``.
+    ``metaData``, and abusua2ga4gh put ``name`` in ``subject`` when asked to.
+    abusua2ga4gh 0.2's Phenopackets and Families are recognised by that, or
+    by being signed ``abusua2ga4gh`` with no version, or by its carrier term.
 Both
     ``KIN:011`` labelled *isDizygoticMultipleBirthSiblingOf*; KIN calls it
     *isPolyzygoticMultipleBirthSiblingOf*.
@@ -48,7 +50,7 @@ from typing import Dict, List, Optional, Tuple
 
 from . import kin, ontology
 from . import phenopackets as pp
-from .kindred import DISEASE, Kindred, Member, Relation, Term, detect, to_ga4gh_pedigree
+from .kindred import Kindred, Member, Relation, detect, to_ga4gh_pedigree
 from .schema import camelise
 
 UPGRADED_BY = "pedigree-ga4gh upgrade"
@@ -129,7 +131,14 @@ def identify(doc: Dict) -> Optional[Legacy]:
         packets = _packets(doc, kind)
         md = doc.get("metaData") or doc.get("meta_data") or {}
         studio = (md.get("createdBy") == "studio2ga4gh" and "phenopacketSchemaVersion" not in md)
-        abusua = any("name" in (p.get("subject") or {}) for p in packets)
+        # abusua2ga4gh 0.2 put names in subject only when asked to, but it always signed its files
+        # "abusua2ga4gh" with no version (0.3 adds one), and it gave carriers HP:0032500
+        mds = [md] + [p.get("metaData") or p.get("meta_data") or {} for p in packets]
+        abusua = (any("name" in (p.get("subject") or {}) for p in packets)
+                  or any(isinstance(m, dict) and m.get("createdBy") == "abusua2ga4gh" for m in mds)
+                  or any(is_carrier_mistake((f or {}).get("type")) for p in packets
+                         for f in (p.get("phenotypicFeatures") or p.get("phenotypic_features") or [])
+                         if isinstance(f, dict)))
         if studio or abusua:
             return Legacy("phenopackets",
                           "This file was written by an older version of {} and does not meet the "

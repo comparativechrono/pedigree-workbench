@@ -30,8 +30,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import __version__
-from .suggest import (EXACT_LABEL, EXACT_SYNONYM, EXTENDED, PLURAL, Candidate, content_words, normalise_text,
-                      similarity_normalised)
+from .suggest import (EXACT_LABEL, EXACT_SYNONYM, EXTENDED, PLURAL, Candidate, content_words, different_words,
+                      normalise_text, similarity_normalised)
 
 # Official, version-pinned-to-"latest" PURLs maintained by the Monarch Initiative.
 MONDO_OBO_URL = "https://purl.obolibrary.org/obo/mondo.obo"
@@ -212,7 +212,8 @@ class MondoIndex:
         slack = max(2, len(word) // 4)
         nearby = [w for n in range(len(word) - slack, len(word) + slack + 1) for w in self._by_length.get(n, ())]
         for w in difflib.get_close_matches(word, nearby, n=6, cutoff=0.85):
-            if w not in have:
+            # "hypotension" is spelt nearly like "hypertension", but is not a spelling of it
+            if w not in have and not different_words(word, w):
                 found.append((w, difflib.SequenceMatcher(None, word, w, autojunk=False).ratio()))
         return found
 

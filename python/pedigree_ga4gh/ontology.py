@@ -27,7 +27,8 @@ _PREFIX_CASE = {
     "hgnc": "HGNC", "geno": "GENO", "so": "SO", "eco": "ECO", "efo": "EFO",
     "loinc": "LOINC", "ucum": "UCUM", "chebi": "CHEBI", "ncbitaxon": "NCBITaxon",
     "hancestro": "HANCESTRO", "pato": "PATO", "uo": "UO", "cl": "CL", "maxo": "MAXO",
-    "snomedct": "SNOMEDCT", "kin": "KIN",
+    "snomedct": "SNOMEDCT", "snomed": "SNOMEDCT", "sctid": "SNOMEDCT", "doid": "DOID", "icd10cm": "ICD10CM",
+    "drugcentral": "DrugCentral", "kin": "KIN",
 }
 
 RESOURCES: Dict[str, Dict[str, str]] = {
@@ -88,7 +89,24 @@ RESOURCES: Dict[str, Dict[str, str]] = {
     "MAXO": {"id": "maxo", "name": "Medical Action Ontology",
              "url": "http://purl.obolibrary.org/obo/maxo.owl",
              "iriPrefix": "http://purl.obolibrary.org/obo/MAXO_"},
+    "DrugCentral": {"id": "drugcentral", "name": "Drug Central", "url": "https://drugcentral.org/",
+                    "iriPrefix": "https://drugcentral.org/drugcard/"},
+    # three more disease vocabularies that Phenopackets' Disease.term names; phenopacket-tools has no
+    # resource for them, so these follow their own sites (and BioPortal, for ICD-10-CM's IRIs)
+    "DOID": {"id": "doid", "name": "Human Disease Ontology",
+             "url": "http://purl.obolibrary.org/obo/doid.owl",
+             "iriPrefix": "http://purl.obolibrary.org/obo/DOID_"},
+    "SNOMEDCT": {"id": "snomedct", "name": "SNOMED CT", "url": "https://www.snomed.org",
+                 "iriPrefix": "http://snomed.info/id/"},
+    "ICD10CM": {"id": "icd10cm",
+                "name": "International Classification of Diseases, Tenth Revision, Clinical Modification",
+                "url": "https://www.cdc.gov/nchs/icd/icd-10-cm/",
+                "iriPrefix": "http://purl.bioontology.org/ontology/ICD10CM/"},
 }
+
+# A resource's fields, all of which must be filled in: phenopacket-tools reads an empty string as a missing
+# field, and its JSON schemas require all six.
+RESOURCE_FIELDS = ("id", "name", "url", "version", "namespacePrefix", "iriPrefix")
 
 # Recorded as the version when the ontology release behind a term is not known.
 UNKNOWN_VERSION = "unknown"
@@ -123,28 +141,49 @@ def ontology_class(curie: str, label: str) -> Dict[str, str]:
     return {"id": cid, "label": lab}
 
 
-def resource(prefix: str, version: Optional[str] = None) -> Dict[str, str]:
+def complete(res) -> bool:
+    """True for a resource with all six fields filled in, as phenopacket-tools requires."""
+    return isinstance(res, dict) and all(isinstance(res.get(f), str) and res[f].strip() for f in RESOURCE_FIELDS)
+
+
+def can_declare(prefix: str, known: Optional[Dict[str, Dict[str, str]]] = None) -> bool:
+    """True if a resource can be written for ``prefix``: it is one this module
+    knows, or ``known`` (resources read from a file) has a complete one for it."""
+    p = _PREFIX_CASE.get((prefix or "").lower(), prefix)
+    return p in RESOURCES or complete((known or {}).get(p))
+
+
+def resource(prefix: str, version: Optional[str] = None,
+             known: Optional[Dict[str, Dict[str, str]]] = None) -> Dict[str, str]:
     """A MetaData ``Resource`` for a prefix, with every field filled in.
 
-    Prefixes this module does not know get a minimal entry whose URL and IRI
-    prefix are blank; :func:`pedigree_ga4gh.validate.validate` reports those.
+    A prefix this module does not know is taken from ``known`` (the complete
+    resources a file declared, by prefix) if it is there. Otherwise it gets a
+    minimal entry whose URL and IRI prefix are blank, which phenopacket-tools
+    rejects: :func:`can_declare` says beforehand whether that will happen, and
+    the writers leave out terms whose resource cannot be declared.
     """
     p = _PREFIX_CASE.get(prefix.lower(), prefix)
-    known = RESOURCES.get(p)
-    if known is None:
+    entry = RESOURCES.get(p)
+    if entry is None and complete((known or {}).get(p)):
+        entry = known[p]
+        return {"id": entry["id"], "name": entry["name"], "url": entry["url"],
+                "version": version or entry["version"], "namespacePrefix": p, "iriPrefix": entry["iriPrefix"]}
+    if entry is None:
         return {"id": p.lower(), "name": p, "url": "", "version": version or UNKNOWN_VERSION,
                 "namespacePrefix": p, "iriPrefix": ""}
-    return {"id": known["id"], "name": known["name"], "url": known["url"],
+    return {"id": entry["id"], "name": entry["name"], "url": entry["url"],
             "version": version or UNKNOWN_VERSION, "namespacePrefix": p,
-            "iriPrefix": known["iriPrefix"]}
+            "iriPrefix": entry["iriPrefix"]}
 
 
-def resources_for(prefixes: Iterable[str], versions: Optional[Dict[str, str]] = None) -> List[Dict[str, str]]:
+def resources_for(prefixes: Iterable[str], versions: Optional[Dict[str, str]] = None,
+                  known: Optional[Dict[str, Dict[str, str]]] = None) -> List[Dict[str, str]]:
     """One resource per distinct prefix, in a stable order."""
     versions = versions or {}
     out = []
     for p in sorted({_PREFIX_CASE.get(x.lower(), x) for x in prefixes if x}):
-        out.append(resource(p, versions.get(p)))
+        out.append(resource(p, versions.get(p), known))
     return out
 
 
