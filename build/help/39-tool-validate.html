@@ -1,0 +1,41 @@
+<!-- id: h-tool-validate | title: Check against the standard | group: Tools | summary: pedigree-ga4gh validate: is a GA4GH file correct, and how to fix it | keys: validate check validator valid invalid errors warnings notes phenopacket-tools schema metadata resources kin curie json exit status -->
+<h1><!--ICON:badgeCheck-->Check against the standard</h1>
+<p class="lede">Checks a GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket, and says for each problem what it is, where it is in the file, and how to fix it. It needs nothing but the file: no Java, no internet.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check a correct file</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Check a file with problems</button></div>
+
+<h2>What is checked</h2>
+<h3>As the GA4GH's own validator does</h3>
+<p>phenopacket-tools is the GA4GH's validator for Phenopackets. The check applies its rules:</p>
+<ul>
+  <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
+  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>.</li>
+  <li><b>Values</b>: ages are ISO 8601 durations (<code>P45Y</code>), dates and times are in the right form.</li>
+</ul>
+<h3>And for a GA4GH Pedigree</h3>
+<ul>
+  <li>Every id in the relationships and the index patients is the subject of one of the individuals, and no two individuals share an id.</li>
+  <li>Every relation is a current KIN term, written with KIN's own label; retired codes from earlier drafts of KIN are reported.</li>
+  <li>No one is related to themselves; a biological mother is female and a father male; no one has more than two genetic parents; no one is their own ancestor.</li>
+</ul>
+<h3>And one mistake of older files</h3>
+<ul>
+  <li><code>HP:0032500</code> used for a carrier. It is valid in form – a real HPO term – but it is <i>Exacerbated by tobacco use</i>.</li>
+</ul>
+<p>The check does not look terms up, so it cannot tell whether a term is the right one for the person: only that it is well formed and declared.</p>
+
+<h2>The result</h2>
+<p><b>Valid</b> or <b>Not valid</b>, then a line for each finding: errors (the file is invalid), warnings (allowed, but probably a mistake), and notes (for information). Each has a code, such as <code>empty-term-id</code>, the place in the file, and how to fix it. A file from an older tool is recognised as such, with a button to upgrade it. <a href="#h-walk-check">Check a GA4GH file, or update an old one</a> lists the commonest findings and their fixes.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedigree-ga4gh validate /data/examples/okafor_phenopackets-family.json
+pedigree-ga4gh validate --json /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json | head -20</code></pre>
+<p>The exit status is 0 for a valid file and 1 for an invalid one. <code>--json</code> prints the findings as JSON. <code>phenotk validate FILE</code> runs the same checks on a file in the standard form; a file from an older tool it refuses, with a message saying to upgrade it.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pedigree_ga4gh as pg
+
+doc = pg.load("/data/examples/okafor_ga4gh-pedigree.json")
+findings = pg.validate(doc)
+print(pg.render_findings(findings))
+print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
+<!--CITE: pedigree-ga4gh phenopacket-tools phenopackets ga4gh-pedigree-->

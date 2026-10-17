@@ -1,0 +1,41 @@
+<!-- id: h-walk-check | title: Check a GA4GH file, or update an old one | group: Walkthroughs | summary: What the check reports, and how to fix each kind of problem | keys: check validate validator valid invalid error warning note fix problem upgrade older legacy old file phenopacket-tools schema kin metadata resources -->
+<h1><!--ICON:badgeCheck-->Check a GA4GH file, or update an old one</h1>
+<p class="lede">The check reads a GA4GH Pedigree, a Phenopackets Family, Cohort or single Phenopacket, and says whether it is correct and how to fix what is not. Use it on files you make before sending them, and on files you are sent before relying on them.</p>
+
+<h2>1 · Check the file</h2>
+<p><b>Check against the standard</b> takes one file. The answer comes first – <b>Valid</b> or <b>Not valid</b> – then a table with a line for each finding: what is wrong, where in the file (a path such as <code>individuals[4].metaData</code>), and how to fix it.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check a correct file</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Check an older file</button></div>
+<ul>
+  <li><b>Errors</b> make the file invalid: other software may refuse it, or read it wrongly.</li>
+  <li><b>Warnings</b> are things that are allowed but probably mistaken, such as a mother recorded as male.</li>
+  <li><b>Notes</b> are for information, such as an ontology release that the file does not record.</li>
+</ul>
+<p>The checks are those of the Phenopackets version 2 schema and of phenopacket-tools, the GA4GH's own validator, with the GA4GH Pedigree's on top: KIN terms, people named in relationships, parents' sexes, loops of ancestry. <a href="#h-tool-validate">Check against the standard</a> lists them.</p>
+
+<h2>2 · Fix what it finds</h2>
+<table>
+<tr><th>Finding</th><th>What it means</th><th>How to fix it</th></tr>
+<tr><td>made by an older tool (<code>legacy-format</code>)</td><td>studio2ga4gh 0.3 or abusua2ga4gh 0.2 wrote it, in a form the standard does not accept</td><td><b>Upgrade a file from an older tool</b></td></tr>
+<tr><td>no ontology id (<code>empty-term-id</code>)</td><td>a condition is named, but has no term</td><td><b>Fill in missing terms</b></td></tr>
+<tr><td>no resource for a prefix (<code>undeclared-prefix</code>)</td><td>terms are used, but metaData does not say which ontology they come from</td><td><b>Upgrade</b> adds the resource</td></tr>
+<tr><td>a field the standard does not have (<code>unknown-field</code>), or a required one missing (<code>missing-field</code>)</td><td>for example a name in <code>subject</code>, or no <code>metaData</code></td><td><b>Upgrade</b> fixes those it knows; otherwise the file must be corrected where it was made</td></tr>
+<tr><td>a retired KIN code (<code>old-kin-term</code>), or KIN's label not used (<code>kin-label</code>)</td><td>the relationship is written with a code from an earlier draft of KIN, or with another label</td><td><b>Upgrade</b> replaces them</td></tr>
+<tr><td>not a carrier term (<code>carrier-term</code>)</td><td><code>HP:0032500</code> used for a carrier, as abusua2ga4gh 0.2 did: it is the HPO's <i>Exacerbated by tobacco use</i></td><td><b>Upgrade</b> removes it, and a GA4GH Pedigree's narrative then says who is a carrier</td></tr>
+<tr><td>someone not in the file (<code>unknown-person</code>, <code>unknown-index-patient</code>)</td><td>a relationship or the index patient names an id that no individual has</td><td>correct the ids where the file was made</td></tr>
+<tr><td>a parent's sex (<code>parent-sex</code>, <code>relation-sex</code>), a loop of ancestry (<code>ancestry-loop</code>)</td><td>the family does not hang together</td><td>correct the drawing, and convert it again</td></tr>
+<tr><td>release not recorded (<code>unknown-version</code>)</td><td>the file does not say which release of an ontology its terms come from</td><td>nothing has to be done; matching terms in the workbench records the release</td></tr>
+</table>
+
+<h2>3 · Upgrade an older file</h2>
+<p><b>Upgrade a file from an older tool</b> rewrites the file in the standard form and lists every change, and anything it could not do – usually conditions without a term. Under the result, <b>Check the upgraded file</b> checks it again.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Upgrade the older example</button></div>
+<p>Among the things it corrects in files from abusua2ga4gh 0.2: names inside <code>subject</code>, which the standard has no place for; a sperm donor written as <code>KIN:039</code>, which is KIN's term for a gestational carrier; and carriers given the HPO term <code>HP:0032500</code>, which is <i>Exacerbated by tobacco use</i>. What it cannot tell from the file it leaves, and says so: abusua2ga4gh wrote foster and social parents as adoptive parents, and only the free-text note that it keeps in the narrative says which they were. <a href="#h-ga4gh">The GA4GH Pedigree</a> lists what was wrong with the older files, and why.</p>
+
+<h2>4 · Give the remaining conditions their terms</h2>
+<p>If the upgrade could not give a condition its term, <b>Fill in missing terms</b> can, from a terms file or by looking the name up (<a href="#h-walk-terms">Give the conditions ontology terms</a>). Then check the file once more.</p>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>pedigree-ga4gh validate /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json
+pedigree-ga4gh upgrade /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json -o ~/results/abusua_phenopackets-family.json
+pedigree-ga4gh validate ~/results/abusua_phenopackets-family.json</code></pre>
+<p><code>pedigree-ga4gh validate</code> ends with exit status 0 for a valid file and 1 for an invalid one, so a script can use it.</p>

@@ -1,0 +1,72 @@
+// The Tools tab's tools (assets/js/tools.js), each with sample values: print the command each runs and its Python, as
+// JSON lines, for run_equiv.py. tools.js is loaded with a small stand-in for the page.
+//
+//   node tests/equivalence/gen.js assets/js/tools.js > cases.jsonl
+const path = require('path');
+const HOME = '/home/user';
+const MG = {
+  h: () => ({}), esc: (s) => s, toast() {}, store: { get: (k, d) => d, set() {} }, bus: { on() {}, emit() {} },
+  path: { dirname: (p) => p.replace(/\/[^/]*$/, '') || '/' },
+  icon: () => '', kernels: {}, config: {},
+  app: { HOME, kindNames: {}, pedKind: (p) => (/\.studio\.json$/.test(p) ? 'studio' : /_ga4gh-pedigree\.json$/.test(p) ? 'pedigree' : /_phenopackets-family\.json$/.test(p) ? 'family' : /\.mped$/.test(p) ? 'mped' : /\.ped$/.test(p) ? 'ped' : 'json') }
+};
+global.window = { MG, matchMedia: () => ({ matches: false }) };
+require(path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'assets', 'js', 'tools.js')));
+const TOOLS = Object.fromEntries(MG.pedTools.map((t) => [t.id, t]));
+const EX = '/data/examples/';
+const R = HOME + '/results/';
+const CASES = [
+  ['studio2ga4gh', { input: EX + 'okafor.studio.json', terms: EX + 'example-terms.json' }],
+  ['studio2ga4gh', { input: EX + 'lynch.studio.json', terms: EX + 'example-terms.json', ids: 'drawing', only: 'family', family: 'LYN', prefix: 'lynch-drawing' }],
+  ['ga4gh2studio', { input: EX + 'okafor_ga4gh-pedigree.json' }],
+  ['ga4gh2studio', { input: EX + 'okafor_phenopackets-family.json', out: '~/pedigrees/okafor-from-family.studio.json' }],
+  ['studio2ped', { input: EX + 'okafor.studio.json' }],
+  ['studio2ped', { input: EX + 'cf-cousins.studio.json', prefix: 'cf' }],
+  ['ped2studio', { input: EX + 'lynch.ped' }],
+  ['ped2studio', { input: EX + 'okafor.mped', colour: '#c0392b', shading: true, pattern: 'dots', fill: 'half', out: '~/pedigrees/okafor-shaded.studio.json' }],
+  ['ga4gh-convert', { input: EX + 'okafor_ga4gh-pedigree.json', to: 'family', proband: 'IV-3' }],
+  ['ga4gh-convert', { input: EX + 'okafor_phenopackets-family.json', to: 'pedigree' }],
+  ['export', { input: EX + 'okafor_phenopackets-family.json', fmt: 'ped' }],
+  ['export', { input: EX + 'okafor_ga4gh-pedigree.json', fmt: 'tsv' }],
+  ['export', { input: EX + 'okafor_phenopackets-family.json', fmt: 'yaml' }],
+  ['export', { input: EX + 'okafor_phenopackets-family.json', fmt: 'jsonl' }],
+  ['upgrade', { input: EX + 'older/studio2ga4gh-0.3_phenopackets-family.json' }],
+  ['upgrade', { input: EX + 'older/abusua2ga4gh-0.2_ga4gh-pedigree.json' }],
+  ['normalise', { input: R + "studio2ga4gh-0.3.upgraded.json", mapping: EX + 'example-terms.json', lookup: 'no' }],
+  ['validate', { input: EX + 'okafor_ga4gh-pedigree.json' }],
+  ['view', { input: EX + 'okafor_phenopackets-family.json', what: 'view' }],
+  ['view', { input: EX + 'okafor_ga4gh-pedigree.json', what: 'stats' }],
+  ['diff', { input: EX + 'okafor_ga4gh-pedigree.json', input2: R + 'okafor_ga4gh-pedigree.json' }],
+  ['deidentify', { input: EX + 'okafor_phenopackets-family.json' }],
+  ['deidentify', { input: EX + 'okafor_ga4gh-pedigree.json', remap: 'hash', salt: 'pepper', binAge: '10y', dropProv: true, out: '~/results/okafor-hashed.json', keyfile: '~/results/okafor-hashed.key.json' }],
+  ['filter', { input: EX + 'okafor_phenopackets-family.json', who: 'affected' }],
+  ['filter', { input: EX + 'okafor_ga4gh-pedigree.json', ids: 'IV-3\nIII-2\nIII-3', terms: 'HP:0000365', out: '~/results/okafor-three.json' }],
+  ['split', { input: EX + 'okafor_phenopackets-family.json' }],
+  ['merge', { inputs: [R + 'okafor-people/IV-3.json', R + 'okafor-people/II-3.json'], cid: 'okafor-cases' }],
+  ['add', { input: EX + 'okafor_phenopackets-family.json', phenotypes: 'HP:0000365=Hearing impairment\nHP:0001263', excluded: true, diseases: 'MONDO:0007254=breast cancer', onset: 'P45Y', vital: 'ALIVE', out: '~/results/okafor-added.json' }],
+  ['add', { input: EX + 'okafor_ga4gh-pedigree.json', target: 'II-3', diseases: 'MONDO:0007254', out: '~/results/okafor-added2.json' }],
+  ['mped-info', { input: EX + 'okafor.mped' }],
+  ['mped-extract', { input: EX + 'okafor.mped', which: 'Breast_cancer' }],
+  ['mped-extract', { input: EX + 'okafor.mped', which: '', prefix: 'okall' }],
+  ['mped-merge', { inputs: [R + 'okall_Hearing_loss_from_birth.ped', R + 'okall_Breast_cancer.ped'], names: 'Hearing Breast' }],
+  ['mped-split', { input: EX + 'okafor.mped' }],
+  ['mped-convert', { input: EX + 'okafor.mped', action: 'to-ped', column: 'Breast_cancer' }],
+  ['mped-convert', { input: EX + 'lynch.ped', action: 'to-mped' }],
+  ['mped-convert', { input: EX + 'lynch.ped', action: 'add', column: 'Pancreatic', value: '1', out: '~/results/lynch-plus.mped' }],
+  ['mped-convert', { input: EX + 'okafor.mped', action: 'remove', column: 'Hearing_loss_from_birth', out: '~/results/okafor-less.mped' }]
+];
+const expand = (p) => String(p).replace(/^~(?=\/|$)/, HOME);
+for (const [id, given] of CASES) {
+  const t = TOOLS[id];
+  const v = {};
+  for (const f of t.fields) v[f.key] = given[f.key] != null ? given[f.key] : f.type === 'files' ? [] : f.type === 'file' ? '' : typeof f.def === 'function' ? undefined : f.def;
+  for (const f of t.fields) if (v[f.key] === undefined) v[f.key] = f.def(v);
+  for (const f of t.fields) {
+    if (f.show && !f.show(v)) v[f.key] = f.type === 'check' ? false : f.type === 'files' ? [] : '';
+    if ((f.type === 'file' || f.type === 'folder' || f.type === 'path') && v[f.key]) v[f.key] = expand(v[f.key]);
+    if (f.type === 'files') v[f.key] = v[f.key].map(expand);
+  }
+  let argv = t.argv(v);
+  if (!Array.isArray(argv[0])) argv = [argv];
+  console.log(JSON.stringify({ id, argv, python: t.python ? t.python(v) : '', outputs: t.outputs ? t.outputs(v) : [], idfile: id === 'filter' && v.ids ? { path: argv[0][argv[0].indexOf('--id-list') + 1], text: v.ids.split('\n').join('\n') + '\n' } : null }));
+}

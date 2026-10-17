@@ -1,0 +1,17 @@
+{
+  "archive": "pedigree-tools.zip",
+  "sha256": "64b3758af0eb78960813f15c953029d9ff4a7f2390be5094039e6a2395117394",
+  "bytes": 172573,
+  "packages": {
+    "studio2ped": "0.1.0",
+    "ped2studio": "0.2.0",
+    "studio2ga4gh": "0.4.0",
+    "ga4gh2studio": "0.4.0",
+    "mpedtools": "0.1.0",
+    "hponorm": "1.0.0",
+    "mondonorm": "1.0.0",
+    "phenopacket_toolkit": "0.4.0",
+    "pedigree_ga4gh": "1.0.0",
+    "pedwb": "1.0.0"
+  }
+}

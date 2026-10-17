@@ -1,0 +1,43 @@
+{
+  "refs": {
+    "phenopackets2022": {"authors": ["Jacobsen JOB", "Baudis M", "Baynam GS", "Beckmann JS", "Beltran S", "Buske OJ", "Callahan TJ", "Chute CG"], "short": "Jacobsen et al.", "year": 2022, "title": "The GA4GH Phenopacket schema defines a computable representation of clinical data", "container": "Nature Biotechnology", "volume": "40", "issue": "6", "pages": "817-820", "doi": "10.1038/s41587-022-01357-4"},
+    "phenopackettools2023": {"authors": ["Danis D", "Jacobsen JOB", "Wagner AH", "Groza T", "Beckwith MA", "Rekerle L", "Carmody LC"], "short": "Danis et al.", "year": 2023, "title": "Phenopacket-tools: building and validating GA4GH Phenopackets", "container": "PLoS ONE", "volume": "18", "issue": "5", "pages": "e0285433", "doi": "10.1371/journal.pone.0285433"},
+    "hpo2024": {"authors": ["Gargano MA", "Matentzoglu N", "Coleman B", "Addo-Lartey EB", "Anagnostopoulos AV", "Anderton J", "Avillach P"], "short": "Gargano et al.", "year": 2024, "title": "The Human Phenotype Ontology in 2024: phenotypes around the world", "container": "Nucleic Acids Research", "volume": "52", "issue": "D1", "pages": "D1333-D1346", "doi": "10.1093/nar/gkad1005"},
+    "mondo2022": {"authors": ["Vasilevsky NA", "Matentzoglu NA", "Toro S", "Flack JE", "Hegde H", "Unni DR", "Alyea GF"], "short": "Vasilevsky et al.", "year": 2022, "title": "Mondo: unifying diseases for the world, by the world", "container": "medRxiv", "pages": "2022.04.13.22273750", "doi": "10.1101/2022.04.13.22273750"},
+    "ga4ghpedigree": {"corporate": "GA4GH Pedigree Standard", "title": "Pedigree Standard: documentation, examples and the Kinship Ontology (KIN)", "url": "https://pedigree.readthedocs.io/"},
+    "kin": {"corporate": "GA4GH Pedigree Standard", "title": "family_history_terminology: the Kinship Ontology (KIN), kin.owl", "url": "https://github.com/GA4GH-Pedigree-Standard/family_history_terminology"},
+    "pr364": {"authors": ["Jacobsen JOB"], "title": "Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025)", "url": "https://github.com/phenopackets/phenopacket-schema/pull/364"},
+    "bennett2008": {"authors": ["Bennett RL", "French KS", "Resta RG", "Doyle DL"], "year": 2008, "title": "Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors", "container": "Journal of Genetic Counseling", "volume": "17", "issue": "5", "pages": "424-433", "doi": "10.1007/s10897-008-9169-9"},
+    "bennett2022": {"authors": ["Bennett RL", "French KS", "Resta RG", "Austin J"], "year": 2022, "title": "Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors", "container": "Journal of Genetic Counseling", "volume": "31", "issue": "6", "pages": "1238-1248", "doi": "10.1002/jgc4.1621"},
+    "pedigreestudio": {"authors": ["Hearn TJ"], "short": "Hearn", "title": "Pedigree Studio [software]. Zenodo", "doi": "10.5281/zenodo.20209376"},
+    "pyodide": {"corporate": "The Pyodide development team", "title": "Pyodide: Python in the browser", "url": "https://pyodide.org/"},
+    "studio2ped": {"authors": ["Hearn TJ"], "title": "studio2ped [software]", "url": "https://github.com/comparativechrono/studio2ped"},
+    "ped2studio": {"authors": ["Hearn TJ"], "title": "ped2studio [software]", "url": "https://github.com/comparativechrono/ped2studio"},
+    "studio2ga4gh": {"authors": ["Hearn TJ"], "title": "studio2ga4gh [software]", "url": "https://github.com/comparativechrono/studio2ga4gh"},
+    "ga4gh2studio": {"authors": ["Hearn TJ"], "title": "ga4gh2studio [software]", "url": "https://github.com/comparativechrono/ga4gh2studio"},
+    "mpedtools": {"authors": ["Hearn TJ"], "title": "mpedtools [software]", "url": "https://github.com/comparativechrono/mpedtools"},
+    "hponorm": {"authors": ["Hearn TJ"], "title": "hponorm [software]", "url": "https://github.com/comparativechrono/hponorm"},
+    "mondonorm": {"authors": ["Hearn TJ"], "title": "mondonorm [software]", "url": "https://github.com/comparativechrono/mondonorm"},
+    "phenopackettoolkit": {"authors": ["Hearn TJ"], "title": "phenopacket-toolkit [software]", "url": "https://pypi.org/project/phenopacket-toolkit/"},
+    "pedigreega4gh": {"authors": ["Hearn TJ"], "title": "pedigree-ga4gh, in the Pedigree workbench [software]", "url": "https://github.com/comparativechrono/pedigree-workbench"}
+  },
+  "programs": {
+    "phenopackets": {"name": "Phenopackets", "refs": ["phenopackets2022"]},
+    "phenopacket-tools": {"name": "phenopacket-tools (the GA4GH's validator)", "refs": ["phenopackettools2023"]},
+    "hpo": {"name": "Human Phenotype Ontology", "refs": ["hpo2024"], "note": "Give the release you used, too (the terms file records it)."},
+    "mondo": {"name": "Mondo Disease Ontology", "refs": ["mondo2022"], "note": "Give the release you used, too (the terms file records it)."},
+    "ga4gh-pedigree": {"name": "GA4GH Pedigree Standard", "refs": ["ga4ghpedigree", "kin", "pr364"]},
+    "nomenclature": {"name": "Pedigree nomenclature", "refs": ["bennett2008", "bennett2022"]},
+    "pedigree-studio": {"name": "Pedigree Studio", "refs": ["pedigreestudio"]},
+    "pyodide": {"name": "Pyodide", "refs": ["pyodide"]},
+    "studio2ped": {"name": "studio2ped", "refs": ["studio2ped"]},
+    "ped2studio": {"name": "ped2studio", "refs": ["ped2studio"]},
+    "studio2ga4gh": {"name": "studio2ga4gh", "refs": ["studio2ga4gh"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
+    "ga4gh2studio": {"name": "ga4gh2studio", "refs": ["ga4gh2studio"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
+    "mpedtools": {"name": "mpedtools", "refs": ["mpedtools"]},
+    "hponorm": {"name": "hponorm", "refs": ["hponorm"]},
+    "mondonorm": {"name": "mondonorm", "refs": ["mondonorm"]},
+    "phenotk": {"name": "phenopacket-toolkit (phenotk)", "refs": ["phenopackettoolkit"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
+    "pedigree-ga4gh": {"name": "pedigree-ga4gh", "refs": ["pedigreega4gh"]}
+  }
+}

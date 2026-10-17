@@ -1,0 +1,32 @@
+<!-- id: h-tool-terms | title: Match conditions to terms | group: Tools | summary: hponorm and mondonorm: find the HPO or Mondo term for each condition in a drawing | keys: match terms hpo mondo ontology ols ebi lookup service local obo hp.obo mondo.obo suggest search terms file key colour key hponorm mondonorm -->
+<h1><!--ICON:tag-->Match conditions to terms</h1>
+<p class="lede">Finds the ontology term for each condition in a drawing's colour key – a Mondo term for a disease, an HPO term for a sign or symptom – and keeps your choices in a terms file, which Drawing → GA4GH reads. The searches are those of hponorm and mondonorm.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="terms" data-input="/data/examples/okafor.studio.json">Open it with the Okafor family</button></div>
+
+<h2>On the page</h2>
+<dl>
+  <dt>1 · The drawing</dt><dd>Its conditions are listed under 3, with how many people have each. <b>Start from a terms file</b> fills in the conditions it has already; the matches you make are added to it when you save.</dd>
+  <dt>2 · Search in</dt><dd><b>EBI's Ontology Lookup Service</b> (online, the latest releases, the best ranking) or <b>copies of the ontologies on this computer</b> (offline). For the second, choose <code>hp.obo</code> and <code>mondo.obo</code> among your files: the HPO can be downloaded from here into <code>~/ontologies</code>, and Mondo's file is downloaded with your browser from its download page, then added with <b>From my computer…</b>.</dd>
+  <dt>3 · The conditions</dt><dd>For each one: <b>a disease (Mondo)</b> or <b>a sign or symptom (HPO)</b> – guessed from the name, so check it – the words to search for, and <b>Suggest</b>. Up to six suggestions come back, each with its id, label, what matched (the label or a synonym; from EBI's service, its own ranking), a score out of 100 and the definition. Choose one, or type an id and press <b>Use this id</b>. <b>Suggest terms for all</b> searches for every condition not matched yet.</dd>
+  <dt>4 · Keep the matches</dt><dd><b>Save</b> writes the terms file (<code>~/terms/<i>drawing</i>-terms.json</code>). With <b>Also write the ids into the drawing's colour key</b>, it also writes a copy of the drawing, <code>~/pedigrees/<i>drawing</i>-with-terms.studio.json</code>, whose key reads <i>Breast cancer [MONDO:0007254]</i>. <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file chosen.</dd>
+</dl>
+
+<h2>What is sent where</h2>
+<p>With EBI's service, the words you search for and the ids you type are sent to EBI (www.ebi.ac.uk); nothing else is, and not the drawing. With copies on this computer, nothing is sent anywhere. Downloading the HPO here fetches <code>hp.obo</code> from the HPO's repository on GitHub.</p>
+
+<h2>Good to know</h2>
+<ul>
+  <li>The first search of a local file reads all of it: a few seconds for the HPO, longer for Mondo. The local search ranks less well than EBI's: if the term you expect is missing, try other words.</li>
+  <li>A term's release is recorded with it in the terms file, and goes into the GA4GH files' <code>metaData</code>, so that anyone can tell which version of the ontology the term came from.</li>
+  <li>A typed id is looked up when it can be. If it cannot (no copy of that ontology here, or no answer from EBI), it is used as typed, labelled with the condition's name, and the release is left out.</li>
+  <li>An id written in the key itself (<i>Condition X [MONDO:0009061]</i>) counts as matched.</li>
+</ul>
+<p><a href="#h-walk-terms">Give the conditions ontology terms</a> walks through it, with advice on choosing a term.</p>
+
+<h2>In Python</h2>
+<p>There is no command for this page: hponorm and mondonorm work on GA4GH and Phenopackets files, asking about each name as they go (<a href="#h-terminal">the terminal</a> cannot answer them, so there they take their answers from a file). Their searches can be used in a notebook:</p>
+<pre class="code" data-run="py"><code>from hponorm.hpo import HpoIndex            # a copy of the HPO on this computer
+index = HpoIndex.load("/home/user/ontologies/hp.obo", allow_download=False)
+for c in index.search("hearing loss from birth", limit=6):
+    print(c.id, c.label, c.score)</code></pre>
+<!--CITE: hponorm mondonorm hpo mondo-->

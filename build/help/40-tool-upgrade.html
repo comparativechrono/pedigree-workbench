@@ -1,0 +1,41 @@
+<!-- id: h-tool-upgrade | title: Upgrade a file from an older tool | group: Tools | summary: pedigree-ga4gh upgrade: rewrite an older or non-standard file in the standard form | keys: upgrade older legacy old file studio2ga4gh 0.3 abusua2ga4gh 0.2 fix repair convert standard form kin retired names metadata -->
+<h1><!--ICON:wand-->Upgrade a file from an older tool</h1>
+<p class="lede">Earlier versions of our tools – studio2ga4gh up to 0.3, abusua2ga4gh up to 0.2 – wrote GA4GH files that the standard does not accept. The upgrade rewrites such a file, once, in the standard form, and lists every change it made and everything it could not do. It tidies other non-standard files too.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Upgrade an older example</button></div>
+
+<h2>What it changes</h2>
+<ul>
+  <li><b>The form</b>: studio2ga4gh 0.3's GA4GH Pedigree, which was the conceptual model written out as JSON, becomes one Phenopacket per person, with relationships in the standard form.</li>
+  <li><b>What the standard has no place for</b>: names are removed (Phenopackets have no field for a name, and names are personal data); diseases inside <code>subject</code> are moved to the Phenopacket; notes on relationships go into the narrative.</li>
+  <li><b>metaData</b>: added where it is missing, with <code>phenopacketSchemaVersion</code>, and a resource for every ontology the terms use.</li>
+  <li><b>KIN</b>: retired codes are replaced by the current ones, the people swapped where the new term runs the other way, and labels corrected; a relation whose code and label disagree is decided by its label (abusua2ga4gh's <code>KIN:039</code> <i>isSpermDonorOf</i> becomes <code>KIN:004</code>).</li>
+  <li><b>Carriers</b>: the phenotypic feature <code>HP:0032500</code> written for a carrier is removed – it is <i>Exacerbated by tobacco use</i> – and a GA4GH Pedigree's narrative says who is a carrier.</li>
+  <li><b>Field names</b> in proto spelling (<code>index_patients</code>) are written in camelCase (<code>indexPatients</code>), as JSON is.</li>
+</ul>
+
+<h2>What it leaves to you</h2>
+<p>Under <i>to do</i>, it lists what only a person can decide:</p>
+<ul>
+  <li>conditions with a name and no term: <a href="#h-tool-normalise">Fill in missing terms</a> gives them their terms;</li>
+  <li>carriers in a Phenopacket or a Family: Phenopackets have no field for carrier status, and the only structured place for it is a genomic interpretation of the variant, if it is known (<code>phenotk add --variant</code> in the terminal: <a href="#h-tool-add">Add findings to people</a>);</li>
+  <li>foster and social parents that abusua2ga4gh wrote as adoptive parents, which only the relationship's note tells apart;</li>
+  <li>for studio2ga4gh 0.3's GA4GH Pedigree, the conditions: it recorded who was affected, but not by what, so convert the drawing again or use the Phenopackets file made with it.</li>
+</ul>
+<p>Nothing is guessed. A file that is already standard comes back as it was, apart from its field names. Under the result, <b>Check the upgraded file</b> runs the check on it.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json -o ~/results/abusua_phenopackets-family.json
+pedigree-ga4gh validate ~/results/abusua_phenopackets-family.json</code></pre>
+<p><code>phenotk upgrade FILE -o OUT</code> does the same.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pedigree_ga4gh as pg
+
+doc = pg.load("/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json")
+new, changes, todo = pg.upgrade(doc)
+pg.dump(new, "/home/user/results/abusua_phenopackets-family.json")
+for c in changes:
+    print("changed:", c)
+for t in todo:
+    print("to do:", t)</code></pre>
+<!--CITE: pedigree-ga4gh ga4gh-pedigree phenopackets-->

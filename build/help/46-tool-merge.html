@@ -1,0 +1,35 @@
+<!-- id: h-tool-merge | title: Put files together | group: Tools | summary: phenotk merge: Phenopackets and Families into one Cohort or Family | keys: merge combine join cohort family put together several files probands phenotk ids clash -->
+<h1><!--ICON:layers-->Put files together</h1>
+<p class="lede">Merges Phenopackets, Families and GA4GH Pedigrees into one Cohort – a set of people who need not be related – or into one Family.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="merge">Open it</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>The files</dt><dd>Two or more: add them one by one.</dd>
+  <dt>Into</dt><dd><b>a Cohort</b>, such as the probands of several families, or <b>a Family</b>.</dd>
+  <dt>Its id, Save as</dt><dd>The new file's id, and where it goes.</dd>
+</dl>
+
+<h2>Who ends up in it</h2>
+<ul>
+  <li><b>A Cohort</b> has every Phenopacket of every file. People are told apart by their ids, and pedigree numbers recur from family to family, so a person whose id another file has already used (IV-3, in two families) is renamed after their file's id: <code>FAM2-IV-3</code>. The tool says whom it renamed. Give each family its own id when you convert it (<i>Family id</i>, in Drawing → GA4GH), and the new names say which family each person came from.</li>
+  <li><b>A Family</b> is one family, so the same id is the same person: the first Phenopacket for each is kept, and the tool says which were left out. The first file's first person becomes the proband. The Family's pedigree comes from the Families among the files, and from the GA4GH Pedigrees' relationships; anyone in neither is added as a founder (no parents).</li>
+</ul>
+<p>The new file's <code>metaData</code> declares every ontology the files declare, with its release.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>phenotk split /data/examples/okafor_ga4gh-pedigree.json --out-dir ~/results/okafor-people --affected-only
+phenotk merge ~/results/okafor-people/IV-3.json ~/results/okafor-people/II-3.json --into cohort --id okafor-affected -o ~/results/okafor-affected.json
+pedigree-ga4gh validate ~/results/okafor-affected.json</code></pre>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import merge
+
+docs = [ptk.read(p) for p in ["/home/user/results/okafor-people/IV-3.json", "/home/user/results/okafor-people/II-3.json"]]
+notes = []
+new = merge(docs, into="cohort", cohort_id="okafor-affected", notes=notes)
+ptk.write(new, "/home/user/results/okafor-affected.json")
+for note in notes:
+    print("note:", note)</code></pre>
+<!--CITE: phenotk-->

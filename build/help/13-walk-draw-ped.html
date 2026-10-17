@@ -1,0 +1,30 @@
+<!-- id: h-walk-draw-ped | title: Draw a PED file you have been sent | group: Walkthroughs | summary: Upload it, draw it, tidy it, add what a PED file cannot say | keys: draw ped mped file sent received linkage view picture diagram plot pedigree drawing ped2studio tidy upload -->
+<h1><!--ICON:pedigree-->Draw a PED file you have been sent</h1>
+<p class="lede">A PED file is hard to read as a family. Drawn in Pedigree Studio it can be checked at a glance, finished with what the PED file leaves out, and saved as a picture or converted on to the GA4GH files. The example is the PED file of the Lynch family, in which several people have had bowel or pancreatic cancer.</p>
+
+<h2>1 · Add the file</h2>
+<p>Add the file to your files: <b>My files → Add files from my computer…</b> at the top right, or <b>From my computer…</b> under the file box of the tool in the next step, which puts it in <code>~/data</code>. The workbench knows a PED file by its ending, <code>.ped</code> or <code>.fam</code> (PLINK's name for the same six columns), and an MPED file by <code>.mped</code>: rename a file that ends otherwise.</p>
+
+<h2>2 · Draw it</h2>
+<p><b>PED or MPED → drawing</b> lays the family out generation by generation and fills in the affected people (status 2). Choose the colour, and whether to fill the whole symbol or the left half, or to shade with a pattern. An MPED file's conditions each get a colour of their own.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="/data/examples/lynch.ped">Draw the Lynch family</button></div>
+<p>The drawing is saved in <code>~/pedigrees</code>. <b>Open the drawing in Studio</b>, under the result, shows it; with the box ticked, Pedigree Studio's Tidy lays it out afresh as it opens, which usually gives the neatest drawing.</p>
+
+<h2>3 · Finish it in the Studio</h2>
+<p>A PED file says only who the parents are, the sex and the affected status, so the drawing has only those. In the Studio you can add the rest:</p>
+<ul>
+  <li><b>The condition's name.</b> The colour key calls it <i>Affected</i> (or, from an MPED file, by its column name). Click the key and type the condition's name, so that the drawing can be matched to terms and converted.</li>
+  <li><b>Who has died</b>, twins, adoptions, pregnancies, a proband: select a person or a line and use the panel.</li>
+  <li><b>Labels.</b> Each person is labelled with their id from the PED file; add ages or notes under it if you like.</li>
+</ul>
+<p>Then <b>Save</b> in the bar above the drawing. Pedigree Studio's <b>File</b> menu exports a picture (PNG or SVG) to your computer.</p>
+<p>The examples have the drawing that the Lynch PED file was made from, to compare with:</p>
+<div class="tryrow"><button class="do" type="button" data-studio="/data/examples/lynch.studio.json">Open the original Lynch drawing</button></div>
+
+<div class="callout info"><div class="co-t"><!--ICON:info-->Several families in one file</div><p>A PED file can hold several families. They are all drawn, side by side, in one drawing. To draw each on its own, split the file first with <b>One file for each family</b> (in PED and MPED files).</p></div>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>mpedtools info /data/examples/lynch.ped
+ped2studio /data/examples/lynch.ped ~/pedigrees/lynch.studio.json
+studio --tidy ~/pedigrees/lynch.studio.json</code></pre>
+<p><code>studio</code> opens a drawing in the Studio tab (<code>--tidy</code> lays it out afresh).</p>

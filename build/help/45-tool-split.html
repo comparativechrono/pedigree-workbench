@@ -1,0 +1,28 @@
+<!-- id: h-tool-split | title: One file for each person | group: Tools | summary: phenotk split: a Phenopacket for each person in a Family, Cohort or GA4GH Pedigree | keys: split explode one file each person individual phenopacket separate proband affected phenotk -->
+<h1><!--ICON:file-->One file for each person</h1>
+<p class="lede">Splits a Phenopackets Family, a Cohort or a GA4GH Pedigree into a Phenopacket for each person – or for each person with findings. Use it to send one person's findings without the rest of the family.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="split" data-input="/data/examples/okafor_ga4gh-pedigree.json">Split the Okafor GA4GH Pedigree</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>The file</dt><dd>A GA4GH Pedigree, a Phenopackets Family or a Cohort.</dd>
+  <dt>Only the people with findings</dt><dd>Leave out the people with no disease or phenotype recorded.</dd>
+  <dt>Save in the folder</dt><dd><code>~/results/<i>name</i>-people</code>: each file is named after its person's id, such as <code>IV-3.json</code>.</dd>
+</dl>
+<p>Each Phenopacket is complete on its own, with its <code>metaData</code> (taken from the file's when it has none of its own). A Phenopacket says nothing about relatives, so the family's structure stays behind – which is the point, when one person's findings are all that should go.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>phenotk split /data/examples/okafor_ga4gh-pedigree.json --out-dir ~/results/okafor-people --affected-only
+ls ~/results/okafor-people</code></pre>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import os
+import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import split
+
+doc = ptk.read("/data/examples/okafor_ga4gh-pedigree.json")
+os.makedirs("/home/user/results/okafor-people", exist_ok=True)
+for packet in split(doc, affected_only=True):
+    sid = packet.proband().subject.id
+    ptk.write(packet, os.path.join("/home/user/results/okafor-people", sid + ".json"))</code></pre>
+<!--CITE: phenotk-->

@@ -1,0 +1,18 @@
+# MPED v1	Hearing_loss_from_birth	Breast_cancer
+# FamID	IndID	FatherID	MotherID	Sex	Hearing_loss_from_birth	Breast_cancer
+FAM1	Adanna	0	0	2	1	1
+FAM1	Nnamdi	0	0	1	1	1
+FAM1	Emeka_d_70	Nnamdi	Adanna	1	1	1
+FAM1	Grace_78	Nnamdi	Adanna	2	1	2
+FAM1	Ngozi_84	0	0	2	1	1
+FAM1	Samuel	0	0	1	1	1
+FAM1	Amaka_42	Samuel	Grace_78	2	1	1
+FAM1	all_well	Samuel	Grace_78	1	1	1
+FAM1	Chioma_d_31	Samuel	Grace_78	2	1	1
+FAM1	Ifeanyi_49	Emeka_d_70	Ngozi_84	1	1	1
+FAM1	Obi_45	Emeka_d_70	Ngozi_84	1	1	1
+FAM1	Ada_14	Obi_45	Amaka_42	2	1	1
+FAM1	Chidi_7	Obi_45	Amaka_42	1	2	1
+FAM1	Dubem_7	Obi_45	Amaka_42	1	2	1
+FAM1	2016	Obi_45	Amaka_42	0	1	1
+FAM1	16_weeks	Obi_45	Amaka_42	0	1	1

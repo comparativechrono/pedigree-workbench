@@ -1,0 +1,41 @@
+<!-- id: h-tool-mpedtools | title: PED and MPED files | group: Tools | summary: mpedtools: summary and check, one condition out, merge, split, PED ⇄ MPED | keys: mpedtools ped mped info validate extract extract-all merge split convert add-phenotype remove-phenotype column condition family linkage -->
+<h1><!--ICON:table-->PED and MPED files</h1>
+<p class="lede">mpedtools works on PED files and on MPED files, which are PED files with a column for each of several conditions. Its five tools in the Tools tab summarise and check a file, take one condition out, put files together, split families apart, and turn one kind into the other.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="mped-info" data-input="/data/examples/okafor.mped">Summary and check of the Okafor MPED file</button></div>
+
+<h2>The five tools</h2>
+<dl>
+  <dt>Summary and check</dt><dd>The families, people (founders and the rest, by sex), and for each condition how many are affected, unaffected and carriers; then the check: people listed twice, parents who are not in the file, parents of the wrong sex, status codes other than 0, 1, 2 and 3.</dd>
+  <dt>Take one condition out</dt><dd>A plain PED file for one condition of an MPED file (give its column name, as the file's first line or the summary shows it), or one for each condition if you leave the name empty. Carriers (3) become unaffected (1), since a plain PED file has no code for them.</dd>
+  <dt>Put PED files together</dt><dd>PED files of the same people, one condition each, into one MPED file; name the conditions in the same order as the files, or each is named after its file.</dd>
+  <dt>One file for each family</dt><dd>A PED or MPED file of several families, split into a file for each, named after the families' ids.</dd>
+  <dt>PED ⇄ MPED, and columns</dt><dd>Make a PED file an MPED file or the other way round (keeping one condition), or add or remove a condition column; a new column starts with everyone at the value you choose.</dd>
+</dl>
+<div class="tryrow"><button class="do" type="button" data-tool="mped-extract" data-input="/data/examples/okafor.mped">Take one condition out</button> <button class="do" type="button" data-tool="mped-convert" data-input="/data/examples/lynch.ped">Make the Lynch PED file an MPED file</button></div>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>mpedtools info /data/examples/cf-cousins.mped
+mpedtools validate /data/examples/cf-cousins.mped
+mpedtools extract-all /data/examples/okafor.mped -d ~/results -p okafor
+mpedtools convert /data/examples/lynch.ped -o ~/results/lynch.mped -f mped</code></pre>
+<table>
+<tr><th>Command</th><th></th></tr>
+<tr><td><code>info FILE</code>, <code>validate FILE</code></td><td>the summary; the check (exit status 1 if it finds an error)</td></tr>
+<tr><td><code>extract FILE CONDITION -o OUT</code>, <code>extract-all FILE -d DIR -p START</code></td><td>one condition, or each, as a plain PED file</td></tr>
+<tr><td><code>merge A.ped B.ped … -o OUT -n NAME …</code></td><td>PED files into one MPED file</td></tr>
+<tr><td><code>split FILE -d DIR -p START</code></td><td>a file for each family</td></tr>
+<tr><td><code>convert FILE -o OUT -f ped|mped [--phenotype NAME]</code></td><td>one kind into the other</td></tr>
+<tr><td><code>add-phenotype FILE NAME -o OUT [--default N]</code>, <code>remove-phenotype FILE NAME -o OUT</code></td><td>a column more, or less</td></tr>
+</table>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import mpedtools
+
+ped = mpedtools.read("/data/examples/okafor.mped")
+print(mpedtools.summarise(ped))
+for issue in mpedtools.validate(ped):
+    print(issue.level, issue.message)
+one = mpedtools.extract_phenotype(ped, "Hearing_loss_from_birth")
+mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped")</code></pre>
+<p><a href="#h-ped">PED and MPED files</a> describes the formats.</p>
+<!--CITE: mpedtools-->

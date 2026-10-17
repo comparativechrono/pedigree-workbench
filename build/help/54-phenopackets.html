@@ -1,0 +1,29 @@
+<!-- id: h-phenopackets | title: Phenopackets | group: Files and standards | summary: Phenopackets version 2: the Phenopacket, the Family and the Cohort | keys: phenopackets phenopacket v2 family cohort proband relatives pedigree persons metadata resources subject phenotypic features diseases interpretations consanguinousParents schema -->
+<h1><!--ICON:tag-->Phenopackets</h1>
+<p class="lede">Phenopackets are the GA4GH's approved standard for a person's clinical findings – their phenotypes, diseases, and the genetic findings behind them – in a form that computers can read. Version 2 is the current one, and it is what the workbench writes.</p>
+
+<h2>The three messages</h2>
+<dl>
+  <dt>A Phenopacket</dt><dd>One person: the <code>subject</code> (id, sex, vital status, age), their <code>phenotypicFeatures</code> (HPO terms, observed or excluded, with onset and severity), <code>diseases</code> (Mondo terms), <code>interpretations</code> (genetic findings), and <code>metaData</code>.</dd>
+  <dt>A Family</dt><dd>One family: the <code>proband</code> and the <code>relatives</code> with findings, each a Phenopacket; a <code>pedigree</code> of everyone, in the form of a PED file (family, person, father, mother, sex, affected status); <code>consanguinousParents</code>, whether the proband's parents are related; and its own <code>metaData</code>.</dd>
+  <dt>A Cohort</dt><dd>A set of people who need not be related, each a Phenopacket.</dd>
+</dl>
+
+<h2>What the workbench puts in a Family</h2>
+<ul>
+  <li>The proband is the drawing's proband (the index patient); the relatives are the other people with a condition. A relative with nothing to record is in the pedigree but has no Phenopacket.</li>
+  <li>The pedigree's parents are the genetic ones: biological parents, and egg and sperm donors. Adoptive, foster and step-parents are not genetic parents, and are not written there.</li>
+  <li><code>consanguinousParents</code> is worked out from the relationships: true when the proband's parents are marked consanguineous or share an ancestor.</li>
+  <li>Each Phenopacket has its own <code>metaData</code>, and so has the Family.</li>
+</ul>
+<div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_phenopackets-family.json">Look at the Okafor Family</button> <button class="do" type="button" data-tool="view" data-input="/data/examples/okafor_phenopackets-family.json">See it as a table</button></div>
+
+<h2>metaData and resources</h2>
+<p>Every <code>metaData</code> says when the file was made and by what (<code>created</code>, <code>createdBy</code>), the schema version (<code>phenopacketSchemaVersion</code>: 2.0), and a <code>resource</code> for each ontology whose terms it uses, with that ontology's release:</p>
+<pre class="code"><code>"resources": [{"id": "hp", "name": "human phenotype ontology", "url": "http://purl.obolibrary.org/obo/hp.owl",
+               "version": "2026-09-01", "namespacePrefix": "HP", "iriPrefix": "http://purl.obolibrary.org/obo/HP_"}]</code></pre>
+<p>Every term's prefix (<code>HP</code> in <code>HP:0000365</code>) must be declared there: that is the rule of phenopacket-tools that files most often break. The release comes from the terms file, the ontology file searched, or EBI's service; it is <code>unknown</code> when none of them says.</p>
+
+<h2>In JSON</h2>
+<p>Phenopackets are defined in Protocol Buffers, and written as JSON the way proto3 writes it: field names in camelCase (<code>phenotypicFeatures</code>), values that are their defaults may be left out, and readers accept the proto spelling (<code>phenotypic_features</code>) too. The workbench writes camelCase and reads both.</p>
+<!--CITE: phenopackets phenopacket-tools-->

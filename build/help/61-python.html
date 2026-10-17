@@ -1,0 +1,86 @@
+<!-- id: h-python | title: The packages in Python | group: Notebook and terminal | summary: The main functions of each package, with examples | keys: python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm notebook code -->
+<h1><!--ICON:python-->The packages in Python</h1>
+<p class="lede">The main functions of each package, for notebooks and scripts. Each box can be added to the open notebook. The packages' own help – <code>help(studio2ga4gh.convert_file)</code> – says more.</p>
+
+<h2>studio2ga4gh, ga4gh2studio</h2>
+<pre class="code" data-run="py"><code>import json
+from studio2ga4gh import convert_file, parse_session
+
+# a drawing as Python objects: people, couples, pedigree numbers, the colour key
+drawing = parse_session(json.load(open("/data/examples/okafor.studio.json")))
+print(drawing.legend, drawing.numbers())
+
+# the drawing → the two GA4GH files (terms: a terms file, as a dict)
+terms = json.load(open("/data/examples/example-terms.json"))
+result = convert_file("/data/examples/okafor.studio.json", "okafor-py", "/home/user/results", terms=terms)
+print(result.summary, result.warnings)
+
+# and back: a GA4GH file → a drawing
+from ga4gh2studio import convert_file as draw
+print(draw("/home/user/results/okafor-py_ga4gh-pedigree.json", None, "/home/user/pedigrees/okafor-py.studio.json").summary)</code></pre>
+
+<h2>pedigree_ga4gh: reading, checking, upgrading</h2>
+<pre class="code" data-run="py"><code>import pedigree_ga4gh as pg
+
+doc = pg.load("/data/examples/okafor_ga4gh-pedigree.json")
+findings = pg.validate(doc)                       # [] when the file is correct
+print(pg.render_findings(findings), pg.is_valid(findings))
+
+# any GA4GH form → a Kindred: members, their terms, the KIN relations between them
+kindred, notes = pg.from_document(doc)
+for m in kindred.members[:3]:
+    print(m.id, m.sex, [t.label for t in m.terms])
+print(kindred.genetic_parents("IV-3"))              # (father, mother, notes)
+
+# and a Kindred → either form
+family, warnings = pg.to_phenopackets_family(kindred, created_by="my notebook")
+
+# an older file, rewritten in the standard form
+old = pg.load("/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json")
+new, changes, todo = pg.upgrade(old)
+print(len(changes), "changes;", todo)</code></pre>
+
+<h2>phenopacket_toolkit: the jobs of phenotk</h2>
+<pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import render, stats, render_stats, filter_document, deidentify, to_kind, to_format
+
+doc = ptk.read("/data/examples/okafor_ga4gh-pedigree.json")    # a Document, whatever its kind
+print(doc.kind, render(doc))
+print(render_stats(stats(doc)))
+
+affected = filter_document(doc, affected_only=True)
+family, notes = to_kind(doc, "family")
+print(to_format(family, "ped"))
+
+shared = deidentify(doc, remap_ids="seq")
+ptk.write(shared.document, "/home/user/results/okafor-py.deidentified.json")</code></pre>
+<p>The other operations – <code>normalise</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>sort</code> – are in <code>phenopacket_toolkit.ops</code> as well.</p>
+
+<h2>mpedtools</h2>
+<pre class="code" data-run="py"><code>import mpedtools
+
+ped = mpedtools.read("/data/examples/cf-cousins.mped")
+print(mpedtools.summarise(ped))
+print([(i.level, i.message) for i in mpedtools.validate(ped)])
+cf = mpedtools.extract_phenotype(ped, "Cystic_fibrosis")
+mpedtools.write(cf, "/home/user/results/cf.ped", force_format="ped")</code></pre>
+
+<h2>hponorm, mondonorm: searching the ontologies</h2>
+<pre class="code" data-run="py"><code>from mondonorm.mondo import MondoIndex      # a copy of Mondo among your files (or: from mondonorm.ols import OlsClient)
+index = MondoIndex.load("/home/user/ontologies/mondo.obo", allow_download=False)
+for c in index.search("bowel cancer", limit=5):
+    print(c.id, c.label, c.score, c.matched_on)</code></pre>
+<p><code>hponorm.hpo.HpoIndex</code> does the same for the HPO. <code>OlsClient().search(…)</code> asks EBI's Ontology Lookup Service instead, over the internet.</p>
+
+<h2>Many families at once</h2>
+<pre class="code" data-run="py"><code>import glob, json, os
+from studio2ga4gh import convert_file
+import pedigree_ga4gh as pg
+
+terms = json.load(open("/data/examples/example-terms.json"))
+os.makedirs("/home/user/results/all", exist_ok=True)
+for path in sorted(glob.glob("/data/examples/*.studio.json")):
+    name = os.path.basename(path).replace(".studio.json", "")
+    result = convert_file(path, name, "/home/user/results/all", terms=terms, family_id=name.upper())
+    for out, _ in result.files:
+        print(os.path.basename(out), "valid" if pg.is_valid(pg.validate(pg.load(out))) else "NOT valid")</code></pre>
