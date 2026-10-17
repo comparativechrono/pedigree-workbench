@@ -1,7 +1,7 @@
 """ga4gh2studio: draw GA4GH Pedigree and Phenopackets Family files in Pedigree Studio.
 
-This is the pedigree workbench's copy (0.4.0), which reads GA4GH through
-pedigree-ga4gh, the workbench's single GA4GH implementation.
+It reads GA4GH files through pedigree-ga4gh, the one GA4GH implementation that
+the lab's pedigree tools share.
 """
 __version__ = "0.4.0"
 

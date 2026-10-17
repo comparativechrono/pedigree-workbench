@@ -7,7 +7,7 @@ the GA4GH Pedigree in its Phenopackets form (``GA4GHPedigree`` and
 name (snake_case) and its type.
 
 ``REQUIRED`` and the other constraints follow the JSON schemas that
-phenopacket-tools, the GA4GH reference validator, applies to Phenopackets v2.
+phenopacket-tools, the Phenopackets team's validator, applies to Phenopackets v2.
 For the GA4GH Pedigree they follow the field multiplicities of the standard's
 conceptual model and the proposed ``pedigree.proto``.
 

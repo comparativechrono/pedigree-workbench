@@ -7,20 +7,21 @@
 <dl>
   <dt>The drawing</dt><dd>A Pedigree Studio file, or the drawing in the Studio tab.</dd>
   <dt>Save in, Start of the file name</dt><dd>The file is <code><i>start</i>.ped</code> or <code><i>start</i>.mped</code>, in <code>~/results</code> unless you choose another folder.</dd>
+  <dt>People are named by</dt><dd>Pedigree numbers (<code>II-3</code>), the labels the drawing shows, Pedigree Studio's own ids, or the text under the symbols, as version 0.1 did.</dd>
 </dl>
 
 <h2>What it writes</h2>
-<p>One line per person: family, person, father, mother, sex (1 male, 2 female, 0 unknown) and, for each condition, 1 unaffected, 2 affected, or 3 for a carrier in an MPED file. Each condition's column is named after it in the colour key (<i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>). <a href="#h-ped">PED and MPED files</a> has the details.</p>
+<p>One line per person: family, person, father, mother, sex (1 male, 2 female, 0 unknown) and, for each condition, 1 unaffected, 2 affected, or 3 for a carrier in an MPED file. Each condition's column is named after it in the colour key (<i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>), without an ontology id written after it (<i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>). <a href="#h-ped">PED and MPED files</a> has the details.</p>
 <p>After writing, the tool checks the file with mpedtools and shows the result under it.</p>
 
-<div class="callout warn"><div class="co-t"><!--ICON:warning-->Check the ids</div>
-<p>studio2ped names each person by the text under their symbol – <code>Grace_78</code> for <i>Grace, 78</i> – or by Pedigree Studio's own id (<code>p-ggf</code>) when there is none. So the ids are often names, and two people with the same text get the same id, which makes the file invalid. Before the file leaves you, change the labels in the drawing, or make the PED file from the GA4GH files instead, which name people by pedigree number (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</p></div>
-<div class="callout warn"><div class="co-t"><!--ICON:warning-->The <i>no children</i> and <i>infertility</i> bars</div><p>Pedigree Studio stores these bars as children of the couple, and studio2ped writes them as children: people of unknown sex who are unaffected (<code>m1</code> and <code>m2</code> in the example with every kind of symbol). A linkage program would count them as real children, so delete those lines before an analysis.</p></div>
+<div class="callout"><div class="co-t"><!--ICON:info-->The ids</div>
+<p>People are named by their pedigree numbers, <code>II-3</code>, as in the GA4GH files. The other choices can give names: the text under a symbol (<code>Grace_78</code> for <i>Grace, 78</i>) often is one, and so may a label. Check those before the file leaves you. An id that two people would share, or an empty one, falls back to the person's pedigree number, and the tool says so.</p></div>
+<p>The <i>no children</i> and <i>infertility</i> bars, which Pedigree Studio stores as children of the couple, are not people, so they are left out; the notes say which couple had them. (Version 0.1 wrote them as children of unknown sex.)</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>studio2ped /data/examples/cf-cousins.studio.json -d ~/results -o cf-cousins
 mpedtools validate ~/results/cf-cousins.mped</code></pre>
-<p>Give <code>-o</code>: without it, the file is named after the drawing with only <code>.json</code> taken off (<code>cf-cousins.studio.mped</code>).</p>
+<p>Without <code>-o</code>, the file is named after the drawing, without <code>.studio.json</code> (<code>cf-cousins.mped</code>). <code>--ids drawing</code>, <code>--ids studio</code> or <code>--ids text</code> choose the other ids.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>from studio2ped import convert_file

@@ -7,38 +7,47 @@ search index over term labels + synonyms, and answers two questions:
 * ``search(query)``  -> ranked candidate terms for a free-text label
 * ``get(curie)``     -> the canonical term for a specific ``MONDO:xxxxxxx`` id
 
-Fuzzy matching uses ``rapidfuzz`` when available and falls back to the stdlib
-``difflib`` otherwise, so the tool runs even in a minimal environment.
+A search first finds the names (labels and synonyms) that share a word with
+the query, or a word spelt nearly the same, giving rare words more weight
+than common ones; it then scores that shortlist with
+:func:`~mondonorm.suggest.similarity`, the scoring the OLS backend uses too.
+``rapidfuzz``, when installed, adds names that are alike letter by letter but
+share no word with the query (a name written as one word, say); a term found
+either way has the same score.
 """
 from __future__ import annotations
 
+import difflib
+import heapq
 import json
+import math
 import os
 import pickle
 import re
-import sys
-import time
 import urllib.request
+from array import array
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
-from .suggest import Candidate
+from . import __version__
+from .suggest import (EXACT_LABEL, EXACT_SYNONYM, EXTENDED, PLURAL, Candidate, content_words, normalise_text,
+                      similarity_normalised)
 
 # Official, version-pinned-to-"latest" PURLs maintained by the Monarch Initiative.
-MONDO_OBO_URL = "http://purl.obolibrary.org/obo/mondo.obo"
-MONDO_JSON_URL = "http://purl.obolibrary.org/obo/mondo.json"
+MONDO_OBO_URL = "https://purl.obolibrary.org/obo/mondo.obo"
+MONDO_JSON_URL = "https://purl.obolibrary.org/obo/mondo.json"
+
+#: The small sample of MONDO that comes with the package, for trying the tool offline.
+SAMPLE_OBO = Path(__file__).resolve().parent / "data" / "mondo-sample.obo"
 
 _CURIE_RE = re.compile(r"^MONDO:\d{7}$")
 _IRI_RE = re.compile(r"MONDO_(\d{7})")
 
-try:  # Optional, much faster + better quality.
+try:  # Optional: makes the search faster, and finds names written quite differently.
     from rapidfuzz import fuzz, process
 
     _HAVE_RAPIDFUZZ = True
 except Exception:  # pragma: no cover - exercised only when dep is absent
-    import difflib
-
     _HAVE_RAPIDFUZZ = False
 
 
@@ -80,14 +89,21 @@ def normalise_curie(raw: str) -> str | None:
 class MondoIndex:
     """An in-memory, searchable index of MONDO disease terms."""
 
+    name = "mondo-local"
+
     def __init__(self, terms: dict[str, MondoTerm], source: str):
         self.source = source
         self.terms: dict[str, MondoTerm] = terms
         # Parallel arrays for fast fuzzy scanning: searchable string -> term id.
         self._names: list[str] = []
+        self._norm: list[str] = []  # _names[i] put through normalise_text
         self._owner: list[str] = []  # term id for _names[i]
         self._kind: list[str] = []  # "label" or "synonym"
-        self._exact: dict[str, list[tuple[str, str]]] = {}  # lower text -> [(id, kind)]
+        self._exact: dict[str, list[int]] = {}  # normalised text -> indices into _names
+        # built on the first search: word -> indices of the names that have it, and the words by length
+        self._postings: dict[str, array] | None = None
+        self._by_length: dict[int, list[str]] = {}
+        self._words_in: list[int] = []
         for t in terms.values():
             if t.obsolete:
                 continue
@@ -97,68 +113,130 @@ class MondoIndex:
 
     def _add_name(self, term_id: str, text: str, kind: str) -> None:
         text = (text or "").strip()
-        if not text:
+        norm = normalise_text(text)
+        if not norm:
             return
+        self._exact.setdefault(norm, []).append(len(self._names))
         self._names.append(text)
+        self._norm.append(norm)
         self._owner.append(term_id)
         self._kind.append(kind)
-        self._exact.setdefault(text.lower(), []).append((term_id, kind))
 
     # ------------------------------------------------------------------ lookup
     def get(self, curie: str) -> MondoTerm | None:
         c = normalise_curie(curie)
         return self.terms.get(c) if c else None
 
-    def __len__(self) -> int:  # number of (non-obsolete-aware) terms loaded
+    def __len__(self) -> int:
         return len(self.terms)
 
     # ------------------------------------------------------------------ search
     def search(self, query: str, limit: int = 8) -> list[Candidate]:
-        query = (query or "").strip()
-        if not query:
+        q = normalise_text(query)
+        if not q:
             return []
         scored: dict[str, Candidate] = {}
 
-        def consider(term_id: str, score: float, matched_on: str, kind: str) -> None:
-            t = self.terms.get(term_id)
+        def consider(i: int, score: float) -> None:
+            t = self.terms.get(self._owner[i])
             if t is None or t.obsolete:
                 return
-            tag = "label" if kind == "label" else f"synonym: {matched_on}"
-            prev = scored.get(term_id)
-            if prev is None or score > prev.score:
-                scored[term_id] = Candidate(
-                    id=t.id,
-                    label=t.label,
-                    score=round(float(score), 1),
-                    matched_on=tag,
-                    definition=t.definition,
-                    source="mondo-local",
-                )
-
-        # 1) Exact (case-insensitive) label / synonym hits get a strong score.
-        for term_id, kind in self._exact.get(query.lower(), []):
-            consider(term_id, 100.0 if kind == "label" else 98.0, query, kind)
-
-        # 2) Fuzzy scan across all label + synonym strings.
-        if _HAVE_RAPIDFUZZ:
-            matches = process.extract(
-                query, self._names, scorer=fuzz.WRatio, limit=limit * 6
+            kind = self._kind[i]
+            prev = scored.get(t.id)
+            if prev is not None and (score < prev.score or (score == prev.score and (
+                    prev.matched_on == "label" or kind != "label"))):
+                return
+            scored[t.id] = Candidate(
+                id=t.id,
+                label=t.label,
+                score=round(float(score), 1),
+                matched_on="label" if kind == "label" else "synonym: " + self._names[i],
+                definition=t.definition,
+                source="mondo-local",
+                synonyms=list(t.synonyms),
             )
-            for matched_text, score, idx in matches:
-                consider(self._owner[idx], score, matched_text, self._kind[idx])
-        else:  # difflib fallback
-            ratios = (
-                (difflib.SequenceMatcher(None, query.lower(), n.lower()).ratio(), i)
-                for i, n in enumerate(self._names)
-            )
-            top = sorted(ratios, reverse=True)[: limit * 6]
-            for ratio, idx in top:
-                consider(
-                    self._owner[idx], ratio * 100.0, self._names[idx], self._kind[idx]
-                )
 
-        ranked = sorted(scored.values(), key=lambda c: c.score, reverse=True)
+        # 1) The query is a label or a synonym (whatever the case and punctuation).
+        for i in self._exact.get(q, []):
+            consider(i, EXACT_LABEL if self._kind[i] == "label" else EXACT_SYNONYM)
+
+        # 2) The closest of the names on the shortlist.
+        for i in self._shortlist(q, max(limit * 25, 150)):
+            if self._norm[i] != q:  # exact names were scored above
+                consider(i, similarity_normalised(q, self._norm[i]))
+
+        ranked = sorted(scored.values(), key=lambda c: (-c.score, c.matched_on != "label", len(c.label), c.id))
         return ranked[:limit]
+
+    def _shortlist(self, q: str, n: int) -> set[int]:
+        """Indices of up to ``n`` names worth scoring for the normalised query ``q``
+        (with rapidfuzz, up to ``n`` more)."""
+        picks = set(self._word_shortlist(q, n))
+        if _HAVE_RAPIDFUZZ:
+            # names alike letter by letter, which may share no word with the query ("longqt")
+            for _text, _score, i in process.extract(q, self._norm, scorer=fuzz.ratio, limit=n, score_cutoff=70):
+                picks.add(i)
+        return picks
+
+    def _build_word_index(self) -> None:
+        postings: dict[str, list[int]] = {}
+        words_in = []
+        for i, norm in enumerate(self._norm):
+            words = content_words(norm)
+            words_in.append(len(words))
+            for w in set(words):
+                postings.setdefault(w, []).append(i)
+        by_length: dict[int, list[str]] = {}
+        for w in postings:
+            by_length.setdefault(len(w), []).append(w)
+        self._postings = {w: array("I", ids) for w, ids in postings.items()}
+        self._by_length = by_length
+        self._words_in = words_in
+
+    def _similar_words(self, word: str) -> list[tuple[str, float]]:
+        """The index's words that are ``word`` or spelt nearly like it (plurals, typos,
+        UK and US spellings), with how alike they are (1 for the word itself)."""
+        found = [(word, 1.0)] if word in self._postings else []
+        for plural in (word + "s", word + "es", word[:-1] if word.endswith("s") else "",
+                       word[:-2] if word.endswith("es") else ""):
+            if plural and plural != word and plural in self._postings:
+                found.append((plural, PLURAL))
+        if len(word) < 5:
+            return found
+        have = {w for w, _ in found}
+        for n in range(len(word) + 1, len(word) + 5):   # the word with an ending: "abnormal", "abnormality"
+            for w in self._by_length.get(n, ()):
+                if w not in have and w.startswith(word):
+                    found.append((w, EXTENDED))
+                    have.add(w)
+        slack = max(2, len(word) // 4)
+        nearby = [w for n in range(len(word) - slack, len(word) + slack + 1) for w in self._by_length.get(n, ())]
+        for w in difflib.get_close_matches(word, nearby, n=6, cutoff=0.85):
+            if w not in have:
+                found.append((w, difflib.SequenceMatcher(None, word, w, autojunk=False).ratio()))
+        return found
+
+    def _word_shortlist(self, q: str, n: int) -> list[int]:
+        if self._postings is None:
+            self._build_word_index()
+        total = len(self._norm) or 1
+        weight: dict[int, float] = {}
+        for word in dict.fromkeys(content_words(q)):
+            best: dict[int, float] = {}
+            for w, alike in self._similar_words(word):
+                ids = self._postings[w]
+                score = alike * math.log(1.0 + total / len(ids))  # rare words count for more
+                for i in ids:
+                    if score > best.get(i, 0.0):
+                        best[i] = score
+            for i, score in best.items():
+                weight[i] = weight.get(i, 0.0) + score
+        if not weight:
+            # no word of the query is in the index: compare the whole names instead (slower)
+            near = difflib.get_close_matches(q, list(self._exact), n=n, cutoff=0.6)
+            return [i for text in near for i in self._exact[text]]
+        words_in = self._words_in
+        return [i for i, _ in heapq.nlargest(n, weight.items(), key=lambda kv: (kv[1], -words_in[kv[0]]))]
 
     # ----------------------------------------------------------- construction
     @classmethod
@@ -220,7 +298,7 @@ class MondoIndex:
 def _download(url: str, dest: Path, timeout: int = 120) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
-    req = urllib.request.Request(url, headers={"User-Agent": "mondonorm/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "mondonorm/" + __version__})
     with urllib.request.urlopen(req, timeout=timeout) as resp, tmp.open("wb") as out:
         while True:
             chunk = resp.read(1 << 16)

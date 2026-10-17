@@ -22,6 +22,7 @@ const CASES = [
   ['ga4gh2studio', { input: EX + 'okafor_phenopackets-family.json', out: '~/pedigrees/okafor-from-family.studio.json' }],
   ['studio2ped', { input: EX + 'okafor.studio.json' }],
   ['studio2ped', { input: EX + 'cf-cousins.studio.json', prefix: 'cf' }],
+  ['studio2ped', { input: EX + 'lynch.studio.json', prefix: 'lynch-text', ids: 'text' }],
   ['ped2studio', { input: EX + 'lynch.ped' }],
   ['ped2studio', { input: EX + 'okafor.mped', colour: '#c0392b', shading: true, pattern: 'dots', fill: 'half', out: '~/pedigrees/okafor-shaded.studio.json' }],
   ['ga4gh-convert', { input: EX + 'okafor_ga4gh-pedigree.json', to: 'family', proband: 'IV-3' }],

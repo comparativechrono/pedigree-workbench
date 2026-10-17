@@ -1,13 +1,13 @@
 <!-- id: h-walk-ped | title: Make a PED file for a linkage program | group: Walkthroughs | summary: Drawing → MPED, one condition out, check the ids | keys: ped mped linkage association merlin plink superlink allegro genehunter fam file pedigree file make write export one condition affected status ids names -->
 <h1><!--ICON:table-->Make a PED file for a linkage program</h1>
-<p class="lede">Linkage and association programs read pedigrees as PED files: one line per person, with their parents, sex and whether they are affected. There are two ways to make one from a drawing, which differ in how people are named and in how they deal with more than one condition.</p>
+<p class="lede">Linkage and association programs read pedigrees as PED files: one line per person, with their parents, sex and whether they are affected. There are two ways to make one from a drawing, which differ in how they deal with more than one condition and with carriers.</p>
 
 <table>
 <tr><th></th><th>From the drawing (studio2ped)</th><th>Through the GA4GH files (phenotk)</th></tr>
-<tr><td>People are named by</td><td>the text under their symbols, which may be names</td><td>their pedigree numbers (II-3)</td></tr>
+<tr><td>People are named by</td><td>their pedigree numbers (II-3), or another choice of ids</td><td>their pedigree numbers (II-3)</td></tr>
 <tr><td>Several conditions</td><td>an MPED file with a column for each; then a PED file for each condition</td><td>one column: affected means having any of the conditions</td></tr>
 <tr><td>Carriers</td><td>marked 3 in the MPED file</td><td>not marked</td></tr>
-<tr><td>Best for</td><td>a family with several conditions, or carriers</td><td>a family with one condition, when the ids must not be names</td></tr>
+<tr><td>Best for</td><td>a family with several conditions, or carriers</td><td>a family with one condition, when you have the GA4GH files already</td></tr>
 </table>
 
 <h2>From the drawing</h2>
@@ -17,7 +17,7 @@
 <p>It checks what it wrote with mpedtools straight away and says if anything is wrong.</p>
 
 <h3>2 · Check the ids</h3>
-<p>studio2ped names each person by the text under their symbol (or by Pedigree Studio's own id, such as <code>p-ggf</code>, when there is none). In the Okafor family that gives <code>Grace_78</code> and <code>Emeka_d_70</code>: names. Two people with the same text get the same id, which the check reports as an error. If the file is to leave you, change the labels in the drawing first, or take the other route below.</p>
+<p>studio2ped names each person by their pedigree number, <code>II-3</code>, the same as the GA4GH files do, so the file can leave you without anyone's name in it. <b>People are named by</b> can choose the drawing's labels, Pedigree Studio's own ids (<code>p-ggf</code>) or the text under the symbols instead, as version 0.1 did; in the Okafor family that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. An id that two people would share falls back to the pedigree number, with a note.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="mped-info" data-input="/data/examples/okafor.mped">Summary and check of the Okafor MPED file</button></div>
 
 <h3>3 · One condition at a time</h3>

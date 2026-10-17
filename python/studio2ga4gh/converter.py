@@ -1,9 +1,9 @@
 """Convert a Pedigree Studio drawing to a GA4GH Pedigree and a Phenopackets Family.
 
 The drawing is read into a :class:`pedigree_ga4gh.Kindred` (one per separate
-family on the canvas) and written out by pedigree-ga4gh, the workbench's one
-implementation of GA4GH output. This module only decides what each symbol and
-line in the drawing means:
+family on the canvas) and written out by pedigree-ga4gh, the one
+implementation of GA4GH output that the lab's pedigree tools share. This module
+only decides what each symbol and line in the drawing means:
 
 ========================================  ==============================================
 In Pedigree Studio                        In the GA4GH files
@@ -292,7 +292,8 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
         if conds:
             parts.append("Conditions: {}.".format(", ".join(conds)))
         if notes:
-            parts.append(" ".join(n[0].upper() + n[1:] + "." for n in notes))
+            # each note starts with a person's id, which must stay as it is ("i2", not "I2")
+            parts.append(" ".join(n + "." for n in notes))
         k.narrative = " ".join(parts)
         notes_all.extend(notes)
         kindreds.append(k)

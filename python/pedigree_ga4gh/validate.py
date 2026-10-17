@@ -6,7 +6,7 @@ means it is valid but probably wrong (a mother recorded as male, a term label
 that does not match KIN); *info* is for things worth knowing that are allowed.
 
 The structural checks mirror the JSON schemas and the MetaData check of
-phenopacket-tools, the GA4GH reference validator for Phenopackets v2, so a
+phenopacket-tools, the Phenopackets team's validator for Phenopackets v2, so a
 file that passes here should pass there. The GA4GH Pedigree checks follow the
 standard's conceptual model and its Phenopackets form (see
 :mod:`pedigree_ga4gh.pedigree`).
@@ -81,7 +81,7 @@ def validate(doc, kind: Optional[str] = None) -> List[Finding]:
         out.append(Finding(INFO, "proto-names",
                            "{} field name(s) use the proto spelling, e.g. '{}'. Readers accept both "
                            "spellings, but writers use camelCase.".format(len(renamed), renamed[0]),
-                           renamed[0], "save the file again with any of the workbench tools"))
+                           renamed[0], "pedigree-ga4gh upgrade FILE writes them in camelCase"))
     _structure(data, _KIND_MESSAGE[kind], out)
     if kind == "phenopacket":
         _packet(data, "", out)

@@ -1,42 +1,73 @@
-# Changes the other repositories need
+# The changes in the other repositories
 
-The workbench carries its own copies of the Python packages (`python/`). Five
-are unchanged copies of their releases on PyPI; three were changed here so that
-there is one correct GA4GH implementation, and one, `pedigree_ga4gh`, is new.
-Nothing has been changed in the packages' own repositories: this file lists
-what should be changed there, so that `pip install` gives people what the
-workbench runs.
+The workbench carries its own copies of the Python packages (`python/`). To
+give one correct GA4GH implementation, three of them were changed here and
+one, `pedigree_ga4gh`, is new; this file listed what their own repositories
+needed so that `pip install` would give people what the workbench runs. Each
+package now has a pull request making those changes, and the copies here are
+the code of those pull requests, taken from their wheels. Until the pull
+requests are merged and released, everything here but mpedtools is newer than
+PyPI.
 
-| Package | Release on PyPI | In the workbench | State |
+| Package | On PyPI | Pull request | Version |
 |---|---|---|---|
-| studio2ped | 0.1.0 | 0.1.0 | unchanged copy |
-| ped2studio | 0.2.1 | 0.2.0 in its `__init__` (the 0.2.1 release's code) | unchanged copy |
-| mpedtools | 0.1.0 | 0.1.0 | unchanged copy |
-| hponorm | 1.0.0 | 1.0.0 | unchanged copy |
-| mondonorm | 1.0.0 | 1.0.0 | unchanged copy |
-| studio2ga4gh | 0.3.0 | **0.4.0** | rewritten on `pedigree_ga4gh` |
-| ga4gh2studio | 0.3.0 | **0.4.0** | reads through `pedigree_ga4gh` |
-| phenopacket-toolkit | 0.3.0 | **0.4.0** | “dialects” removed; reads and writes through `pedigree_ga4gh`; `upgrade` command |
-| pedigree-ga4gh | – | **1.0.0** | new: the one GA4GH implementation |
+| pedigree-ga4gh | – | [pedigree-ga4gh#1](https://github.com/comparativechrono/pedigree-ga4gh/pull/1) | **1.0.0**, new: the one GA4GH implementation |
+| studio2ga4gh | 0.3.0 | [studio2ga4gh#1](https://github.com/comparativechrono/studio2ga4gh/pull/1) | **0.4.0**, rewritten on pedigree-ga4gh |
+| ga4gh2studio | 0.3.0 | [ga4gh2studio#1](https://github.com/comparativechrono/ga4gh2studio/pull/1) | **0.4.0**, reads through pedigree-ga4gh |
+| phenopacket-toolkit | 0.3.0 | [phenopacket-toolkit#1](https://github.com/comparativechrono/phenopacket-toolkit/pull/1) | **0.4.0**, “dialects” removed; reads and writes through pedigree-ga4gh; `upgrade` |
+| abusua2ga4gh | 0.2.0 | [abusua2ga4gh#1](https://github.com/comparativechrono/abusua2ga4gh/pull/1) | **0.3.0**, writes through pedigree-ga4gh (not in the workbench) |
+| ga4gh2abusua | 0.3.0 | [ga4gh2abusua#1](https://github.com/comparativechrono/ga4gh2abusua/pull/1) | **0.4.0**, reads through pedigree-ga4gh (not in the workbench) |
+| studio2ped | 0.1.0 | [studio2ped#1](https://github.com/comparativechrono/studio2ped/pull/1) | **0.2.0**, pedigree numbers; markers left out |
+| ped2studio | 0.2.1 | [ped2studio#1](https://github.com/comparativechrono/ped2studio/pull/1) | **0.2.2**, families that reuse ids kept apart |
+| hponorm | 1.0.0 | [hponorm#1](https://github.com/comparativechrono/hponorm/pull/1) | **1.1.0**, results scored by how well they match |
+| mondonorm | 1.0.0 | [mondonorm#1](https://github.com/comparativechrono/mondonorm/pull/1) | **1.1.0**, the same as hponorm |
+| mpedtools | 0.1.0 | – | 0.1.0, unchanged |
 
 `docs/ga4gh.md` says what the correct form is and why.
 
+## Releasing them
+
+Every pull request adds a workflow that publishes the package to PyPI when a
+GitHub release is published, with PyPI's trusted publishing, so no token is
+stored anywhere. For each package: merge the pull request; on PyPI, add a
+trusted publisher (owner `comparativechrono`, the repository's name, workflow
+`release.yml`, environment `pypi`) under the project's Settings → Publishing,
+or, for pedigree-ga4gh, which is not on PyPI yet, as a "pending publisher"
+under your account's Publishing page; then publish a GitHub release tagged with
+the version (`v1.0.0`). The workflow checks the tag against the version, runs
+the tests, builds and publishes.
+
+The order matters, because the tests of each install what it depends on from
+PyPI:
+
+1. pedigree-ga4gh 1.0.0;
+2. studio2ga4gh 0.4.0, then ga4gh2studio 0.4.0 (whose round-trip test installs
+   studio2ga4gh 0.4);
+3. phenopacket-toolkit 0.4.0;
+4. abusua2ga4gh 0.3.0, then ga4gh2abusua 0.4.0 (whose round-trip test installs
+   abusua2ga4gh 0.3).
+
+studio2ped, ped2studio, hponorm and mondonorm depend on none of these and can
+be released at any time; phenopacket-toolkit works with hponorm and mondonorm
+1.0 or 1.1.
+
 ## 1. pedigree-ga4gh: a package of its own
 
-Make `python/pedigree_ga4gh` a repository and a PyPI package (`pedigree-ga4gh`,
-pure Python, no dependencies), and make studio2ga4gh, ga4gh2studio,
-phenopacket-toolkit and abusua2ga4gh depend on it (`pedigree-ga4gh>=1.0,<2`).
-Its tests are in `python/tests/test_pedigree_ga4gh.py`; with
+`python/pedigree_ga4gh` is now a repository of its own and will be a PyPI
+package, `pedigree-ga4gh` (pure Python, no dependencies). studio2ga4gh,
+ga4gh2studio, phenopacket-toolkit, abusua2ga4gh and ga4gh2abusua depend on it
+(`pedigree-ga4gh>=1.0,<2`). Its tests are in its repository, and here in
+`python/tests/test_pedigree_ga4gh.py`; with
 `PHENOPACKET_TOOLS_SCHEMAS` pointing at phenopacket-tools' JSON schemas they
 also check its output against those.
 
 It is also where version 1 of the GA4GH Pedigree Standard will go once it is
 approved (the drafts are ga4gh/pedigree pull request 50 and KIN's pull request
-55: see `docs/ga4gh.md`), so that the four tools change together.
+55: see `docs/ga4gh.md`), so that the tools change together.
 
 ## 2. studio2ga4gh → 0.4.0
 
-Replace the package with the workbench's copy (`python/studio2ga4gh`). What changed:
+In its pull request; the workbench's copy is the same. What changed:
 
 * The GA4GH Pedigree is the Phenopackets form (individuals are Phenopackets v2,
   relationships with KIN terms), not the conceptual model as JSON.
@@ -56,13 +87,15 @@ Replace the package with the workbench's copy (`python/studio2ga4gh`). What chan
 * Carriers, pregnancies, losses and symbols for several people go into the
   narrative.
 
-The README's description of the output should be updated to match; the
-command's options are backwards compatible except that unmatched conditions
-are now left out.
+The README describes the new output. The command's options are backwards
+compatible, except that unmatched conditions are now left out. The notes in
+the narrative keep people's ids as they are (0.4.0 at first capitalised their
+first letter, which turned Pedigree Studio's ids, such as `p6`, into ids
+naming nobody).
 
 ## 3. ga4gh2studio → 0.4.0
 
-Replace with `python/ga4gh2studio`. It reads GA4GH Pedigrees and Phenopackets
+In its pull request. It reads GA4GH Pedigrees and Phenopackets
 Families through `pedigree_ga4gh`, so it accepts camelCase and proto names,
 draws partnerships (consanguineous, separated), adoption (dashed lines), twins,
 markers from the narrative, and puts each condition's term in the colour key.
@@ -72,7 +105,7 @@ saying to upgrade them first. The command takes one file (`ga4gh2studio FILE
 
 ## 4. phenopacket-toolkit → 0.4.0
 
-Replace with `python/phenopacket_toolkit`. The “dialects” for the two older
+In its pull request. The “dialects” for the two older
 forms are gone: a file in an older form is refused with a message, and `phenotk
 upgrade` rewrites it once. GA4GH Pedigrees are handled as documents of their
 own (view, stats, filter, de-identify, sort, convert to a Family and back, PED
@@ -122,41 +155,84 @@ zygosity given as its GENO id had no label. `phenotk filter` on a Family now
 refuses filters that would leave out the proband, which a Family must have,
 instead of writing a Family without one.
 
-The package has no repository link on PyPI: add one (the lab's software page
-does not list the toolkit either).
+The 0.3.0 release has no repository link on PyPI, and its repository was
+empty: 0.4.0's metadata links the repository, which now holds the code, its
+first commit being 0.3.0 as released. (The lab's software page does not list
+the toolkit yet.)
 
-## 5. abusua2ga4gh
+One change came from hponorm and mondonorm 1.1, which make their ontology
+index available at the top of the package. `filter --include-descendants`
+tried that index whenever no file was given for an ontology, and loading it
+without a file downloads the whole ontology. It now uses an index only if it
+can list a term's descendants (neither can yet) and never downloads one; and
+a name that OLS gave no answer for is noted in `normalise`'s decision log.
 
-It should write through `pedigree-ga4gh` like studio2ga4gh. Until then, its
-output has these faults. `pedigree-ga4gh upgrade` corrects those it can tell
-from the file, as marked; the others need abusua2ga4gh itself to change.
+## 5. abusua2ga4gh → 0.3.0
+
+abusua2ga4gh converts Abusua Pedigree Studio sessions. It is not in the
+workbench, but it wrote GA4GH files too, and 0.2.0 had all of the faults
+below. Its repository was empty; the pull request's first commit is 0.2.0 as
+released, and the second makes it write through pedigree-ga4gh, like
+studio2ga4gh, which corrects every one of them. For files 0.2 has already
+written, `pedigree-ga4gh upgrade` corrects those it can tell from the file, as
+marked.
 
 * `KIN:039` is used for a sperm donor: `KIN:039` is *hasGestationalCarrier*;
-  a sperm donor is `KIN:004` *isSpermDonorOf*. (Corrected: the relation's
-  label, *isSpermDonorOf*, says which was meant.)
+  a sperm donor is `KIN:004` *isSpermDonorOf*. (Upgrade: corrected, since the
+  relation's label, *isSpermDonorOf*, says which was meant.)
 * `KIN:011` is labelled *isDizygoticMultipleBirthSiblingOf*; KIN's label is
-  *isPolyzygoticMultipleBirthSiblingOf*. (Corrected.)
+  *isPolyzygoticMultipleBirthSiblingOf*. (Upgrade: corrected.)
 * Foster and social parents are written as `KIN:022` *isAdoptiveParentOf*;
-  KIN has `KIN:021` *isFosterParentOf* and `KIN:020` *isParentFigureOf*.
-  (Not corrected: only the relationship's free-text description says which
-  was meant. The upgrade keeps the description in the narrative, and lists
-  the relationship to be checked when the description says foster or social.)
+  KIN has `KIN:021` *isFosterParentOf* and `KIN:020` *isParentFigureOf*, which
+  0.3.0 uses. (Upgrade: not corrected, as only the relationship's free-text
+  description says which was meant. The upgrade keeps the description in the
+  narrative, and lists the relationship to be checked when the description
+  says foster or social.)
 * Carriers get the phenotypic feature `HP:0032500` “Heterozygous carrier”.
   `HP:0032500` is *Exacerbated by tobacco use*, and the HPO has no carrier
   term. Phenopackets have no field for carrier status: the only structured
   place for it is a genomic interpretation of the variant (heterozygous), when
-  the variant is known; otherwise a GA4GH Pedigree's narrative. (Corrected:
-  the upgrade removes the feature and says who is a carrier in a GA4GH
-  Pedigree's narrative, or lists them to be done for a Phenopacket; the check
-  reports the term as an error, `carrier-term`.)
+  the variant is known; otherwise a GA4GH Pedigree's narrative, where 0.3.0
+  says it. (Upgrade: corrected. The upgrade removes the feature and says who
+  is a carrier in a GA4GH Pedigree's narrative, or lists them to be done for a
+  Phenopacket; the check reports the term as an error, `carrier-term`.)
 * `name` and `diseases` inside `subject`, a `description` on relationships,
   no `metaData` in the Phenopackets, and resources with an empty `version`.
-  (Corrected.)
-* Conditions with empty ontology ids. (Listed to be done: they need terms,
-  which `phenotk normalise` or the workbench's *Fill in missing terms* give
-  them.)
+  (Upgrade: corrected.)
+* Conditions with empty ontology ids. 0.3.0 leaves them out and says in the
+  narrative who has each; `--terms FILE` matches them. (Upgrade: listed to be
+  done. They need terms, which `phenotk normalise` or the workbench's *Fill in
+  missing terms* give them.)
+* Two ids in its built-in list of conditions were wrong: oculocutaneous
+  albinism was `MONDO:0019064` (hereditary spastic paraplegia; it is
+  `MONDO:0018910`) and "breast and ovarian cancer" was `MONDO:0003832`
+  (complement deficiency). 0.3.0 corrects the first and no longer matches the
+  second, which names two cancers rather than one Mondo term.
 
-## 6. studio2ped
+Whatever the GA4GH structure cannot hold of an Abusua session – reported or
+unknown paternity, social fathers, fostering, carriers, who is unaffected – is
+said in the narrative in fixed sentences, which ga4gh2abusua reads back.
+
+## 6. ga4gh2abusua → 0.4.0
+
+The reverse of abusua2ga4gh, on PyPI at 0.3.0 with an empty repository. 0.3.0
+read abusua2ga4gh 0.2's non-standard files and could not read the standard
+form properly: in a Phenopacket the conditions sit beside `subject`, not
+inside it, so a standard GA4GH Pedigree came back without them. It also took
+carriers from `HP:0032500`. 0.4.0 reads through pedigree-ga4gh, refuses the
+older forms with a message to upgrade them, reads abusua2ga4gh 0.3's
+narrative, and writes each condition with its ontology id in brackets, so
+that a session converted to GA4GH and back is what it was, apart from names,
+and converting it again gives the same files.
+
+## 7. studio2ped → 0.2.0
+
+All four are done in its pull request: people are named by pedigree numbers
+by default (`--ids numbers|drawing|studio|text`, `text` being 0.1.0's ids),
+the markers are left out, the id comes off a condition's column name, and
+`.studio.json` comes off the output's name as a whole. It also makes the
+output folder when `-d` names one that does not exist, and regenerates its
+single-file script from the package. What was wrong:
 
 * People are named by the text under their symbol (or the Studio's own id). In
   the examples this gives ids such as `Alice_50` and `Bowel_cancer`, and two
@@ -173,7 +249,24 @@ from the file, as marked; the others need abusua2ga4gh itself to change.
   off: `okafor.studio.json` gives `okafor.studio.mped`. Take `.studio.json`
   off as a whole, as studio2ga4gh does.
 
-## 7. hponorm and mondonorm
+## 8. ped2studio → 0.2.2
+
+Its repository was at 0.1.0 while PyPI had 0.2.1, so the pull request's first
+commit brings it up to the release. 0.2.2 then keeps apart families in one
+PED file that reuse the same ids (they overwrote each other, so seven people
+could come out as four), notes a child whose parent is not in the file, makes
+`__version__` say the release (0.2.1's said 0.2.0), and regenerates its
+single-file script, which was still 0.1.0 and could not read MPED files.
+
+## 9. hponorm and mondonorm → 1.1.0
+
+All of these are done in their pull requests: mapping files are read in any
+case, a failed request says that OLS did not answer (`Suggester.last_error`),
+OLS's results are scored by how closely their label or a synonym matches, the
+local search shortlists names by their words before difflib, and the purl is
+fetched over https. The packages now have an `__init__.py` with their
+version, the sample ontologies ship in the wheel, and the workbench needs no
+change to use them. What was wrong:
 
 * `--mapping` looks a label up as it is lower-cased, so a mapping file must
   have lower-case keys; studio2ga4gh's and phenotk's terms files are matched
@@ -196,7 +289,9 @@ from the file, as marked; the others need abusua2ga4gh itself to change.
   web page cannot fetch (plain http, and a redirect to a host without CORS).
   The workbench downloads `hp.obo` from raw.githubusercontent.com instead.
 
-## 8. The lab web site
+## 10. Still to do: the lab web site
 
-The Software page lists seven of the packages; add phenopacket-toolkit and
-pedigree-ga4gh (with the map of formats), and link the workbench.
+The Software page lists seven of the packages; add phenopacket-toolkit,
+pedigree-ga4gh, abusua2ga4gh and ga4gh2abusua (with the map of formats), and
+link the workbench. Once the packages are released, the copies here can be
+built from PyPI's wheels instead of the pull requests'.

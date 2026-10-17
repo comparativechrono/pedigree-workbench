@@ -1,9 +1,10 @@
 """Convert GA4GH files to a Pedigree Studio drawing.
 
 Reads a GA4GH Pedigree (Phenopackets form) or a Phenopackets Family through
-pedigree-ga4gh, the workbench's single GA4GH implementation, and draws it as a
-Pedigree Studio session. The layout here is a simple one; the workbench runs
-Pedigree Studio's Tidy on the drawing as soon as it opens.
+pedigree-ga4gh, the one GA4GH implementation that the lab's pedigree tools
+share, and draws it as a Pedigree Studio session. The layout here is a simple
+one: Tidy in Pedigree Studio arranges the drawing properly (the Pedigree
+workbench runs it as soon as the drawing opens).
 
 How relationships are drawn:
 

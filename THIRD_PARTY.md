@@ -10,9 +10,13 @@ when copying or redistributing its files.
 | Component | Version | Licence | Where | Origin |
 |---|---|---|---|---|
 | Pedigree Studio (Timothy J Hearn) | commit `9e6b524` of 17 October 2026 | MIT | `assets/studio/index.html` | [comparativechrono/PedigreeStudio](https://github.com/comparativechrono/PedigreeStudio); two small changes, recorded in `assets/studio/SOURCE.json` and made by `build/update_studio.py`: the name it keeps its drawing under in the browser, and loading `bridge.js` |
-| studio2ped, ped2studio, mpedtools, hponorm, mondonorm (Tim Hearn) | 0.1.0, 0.2.1, 0.1.0, 1.0.0, 1.0.0 | MIT | `python/`, packed into `assets/py/pedigree-tools.zip` | their releases on PyPI, unchanged |
-| studio2ga4gh, ga4gh2studio, phenopacket-toolkit (Tim Hearn) | 0.4.0 | MIT | the same | changed from their 0.3.0 releases: see `docs/upstream.md` |
-| pedigree-ga4gh, pedwb | 1.0.0 | MIT | the same | written for the workbench |
+| mpedtools (Tim Hearn) | 0.1.0 | MIT | `python/`, packed into `assets/py/pedigree-tools.zip` | its release on PyPI, unchanged |
+| studio2ped, ped2studio, hponorm, mondonorm (Tim Hearn) | 0.2.0, 0.2.2, 1.1.0, 1.1.0 | MIT | the same | the pull requests for their next releases: see `docs/upstream.md` |
+| studio2ga4gh, ga4gh2studio, phenopacket-toolkit (Tim Hearn) | 0.4.0 | MIT | the same | changed from their 0.3.0 releases, in the pull requests for 0.4.0: see `docs/upstream.md` |
+| pedigree-ga4gh (Tim Hearn) | 1.0.0 | MIT | the same | written for the workbench, now [its own repository](https://github.com/comparativechrono/pedigree-ga4gh) |
+| pedwb | 1.0.0 | MIT | the same | written for the workbench |
+| Mondo, nine terms (ids, names, definitions, synonyms) | release 2026-10-06 | CC BY 4.0 | `python/mondonorm/data/mondo-sample.obo`, mondonorm's offline sample | [Mondo](https://mondo.monarchinitiative.org) |
+| HPO ids and names, a small hand-built sample | – | the HPO's own terms of use | `python/hponorm/data/hpo-sample.obo`, hponorm's offline sample | [the HPO](https://hpo.jax.org) |
 | KIN, the Kinship Ontology (GA4GH Pedigree Standard): its codes, labels and definitions | `kin.owl`, commit `71616ea` of 16 September 2024 | Apache License 2.0 | `python/pedigree_ga4gh/kin.py`; licence in `python/pedigree_ga4gh/LICENSE-KIN.txt` | [ga4gh/pedigree_family_history_terminology](https://github.com/ga4gh/pedigree_family_history_terminology) (formerly GA4GH-Pedigree-Standard/family_history_terminology) |
 | CodeMirror | 5.65.18 | MIT | `assets/vendor/codemirror/` (with its `LICENSE`) | [codemirror/codemirror5](https://github.com/codemirror/codemirror5) |
 | marked | 18.0.13 | MIT | `assets/vendor/marked/` (with its `LICENSE`) | [markedjs/marked](https://github.com/markedjs/marked) |

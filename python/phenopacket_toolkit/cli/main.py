@@ -311,6 +311,26 @@ def _read_id_list_safe(path):
 
 
 # -- argument parser -------------------------------------------------------
+# Options of version 0.3 that 0.4 no longer needs. They are still accepted, so that 0.3's commands run, and
+# ignored with a note: 0.4 reads and writes one form (no dialects), and validation has no levels.
+_OLD_OPTIONS = {"old_dialect": "--dialect", "old_to_dialect": "--to-dialect", "old_level": "--level",
+                "old_online": "--online"}
+
+
+def old_dialect_options(sp, writes=True) -> None:
+    sp.add_argument("--dialect", dest="old_dialect", default=None, help=argparse.SUPPRESS)
+    if writes:
+        sp.add_argument("--to-dialect", dest="old_to_dialect", default=None, help=argparse.SUPPRESS)
+
+
+def _note_old_options(args) -> None:
+    used = [flag for dest, flag in _OLD_OPTIONS.items() if getattr(args, dest, None) not in (None, False)]
+    if used:
+        sys.stderr.write("phenotk: {} {} not needed since version 0.4, which reads and writes one form of each "
+                         "file and checks everything at once; ignored.\n".format(
+                             " and ".join(used), "is" if len(used) == 1 else "are"))
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="phenotk",
                                 description="samtools/bedtools-style toolkit for GA4GH Phenopackets and pedigrees")
@@ -322,6 +342,7 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("-o", "--output", default=None, help="output file (default: stdout)")
         if writes:
             sp.add_argument("--in-place", action="store_true", help="overwrite the input file")
+        old_dialect_options(sp, writes)
 
     sp = sub.add_parser("view", help="render a readable table")
     sp.add_argument("input"); sp.add_argument("--no-terms", action="store_true")
@@ -330,6 +351,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("validate", help="check against Phenopackets v2 and the GA4GH Pedigree")
     sp.add_argument("input")
     sp.add_argument("--format", choices=["human", "json"], default="human")
+    sp.add_argument("--level", dest="old_level", default=None, help=argparse.SUPPRESS)
+    sp.add_argument("--online", dest="old_online", action="store_true", help=argparse.SUPPRESS)
     common(sp); sp.set_defaults(func=cmd_validate)
 
     sp = sub.add_parser("stats", help="counts and term frequency")
@@ -395,6 +418,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("split", help="explode a family into per-individual files")
     sp.add_argument("input"); sp.add_argument("--out-dir", required=True)
     sp.add_argument("--affected-only", action="store_true")
+    old_dialect_options(sp)
     sp.set_defaults(func=cmd_split)
 
     sp = sub.add_parser("merge", help="combine documents into a cohort/family")
@@ -444,6 +468,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    _note_old_options(args)
     try:
         return args.func(args)
     except (RuntimeError, ValueError, FileNotFoundError) as e:

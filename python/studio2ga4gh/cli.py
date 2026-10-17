@@ -25,6 +25,9 @@ def main(argv=None) -> int:
     p.add_argument("--ids", choices=["numbers", "drawing", "studio"], default="numbers",
                    help="identifiers for people: pedigree numbers such as II-3 (default), the labels shown "
                         "in the drawing (which may be names), or Pedigree Studio's internal ids")
+    p.add_argument("--include-names", action="store_true",
+                   help="kept for version 0.3's commands: the same as --ids drawing (Phenopackets have no field "
+                        "for a name, so names are never written into the files)")
     p.add_argument("--family-id", default="FAM", help="family id (default FAM1, FAM2 ...)")
     p.add_argument("--created-by", default=None, help="who made the files, for metaData.createdBy")
     p.add_argument("--only", choices=["pedigree", "family"], default=None, help="write only one of the two files")
@@ -34,7 +37,8 @@ def main(argv=None) -> int:
     if a.terms:
         with open(a.terms, encoding="utf-8") as fh:
             terms = json.load(fh)
-    options = dict(terms=terms, use_phenotypic_features=a.phenotypes, ids=a.ids, family_id=a.family_id,
+    options = dict(terms=terms, use_phenotypic_features=a.phenotypes,
+                   ids="drawing" if a.include_names else a.ids, family_id=a.family_id,
                    outputs=(a.only,) if a.only else ("pedigree", "family"))
     if a.created_by:
         options["created_by"] = a.created_by

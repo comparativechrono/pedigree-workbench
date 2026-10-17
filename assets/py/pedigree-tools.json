@@ -1,15 +1,15 @@
 {
   "archive": "pedigree-tools.zip",
-  "sha256": "474ae6079b7839e5bee2739d1f52f4892033023c3efe839ff58432d574f90d38",
-  "bytes": 173566,
+  "sha256": "a90e44263ca0ef25cc5c34b76d5d706fb843eb2210b84ca8bccecf30959a82d8",
+  "bytes": 198961,
   "packages": {
-    "studio2ped": "0.1.0",
-    "ped2studio": "0.2.0",
+    "studio2ped": "0.2.0",
+    "ped2studio": "0.2.2",
     "studio2ga4gh": "0.4.0",
     "ga4gh2studio": "0.4.0",
     "mpedtools": "0.1.0",
-    "hponorm": "1.0.0",
-    "mondonorm": "1.0.0",
+    "hponorm": "1.1.0",
+    "mondonorm": "1.1.0",
     "phenopacket_toolkit": "0.4.0",
     "pedigree_ga4gh": "1.0.0",
     "pedwb": "1.0.0"

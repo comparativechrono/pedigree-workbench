@@ -204,7 +204,7 @@ def test_old_abusua_pedigree_is_upgraded():
         assert "name" not in ind["subject"] and "diseases" not in ind["subject"]
         assert "metaData" in ind and "vitalStatus" in ind["subject"]
     assert all(set(r) == {"individualId", "relation", "relativeId"} for r in new["relationships"])
-    assert "paternity reported, not confirmed" in new["narrative"]
+    assert new["narrative"].startswith("Asante family. i1 and i3: paternity reported, not confirmed.")
     assert codes(validate(new)) == ["empty-term-id"]
     # foster and social parents were written as adoptive ones: listed to be checked, not changed
     assert sum("KIN:021 isFosterParentOf" in t for t in todo) == 2

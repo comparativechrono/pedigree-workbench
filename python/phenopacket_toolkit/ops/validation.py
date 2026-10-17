@@ -1,7 +1,7 @@
-"""Validation, by pedigree-ga4gh: the same checks every workbench tool applies.
+"""Validation, by pedigree-ga4gh: the same checks every tool built on it applies.
 
-The structural checks mirror phenopacket-tools, the GA4GH reference validator
-for Phenopackets v2 (its JSON schemas and its MetaData check); the GA4GH
+The structural checks mirror phenopacket-tools, the Phenopackets team's
+validator for Phenopackets v2 (its JSON schemas and its MetaData check); the GA4GH
 Pedigree checks follow the standard's conceptual model. See
 ``pedigree_ga4gh.validate``.
 """

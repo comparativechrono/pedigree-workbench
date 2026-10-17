@@ -1,0 +1,143 @@
+format-version: 1.2
+ontology: mondo-sample
+remark: ILLUSTRATIVE OFFLINE SUBSET ONLY: nine terms of Mondo, so that mondonorm can be
+remark: tried without a network connection. It is NOT the ontology: for real work use the
+remark: full Mondo (online OLS, or --mondo-file with mondo.obo from purl.obolibrary.org).
+remark: The ids, names, definitions and synonyms are copied unchanged from the Mondo
+remark: release of 2026-10-06 (https://mondo.monarchinitiative.org, licence CC BY 4.0).
+remark: The is_a lines name only terms in this sample, so the hierarchy is simplified.
+
+[Term]
+id: MONDO:0000001
+name: disease
+def: "A disease is a disposition to undergo pathological processes that exists in an organism because of one or more disorders in that organism." [OGMS:0000031]
+synonym: "condition" EXACT [NCIT:C2991]
+synonym: "disease" EXACT [DOID:4, NCIT:C2991, Orphanet:377788]
+synonym: "disease or disorder" EXACT [NCIT:C2991]
+synonym: "disease or disorder, non-neoplastic" EXACT [NCIT:C2991]
+synonym: "diseases" EXACT [NCIT:C2991]
+synonym: "diseases and disorders" EXACT [NCIT:C2991]
+synonym: "disorder" EXACT [NCIT:C2991]
+synonym: "disorders" EXACT [NCIT:C2991]
+synonym: "medical condition" EXACT []
+synonym: "other disease" EXACT [NCIT:C2991]
+
+[Term]
+id: MONDO:0002908
+name: glucose metabolism disease
+def: "A metabolic disorder characterized by abnormal blood glucose levels." [NCIT:P378]
+synonym: "disorder of glucose metabolism" EXACT [DOID:4194, NCIT:C53655]
+synonym: "glucose metabolism disorder" EXACT [NCIT:C53655]
+is_a: MONDO:0000001 ! disease
+
+[Term]
+id: MONDO:0005015
+name: diabetes mellitus
+def: "A metabolic disorder characterized by abnormally high blood sugar levels due to diminished production of insulin or insulin resistance/desensitization." [NCIT:P378]
+synonym: "diabetes" EXACT [DOID:9351, NCIT:C2985]
+synonym: "diabetes mellitus" EXACT [DOID:9351, ICD10CM:E08-E13, ICD10WHO:E10-E14, icd11.foundation:465177735, MONDO:ambiguous, NCIT:C2985]
+synonym: "diabetes mellitus (disease)" EXACT [https://orcid.org/0000-0002-6601-2165]
+synonym: "DM" EXACT ABBREVIATION [NCIT:C2985]
+is_a: MONDO:0002908 ! glucose metabolism disease
+
+[Term]
+id: MONDO:0005147
+name: type 1 diabetes mellitus
+def: "A chronic condition characterized by minimal or absent production of insulin by the pancreas." [NCIT:C2986]
+synonym: "diabetes mellitis type 1" EXACT []
+synonym: "diabetes mellitis type I" EXACT []
+synonym: "IDDM" EXACT DEPRECATED [DOID:9744, NCIT:C2986, OMIM:222100]
+synonym: "immune mediated diabetes" EXACT [NCIT:C2986]
+synonym: "insulin dependent diabetes" EXACT DEPRECATED [NCIT:C2986]
+synonym: "juvenile diabetes" EXACT DEPRECATED [NCIT:C2986]
+synonym: "T1D" EXACT ABBREVIATION [https://orcid.org/0000-0002-4071-8397, OMIM:222100]
+synonym: "T1DM" EXACT ABBREVIATION [https://orcid.org/0000-0002-4071-8397]
+synonym: "type 1 diabetes" EXACT [icd11.foundation:1651053999, NCIT:C2986]
+synonym: "type I diabetes" EXACT [NCIT:C2986]
+synonym: "type I diabetes mellitus" EXACT [DOID:9744, NCIT:C2986]
+is_a: MONDO:0005015 ! diabetes mellitus
+
+[Term]
+id: MONDO:0005148
+name: type 2 diabetes mellitus
+def: "A type of diabetes mellitus that is characterized by insulin resistance or desensitization and increased blood glucose levels. This is a chronic disease that can develop gradually over the life of a patient and can be linked to both environmental factors and heredity." [NCIT:P378]
+synonym: "adult onset diabetes" EXACT DEPRECATED [icd11.foundation:119724091, NCIT:C26747]
+synonym: "adult-onset diabetes" EXACT DEPRECATED [NCIT:C26747]
+synonym: "diabetes mellitis type 2" EXACT []
+synonym: "diabetes mellitis type II" EXACT []
+synonym: "diabetes mellitus, noninsulin-dependent" EXACT [OMIM:125853]
+synonym: "diabetes mellitus, noninsulin-dependent, 2" NARROW []
+synonym: "diabetes mellitus, noninsulin-dependent, association with" EXACT []
+synonym: "diabetes mellitus, noninsulin-dependent, late onset" EXACT []
+synonym: "diabetes mellitus, type 2" EXACT [OMIM:125853]
+synonym: "diabetes mellitus, type II" EXACT []
+synonym: "diabetes, type 2" EXACT [NCIT:C26747]
+synonym: "insulin resistance, severe, digenic" EXACT []
+synonym: "NIDDM" EXACT DEPRECATED [DOID:9352, NCIT:C26747, OMIM:125853]
+synonym: "non-insulin dependent diabetes" EXACT DEPRECATED [NCIT:C26747]
+synonym: "non-insulin dependent diabetes mellitus" EXACT DEPRECATED [icd11.foundation:119724091, NCIT:C26747]
+synonym: "noninsulin dependent diabetes" EXACT DEPRECATED [icd11.foundation:119724091, NCIT:C26747]
+synonym: "noninsulin-dependent diabetes mellitus" EXACT [OMIM:125853]
+synonym: "T2D" EXACT ABBREVIATION [https://orcid.org/0000-0002-4071-8397, OMIM:125853]
+synonym: "T2DM" EXACT ABBREVIATION [https://orcid.org/0000-0002-4071-8397]
+synonym: "T2DM - type 2 diabetes mellitus" EXACT [NCIT:C26747]
+synonym: "type 2 diabetes" EXACT [DOID:9352, icd11.foundation:119724091, NCIT:C26747]
+synonym: "type 2 diabetes mellitus" EXACT [DOID:9352, ICD10CM:E11, ICD10WHO:E11, icd11.foundation:119724091, NCIT:C26747, OMIM:125853]
+synonym: "type 2 diabetes mellitus non-insulin dependent" EXACT [NCIT:C26747]
+synonym: "type II diabetes" EXACT [icd11.foundation:119724091, NCIT:C26747]
+synonym: "type II diabetes mellitus" EXACT [DOID:9352, icd11.foundation:119724091, NCIT:C26747]
+is_a: MONDO:0005015 ! diabetes mellitus
+
+[Term]
+id: MONDO:0019050
+name: inherited hemoglobinopathy
+def: "An inherited disorder characterized by structural alterations of a globin chain within the hemoglobin molecule." [NCIT:C3092]
+synonym: "Hemoglobinopathies / iron metabolism" EXACT [NCIT:C3092]
+synonym: "hereditary hemoglobinopathy" EXACT [MONDO:patterns/hereditary]
+is_a: MONDO:0000001 ! disease
+
+[Term]
+id: MONDO:0011382
+name: sickle cell disease
+def: "Sickle cell anemias are chronic hemolytic diseases that may induce three types of acute accidents: severe anemia, severe bacterial infections, and ischemic vasoocclusive accidents (VOA) caused by sickle-shaped red blood cells obstructing small blood vessels and capillaries. Many diverse complications can occur." [Orphanet:232]
+synonym: "Haemoglobin S disease" RELATED OMO:0003005 []
+synonym: "Haemoglobin S disease without crisis" EXACT OMO:0003005 []
+synonym: "Hb-S/Hb-C disease" EXACT [DOID:10923, ICD10CM:D57.2]
+synonym: "HbS disease" RELATED [GARD:0008614]
+synonym: "Hemoglobin S disease" RELATED [GARD:0008614]
+synonym: "HPA 1 recognition polymorphism, beta-globin-related" RELATED []
+synonym: "HPA1" RELATED ABBREVIATION []
+synonym: "sickle cell anemia" EXACT [DOID:10923, NCIT:C34383, OMIM:603903, Orphanet:232]
+synonym: "Sickle Cell Disease" EXACT [DOID:0081445, NCIT:C34383, NORD:1714, OMIM:603903] {OMO:0002001="https://w3id.org/information-resource-registry/nord"}
+synonym: "sickle cell disease" EXACT [DOID:0081445, NCIT:C34383, OMIM:603903]
+synonym: "sickle-cell/Hb-C disease without crisis" EXACT [DOID:10923, ICD9CM:282.63]
+synonym: "sickling disorder due to Haemoglobin S" EXACT OMO:0003005 []
+synonym: "sickling disorder due to Hemoglobin S" EXACT [NCIT:C34383]
+is_a: MONDO:0019050 ! inherited hemoglobinopathy
+
+[Term]
+id: MONDO:0016668
+name: sickle cell-beta-thalassemia disease syndrome
+def: "Sickle beta thalassemia is an inherited condition that affects hemoglobin, the protein in red blood cells that carries oxygen to different parts of the body.It is a type of sickle cell disease. Affected people have a differentchange (mutation) in each copy of their HBB gene: onethat causes red blood cells to form a 'sickle' or crescent shape and a second that is associated with beta thalassemia, a blood disorder that reduces the production of hemoglobin. Depending on the beta thalassemia mutation, people may have no normal hemoglobin (called sickle beta zero thalassemia) or a reduced amount of normal hemoglobin (called sickle beta plus thalassemia). The presence of sickle-shaped red blood cells, which often breakdown prematurely and can get stuck in blood vessels, combined with the reduction or absence of mature redblood cells leads to the many signs and symptoms of sickle beta thalassemia. Features, which may include anemia (low levels of red blood cells), repeated infections, and frequent episodes of pain, generally develop in early childhood and vary in severity depending on the amount of normal hemoglobin made. Sickle beta thalassemia is inherited in an autosomal recessive manner. Treatment is supportive and depends on the signs and symptoms present in each person." [GARD:0010333]
+synonym: "Haemoglobin sickle-beta thalassemia" RELATED OMO:0003005 []
+synonym: "Hb S beta-thalassemia" RELATED [GARD:0010333]
+synonym: "Hb S-Beta thalassemia" EXACT [NCIT:C95539]
+synonym: "HbS - beta-thalassemia" RELATED [GARD:0010333]
+synonym: "HbS-beta-thalassemia syndrome" EXACT [GARD:0010333, Orphanet:251359]
+synonym: "Hemoglobin sickle-beta thalassemia" RELATED [GARD:0010333]
+synonym: "S-Beta thalassemia" EXACT [NCIT:C95539]
+synonym: "sickle beta thalassemia" RELATED [GARD:0010333]
+synonym: "sickle cell - beta-thalassemia disease" RELATED [GARD:0010333]
+synonym: "sickle cell-Beta thalassemia" EXACT [NCIT:C95539]
+synonym: "sickle cell-Beta-thalassemia" EXACT [NCIT:C95539]
+synonym: "sickle cell-beta-thalassemia disease syndrome" EXACT [GARD:0010333, Orphanet:251359]
+is_a: MONDO:0019050 ! inherited hemoglobinopathy
+
+[Term]
+id: MONDO:0016669
+name: sickle cell-hemoglobin c disease syndrome
+def: "A rare, genetic hemoglobinopathy characterized by anemia, reticulocytosis and erythrocyte abnormalities including target cells, irreversibly sickled cells and crystal-containing cells. Clinical course is similar to sickle cell disease, but less severe and with less complications. Signs and symptoms may include acute episodes of pain, splenic infarction and splenic sequestration crisis, acute chest syndrome, focal segmental glomerulosclerosis, ischemic brain injury, peripheral retinopathy, and osteonecrosis." [Orphanet:251365]
+synonym: "HbSC disease" EXACT [Orphanet:251365]
+synonym: "sickle cell - haemoglobin C disease" RELATED OMO:0003005 []
+synonym: "sickle cell - hemoglobin C disease" RELATED [GARD:0006584]
+is_a: MONDO:0011382 ! sickle cell disease

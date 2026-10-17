@@ -51,6 +51,8 @@ class Individual:
     y: float = 0.0
     partners: list[str] = field(default_factory=list)
     mating_units: list[str] = field(default_factory=list)
+    label: str = ""               # the id as written in the file (ind_id is made unique if
+                                  # the same id is used in more than one family)
 
 
 @dataclass
@@ -64,11 +66,16 @@ class MatingUnit:
 
 # ── PED parser ─────────────────────────────────────────────────────────────
 
-def parse_ped(text: str) -> tuple[dict[str, Individual], list[str]]:
+def parse_ped(text: str, notes: Optional[list] = None) -> tuple[dict[str, Individual], list[str]]:
     """Parse PED or MPED format text into individuals.
 
     Detects MPED format automatically by looking for the '# MPED v' header line.
     For standard PED, creates a single phenotype named 'Phenotype'.
+
+    An individual id is often used again in another family (PLINK's files
+    number the people of each family 1, 2, 3 ...). Such people are kept apart:
+    their ``ind_id`` becomes ``FAMILY/ID``, their ``label`` stays ``ID``, and
+    a note is added to ``notes`` if a list is given.
 
     Returns
     -------
@@ -78,6 +85,7 @@ def parse_ped(text: str) -> tuple[dict[str, Individual], list[str]]:
     """
     individuals: dict[str, Individual] = {}
     missing = {"0", "-9", ""}
+    rows: list = []
 
     # Detect MPED format
     is_mped = False
@@ -135,17 +143,65 @@ def parse_ped(text: str) -> tuple[dict[str, Individual], list[str]]:
                     primary = 1
                     break
 
-        individuals[ind_id] = Individual(
+        rows.append((fam_id, ind_id, father, mother, sex, primary, pheno_dict))
+
+    # The same id in more than one family is more than one person
+    families_of: dict[str, set] = defaultdict(set)
+    for fam_id, ind_id, *_ in rows:
+        families_of[ind_id].add(fam_id)
+    shared = sorted(i for i, fams in families_of.items() if len(fams) > 1)
+
+    def key(fam_id: str, ind_id: Optional[str]) -> Optional[str]:
+        if ind_id is None:
+            return None
+        return f"{fam_id}/{ind_id}" if ind_id in families_of and len(families_of[ind_id]) > 1 else ind_id
+
+    for fam_id, ind_id, father, mother, sex, primary, pheno_dict in rows:
+        individuals[key(fam_id, ind_id)] = Individual(
             family_id=fam_id,
-            ind_id=ind_id,
-            father_id=father,
-            mother_id=mother,
+            ind_id=key(fam_id, ind_id),
+            father_id=key(fam_id, father),
+            mother_id=key(fam_id, mother),
             sex=sex,
             phenotype=primary,
             phenotypes=pheno_dict,
+            label=ind_id,
         )
 
+    if shared and notes is not None:
+        listed = _and(shared) if len(shared) <= 10 else ", ".join(shared[:10]) + f" and {len(shared) - 10} more"
+        notes.append(f"{'the id' if len(shared) == 1 else 'the ids'} {listed} {'is' if len(shared) == 1 else 'are'} "
+                     f"used in more than one family; the families are kept apart, and each person is labelled "
+                     f"with their id from the file")
+
     return individuals, phenotype_names
+
+
+def _and(items) -> str:
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def parent_notes(inds: dict[str, Individual]) -> list[str]:
+    """Notes on children who will be drawn without a line to their parents.
+
+    Pedigree Studio draws a child's line from a couple, so a child is joined to
+    their parents only when the file gives both, and both are in the file.
+    """
+    notes = []
+    for ind in inds.values():
+        parents = [(role, pid) for role, pid in (("father", ind.father_id), ("mother", ind.mother_id)) if pid]
+        if not parents or (len(parents) == 2 and all(pid in inds for _, pid in parents)):
+            continue
+        absent = [f"{role} {pid}" for role, pid in parents if pid not in inds]
+        if absent:
+            notes.append(f"{ind.ind_id}'s {_and(absent)} {'is' if len(absent) == 1 else 'are'} not in the file, "
+                         f"so {ind.ind_id} is drawn without a line to their parents")
+        else:
+            role, pid = parents[0]
+            notes.append(f"{ind.ind_id} has only one parent in the file, their {role} {pid}; Pedigree Studio draws "
+                         f"a child's line from a couple, so {ind.ind_id} is drawn without one")
+    return notes
 
 
 # ── Graph analysis ─────────────────────────────────────────────────────────
@@ -595,7 +651,7 @@ def build_session(
             "shape": shape,
             "x": round(ind.x, 1),
             "y": round(ind.y, 1),
-            "text": ind.ind_id,
+            "text": ind.label or ind.ind_id,
             "deceased": False,
             "proband": False,
             "fillMode": fill_mode,
@@ -686,6 +742,7 @@ def convert(
     use_shading: bool = False,
     shading_pattern: str = "stripes",
     fill_type: str = "full",
+    notes: Optional[list] = None,
 ) -> dict:
     """Convert PED or MPED format text to a Pedigree Studio session dict.
 
@@ -707,16 +764,22 @@ def convert(
         'stripes' or 'dots' (single-phenotype, shading only).
     fill_type : str
         'full' or 'half' (single-phenotype only).
+    notes : list, optional
+        If a list is given, notes on anything the drawing can't show as the
+        file does (a child with only one parent in the file, say) are added
+        to it.
 
     Returns
     -------
     dict
         A Pedigree Studio v4 session object, ready for JSON serialisation.
     """
-    inds, phenotype_names = parse_ped(ped_text)
+    inds, phenotype_names = parse_ped(ped_text, notes)
     if not inds:
         return build_session({}, {}, phenotype_names, affected_color, use_shading, shading_pattern, fill_type)
 
+    if notes is not None:
+        notes.extend(parent_notes(inds))
     units = build_mating_units(inds)
     num_gens = assign_generations(inds)
     compute_layout(inds, units, num_gens)
@@ -744,12 +807,12 @@ def convert_file(
     dict
         The session dict that was written.
     """
-    with open(input_path, "r") as f:
+    with open(input_path, "r", encoding="utf-8-sig") as f:
         ped_text = f.read()
 
     session = convert(ped_text, **kwargs)
 
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(session, f, indent=2)
 
     return session

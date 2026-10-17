@@ -77,7 +77,7 @@ class Legacy:
 
 
 # Fields of the draft of version 1 of the standard (ga4gh/pedigree pull request 50), in JSON and proto spelling,
-# that no form the workbench reads has: on its Individuals, and on its Relationships
+# that no form this package reads has: on its Individuals, and on its Relationships
 V1_DRAFT_INDIVIDUAL = ("sexAssignedAtBirth", "sex_assigned_at_birth", "genderIdentity", "gender_identity",
                        "eggParentId", "egg_parent_id", "spermParentId", "sperm_parent_id", "egg_parent",
                        "sperm_parent", "externalIdentifiers", "external_identifiers", "populationDescriptors",
@@ -87,8 +87,8 @@ V1_DRAFT_RELATIONSHIP = ("biologicalRelationship", "biological_relationship", "s
                          "consanguinity_note")
 V1_DRAFT = ("This GA4GH Pedigree is in the form of the draft of version 1 of the standard (ga4gh/pedigree pull "
             "request 50), which is not yet approved: its people are not Phenopackets, and its relationships have "
-            "lists of biological and social KIN terms. The workbench reads and writes the published form, and "
-            "cannot read or convert this one yet.")
+            "lists of biological and social KIN terms. pedigree-ga4gh, and the tools built on it, read and write the "
+            "published form, and cannot read or convert this one yet.")
 
 
 def _individuals(doc: Dict) -> List[Dict]:
@@ -184,7 +184,9 @@ def upgrade(doc: Dict, *, created_by: str = UPGRADED_BY, created: Optional[str] 
         if carriers:
             notes.append("{} {} a carrier.".format(_who(carriers), "is" if len(carriers) == 1 else "are each"))
         if notes:
-            narrative = data.get("narrative") or ""
+            narrative = (data.get("narrative") or "").strip()
+            if narrative and not narrative.endswith((".", "!", "?")):
+                narrative += "."          # so that the notes read as sentences of their own
             extra = " ".join(notes)
             data["narrative"] = (narrative + " " + extra).strip() if narrative else extra
             changes.append("kept {} note(s) in the narrative".format(len(notes)))

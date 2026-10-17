@@ -3,8 +3,8 @@
 <p class="lede">The packages that run here are ordinary Python packages, so the commands and code the workbench shows run on your own computer too – in a pipeline, on a server, on many families at once.</p>
 
 <h2>The workbench's versions</h2>
-<p>Three of the packages here are newer than their releases on PyPI, because they write the corrected GA4GH form, and one, pedigree-ga4gh, is not on PyPI yet (<a href="#h-versions">Versions</a>). Until they are released, use the workbench's own copies: they are in one archive, which needs only Python 3.9 or later.</p>
-<div class="tryrow"><a class="do" href="assets/py/pedigree-tools.zip" download="pedigree-tools.zip">Download the packages (.zip, about 170 KB)</a></div>
+<p>All the packages here but mpedtools are newer than their releases on PyPI, and one, pedigree-ga4gh, is not on PyPI yet (<a href="#h-versions">Versions</a>). Until they are released, use the workbench's own copies: they are in one archive, which needs only Python 3.9 or later.</p>
+<div class="tryrow"><a class="do" href="assets/py/pedigree-tools.zip" download="pedigree-tools.zip">Download the packages (.zip, about 190 KB)</a></div>
 <pre class="code"><code>unzip pedigree-tools.zip -d pedigree-tools
 export PYTHONPATH="$PWD/pedigree-tools"
 python -m pedwb studio2ga4gh okafor.studio.json -t example-terms.json -d results
@@ -14,11 +14,11 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <h2>What else they use</h2>
 <ul>
   <li><b>PyYAML</b>, for YAML files: <code>pip install pyyaml</code>.</li>
-  <li><b>rapidfuzz</b>, if you have it, makes hponorm's and mondonorm's searches of local copies of the ontologies faster and better ranked: <code>pip install rapidfuzz</code>.</li>
+  <li><b>rapidfuzz</b>, if you have it, lets hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word: <code>pip install rapidfuzz</code>. It is not needed for speed or for the scores, which are the same without it.</li>
   <li><b>rich</b>, if you have it, gives hponorm and mondonorm their coloured questions.</li>
 </ul>
 <p>Everything else is in Python's standard library. On your own computer hponorm and mondonorm can ask their questions, as they are meant to.</p>
 
 <h2>The releases on PyPI</h2>
-<pre class="code"><code>pip install studio2ped ped2studio mpedtools hponorm mondonorm</code></pre>
-<p>These five are the same here as on PyPI. studio2ga4gh, ga4gh2studio and phenopacket-toolkit on PyPI are the older versions (0.3.0), which write the forms that the workbench now upgrades: use the archive above for those, until their new versions are released.</p>
+<pre class="code"><code>pip install studio2ped ped2studio mpedtools hponorm mondonorm studio2ga4gh ga4gh2studio phenopacket-toolkit</code></pre>
+<p>Until the new versions are released, this gives the older ones (<a href="#h-versions">Versions</a>). studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.3.0 write or read the forms that the workbench now upgrades, so use the archive above for those in the meantime. Once pedigree-ga4gh and the new versions are on PyPI, <code>pip install</code> gives exactly what runs here.</p>

@@ -24,13 +24,9 @@ OUT = os.path.join(ROOT, "assets", "py")
 # the packages, in the order the help lists them
 PACKAGES = ["studio2ped", "ped2studio", "studio2ga4gh", "ga4gh2studio", "mpedtools", "hponorm", "mondonorm",
             "phenopacket_toolkit", "pedigree_ga4gh", "pedwb"]
-# versions of the two packages that have none in their code
-FIXED_VERSIONS = {"hponorm": "1.0.0", "mondonorm": "1.0.0"}
 
 
 def version_of(pkg):
-    if pkg in FIXED_VERSIONS:
-        return FIXED_VERSIONS[pkg]
     init = os.path.join(HERE, pkg, "__init__.py")
     m = re.search(r'^__version__\s*=\s*["\']([^"\']+)', open(init, encoding="utf-8").read(), re.M)
     return m.group(1) if m else ""

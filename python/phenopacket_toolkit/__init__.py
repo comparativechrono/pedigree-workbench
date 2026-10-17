@@ -1,10 +1,10 @@
 """phenopacket-toolkit: the samtools/bedtools-style toolkit for GA4GH Phenopackets.
 
-This is the pedigree workbench's copy (0.4.0). It reads and writes one form of
-each file, through pedigree-ga4gh, and handles GA4GH Pedigrees as well as
-Phenopackets, Families and Cohorts. The 0.3 "dialects" are gone: files from
-older versions of studio2ga4gh and abusua2ga4gh are converted once with
-``phenotk upgrade``.
+From version 0.4 it reads and writes one form of each file, through
+pedigree-ga4gh (the GA4GH implementation the lab's pedigree tools share), and
+handles GA4GH Pedigrees as well as Phenopackets, Families and Cohorts. The 0.3
+"dialects" are gone: files from older versions of studio2ga4gh and
+abusua2ga4gh are converted once with ``phenotk upgrade``.
 """
 from __future__ import annotations
 

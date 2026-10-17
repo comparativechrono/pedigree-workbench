@@ -129,21 +129,22 @@
       pkg: 'studio2ped',
       what: 'Write a drawing as a PED file for linkage and association programs (an MPED file when it shows several conditions or carriers).',
       about:
-        'A PED file has one line per person: family, person, father, mother, sex and whether they are affected. studio2ped takes each person’s id from the text under their symbol in the drawing (or Pedigree Studio’s own id when there is none), so check the ids before you share the file: they may be names, and two people with the same text get the same id. For pedigree numbers (II-3) as ids, write the GA4GH files first and make the PED file from them (GA4GH → PED).',
+        'A PED file has one line per person: family, person, father, mother, sex and whether they are affected. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but those are often names, so check them before the file leaves you; an id two people would share falls back to the pedigree number. The “no children” and “infertility” bars are left out: they are not people.',
       help: 'h-tool-studio2ped',
       fields: [
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
-        { key: 'prefix', type: 'text', label: 'Start of the file name', def: (v) => stemOf(v.input) }
+        { key: 'prefix', type: 'text', label: 'Start of the file name', def: (v) => stemOf(v.input) },
+        { key: 'ids', type: 'select', label: 'People are named by', def: 'numbers', options: [['numbers', 'pedigree numbers, such as II-3'], ['drawing', 'the labels in the drawing (these may be names)'], ['studio', 'Pedigree Studio’s own ids'], ['text', 'the text under the symbols, as version 0.1 did (often names)']] }
       ],
-      argv: (v) => ['studio2ped', v.input, '-d', v.outdir, '-o', v.prefix],
-      python: (v) => ['from studio2ped import convert_file', '', `result = convert_file(${pyq(v.input)}, output_prefix=${pyq(v.prefix)}, output_dir=${pyq(v.outdir)})`, 'print(result.summary)', 'for path, _ in result.files:', '    print("wrote", path)'].join('\n'),
+      argv: (v) => ['studio2ped', v.input, '-d', v.outdir, '-o', v.prefix, ...optArgs(v.ids && v.ids !== 'numbers', '--ids', v.ids)],
+      python: (v) => ['from studio2ped import convert_file', '', `result = convert_file(${pyq(v.input)}, output_prefix=${pyq(v.prefix)}, output_dir=${pyq(v.outdir)}${v.ids && v.ids !== 'numbers' ? `, ids=${pyq(v.ids)}` : ''})`, 'print(result.summary)', 'for path, _ in result.files:', '    print("wrote", path)', 'for note in result.notes:', '    print("note:", note)'].join('\n'),
       after: async (res, v, out) => {
-        // the PED files it wrote, checked with mpedtools: duplicate ids are common when people share a label
+        // the PED files it wrote, checked with mpedtools
         for (const f of res.files.filter((p) => /\.m?ped$/i.test(p))) {
           const r = await runArgv(['mpedtools', 'validate', f]);
           const text = (r.stdout || '').trim();
-          if (r.code) out.appendChild(h('div.tl-warn', h('b', `${tilde(f)}: `), 'mpedtools found problems in it:', h('pre.tl-pre', text), h('p', 'studio2ped names people by the text under their symbols. Give the people different labels in the drawing, or make the PED file from the GA4GH files instead (GA4GH → PED), which names them by pedigree number.')));
+          if (r.code) out.appendChild(h('div.tl-warn', h('b', `${tilde(f)}: `), 'mpedtools found problems in it:', h('pre.tl-pre', text), h('p', 'Check the people and lines it names in the drawing, and, if they are not named by pedigree numbers, their labels.')));
           else out.appendChild(h('div.tl-ok', h('b', `${tilde(f)}: `), text || 'valid'));
         }
       }
@@ -1667,7 +1668,7 @@
       const details = h('details.tl-samebox', h('summary', { html: icon('code') + '<span>The same in Python</span>' }));
       const pre = h('pre.code', { dataset: { run: 'py' } }, h('code', code.join('\n')));
       details.appendChild(h('div.tl-code', h('div.tl-code-t', 'Python (a notebook cell)'), pre));
-      details.appendChild(h('p.tl-help', { html: 'In the terminal there is no command that reads a drawing’s key: hponorm and mondonorm match the names in GA4GH and Phenopackets files, asking as they go – which this terminal cannot answer – so there they take the answers from a file: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code> (the names in lower case).' }));
+      details.appendChild(h('p.tl-help', { html: 'In the terminal there is no command that reads a drawing’s key: hponorm and mondonorm match the names in GA4GH and Phenopackets files, asking as they go – which this terminal cannot answer – so there they take the answers from a file: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code>.' }));
       box.appendChild(details);
       MG.app.decorateCode(pre);
     }
