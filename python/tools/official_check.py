@@ -1,4 +1,4 @@
-"""Check documents the way phenopacket-tools (the GA4GH reference validator) does.
+"""Check documents the way phenopacket-tools (the Phenopackets team's validator) does.
 
 phenopacket-tools reads a JSON file into protobuf (rejecting unknown fields,
 accepting proto or JSON field names), prints it back as JSON with enum and bool

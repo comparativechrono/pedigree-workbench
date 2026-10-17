@@ -68,8 +68,15 @@ workbench writes a GA4GH Pedigree in the Phenopackets form proposed for it
 (every individual a Phenopacket version 2, relationships named with current KIN
 terms), and a Phenopackets Family exactly to the Phenopackets v2 schema. Files
 from the older versions of studio2ga4gh and abusua2ga4gh, which were not
-correct, are recognised and upgraded once. **[docs/ga4gh.md](docs/ga4gh.md)**
-records the decision, what was wrong before, and the sources.
+correct, are recognised and upgraded once.
+
+A draft of version 1 of the standard, under review since June 2026, would
+change the form: people would be records of the standard's own, linked to
+their Phenopackets, and KIN would be revised. It is not approved, so the
+workbench follows the published version, and recognises files in the draft's
+form without trying to convert them. **[docs/ga4gh.md](docs/ga4gh.md)**
+records the decision, what was wrong before, what the draft would change, and
+the sources.
 
 ## Put it on GitHub Pages
 
@@ -83,7 +90,10 @@ and `data/` beside it. It needs no build step and no server-side code.
 
 The empty file `.nojekyll` stops GitHub processing the site. Python
 (Pyodide 0.29.5, about 10 MB the first time) is loaded from jsDelivr when a
-user first runs a tool; everything else comes from the site itself.
+user first runs a tool; everything else comes from the site itself. Pyodide
+0.29.5 (September 2026) is a maintenance release of the 0.29 series, with
+Python 3.13; Pyodide's newer series, numbered 314, has Python 3.14, and the
+workbench has not been tried with it.
 
 Users' files are kept by their browser for the site's address (IndexedDB, under
 the prefix `pedwb`), so they stay when the site is updated, and are not shared

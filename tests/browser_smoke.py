@@ -52,6 +52,14 @@ async () => {
     document.querySelector('.tl-run').click();
     await wait(() => document.querySelector('.tl-done'), 60000);
     check(document.querySelector('.tl-done.ok') && /to do/.test(document.querySelector('.tl-result').innerText), 'Tools: an older file is upgraded, with what is left to do');
+    // a file in the form of the draft of version 1 is named as such, and no upgrade is offered
+    MG.app.fs.writeText('/home/user/results/draft-v1.json', JSON.stringify({ id: 'FAM1', individuals: [{ id: 'MOTHER', sexAssignedAtBirth: 'ASSIGNED_FEMALE' }, { id: 'CHILD', eggParentId: 'MOTHER' }], relationships: [{ individual: 'MOTHER', relative: 'CHILD', biologicalRelationship: [{ id: 'KIN:027', label: 'isBiologicalMotherOf' }] }] }));
+    await MG.app.useTool('validate', { input: '/home/user/results/draft-v1.json' });
+    await sleep(300);
+    document.querySelector('.tl-run').click();
+    await wait(() => document.querySelector('.tl-verdict'), 60000);
+    const warn = document.querySelector('.tl-warn');
+    check(document.querySelector('.tl-verdict.bad') && warn && /draft of version 1/.test(warn.textContent) && !warn.querySelector('button'), 'Tools: a draft version 1 file is named, with no upgrade offered');
     // the terminal
     await MG.app.showWorkbench('terminal');
     const T = MG.app.term;

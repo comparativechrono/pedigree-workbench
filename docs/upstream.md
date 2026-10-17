@@ -30,6 +30,10 @@ Its tests are in `python/tests/test_pedigree_ga4gh.py`; with
 `PHENOPACKET_TOOLS_SCHEMAS` pointing at phenopacket-tools' JSON schemas they
 also check its output against those.
 
+It is also where version 1 of the GA4GH Pedigree Standard will go once it is
+approved (the drafts are ga4gh/pedigree pull request 50 and KIN's pull request
+55: see `docs/ga4gh.md`), so that the four tools change together.
+
 ## 2. studio2ga4gh → 0.4.0
 
 Replace the package with the workbench's copy (`python/studio2ga4gh`). What changed:

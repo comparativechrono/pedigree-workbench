@@ -271,7 +271,7 @@
       pkg: 'pedigree-ga4gh',
       what: 'Check a GA4GH Pedigree, Phenopackets Family, Cohort or Phenopacket against the standards, and say how to fix what is wrong.',
       about:
-        'The checks are those of the Phenopackets v2 schema and of phenopacket-tools, the GA4GH’s own validator – required fields, ontology ids, ages, the resources in metaData – and of the GA4GH Pedigree: KIN relations, people named in relationships and index patients, parents’ sexes, loops of ancestry. Errors make a file invalid; warnings are worth fixing; notes are for information.',
+        'The checks are those of the Phenopackets v2 schema and of phenopacket-tools, the Phenopackets team’s own validator – required fields, ontology ids, ages, the resources in metaData – and of the GA4GH Pedigree: KIN relations, people named in relationships and index patients, parents’ sexes, loops of ancestry. Errors make a file invalid; warnings are worth fixing; notes are for information.',
       help: 'h-tool-validate',
       fields: [{ key: 'input', type: 'file', label: 'The file', kinds: GA4GH }],
       argv: (v) => ['pedigree-ga4gh', 'validate', v.input],
@@ -1273,7 +1273,7 @@
       if (info.relationships != null) row('Relationships', String(info.relationships));
       if (info.indexPatients && info.indexPatients.length) row('Index patient', info.indexPatients.join(', '));
       if (info.proband) row('Proband', info.proband);
-      if (info.legacy) row('Older form', info.legacy.description + (info.legacy.unreadable ? '' : ' Upgrade it to use it with the other tools.'));
+      if (info.legacy) row(info.legacy.upgradable === false ? 'Draft form' : 'Older form', info.legacy.description + (info.legacy.upgradable === false ? '' : ' Upgrade it to use it with the other tools.'));
     } else if (info.kind === 'ped' || info.kind === 'mped') {
       row('People', String(info.people));
       row('Families', (info.families || []).join(', '));
@@ -1339,7 +1339,8 @@
   function renderFindings(res, x, out) {
     const head = h('div.tl-verdict.' + (res.valid ? 'ok' : 'bad'), h('b', res.valid ? `Valid: a correct ${res.name}.` : `Not valid: ${res.errors} error${res.errors === 1 ? '' : 's'}.`), res.warnings ? ` ${res.warnings} warning${res.warnings === 1 ? '' : 's'}.` : '');
     out.appendChild(head);
-    if (res.legacy) {
+    if (res.legacy && res.legacy.upgradable === false) out.appendChild(h('div.tl-warn', res.legacy.description));
+    else if (res.legacy) {
       const b = h('button.btn.small', { type: 'button', html: icon('wand') + '<span>Upgrade it</span>' });
       b.addEventListener('click', () => MG.app.useTool('upgrade', { input: x.input }));
       out.appendChild(h('div.tl-warn', res.legacy.description + ' ', b));

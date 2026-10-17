@@ -133,7 +133,7 @@
 <p>Under the form, <b>The same in the terminal, and in Python</b> shows exactly what the tool runs – a command for the Terminal tab and code for a notebook – so that you can do the same again without the form.</p>
 
 <h2>4 · Check the result</h2>
-<p>The files it writes appear under the result, in <code>~/results</code>. <b>Check</b> next to a file checks it against the standards, the way the GA4GH's own validator does, and says how to fix anything wrong.</p>
+<p>The files it writes appear under the result, in <code>~/results</code>. <b>Check</b> next to a file checks it against the standards, the way phenopacket-tools, the Phenopackets team's own validator, does, and says how to fix anything wrong.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check the example GA4GH Pedigree</button></div>
 
 <h2>5 · Back to a drawing, or on to a PED file</h2>
@@ -219,7 +219,7 @@
 <p>It writes <code>~/results/okafor_ga4gh-pedigree.json</code> and <code>~/results/okafor_phenopackets-family.json</code>. In them is everyone in the drawing with their sex, whether they are alive, and their conditions as terms; the relationships between them; and the proband. What the files have no place for, such as a pregnancy or a symbol that stands for several people, is written in the GA4GH Pedigree's narrative, and the tool notes it under the result.</p>
 
 <h2>4 · Check the files</h2>
-<p><b>Check</b> beside a file (or <b>Check against the standard</b> in the Tools tab) checks it as the GA4GH's own validator would, and for a GA4GH Pedigree checks the family as well. It should say <b>Valid</b>. Errors make a file invalid; warnings are worth reading; notes are for information, such as an ontology release that was not recorded. The examples were made with this tool, so you can try the check on them now:</p>
+<p><b>Check</b> beside a file (or <b>Check against the standard</b> in the Tools tab) checks it as phenopacket-tools, the Phenopackets team's own validator, would, and for a GA4GH Pedigree checks the family as well. It should say <b>Valid</b>. Errors make a file invalid; warnings are worth reading; notes are for information, such as an ontology release that was not recorded. The examples were made with this tool, so you can try the check on them now:</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check the GA4GH Pedigree</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_phenopackets-family.json">Check the Phenopackets Family</button></div>
 
 <h2>5 · Look at what is in them</h2>
@@ -355,12 +355,13 @@ studio --tidy ~/pedigrees/upgraded.studio.json</code></pre>
   <li><b>Warnings</b> are things that are allowed but probably mistaken, such as a mother recorded as male.</li>
   <li><b>Notes</b> are for information, such as an ontology release that the file does not record.</li>
 </ul>
-<p>The checks are those of the Phenopackets version 2 schema and of phenopacket-tools, the GA4GH's own validator, with the GA4GH Pedigree's on top: KIN terms, people named in relationships, parents' sexes, loops of ancestry. <a href="#h-tool-validate">Check against the standard</a> lists them.</p>
+<p>The checks are those of the Phenopackets version 2 schema and of phenopacket-tools, the Phenopackets team's own validator, with the GA4GH Pedigree's on top: KIN terms, people named in relationships, parents' sexes, loops of ancestry. <a href="#h-tool-validate">Check against the standard</a> lists them.</p>
 
 <h2>2 · Fix what it finds</h2>
 <table>
 <tr><th>Finding</th><th>What it means</th><th>How to fix it</th></tr>
 <tr><td>made by an older tool (<code>legacy-format</code>)</td><td>studio2ga4gh 0.3 or abusua2ga4gh 0.2 wrote it, in a form the standard does not accept</td><td><b>Upgrade a file from an older tool</b></td></tr>
+<tr><td>the draft of version 1 (<code>draft-form</code>)</td><td>the file is in the form of the draft of version 1 of the standard, which is not yet approved (<a href="#h-ga4gh">The GA4GH Pedigree</a>)</td><td>it cannot be converted yet: ask for the file in the published form</td></tr>
 <tr><td>no ontology id (<code>empty-term-id</code>)</td><td>a condition is named, but has no term</td><td><b>Fill in missing terms</b></td></tr>
 <tr><td>no resource for a prefix (<code>undeclared-prefix</code>)</td><td>terms are used, but metaData does not say which ontology they come from</td><td><b>Upgrade</b> adds the resource</td></tr>
 <tr><td>a field the standard does not have (<code>unknown-field</code>), or a required one missing (<code>missing-field</code>)</td><td>for example a name in <code>subject</code>, or no <code>metaData</code></td><td><b>Upgrade</b> fixes those it knows; otherwise the file must be corrected where it was made</td></tr>
@@ -618,8 +619,8 @@ for note in result.warnings:
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
 </dl>
@@ -799,8 +800,8 @@ for note in notes:
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
 </dl>
@@ -942,8 +943,8 @@ print(log.summary())</code></pre>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check a correct file</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Check a file with problems</button></div>
 
 <h2>What is checked</h2>
-<h3>As the GA4GH's own validator does</h3>
-<p>phenopacket-tools is the GA4GH's validator for Phenopackets. The check applies its rules:</p>
+<h3>As phenopacket-tools does</h3>
+<p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. The check applies its rules:</p>
 <ul>
   <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
   <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>.</li>
@@ -981,14 +982,14 @@ print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
 <dl class="cite-list">
 <dt>pedigree-ga4gh</dt>
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
-<dt>phenopacket-tools (the GA4GH&#x27;s validator)</dt>
+<dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
 <dd>Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE</i> 18(5): e0285433. <a href="https://doi.org/10.1371/journal.pone.0285433" target="_blank" rel="noopener">doi:10.1371/journal.pone.0285433</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 </dl>
 </article>
 <article class="help-page" id="h-tool-upgrade" data-title="Upgrade a file from an older tool" data-group="Tools" data-group-page="h-tools" data-keys="upgrade older legacy old file studio2ga4gh 0.3 abusua2ga4gh 0.2 fix repair convert standard form kin retired names metadata" hidden>
@@ -1015,6 +1016,7 @@ print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
   <li>for studio2ga4gh 0.3's GA4GH Pedigree, the conditions: it recorded who was affected, but not by what, so convert the drawing again or use the Phenopackets file made with it.</li>
 </ul>
 <p>Nothing is guessed. A file that is already standard comes back as it was, apart from its field names. Under the result, <b>Check the upgraded file</b> runs the check on it.</p>
+<p>A file in the form of the draft of version 1 of the standard is not an older file but a newer, unapproved one (<a href="#h-ga4gh">The GA4GH Pedigree</a>): the upgrade says so, and leaves it alone.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json -o ~/results/abusua_phenopackets-family.json
@@ -1038,8 +1040,8 @@ for t in todo:
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
 </dl>
@@ -1465,15 +1467,15 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
 </dl>
 </article>
-<article class="help-page" id="h-ga4gh" data-title="The GA4GH Pedigree" data-group="Files and standards" data-group-page="h-files" data-keys="ga4gh pedigree standard kin phenopackets fhir form proposal pull request 364 conceptual model individuals relationships indexPatients narrative older studio2ga4gh abusua2ga4gh correct compliant" hidden>
+<article class="help-page" id="h-ga4gh" data-title="The GA4GH Pedigree" data-group="Files and standards" data-group-page="h-files" data-keys="ga4gh pedigree standard kin phenopackets fhir form proposal pull request 364 conceptual model individuals relationships indexPatients narrative older studio2ga4gh abusua2ga4gh correct compliant draft version 1 v1 schema reduced form fhir" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.4"/></svg>The GA4GH Pedigree</h1>
 <p class="lede">The Global Alliance for Genomics and Health (GA4GH) is writing a standard for pedigrees. This page says what that standard is so far, the form in which the workbench writes a GA4GH Pedigree, why, and what was wrong with the files our older tools wrote.</p>
 
 <h2>The standard, so far</h2>
-<p>The GA4GH Pedigree Standard is still in development. Its documentation describes a conceptual model: a pedigree is a set of individuals and the relationships between them, each relationship named with a term of the Kinship Ontology, KIN. It is not a file format of its own. It is carried by other standards, in two forms:</p>
+<p>The GA4GH Pedigree Standard is still in development. Its published documentation describes a conceptual model: a pedigree is a set of individuals and the relationships between them, each relationship named with a term of the Kinship Ontology, KIN. It is not a file format of its own. It is carried by other standards, in two forms:</p>
 <ul>
   <li><b>In Phenopackets.</b> A new message, a <i>Pedigree</i> with its individuals as Phenopackets and its relationships named by KIN terms, was proposed for the Phenopackets schema in November 2022. The proposal was closed without being merged in September 2025, because the pedigree group had not yet decided. It is in no release of Phenopackets.</li>
-  <li><b>In HL7 FHIR</b>, with a draft implementation guide.</li>
+  <li><b>In HL7 FHIR</b>, with a draft implementation guide, in which each person is a FHIR Patient and each relationship a FamilyMemberHistory.</li>
 </ul>
 <p>Neither form is approved yet. The approved GA4GH format that the workbench writes is <b>Phenopackets version 2</b>: the Phenopackets Family, and the Phenopackets inside the GA4GH Pedigree.</p>
 
@@ -1505,7 +1507,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 }</code></pre>
 <ul>
   <li>Every individual is a complete Phenopacket version 2, with its own <code>metaData</code>, so that everything about a person – sex, whether they are alive, diseases, phenotypes – is in an approved, checked structure. Only the wrapper, the list of individuals and the relationships, comes from the proposal.</li>
-  <li>Each relationship is one current KIN term, written once (a symmetric one, such as partners or twins, in one direction). <a href="#h-kin">KIN</a> lists them.</li>
+  <li>Each relationship is one current KIN term, given once, in what the standard calls the <i>reduced form</i>: each parent to each child; partners only when they have no children together, or are related or separated; all twins relative to one of them; and no brothers and sisters, since shared parents say that already. <a href="#h-kin">KIN</a> lists the terms.</li>
   <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Names are never written: Phenopackets have no field for a name.</li>
   <li>A condition with no ontology term is left out, with a note, because a disease or phenotype without an id is invalid.</li>
   <li>What the standard has no field for – a carrier, a pregnancy, a symbol that stands for several people – goes into the <code>narrative</code>, so that it is not lost.</li>
@@ -1515,13 +1517,22 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <h2>Why this form</h2>
 <ul>
   <li>The Phenopackets Family that goes with it is Phenopackets version 2 already, and the phenopacket toolkit is built around Phenopackets: one model throughout.</li>
-  <li>With each individual a Phenopacket, all that is said about a person can be checked against an approved schema, as the GA4GH's own validator checks it.</li>
-  <li>The standard's own examples use this form.</li>
+  <li>With each individual a Phenopacket, all that is said about a person can be checked against an approved schema, as phenopacket-tools, the Phenopackets team's own validator, checks it.</li>
+  <li>The standard's own published examples use this form.</li>
 </ul>
 <p>If the GA4GH settles on a different form, one module of the workbench's packages (<code>pedigree_ga4gh</code>) changes, and the upgrade rewrites files from this form.</p>
 
 <h2>One implementation</h2>
-<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>: studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. Its check applies the rules of the Phenopackets schema and of phenopacket-tools, the GA4GH's validator, and those of the pedigree (<a href="#h-tool-validate">Check against the standard</a>).</p>
+<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>: studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. Its check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, and those of the pedigree (<a href="#h-tool-validate">Check against the standard</a>).</p>
+
+<h2>Version 1, in draft</h2>
+<p>Since June 2026 the Pedigree group has been drafting a version 1 of the standard. It is not yet merged or approved, and its review may change it. As drafted, it would give the GA4GH Pedigree a schema of its own:</p>
+<ul>
+  <li>People would be listed with their sex assigned at birth, dates and genetic parents, and <i>linked</i> to their Phenopackets, rather than being Phenopackets. Whether someone is affected would be recorded in their Phenopacket.</li>
+  <li>A relationship would have separate biological and social KIN terms, a twin type, and a flag for consanguinity.</li>
+  <li>KIN itself would gain 22 terms and retire ten. Three of those it retires are terms the workbench writes: <code>KIN:003</code>, a biological parent whose sex is not known, and the two terms for partners who are related.</li>
+</ul>
+<p>Until version 1 is approved, the workbench follows the published version. A file in the draft's form is recognised, and the tools say what it is rather than misreading it; it cannot be converted yet. When version 1 is approved, the change is in one package (<code>pedigree_ga4gh</code>), the Phenopackets Family stays as it is, and <a href="#h-tool-upgrade">the upgrade</a> will rewrite files written now.</p>
 
 <h2>What was wrong with the older files</h2>
 <p>Before, studio2ga4gh and abusua2ga4gh each wrote GA4GH files their own way, and the phenopacket toolkit had a “dialect” for reading each. Neither way was correct:</p>
@@ -1535,26 +1546,28 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <tr><td>phenopacket-toolkit 0.3</td><td>read both of the forms above</td><td>reading two incorrect forms kept them alive; it now reads the one form, and refuses the older ones with a message</td></tr>
 </table>
 <p>Files in the older forms are recognised, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites them once, in the standard form.</p>
-<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Two things that are not errors</div><p>A Family may leave out <code>consanguinousParents</code> when it is false (the workbench writes it always), and an empty list of resources is not itself wrong: proto3 JSON may leave out default values, and phenopacket-tools accepts either. What is required is a resource for every ontology prefix that the terms use. (The field is spelt <i>consanguinous</i>, as the schema spells it.)</p></div>
+<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Two things that are not errors</div><p>A Family may leave out <code>consanguinousParents</code> when it is false: proto3 JSON may leave out default values, and phenopacket-tools fills it in before checking. The workbench writes it always, because a check with the JSON schema alone asks for it. And a Phenopacket that uses no ontology terms – a relative with nothing recorded – needs no resources: what is required is a resource for every ontology whose terms are used. (The field is spelt <i>consanguinous</i>, as the schema spells it.)</p></div>
 
 <h2>Sources</h2>
 <ul>
   <li>GA4GH, <a href="https://www.ga4gh.org/product/pedigree/" target="_blank" rel="noopener">Pedigree</a> (the product page: in development).</li>
-  <li>The GA4GH Pedigree Standard's <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">documentation</a>: the conceptual model, the examples and KIN.</li>
-  <li>phenopacket-schema, <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">pull request 364, “Pedigree”</a> (opened 24 November 2022, closed without merging 26 September 2025).</li>
+  <li>The GA4GH Pedigree Standard's <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">documentation</a>: the conceptual model, how to use it (the reduced form), the examples and KIN.</li>
+  <li>phenopacket-schema, <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">pull request 364, “Pedigree”</a> (opened 24 November 2022, closed without merging 26 September 2025).</li>
   <li>The <a href="https://phenopacket-schema.readthedocs.io/" target="_blank" rel="noopener">Phenopackets version 2 schema</a>, and <a href="https://github.com/phenopackets/phenopacket-tools" target="_blank" rel="noopener">phenopacket-tools</a>.</li>
-  <li>KIN, in <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">GA4GH-Pedigree-Standard/family_history_terminology</a>.</li>
+  <li>KIN, in <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">ga4gh/<wbr>pedigree_<wbr>family_<wbr>history_<wbr>terminology</a>.</li>
+  <li>The draft of version 1: <a href="https://github.com/ga4gh/pedigree/pull/50" target="_blank" rel="noopener">ga4gh/pedigree pull request 50</a>, and for KIN <a href="https://github.com/ga4gh/pedigree_family_history_terminology/pull/55" target="_blank" rel="noopener">pull request 55</a> (neither merged).</li>
+  <li>The <a href="https://ga4gh.github.io/pedigree-fhir-ig/" target="_blank" rel="noopener">FHIR implementation guide</a> (draft 0.1.0).</li>
 </ul>
 <h2 data-anchor="cite">References</h2>
 <p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
 <dl class="cite-list">
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
-<dt>phenopacket-tools (the GA4GH&#x27;s validator)</dt>
+<dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
 <dd>Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE</i> 18(5): e0285433. <a href="https://doi.org/10.1371/journal.pone.0285433" target="_blank" rel="noopener">doi:10.1371/journal.pone.0285433</a></dd>
 <dt>pedigree-ga4gh</dt>
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
@@ -1593,11 +1606,11 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <dl class="cite-list">
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
-<dt>phenopacket-tools (the GA4GH&#x27;s validator)</dt>
+<dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
 <dd>Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE</i> 18(5): e0285433. <a href="https://doi.org/10.1371/journal.pone.0285433" target="_blank" rel="noopener">doi:10.1371/journal.pone.0285433</a></dd>
 </dl>
 </article>
-<article class="help-page" id="h-kin" data-title="KIN, the kinship terms" data-group="Files and standards" data-group-page="h-files" data-keys="kin kinship ontology relations relationship terms codes labels mother father parent sibling twin cousin partner consanguineous donor surrogate adoptive foster retired" hidden>
+<article class="help-page" id="h-kin" data-title="KIN, the kinship terms" data-group="Files and standards" data-group-page="h-files" data-keys="kin kinship ontology relations relationship terms codes labels mother father parent sibling twin cousin partner consanguineous donor surrogate adoptive foster retired draft version 1 v1" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="7.5" r="2.6"/><circle cx="9.5" cy="18" r="2.6"/><circle cx="19" cy="18.5" r="1.8"/><path d="M8.5 6.4l7 .8M7 8.4l1.7 7.1M16.4 9.6l-5.3 6.3M12 18.1l5.2.3"/></svg>KIN, the kinship terms</h1>
 <p class="lede">The Kinship Ontology, KIN, is the GA4GH Pedigree Standard's vocabulary of relationships: each relationship in a GA4GH Pedigree is one KIN term, such as <code>KIN:027</code> <i>isBiologicalMotherOf</i>.</p>
 
@@ -1617,8 +1630,8 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <p>Brothers and sisters, grandparents, aunts and cousins are not written: they follow from the parents.</p>
 
 <h2>All 48 terms</h2>
-<p>From <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea, 16 September 2024), the file behind <code>http://purl.org/ga4gh/kin.owl</code>. <code>KIN:031</code>, <i>hasSex</i>, is a property of a person rather than a relationship between two, and is never used.</p>
-<div class="help-xscroll"><table class="kin-table">
+<p>From <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea, 16 September 2024, still its latest), the file behind <code>http://purl.org/ga4gh/kin.owl</code>. <code>KIN:031</code>, <i>hasSex</i>, is a property of a person rather than a relationship between two, and is never used.</p>
+<div class="help-xscroll"><table class="kin-table kin-terms">
 <tr><th>Code</th><th>Label</th><th>KIN's definition</th></tr>
 <tr><td><code>KIN:001</code></td><td>isRelativeOf</td><td>A relation that indicates that a person is connected to another biologically or through a socio-legal relationship.<br><small>the same both ways</small></td></tr>
 <tr><td><code>KIN:002</code></td><td>isBiologicalRelativeOf</td><td>A relation that indicates that a person is related to another person biologically.<br><small>the same both ways</small></td></tr>
@@ -1688,6 +1701,9 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <tr><td><code>KIN:049</code></td><td><code>KIN:051</code> isSeparatedConsanguineousPartnerOf</td></tr>
 </table>
 
+<h2>KIN version 1, in draft</h2>
+<p>A revised KIN is being drafted with version 1 of the standard (see <a href="#h-ga4gh">The GA4GH Pedigree</a>), and is not yet merged. It would add 22 terms (<code>KIN:200</code> to <code>KIN:221</code>), which tell biological relatives apart from social and legal ones, and retire ten, among them <code>KIN:003</code> (replaced by <code>KIN:200</code>) and <code>KIN:030</code> and <code>KIN:051</code>, whose consanguinity would become a flag on the relationship. Ten codes would keep their number with a narrower meaning: <code>KIN:017</code> <i>isGrandparentOf</i>, for instance, would become <i>isSocialLegalGrandparentOf</i>. Until the draft is merged, the terms above are KIN's current ones, and they are what the workbench writes.</p>
+
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh kin
 pedigree-ga4gh kin | grep -i sibling</code></pre>
@@ -1696,8 +1712,8 @@ pedigree-ga4gh kin | grep -i sibling</code></pre>
 <dl class="cite-list">
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 </dl>
 </article>
 <article class="help-page" id="h-ped" data-title="PED and MPED files" data-group="Files and standards" data-group-page="h-files" data-keys="ped mped fam linkage format columns family individual father mother sex affected status codes 0 1 2 3 carrier header plink merlin" hidden>
@@ -2035,7 +2051,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dd>Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href="https://github.com/comparativechrono/pedigree-workbench" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-workbench</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
-<dt>phenopacket-tools (the GA4GH&#x27;s validator)</dt>
+<dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
 <dd>Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE</i> 18(5): e0285433. <a href="https://doi.org/10.1371/journal.pone.0285433" target="_blank" rel="noopener">doi:10.1371/journal.pone.0285433</a></dd>
 <dt>Human Phenotype Ontology</dt>
 <dd class="cite-note">Give the release you used, too (the terms file records it).</dd>
@@ -2045,8 +2061,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dd>Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv</i> 2022.04.13.22273750. <a href="https://doi.org/10.1101/2022.04.13.22273750" target="_blank" rel="noopener">doi:10.1101/2022.04.13.22273750</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Pedigree nomenclature</dt>
 <dd>Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 17(5): 424–433. <a href="https://doi.org/10.1007/s10897-008-9169-9" target="_blank" rel="noopener">doi:10.1007/s10897-008-9169-9</a></dd>
 <dd>Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 31(6): 1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a></dd>
@@ -2167,7 +2183,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
-<dt>phenopacket-tools (the GA4GH&#x27;s validator)</dt>
+<dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
 <dd>Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE</i> 18(5): e0285433. <a href="https://doi.org/10.1371/journal.pone.0285433" target="_blank" rel="noopener">doi:10.1371/journal.pone.0285433</a></dd>
 <dt>Human Phenotype Ontology</dt>
 <dd class="cite-note">Give the release you used, too (the terms file records it).</dd>
@@ -2177,8 +2193,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dd>Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv</i> 2022.04.13.22273750. <a href="https://doi.org/10.1101/2022.04.13.22273750" target="_blank" rel="noopener">doi:10.1101/2022.04.13.22273750</a></dd>
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
-<dd>GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/GA4GH-Pedigree-Standard/family_history_terminology" target="_blank" rel="noopener">github.com/GA4GH-Pedigree-Standard/family_history_terminology</a></dd>
-<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/phenopackets/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/phenopackets/phenopacket-schema/pull/364</a></dd>
+<dd>GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">github.com/ga4gh/pedigree_family_history_terminology</a></dd>
+<dd>Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">github.com/ga4gh/phenopacket-schema/pull/364</a></dd>
 <dt>Pedigree nomenclature</dt>
 <dd>Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 17(5): 424–433. <a href="https://doi.org/10.1007/s10897-008-9169-9" target="_blank" rel="noopener">doi:10.1007/s10897-008-9169-9</a></dd>
 <dd>Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 31(6): 1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a></dd>
@@ -2215,9 +2231,9 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <script>window.WB_EXAMPLES = [{"p":"README.md","s":2026},{"p":"cf-cousins.mped","s":450},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":645},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224}];
 window.WB_STARTERS = [{"p":"notebooks/pedigree-tools.ipynb"}];
-window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"64b3758af0eb78960813f15c953029d9ff4a7f2390be5094039e6a2395117394","bytes":172573,"packages":{"studio2ped":"0.1.0","ped2studio":"0.2.0","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.0.0","mondonorm":"1.0.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
+window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"474ae6079b7839e5bee2739d1f52f4892033023c3efe839ff58432d574f90d38","bytes":173566,"packages":{"studio2ped":"0.1.0","ped2studio":"0.2.0","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.0.0","mondonorm":"1.0.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
 window.WB_STUDIO = "9e6b524d4469";
-window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/GA4GH-Pedigree-Standard/family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/GA4GH-Pedigree-Standard/family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/phenopackets/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/phenopackets/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href=\"https://github.com/comparativechrono/pedigree-workbench\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-workbench<\/a>"};</script>
+window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/ga4gh/pedigree_family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/pedigree_family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/ga4gh/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh, in the Pedigree workbench [software]. <a href=\"https://github.com/comparativechrono/pedigree-workbench\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-workbench<\/a>"};</script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/core.js"></script>
 <script src="assets/js/icons.js"></script>

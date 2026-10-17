@@ -227,7 +227,7 @@ def kin_module():
 def kin_table():
     kin = kin_module()
     e = html.escape
-    rows = ['<div class="help-xscroll"><table class="kin-table">',
+    rows = ['<div class="help-xscroll"><table class="kin-table kin-terms">',
             '<tr><th>Code</th><th>Label</th><th>KIN\'s definition</th></tr>']
     for code, t in kin.TERMS.items():
         extra = []

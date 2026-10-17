@@ -33,6 +33,12 @@ abusua2ga4gh up to 0.2, carriers
     Phenopackets have no field for carrier status, and the only structured
     place for it, a genomic interpretation of the variant, needs a person who
     knows the variant.
+
+The draft of version 1 of the standard is recognised too, so that it is not
+taken for one of the forms above, but it cannot be upgraded: it is not yet
+approved (ga4gh/pedigree pull request 50, 2026). Its people are Individuals of
+its own rather than Phenopackets, and its relationships have lists of
+biological and social KIN terms instead of one ``relation``.
 """
 from __future__ import annotations
 
@@ -64,9 +70,25 @@ def _who(ids: List[str]) -> str:
 
 @dataclass
 class Legacy:
-    form: str            # "studio2ga4gh-pedigree", "abusua2ga4gh-pedigree", "phenopackets"
+    form: str            # "studio2ga4gh-pedigree", "abusua2ga4gh-pedigree", "phenopackets", "pedigree-v1-draft"
     description: str
     unreadable: bool     # True if the standard reader cannot make sense of it at all
+    upgradable: bool = True   # False if upgrade() cannot rewrite it (the draft of version 1)
+
+
+# Fields of the draft of version 1 of the standard (ga4gh/pedigree pull request 50), in JSON and proto spelling,
+# that no form the workbench reads has: on its Individuals, and on its Relationships
+V1_DRAFT_INDIVIDUAL = ("sexAssignedAtBirth", "sex_assigned_at_birth", "genderIdentity", "gender_identity",
+                       "eggParentId", "egg_parent_id", "spermParentId", "sperm_parent_id", "egg_parent",
+                       "sperm_parent", "externalIdentifiers", "external_identifiers", "populationDescriptors",
+                       "population_descriptors")
+V1_DRAFT_RELATIONSHIP = ("biologicalRelationship", "biological_relationship", "socialRelationship",
+                         "social_relationship", "twinGroup", "twin_group", "consanguinity", "consanguinityNote",
+                         "consanguinity_note")
+V1_DRAFT = ("This GA4GH Pedigree is in the form of the draft of version 1 of the standard (ga4gh/pedigree pull "
+            "request 50), which is not yet approved: its people are not Phenopackets, and its relationships have "
+            "lists of biological and social KIN terms. The workbench reads and writes the published form, and "
+            "cannot read or convert this one yet.")
 
 
 def _individuals(doc: Dict) -> List[Dict]:
@@ -74,13 +96,16 @@ def _individuals(doc: Dict) -> List[Dict]:
 
 
 def identify(doc: Dict) -> Optional[Legacy]:
-    """Say whether ``doc`` is one of the older, non-standard forms."""
+    """Say whether ``doc`` is one of the older, non-standard forms, or the draft of version 1."""
     if not isinstance(doc, dict):
         return None
     kind = detect(doc)
     if kind == "pedigree":
         inds = _individuals(doc)
         rels = [r for r in (doc.get("relationships") or []) if isinstance(r, dict)]
+        if any(k in i for i in inds for k in V1_DRAFT_INDIVIDUAL) or any(
+                k in r for r in rels for k in V1_DRAFT_RELATIONSHIP):
+            return Legacy("pedigree-v1-draft", V1_DRAFT, True, False)
         flat = inds and all("subject" not in i for i in inds) and any(
             k in i for i in inds for k in ("sex", "deceased", "affected"))
         if flat or any("individual" in r or "relative" in r for r in rels):
@@ -135,6 +160,8 @@ def upgrade(doc: Dict, *, created_by: str = UPGRADED_BY, created: Optional[str] 
     """
     kind = detect(doc)
     old = identify(doc)
+    if old is not None and not old.upgradable:
+        raise ValueError(old.description)
     if old is not None and old.form == "studio2ga4gh-pedigree":
         return _upgrade_flat_pedigree(doc, created_by, created)
     message = {"pedigree": "GA4GHPedigree", "family": "Family", "cohort": "Cohort",

@@ -239,5 +239,18 @@ textarea.tl-input { font: 13px var(--mono); resize: vertical; }
 
 /* the help's tables: a long word (a KIN label, a path) may break rather than widen the pane; the widest scroll sideways */
 .help-page td, .help-page th { overflow-wrap: anywhere; }
+/* a first column of names (studio2ga4gh 0.3, made by an older tool …) is not squeezed until its words break,
+   where the help pane has room for it */
+@media (min-width: 700px) {
+  .help-page table:not(.kin-terms) td:first-child { min-width: 7.5em; }
+}
 .help-xscroll { overflow-x: auto; }
 .help-page .kin-table td:first-child { white-space: nowrap; }
+.help-page .kin-table td:first-child code { white-space: nowrap; overflow-wrap: normal; }
+/* KIN's terms, in the narrow help pane: the code and the label on one line, KIN's definition under them */
+.help-page .kin-terms, .help-page .kin-terms tbody { display: block; }
+.help-page .kin-terms tr:first-child { display: none; }
+.help-page .kin-terms tr { display: block; padding: 6px 2px; border-bottom: 1px solid var(--help-rule); }
+.help-page .kin-terms td { display: inline-block; border: 0; padding: 0; }
+.help-page .kin-terms td:nth-child(2) { margin-left: 0.4em; font-weight: 600; max-width: 100%; }
+.help-page .kin-terms td:nth-child(3) { display: block; padding-top: 2px; }

@@ -65,6 +65,10 @@ def validate(doc, kind: Optional[str] = None) -> List[Finding]:
                         "this is not a GA4GH Pedigree, Phenopackets Family, Cohort or Phenopacket")]
 
     old = legacy.identify(doc)
+    if old is not None and not old.upgradable:
+        out.append(Finding(ERROR, "draft-form", old.description, "",
+                           "ask for the file in the published form, with each individual a Phenopacket"))
+        return out
     if old is not None:
         out.append(Finding(ERROR, "legacy-format", old.description, "",
                            "upgrade it: pedigree-ga4gh upgrade FILE (in the Pedigree workbench: Tools > Upgrade a file from an older tool)"))

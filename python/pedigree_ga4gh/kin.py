@@ -5,10 +5,17 @@ example ``KIN:027`` *isBiologicalMotherOf*. This module holds the whole of KIN
 as published, so that codes and labels are written exactly as the ontology
 gives them and can be checked when a file is read.
 
-Source: ``kin.owl`` in https://github.com/GA4GH-Pedigree-Standard/family_history_terminology
-at commit 71616ea (16 September 2024), the version behind
-http://purl.org/ga4gh/kin.owl. ``KIN:031`` *hasSex* is left out: it links a
-person to a sex, not to another person, so it is never a pedigree relationship.
+Source: ``src/main/resources/kin.owl`` in
+https://github.com/ga4gh/pedigree_family_history_terminology (formerly
+GA4GH-Pedigree-Standard/family_history_terminology) at commit 71616ea
+(16 September 2024), the version behind http://purl.org/ga4gh/kin.owl.
+``KIN:031`` *hasSex* is left out: it links a person to a sex, not to another
+person, so it is never a pedigree relationship.
+
+A draft of KIN version 1 (pull request 55 of that repository, 2026, not merged)
+adds ``KIN:200`` to ``KIN:221``, deprecates ten terms (among them ``KIN:003``,
+``KIN:030`` and ``KIN:051``) and narrows the meaning of ten others. This
+module follows the published KIN until the draft is merged.
 
 KIN's codes, labels and definitions are from that repository, under the Apache
 License, Version 2.0: LICENSE-KIN.txt, beside this file, is its licence.
@@ -23,7 +30,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
 KIN_IRI = "http://purl.org/ga4gh/kin.owl"
-KIN_SOURCE = ("kin.owl, GA4GH-Pedigree-Standard/family_history_terminology "
+KIN_SOURCE = ("kin.owl, ga4gh/pedigree_family_history_terminology "
               "commit 71616ea (2024-09-16)")
 
 

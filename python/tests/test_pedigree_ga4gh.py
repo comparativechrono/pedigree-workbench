@@ -246,6 +246,57 @@ def test_the_carrier_mistake_is_found_and_removed():
     assert "carrier-term" not in codes(validate(ped2))
 
 
+# the trio of the draft of version 1 of the standard (ga4gh/pedigree pull request 50, 2026, not approved), as
+# proto3 JSON writes it, and as the draft's own examples spell it
+V1_DRAFT_TRIO = {
+    "id": "FAM1",
+    "narrative": "A GA4GH Pedigree of a trio with an affected child",
+    "indexPatients": ["CHILD"],
+    "individuals": [
+        {"id": "MOTHER", "sexAssignedAtBirth": "ASSIGNED_FEMALE"},
+        {"id": "FATHER", "sexAssignedAtBirth": "ASSIGNED_MALE"},
+        {"id": "CHILD", "eggParentId": "MOTHER", "spermParentId": "FATHER"},
+    ],
+    "relationships": [
+        {"individual": "MOTHER", "relative": "CHILD",
+         "biologicalRelationship": [{"id": "KIN:027", "label": "isBiologicalMotherOf"}]},
+        {"individual": "FATHER", "relative": "CHILD",
+         "biologicalRelationship": [{"id": "KIN:028", "label": "isBiologicalFatherOf"}]},
+    ],
+}
+V1_DRAFT_TRIO_AS_IN_ITS_EXAMPLES = {
+    "id": "FAM1",
+    "individuals": [
+        {"id": "MOTHER", "sex_assigned_at_birth": "assigned female"},
+        {"id": "FATHER", "sex_assigned_at_birth": "assigned male"},
+        {"id": "CHILD", "egg_parent": "MOTHER", "sperm_parent": "FATHER"},
+    ],
+    "relationships": [
+        {"individual": "MOTHER", "relative": "CHILD", "biological_relationship": [{"id": "KIN:027"}]},
+    ],
+    "index_patients": ["CHILD"],
+}
+
+
+def test_the_draft_of_version_1_is_recognised_and_not_upgraded():
+    from ga4gh2studio.converter import LegacyFileError as StudioError, convert
+    from phenopacket_toolkit.io.readers import LegacyFileError, from_dict
+    for doc in (V1_DRAFT_TRIO, V1_DRAFT_TRIO_AS_IN_ITS_EXAMPLES):
+        old = identify_legacy(doc)
+        assert old.form == "pedigree-v1-draft" and not old.upgradable
+        assert codes(validate(doc)) == ["draft-form"]
+        for read in (upgrade, from_dict, convert):
+            try:
+                read(doc)
+            except (ValueError, LegacyFileError, StudioError) as exc:
+                assert "draft of version 1" in str(exc) and "upgrade" not in str(exc)
+            else:
+                raise AssertionError("{} should refuse the draft form".format(read.__name__))
+    # studio2ga4gh 0.3's relationships also have 'individual' and 'relative': it is still told apart
+    assert identify_legacy(load("studio2ga4gh-0.3_ga4gh.json")).form == "studio2ga4gh-pedigree"
+    assert identify_legacy(load("studio2ga4gh-0.3_ga4gh.json")).upgradable
+
+
 def test_upgrading_a_standard_file_changes_nothing_that_matters():
     doc, _ = to_ga4gh_pedigree(trio(), created_by="test", created=CREATED)
     new, changes, todo = upgrade(doc, created=CREATED)

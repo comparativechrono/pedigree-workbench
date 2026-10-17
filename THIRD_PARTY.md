@@ -13,7 +13,7 @@ when copying or redistributing its files.
 | studio2ped, ped2studio, mpedtools, hponorm, mondonorm (Tim Hearn) | 0.1.0, 0.2.1, 0.1.0, 1.0.0, 1.0.0 | MIT | `python/`, packed into `assets/py/pedigree-tools.zip` | their releases on PyPI, unchanged |
 | studio2ga4gh, ga4gh2studio, phenopacket-toolkit (Tim Hearn) | 0.4.0 | MIT | the same | changed from their 0.3.0 releases: see `docs/upstream.md` |
 | pedigree-ga4gh, pedwb | 1.0.0 | MIT | the same | written for the workbench |
-| KIN, the Kinship Ontology (GA4GH Pedigree Standard): its codes, labels and definitions | `kin.owl`, commit `71616ea` of 16 September 2024 | Apache License 2.0 | `python/pedigree_ga4gh/kin.py`; licence in `python/pedigree_ga4gh/LICENSE-KIN.txt` | [GA4GH-Pedigree-Standard/family_history_terminology](https://github.com/GA4GH-Pedigree-Standard/family_history_terminology) |
+| KIN, the Kinship Ontology (GA4GH Pedigree Standard): its codes, labels and definitions | `kin.owl`, commit `71616ea` of 16 September 2024 | Apache License 2.0 | `python/pedigree_ga4gh/kin.py`; licence in `python/pedigree_ga4gh/LICENSE-KIN.txt` | [ga4gh/pedigree_family_history_terminology](https://github.com/ga4gh/pedigree_family_history_terminology) (formerly GA4GH-Pedigree-Standard/family_history_terminology) |
 | CodeMirror | 5.65.18 | MIT | `assets/vendor/codemirror/` (with its `LICENSE`) | [codemirror/codemirror5](https://github.com/codemirror/codemirror5) |
 | marked | 18.0.13 | MIT | `assets/vendor/marked/` (with its `LICENSE`) | [markedjs/marked](https://github.com/markedjs/marked) |
 | DOMPurify | 3.4.16 | Apache License 2.0 or Mozilla Public License 2.0 | `assets/vendor/dompurify/` (with its `LICENSE`) | [cure53/DOMPurify](https://github.com/cure53/DOMPurify) |
@@ -25,9 +25,11 @@ workbench.
 
 `python/pedigree_ga4gh/schema.py` lists the messages and fields of the
 Phenopackets v2 schema and follows the rules that phenopacket-tools, the
-GA4GH's validator, applies; it contains no code or schema files of either.
-`python/tools/official_check.py` uses phenopacket-tools' JSON schemas when
-someone supplies them; they are not included.
+Phenopackets team's validator, applies; it contains no code or schema files of
+either. `python/tools/official_check.py` uses phenopacket-tools' JSON schemas
+when someone supplies them; they are not included. (phenopacket-tools' licence
+is given two ways: its `LICENSE` file is the GNU GPL 3, and its `pom.xml` the
+3-clause BSD licence. Ask its maintainers before including any of its files.)
 
 ## Loaded when the page runs
 

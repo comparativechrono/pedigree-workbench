@@ -39,6 +39,8 @@ def from_dict(data: dict, *, fmt: str = "json", path: str = "", allow_legacy: bo
     if not isinstance(data, dict):
         raise ValueError("expected a JSON object at the top level, got {}".format(type(data).__name__))
     old = identify_legacy(data)
+    if old is not None and not old.upgradable:
+        raise LegacyFileError("{}{}".format((path + ": ") if path else "", old.description))
     if old is not None and not allow_legacy:
         raise LegacyFileError("{}{} Run `phenotk upgrade {}` to convert it first.".format(
             (path + ": ") if path else "", old.description, path or "FILE"))

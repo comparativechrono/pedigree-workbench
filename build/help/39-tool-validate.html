@@ -4,8 +4,8 @@
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check a correct file</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Check a file with problems</button></div>
 
 <h2>What is checked</h2>
-<h3>As the GA4GH's own validator does</h3>
-<p>phenopacket-tools is the GA4GH's validator for Phenopackets. The check applies its rules:</p>
+<h3>As phenopacket-tools does</h3>
+<p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. The check applies its rules:</p>
 <ul>
   <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
   <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>.</li>

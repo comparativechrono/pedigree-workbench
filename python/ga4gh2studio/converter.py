@@ -582,6 +582,8 @@ def convert(ga4gh_data: Optional[dict] = None, phenopackets_data: Optional[dict]
     for d in (ga4gh_data, phenopackets_data):
         if d is not None:
             old = identify_legacy(d)
+            if old is not None and not old.upgradable:
+                raise LegacyFileError(old.description)
             if old is not None:
                 raise LegacyFileError(old.description + " Upgrade it first: pedigree-ga4gh upgrade FILE "
                                       "(in the Pedigree workbench: Tools > Upgrade a file from an older tool).")

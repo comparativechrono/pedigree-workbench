@@ -125,7 +125,8 @@ def _ga4gh_summary(doc: Dict, kind: str) -> Dict[str, Any]:
         out["people"] = 1
         out["id"] = doc.get("id", "")
     if old:
-        out["legacy"] = {"form": old.form, "description": old.description, "unreadable": bool(old.unreadable)}
+        out["legacy"] = {"form": old.form, "description": old.description, "unreadable": bool(old.unreadable),
+                         "upgradable": bool(old.upgradable)}
     return out
 
 
@@ -414,7 +415,7 @@ def validate(path: str) -> Dict[str, Any]:
         "warnings": sum(1 for f in findings if f.severity == pg.WARNING),
         "findings": [{"severity": f.severity, "code": f.code, "message": f.message, "path": f.path, "fix": f.fix}
                      for f in findings],
-        "legacy": {"form": old.form, "description": old.description} if old else None,
+        "legacy": {"form": old.form, "description": old.description, "upgradable": bool(old.upgradable)} if old else None,
     }
 
 

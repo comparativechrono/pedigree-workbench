@@ -8,7 +8,7 @@ import sys
 from . import __version__, kin
 from .io import dumps, load
 from .kindred import detect, from_document, to_ga4gh_pedigree, to_phenopackets_family
-from .legacy import upgrade
+from .legacy import identify, upgrade
 from .validate import KIND_NAMES, errors, render, validate
 
 
@@ -56,14 +56,28 @@ def main(argv=None) -> int:
             print(render(found))
         return 1 if errors(found) else 0
     if a.cmd == "upgrade":
-        new, changes, todo = upgrade(doc)
+        try:
+            new, changes, todo = upgrade(doc)
+        except ValueError as exc:
+            print("pedigree-ga4gh: {}: {}".format(a.input, exc), file=sys.stderr)
+            return 1
         _write(dumps(new), a.output)
         for c in changes:
             print("changed: " + c, file=sys.stderr)
         for t in todo:
             print("to do: " + t, file=sys.stderr)
         return 0
-    k, warnings = from_document(doc)
+    old = identify(doc)
+    if old is not None:
+        print("pedigree-ga4gh: {}: {}{}".format(a.input, old.description, " Upgrade it first: pedigree-ga4gh "
+                                                "upgrade {}".format(a.input) if old.upgradable else ""),
+              file=sys.stderr)
+        return 1
+    try:
+        k, warnings = from_document(doc)
+    except ValueError as exc:
+        print("pedigree-ga4gh: {}: {}".format(a.input, exc), file=sys.stderr)
+        return 1
     if a.to == "pedigree":
         out, w = to_ga4gh_pedigree(k, created_by=a.created_by)
     else:

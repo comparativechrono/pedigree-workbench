@@ -10,12 +10,13 @@
   <li><b>Warnings</b> are things that are allowed but probably mistaken, such as a mother recorded as male.</li>
   <li><b>Notes</b> are for information, such as an ontology release that the file does not record.</li>
 </ul>
-<p>The checks are those of the Phenopackets version 2 schema and of phenopacket-tools, the GA4GH's own validator, with the GA4GH Pedigree's on top: KIN terms, people named in relationships, parents' sexes, loops of ancestry. <a href="#h-tool-validate">Check against the standard</a> lists them.</p>
+<p>The checks are those of the Phenopackets version 2 schema and of phenopacket-tools, the Phenopackets team's own validator, with the GA4GH Pedigree's on top: KIN terms, people named in relationships, parents' sexes, loops of ancestry. <a href="#h-tool-validate">Check against the standard</a> lists them.</p>
 
 <h2>2 · Fix what it finds</h2>
 <table>
 <tr><th>Finding</th><th>What it means</th><th>How to fix it</th></tr>
 <tr><td>made by an older tool (<code>legacy-format</code>)</td><td>studio2ga4gh 0.3 or abusua2ga4gh 0.2 wrote it, in a form the standard does not accept</td><td><b>Upgrade a file from an older tool</b></td></tr>
+<tr><td>the draft of version 1 (<code>draft-form</code>)</td><td>the file is in the form of the draft of version 1 of the standard, which is not yet approved (<a href="#h-ga4gh">The GA4GH Pedigree</a>)</td><td>it cannot be converted yet: ask for the file in the published form</td></tr>
 <tr><td>no ontology id (<code>empty-term-id</code>)</td><td>a condition is named, but has no term</td><td><b>Fill in missing terms</b></td></tr>
 <tr><td>no resource for a prefix (<code>undeclared-prefix</code>)</td><td>terms are used, but metaData does not say which ontology they come from</td><td><b>Upgrade</b> adds the resource</td></tr>
 <tr><td>a field the standard does not have (<code>unknown-field</code>), or a required one missing (<code>missing-field</code>)</td><td>for example a name in <code>subject</code>, or no <code>metaData</code></td><td><b>Upgrade</b> fixes those it knows; otherwise the file must be corrected where it was made</td></tr>
