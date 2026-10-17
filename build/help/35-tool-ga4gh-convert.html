@@ -1,0 +1,43 @@
+<!-- id: h-tool-ga4gh-convert | title: GA4GH Pedigree ⇄ Phenopackets Family | group: Tools | summary: phenotk convert: one GA4GH form into the other | keys: convert ga4gh pedigree phenopackets family proband relatives pedigree persons phenotk pedigree-ga4gh -->
+<h1><!--ICON:convert-->GA4GH Pedigree ⇄ Phenopackets Family</h1>
+<p class="lede">The two GA4GH files carry the same family in two ways. This tool turns either into the other – for a file someone has sent you in only one of the forms, for example.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ga4gh-convert" data-input="/data/examples/okafor_ga4gh-pedigree.json">Make a Family from the Okafor GA4GH Pedigree</button></div>
+
+<h2>The two forms</h2>
+<table>
+<tr><th></th><th>GA4GH Pedigree</th><th>Phenopackets Family</th></tr>
+<tr><td>Who is in it</td><td>everyone, each a Phenopacket</td><td>the proband, the relatives with findings, and everyone in its pedigree</td></tr>
+<tr><td>How they are related</td><td>relationships named with KIN terms: parents, donors, adoption, partners, twins, cousins…</td><td>a PED-style pedigree: father, mother, sex, affected or not</td></tr>
+<tr><td>Standard</td><td>proposed for the GA4GH Pedigree Standard, still being written</td><td>Phenopackets version 2, approved</td></tr>
+</table>
+<p>Going to a Family loses what a PED-style pedigree cannot say – twins, adoptions, separated couples, and that a parent was a donor rather than a partner – and the narrative. Going to a GA4GH Pedigree, the relationships come from the parents in the Family's pedigree; the proband's parents are marked consanguineous if the Family says so and the pedigree does not show it already. <a href="#h-ga4gh">The GA4GH Pedigree</a> has the details.</p>
+
+<h2>The form</h2>
+<dl>
+  <dt>The file</dt><dd>A GA4GH Pedigree or a Phenopackets Family.</dd>
+  <dt>Make</dt><dd>The other form (chosen for you).</dd>
+  <dt>Proband</dt><dd>Going to a Family: the person's id to make the proband. Without one, the GA4GH Pedigree's index patient is used, or the first affected person.</dd>
+  <dt>Save as</dt><dd><code>~/results/<i>name</i>_phenopackets-family.json</code> or <code>…_ga4gh-pedigree.json</code>.</dd>
+</dl>
+<p>Some things each form cannot say:</p>
+<ul>
+  <li>A person in the GA4GH Pedigree with nothing recorded is in the Family's pedigree, but has no Phenopacket among its relatives. Their status in the Family's pedigree is <i>missing</i> (unknown) rather than unaffected, because a GA4GH Pedigree records the conditions people have, not that they were found to have none.</li>
+  <li>From a Family, the people with no Phenopacket in it come into the GA4GH Pedigree with their sex and parents only: the Family's pedigree does not say whether they are alive.</li>
+</ul>
+<p>So convert each way only when you need to: keep both of the files studio2ga4gh writes, rather than making one from the other.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>phenotk convert /data/examples/okafor_ga4gh-pedigree.json --to family -o ~/results/okafor-again_phenopackets-family.json
+phenotk convert /data/examples/okafor_phenopackets-family.json --to pedigree -o ~/results/okafor-again_ga4gh-pedigree.json</code></pre>
+<p><code>pedigree-ga4gh convert FILE --to pedigree|family -o OUT</code> does the same.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import to_kind
+
+doc = ptk.read("/data/examples/okafor_ga4gh-pedigree.json")
+new, notes = to_kind(doc, "family", proband_id="IV-3")
+ptk.write(new, "/home/user/results/okafor-again_phenopackets-family.json")
+for note in notes:
+    print("note:", note)</code></pre>
+<!--CITE: phenotk pedigree-ga4gh ga4gh-pedigree phenopackets-->

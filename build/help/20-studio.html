@@ -1,0 +1,47 @@
+<!-- id: h-studio | title: The Studio tab | group: Pedigree Studio | summary: Pedigree Studio in the workbench: drawing, opening and saving | keys: studio pedigree studio draw drawing open save save as new tidy layout convert check file bar symbols key colour legend proband carrier twins consanguineous adoption export png svg picture -->
+<h1><!--ICON:pedigree-->The Studio tab</h1>
+<p class="lede">The Studio tab is Pedigree Studio, our program for drawing pedigrees in the standard nomenclature, inside the workbench. The bar above it joins it to your files: it says which file the drawing on show belongs to, saves it there, and takes it to the Tools tab.</p>
+
+<h2>The bar</h2>
+<table>
+<tr><th></th><th>What it does</th></tr>
+<tr><td><b>Drawing</b> and the file's name</td><td>The file the drawing belongs to, or <i>not saved in a file yet</i>. Click it for your other drawings, most recent first. Beside it, <i>saved</i> or <i>changes not saved</i>.</td></tr>
+<tr><td><b>New</b></td><td>An empty drawing. If the one on show has changes that are not saved, you are asked first.</td></tr>
+<tr><td><b>Open…</b></td><td>Your drawings, the examples, or a drawing from your computer.</td></tr>
+<tr><td><b>Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>)</td><td>Saves the drawing in its file. A drawing with no file yet asks for a name.</td></tr>
+<tr><td><b>Save as…</b></td><td>Saves it as a new file, in <code>~/pedigrees</code> unless you give another folder of your home; the name ends in <code>.studio.json</code>.</td></tr>
+<tr><td><b>Tidy</b></td><td>Pedigree Studio's Tidy: lays the whole pedigree out afresh. <b>Undo</b> in the Studio puts your own layout back.</td></tr>
+<tr><td><b>Convert or check…</b></td><td>Saves the drawing, then shows in the Tools tab everything that can be done with it.</td></tr>
+<tr><td><b>⋯</b></td><td>Download the drawing, show its file in the Files tab, and help.</td></tr>
+</table>
+
+<h2>Opening drawings</h2>
+<div class="tryrow"><button class="do" type="button" data-studio="/data/examples/okafor.studio.json">Okafor</button> <button class="do" type="button" data-studio="/data/examples/lynch.studio.json">Lynch</button> <button class="do" type="button" data-studio="/data/examples/price.studio.json">Price</button> <button class="do" type="button" data-studio="/data/examples/cf-cousins.studio.json">Cystic fibrosis cousins</button> <button class="do" type="button" data-studio="/data/examples/features.studio.json">Every kind of symbol</button></div>
+<p>The examples cannot be changed, so one opens as a drawing that is not in a file of yours yet: change it as you like, and <b>Save as…</b> keeps your version. A drawing from somewhere else – saved from Pedigree Studio's own <b>File</b> menu, or sent to you – can be opened with <b>Open… → Open a drawing from my computer…</b>; the workbench recognises a Pedigree Studio file by what is in it, whatever it is called.</p>
+<p>A drawing that a tool has just made opens from the tool's result (<b>Open the drawing in Studio</b>), and from the terminal with <code>studio FILE</code>.</p>
+
+<h2>Where the drawing is kept</h2>
+<p>A saved drawing is a file among your files, kept in this browser like the others (<a href="#h-files">Your files</a>). Pedigree Studio also keeps the drawing on show, as it is, so if you close the page without saving, it is still there when you come back – with <i>changes not saved</i> beside its name, until you save it.</p>
+<p>Pedigree Studio's own <b>File</b> menu still works as it does on its own: it saves the drawing to your computer as a file, opens one from your computer, and exports pictures (PNG, or SVG for documents and posters). To keep a drawing among your files, use the bar's <b>Save</b>.</p>
+
+<h2 data-anchor="drawing">Drawing a pedigree</h2>
+<p>Pedigree Studio's own help, its <b>?</b> button, explains the drawing: the symbols, the toolbar and the panels. In short:</p>
+<ol>
+  <li><b>Add the first person</b> with <b>Male</b>, <b>Female</b> or <b>Unknown</b> on the toolbar – usually the person the pedigree is for, marked as the <b>proband</b> in the panel.</li>
+  <li><b>Build out from them</b>: with someone selected, <b>Add a relative</b> adds a partner, child, parents or brother or sister, already joined up.</li>
+  <li><b>Join people yourself</b> with <b>Partners</b>, <b>Child</b> and <b>Twins</b>.</li>
+  <li><b>Describe each person</b> in the panel: notes under the symbol, deceased, shading for a condition, and a mark inside the symbol for a carrier, a pregnancy, a donor or a surrogate.</li>
+  <li><b>Click a line</b> to mark a couple consanguineous or separated, or to dash a line of descent for adoption.</li>
+  <li><b>Tidy</b> lays it all out afresh.</li>
+</ol>
+
+<h3>What the tools read from a drawing</h3>
+<ul>
+  <li><b>The colour key names the conditions.</b> Give each condition its own colour (or a half, a quarter or a pattern), and name it in the key (the <b>Key</b> button). A colour the key does not name is not counted as a condition. An id in brackets after the name – <i>Breast cancer [MONDO:0007254]</i> – gives the condition its term (<a href="#h-terms">Ontology terms</a>).</li>
+  <li><b>The proband</b> becomes the index patient of the GA4GH files.</li>
+  <li><b>The notes under the symbols</b> stay in the drawing. The GA4GH files name people by their pedigree numbers unless you choose otherwise; Drawing → PED uses the notes as the people's ids.</li>
+  <li><b>Carriers, pregnancies, losses, donors and surrogates</b> are written as the standard allows: losses and pregnancies as people, donors and surrogates by their KIN relationships, and what has no place of its own, such as a carrier, in the GA4GH Pedigree's narrative.</li>
+  <li><b>A symbol that stands for several people</b> (a number inside it) is written as one person, with a note.</li>
+</ul>
+<div class="tryrow"><button class="do" type="button" data-studio="/data/examples/features.studio.json">Open the drawing with every kind of symbol</button> <button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/features.studio.json" data-terms="/data/examples/example-terms.json">See how the tools write it</button></div>
+<!--CITE: pedigree-studio nomenclature-->

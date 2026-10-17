@@ -1,0 +1,28 @@
+<!-- id: h-tool-add | title: Add findings to people | group: Tools | summary: phenotk add: diseases, phenotypes, onset or vital status for chosen people | keys: add findings phenotype disease onset age excluded vital status deceased alive variant gene hgvs zygosity diagnosis interpretation phenotk annotate -->
+<h1><!--ICON:plus-->Add findings to people</h1>
+<p class="lede">Adds diseases or phenotypes – with an age of onset, or marked as looked for and not found – or a vital status, to the proband, to everyone, or to one person, in a GA4GH or Phenopackets file. The drawing has no place for most of these; the files do.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="add" data-input="/data/examples/okafor_phenopackets-family.json">Open it with the Okafor Family</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>To</dt><dd><code>proband</code>, <code>all</code>, <code>affected</code>, <code>unaffected</code> (as the Family's pedigree says), or one person's id, such as <code>IV-4</code>. Only people who have a Phenopacket in the file can be given findings.</dd>
+  <dt>Phenotypes, Diseases</dt><dd>One a line, as the term's id with its label after an equals sign: <code>HP:0008527=Congenital sensorineural hearing impairment</code>, <code>MONDO:0007254=breast cancer</code>. Find the terms with <a href="#h-tool-terms">Match conditions to terms</a>, or on the HPO's and Mondo's own sites.</dd>
+  <dt>These phenotypes were looked for and not found</dt><dd>Marks the phenotypes <i>excluded</i>: as useful to a diagnosis as what was found.</dd>
+  <dt>Age at onset</dt><dd>An ISO 8601 age (<code>P45Y</code> for 45 years, <code>P6M</code> for six months), for every term added.</dd>
+  <dt>Vital status</dt><dd>Alive, deceased or unknown.</dd>
+</dl>
+<p>A term from an ontology the file did not use yet is declared in its <code>metaData</code>, so the file stays valid; its release is recorded as unknown.</p>
+
+<h2>In the terminal, and more</h2>
+<pre class="code" data-run="term"><code>phenotk add /data/examples/okafor_phenopackets-family.json --target IV-4 --phenotype "HP:0008527=Congenital sensorineural hearing impairment" --onset P0D -o ~/results/okafor-added.json
+phenotk view ~/results/okafor-added.json</code></pre>
+<p>The command can add more than the form: a variant (<code>--variant --gene HGNC:1884=CFTR --hgvs … --zygosity heterozygous</code>, with <code>--diagnosis</code> naming the disease it explains), measurements, a cause of death, a date of birth or age, and any field by its path (<code>--set</code>, <code>--merge</code>, <code>--append</code>). <code>man phenotk</code> and <code>phenotk add --help</code> list them.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import add
+
+doc = ptk.read("/data/examples/okafor_phenopackets-family.json")
+new = add(doc, "IV-4", phenotypes=[{"id_": "HP:0008527", "label": "Congenital sensorineural hearing impairment", "onset": "P0D"}])
+ptk.write(new, "/home/user/results/okafor-added.json")</code></pre>
+<!--CITE: phenotk phenopackets-->

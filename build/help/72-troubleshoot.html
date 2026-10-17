@@ -1,0 +1,44 @@
+<!-- id: h-troubleshoot | title: When something goes wrong | group: Reference | summary: The common problems, and what to do | keys: troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug -->
+<h1><!--ICON:warning-->When something goes wrong</h1>
+<p class="lede">The common problems, and what to do about each.</p>
+
+<dl>
+  <dt>Python does not start</dt>
+  <dd>Python is downloaded from cdn.jsdelivr.net the first time (about 10 MB). If the network blocks that site, or there is no connection, the tools, the notebook and the programs cannot run; the Studio and the Files tab still work. Try again on another network. After the first time, the browser usually keeps a copy.</dd>
+
+  <dt>“This GA4GH Pedigree was written by studio2ga4gh 0.3 or earlier …”</dt>
+  <dd>The file is in an older form, which the tools no longer read. <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it, once.</dd>
+
+  <dt>A condition is missing from the GA4GH files</dt>
+  <dd>It has no ontology term, so it was left out (the tool said so under its result). Give it a term with <a href="#h-tool-terms">Match conditions to terms</a>, and convert again with the terms file. Check that the name in the terms file is the name in the colour key; case does not matter, spelling does.</dd>
+
+  <dt>A colour is not counted as a condition</dt>
+  <dd>The colour key does not name it. Open the drawing in the Studio, click the key and type the condition's name beside that colour.</dd>
+
+  <dt>“EBI's Ontology Lookup Service did not answer”</dt>
+  <dd>The service is down or slow, or the network blocks www.ebi.ac.uk. Try again later, or search copies of the ontologies on this computer instead (<i>2 · Search in</i>).</dd>
+
+  <dt>The PED file has names as ids, or the same id twice</dt>
+  <dd>studio2ped uses the text under the symbols as ids. Change the labels in the drawing, or make the PED file through the GA4GH files, which use pedigree numbers (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
+
+  <dt>The drawing a tool made looks untidy</dt>
+  <dd>Press <b>Tidy</b> in the Studio tab, or tick <i>Lay it out afresh with Pedigree Studio's Tidy</i> before running the tool.</dd>
+
+  <dt>The Studio tab shows the wrong drawing, or none</dt>
+  <dd>The bar above it says which file the drawing on show belongs to. <b>Open…</b> shows any of your drawings; the file button lists the latest.</dd>
+
+  <dt>A tool waits for a long time</dt>
+  <dd>A notebook cell may be running: the tools share the notebook's Python, and wait for the cell to finish (stop it in the Notebook tab). The first search of a local copy of Mondo also takes a while: it reads the whole file.</dd>
+
+  <dt>hponorm or mondonorm stops at once in the terminal</dt>
+  <dd>They ask questions that this terminal cannot answer. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms (<a href="#h-terminal">The Terminal</a>).</dd>
+
+  <dt>My files have gone</dt>
+  <dd>Are you in the same browser, on the same computer, and not in a private window? The files are kept by the browser for this site only. A browser that clears site data when it closes deletes them too: download what you want to keep.</dd>
+
+  <dt>“The workbench is open in another tab or window too”</dt>
+  <dd>Both tabs keep files in the same place, and one can overwrite what the other saved. Close one of them.</dd>
+</dl>
+
+<h2>Reporting a fault</h2>
+<p>If a tool fails with Python's traceback (under the result: <i>Python's traceback</i>), or a file the workbench made does not pass its own check, that is a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>, with the traceback and, if you can, a file that shows it – an example, or a de-identified copy of yours. Never attach a family's real data.</p>

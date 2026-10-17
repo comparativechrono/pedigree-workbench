@@ -1,0 +1,33 @@
+<!-- id: h-tool-ga4gh2studio | title: GA4GH or Phenopackets → drawing | group: Tools | summary: ga4gh2studio: a GA4GH file drawn in Pedigree Studio | keys: ga4gh2studio draw drawing ga4gh pedigree phenopackets family import open picture layout key terms -->
+<h1><!--ICON:pedigree-->GA4GH or Phenopackets → drawing</h1>
+<p class="lede">ga4gh2studio draws a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio. Each condition gets a colour, named in the key with its term, so that the drawing converts back to the same terms.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ga4gh2studio" data-input="/data/examples/okafor_ga4gh-pedigree.json">Open it with the Okafor GA4GH Pedigree</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>The GA4GH file</dt><dd>A GA4GH Pedigree or a Phenopackets Family. A file from an older tool must be upgraded first (<a href="#h-tool-upgrade">Upgrade a file from an older tool</a>); the tool says so if it needs to be.</dd>
+  <dt>Save the drawing as</dt><dd>A <code>.studio.json</code> file, in <code>~/pedigrees</code> unless you choose otherwise.</dd>
+  <dt>Lay it out afresh with Pedigree Studio's Tidy when it opens</dt><dd>The tool lays the family out generation by generation; Pedigree Studio's Tidy usually makes it neater. This is done in the Studio when you open the drawing from the result, so it is not part of the command.</dd>
+</dl>
+
+<h2>What comes back</h2>
+<ul>
+  <li>Everyone, with their sex and whether they have died; the couples, consanguineous and separated ones too; twins; adoptions as dashed lines; donors and surrogates; pregnancies and losses, and the markers the narrative records (a carrier, for instance).</li>
+  <li>Each condition, coloured, and named in the key as <i>label [ID]</i>. A person with two conditions is filled in halves, with three or four in quarters.</li>
+  <li>People are labelled with their ids, except ids that are pedigree numbers (II-3), which Pedigree Studio shows itself.</li>
+</ul>
+<p>A Phenopackets Family's pedigree is in the form of a PED file, so a Family gives the parents, sex and conditions, but no twins and no adoptions; a GA4GH Pedigree gives the whole family. Draw from the GA4GH Pedigree when you have one. <a href="#h-walk-draw-ga4gh">Draw a GA4GH or Phenopackets file</a> goes through it step by step.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>ga4gh2studio /data/examples/okafor_ga4gh-pedigree.json -o ~/pedigrees/okafor-back.studio.json
+studio --tidy ~/pedigrees/okafor-back.studio.json</code></pre>
+<p>Without <code>-o</code>, the drawing is written beside the file, which for an example is not possible (the examples cannot be changed). Version 0.3's <code>-g FILE</code> and <code>-p FILE</code> still work.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>from ga4gh2studio import convert_file
+
+result = convert_file("/data/examples/okafor_ga4gh-pedigree.json", None, "/home/user/pedigrees/okafor-back.studio.json")
+print(result.summary)
+for note in result.warnings:
+    print("note:", note)</code></pre>
+<!--CITE: ga4gh2studio pedigree-ga4gh pedigree-studio-->

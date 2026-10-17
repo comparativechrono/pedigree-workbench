@@ -1,0 +1,30 @@
+<!-- id: h-privacy | title: Privacy | group: Reference | summary: What stays on this computer, what goes out, and patient data | keys: privacy data protection personal data patient confidential gdpr local browser storage network ebi ols jsdelivr github cookies tracking analytics share -->
+<h1><!--ICON:lock-->Privacy</h1>
+<p class="lede">The workbench is a web page that does its work in your browser. Your drawings and files are not uploaded anywhere: there is no server behind it that sees them.</p>
+
+<h2>What stays on this computer</h2>
+<ul>
+  <li>Your files, drawings and notebooks, kept in this browser's storage for the site (<a href="#h-files">Your files</a>).</li>
+  <li>The drawing on show in the Studio, kept by Pedigree Studio in the same storage.</li>
+  <li>Small settings: the tab you were on, the help page you were reading, the name you gave the terminal.</li>
+</ul>
+<p>The page has no cookies, no accounts and no analytics.</p>
+
+<h2>What the page fetches, and sends</h2>
+<table>
+<tr><th>When</th><th>From</th><th>What is sent</th></tr>
+<tr><td>Python first starts</td><td>cdn.jsdelivr.net (Pyodide)</td><td>an ordinary download: nothing of yours</td></tr>
+<tr><td>Match conditions to terms, or Fill in missing terms, with EBI's service</td><td>www.ebi.ac.uk (the Ontology Lookup Service)</td><td>the words you search for, or the ids you type – not the drawing, and not anything else in the file</td></tr>
+<tr><td>Downloading the HPO in Match conditions to terms</td><td>raw.githubusercontent.com</td><td>an ordinary download</td></tr>
+<tr><td><code>curl</code>, <code>wget</code>, <code>pip install</code> in the terminal or a notebook</td><td>where you point them</td><td>what you send</td></tr>
+</table>
+<p>Choose <i>copies of the ontologies on this computer</i> in the term tools, and nothing about the family leaves the computer at all.</p>
+
+<h2>Patient data</h2>
+<p>Pedigrees are personal data about whole families, including people who have not consented to anything. Use the workbench as your institution's rules on patient data allow, and:</p>
+<ul>
+  <li>prefer pedigree numbers to names: the GA4GH files use them by default, and the drawing is the only place names need to be;</li>
+  <li>check the ids of PED files made from drawings, which are the text under the symbols (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>);</li>
+  <li>de-identify files before they leave you, and keep the key apart (<a href="#h-tool-deidentify">De-identify</a>), remembering that de-identified is not anonymous;</li>
+  <li>on a shared computer, download your work and use <b>My files → Start afresh</b> when you finish.</li>
+</ul>

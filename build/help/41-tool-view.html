@@ -1,0 +1,24 @@
+<!-- id: h-tool-view | title: Look inside a GA4GH file | group: Tools | summary: phenotk view and stats: a GA4GH file as a table, or counted | keys: view stats look inside table read summary count people terms relationships phenotk -->
+<h1><!--ICON:eye-->Look inside a GA4GH file</h1>
+<p class="lede">Shows a GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket without its JSON: a table of the people and their terms, or the numbers of people, terms and relationships. The quickest way to see that a file says what you meant.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="view" data-input="/data/examples/okafor_ga4gh-pedigree.json">Look inside the Okafor GA4GH Pedigree</button></div>
+
+<h2>What it shows</h2>
+<dl>
+  <dt>A table of the people and their terms</dt><dd>A line for each person: their id (the proband marked <code>*</code>), sex, affected status, <i>deceased</i> if they have died, and their terms. For a GA4GH Pedigree, the relationships follow, in words (<i>III-2 isBiologicalFatherOf IV-3</i>). For a Family, the people of its pedigree who have no Phenopacket are listed at the end.</dd>
+  <dt>Counts</dt><dd>The number of people, by sex and by affected status; of phenotypic features (and how many are excluded) and diseases; of terms that still have no id; and the commonest terms.</dd>
+</dl>
+<p>In a GA4GH Pedigree the affected status is <i>MISSING</i> for everyone without a term, because the file records the conditions people have, not that anyone was found to have none.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>phenotk view /data/examples/okafor_ga4gh-pedigree.json
+phenotk stats /data/examples/okafor_phenopackets-family.json</code></pre>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
+from phenopacket_toolkit.ops import render, stats, render_stats
+
+doc = ptk.read("/data/examples/okafor_phenopackets-family.json")
+print(render(doc))
+print(render_stats(stats(doc)))</code></pre>
+<!--CITE: phenotk-->

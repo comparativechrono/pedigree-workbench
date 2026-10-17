@@ -1,0 +1,57 @@
+<!-- id: h-tools | title: The Tools tab | group: Tools | index: yes | summary: Our Python packages, point and click | keys: tools tab gui point and click form run result convert python packages command same terminal python map tasks file page -->
+<h1><!--ICON:wrench-->The Tools tab</h1>
+<p class="lede">The Tools tab puts our Python packages behind forms. Choose a file, set the options, press <b>Run</b>: the tool runs its package's command, exactly as the terminal would, and shows what it wrote. Under every form is the same command for the terminal, and the same work in Python, so that nothing the tab does is hidden.</p>
+
+<h2>Finding the tool you need</h2>
+<ul>
+  <li><b>The first page</b> has the map of the formats and the tools between them, and the common tasks with their tools in order. Click an arrow on the map to open that tool, or a box to list everything that can be done with that kind of file.</li>
+  <li><b>The list on the left</b> (<b>All tools</b> on a narrow screen) has every tool, in groups.</li>
+  <li><b>From a file</b>: <b>More…</b> beside a file a tool has written, the Files tab's buttons, and the Studio's <b>Convert or check…</b> all open the file's own page: what is in it, and the tools that read it.</li>
+</ul>
+<div class="tryrow"><button class="do" type="button" data-tool="start">Open the first page</button></div>
+
+<h2>A tool's page</h2>
+<ol>
+  <li><b>The fields.</b> Files are chosen from your files or the examples, from your computer (<b>From my computer…</b>), or, for a drawing, from the Studio tab as it is now (<b>The drawing in the Studio tab</b>, which saves it first). <b>Look at it</b> opens the chosen file. Names of the files it will write are filled in for you and can be changed; results go in <code>~/results</code> unless you say otherwise.</li>
+  <li><b>Run.</b> The first run of a visit starts Python in your browser (a few seconds; the first time, it downloads about 10 MB). If a file would be written over, you are asked first.</li>
+  <li><b>The result</b>: <i>Done</i> or the error, what the program printed, and the files it wrote, each with buttons to open it in the Studio, look at it, check it, take it to another tool, or download it.</li>
+  <li><b>The same in the terminal, and in Python</b>: the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
+</ol>
+<p><b>More about this tool</b>, under the title, says what the tool does and does not do, with a link to its page in this help. At the top right, the Python pill says whether Python is running; click it for the versions of the packages.</p>
+
+<h2>The tools</h2>
+<h3>Convert</h3>
+<ul>
+  <li><a href="#h-tool-studio2ga4gh">Drawing → GA4GH Pedigree and Phenopackets</a> (studio2ga4gh)</li>
+  <li><a href="#h-tool-ga4gh2studio">GA4GH or Phenopackets → drawing</a> (ga4gh2studio)</li>
+  <li><a href="#h-tool-studio2ped">Drawing → PED or MPED</a> (studio2ped)</li>
+  <li><a href="#h-tool-ped2studio">PED or MPED → drawing</a> (ped2studio)</li>
+  <li><a href="#h-tool-ga4gh-convert">GA4GH Pedigree ⇄ Phenopackets Family</a> (phenotk)</li>
+  <li><a href="#h-tool-export">GA4GH → PED, table or YAML</a> (phenotk)</li>
+</ul>
+<h3>Ontology terms</h3>
+<ul>
+  <li><a href="#h-tool-terms">Match conditions to terms</a> (hponorm and mondonorm)</li>
+  <li><a href="#h-tool-normalise">Fill in missing terms</a> (phenotk)</li>
+</ul>
+<h3>Check and look inside</h3>
+<ul>
+  <li><a href="#h-tool-validate">Check against the standard</a> (pedigree-ga4gh)</li>
+  <li><a href="#h-tool-upgrade">Upgrade a file from an older tool</a> (pedigree-ga4gh)</li>
+  <li><a href="#h-tool-view">Look inside a GA4GH file</a> (phenotk)</li>
+  <li><a href="#h-tool-diff">Compare two files</a> (phenotk)</li>
+</ul>
+<h3>Prepare to share</h3>
+<ul>
+  <li><a href="#h-tool-deidentify">De-identify</a> (phenotk)</li>
+  <li><a href="#h-tool-filter">Keep some people or terms</a> (phenotk)</li>
+  <li><a href="#h-tool-split">One file for each person</a> (phenotk)</li>
+  <li><a href="#h-tool-merge">Put files together</a> (phenotk)</li>
+  <li><a href="#h-tool-add">Add findings to people</a> (phenotk)</li>
+</ul>
+<h3>PED and MPED files</h3>
+<ul>
+  <li><a href="#h-tool-mpedtools">Summary and check, Take one condition out, Put PED files together, One file for each family, PED ⇄ MPED</a> (mpedtools)</li>
+</ul>
+
+<div class="callout info"><div class="co-t"><!--ICON:info-->What the tab does not do</div><p>Each tool runs one command of one package, as it is, and the tab adds no conversions of its own. The exception is Match conditions to terms, which has no command: it searches with the packages' Python and writes a terms file. A few commands have options that the forms leave out – <code>phenotk add</code>'s variants, for example – which <code>man</code> and <code>--help</code> describe in the terminal.</p></div>
