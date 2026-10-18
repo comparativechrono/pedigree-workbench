@@ -6,5 +6,12 @@
 <p>Python is Pyodide's, loaded from jsDelivr when Python first starts; <code>python --version</code> in the terminal, or the Python pill in the Tools tab, says which.</p>
 
 <h2>Newer than PyPI</h2>
-<p>studio2ga4gh, ga4gh2studio and phenopacket-toolkit here are version 0.4.0, newer than their releases on PyPI (0.3.0): they read and write GA4GH files through pedigree-ga4gh, which is new, and so write the one corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>). The 0.4.0 toolkit also fixes faults of 0.3.0 that made some of its files invalid. The other five packages are the same as on PyPI. <a href="#h-own-computer">On your own computer</a> says how to use these versions outside the browser.</p>
+<p>All the packages here but mpedtools are newer than their releases on PyPI, and are on their way there:</p>
+<ul>
+  <li>studio2ga4gh, ga4gh2studio and phenopacket-toolkit are version 0.4.0 (0.3.0 on PyPI). They read and write GA4GH files through pedigree-ga4gh, which is new, and so write the one corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>). The 0.4.0 toolkit also fixes faults of 0.3.0 that made some of its files invalid.</li>
+  <li>studio2ped is 0.2.0 (0.1.0 on PyPI). It names people by their pedigree numbers, as studio2ga4gh does, and leaves out the “no children” and “infertility” marks, which are not people.</li>
+  <li>ped2studio is 0.2.2 (0.2.1 on PyPI). It keeps apart families that reuse the same ids.</li>
+  <li>hponorm and mondonorm are 1.1.0 (1.0.0 on PyPI). They score OLS's results by how well they match, take synonyms into account, read terms files in any case, and search a local copy of an ontology much faster.</li>
+</ul>
+<p><a href="#h-own-computer">On your own computer</a> says how to use these versions outside the browser.</p>
 <!--CITE: pedigree-studio studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenotk pedigree-ga4gh phenopackets phenopacket-tools hpo mondo ga4gh-pedigree nomenclature pyodide-->

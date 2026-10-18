@@ -3,7 +3,7 @@ import copy
 import json
 import os
 
-from pedigree_ga4gh import (Kindred, Member, Relation, Term, from_document, identify_legacy, kin, loads,
+from pedigree_ga4gh import (Kindred, Member, Relation, Term, from_document, identify_legacy, kin,
                             to_ga4gh_pedigree, to_phenopackets_family, upgrade, validate)
 from pedigree_ga4gh.validate import errors
 
@@ -118,6 +118,63 @@ def test_consanguinity_from_shared_ancestor():
     assert fam["consanguinousParents"] is True
 
 
+def test_consanguinity_is_second_cousins_or_closer():
+    """KIN's isConsanguineousPartnerOf, and the usual clinical sense: related as second cousins or closer."""
+    k = Kindred("F")
+    def child(name, sex, *parents):
+        k.members.append(Member(name, sex=sex))
+        for p in parents:
+            k.relations.append(Relation(p, "KIN:028" if k.member(p).sex == "MALE" else "KIN:027", name))
+    child("GGF", "MALE")
+    child("GGM", "FEMALE")
+    child("A", "MALE", "GGF", "GGM")
+    child("B", "FEMALE", "GGF", "GGM")
+    child("A1", "MALE", "A")
+    child("B1", "FEMALE", "B")          # A1 and B1: first cousins
+    child("A2", "MALE", "A1")
+    child("B2", "FEMALE", "B1")         # A2 and B2: second cousins
+    child("A3", "MALE", "A2")
+    child("B3", "FEMALE", "B2")         # A3 and B3: third cousins
+    assert k.consanguineous("A1", "B1") and k.consanguineous("A2", "B2")
+    assert not k.consanguineous("A3", "B3")
+    assert k.consanguineous("A", "B1")                     # uncle and niece
+    assert k.consanguineous("GGF", "A2")                   # great-grandfather
+    assert not k.consanguineous("GGF", "A3")               # four generations
+
+
+def test_terms_from_other_vocabularies():
+    k = trio()
+    k.member("CHILD").terms += [Term("breast cancer", "SNOMEDCT:254837009"), Term("asthma", "DOID:2841"),
+                                Term("something", "FOO:123")]
+    doc, warnings = to_ga4gh_pedigree(k, created_by="test", created=CREATED)
+    child = doc["individuals"][2]
+    assert [d["term"]["id"] for d in child["diseases"]] == ["MONDO:0009061", "SNOMEDCT:254837009", "DOID:2841"]
+    assert all(r["url"] and r["iriPrefix"] for r in child["metaData"]["resources"])
+    assert codes(validate(doc)) == []
+    # FOO cannot be declared in metaData, so it is left out rather than making the file invalid
+    assert any("FOO:123" in w and "left out" in w for w in warnings)
+    # unless the file it came from declared it in full: then it is kept, and declared the same way
+    child["diseases"].append({"term": {"id": "FOO:123", "label": "something"}})
+    child["metaData"]["resources"].append({"id": "foo", "name": "Foo", "url": "https://foo.example",
+                                           "version": "1", "namespacePrefix": "FOO",
+                                           "iriPrefix": "https://foo.example/"})
+    again, _ = to_ga4gh_pedigree(from_document(doc)[0], created_by="test", created=CREATED)
+    foo = [r for r in again["individuals"][2]["metaData"]["resources"] if r["namespacePrefix"] == "FOO"]
+    assert foo and foo[0]["url"] == "https://foo.example" and codes(validate(again)) == []
+    # an empty field in a resource is an error: phenopacket-tools reads it as missing
+    bad = copy.deepcopy(doc)
+    bad["individuals"][2]["metaData"]["resources"][0]["iriPrefix"] = ""
+    assert "empty-resource-field" in codes(validate(bad))
+
+
+def test_a_person_whose_id_is_zero_is_reported():
+    k = trio()
+    k.members[0].id = "0"
+    k.relations[0].individual = "0"
+    fam, _ = to_phenopackets_family(k, created_by="test", created=CREATED)
+    assert "zero-id" in codes(validate(fam))
+
+
 def test_round_trip_through_both_files():
     k = trio()
     ped, _ = to_ga4gh_pedigree(k, created_by="test", created=CREATED)
@@ -204,7 +261,7 @@ def test_old_abusua_pedigree_is_upgraded():
         assert "name" not in ind["subject"] and "diseases" not in ind["subject"]
         assert "metaData" in ind and "vitalStatus" in ind["subject"]
     assert all(set(r) == {"individualId", "relation", "relativeId"} for r in new["relationships"])
-    assert "paternity reported, not confirmed" in new["narrative"]
+    assert new["narrative"].startswith("Asante family. i1 and i3: paternity reported, not confirmed.")
     assert codes(validate(new)) == ["empty-term-id"]
     # foster and social parents were written as adoptive ones: listed to be checked, not changed
     assert sum("KIN:021 isFosterParentOf" in t for t in todo) == 2
@@ -219,6 +276,17 @@ def test_old_abusua_family_names_are_removed():
         for r in p["metaData"].get("resources", []):
             assert r["version"]
     assert any("removed the name" in c for c in changes)
+
+
+def test_old_abusua_family_without_names_is_recognised():
+    """abusua2ga4gh 0.2 put names in subject only with --include-names; its Family without them is old too."""
+    old = load("abusua2ga4gh-0.2_family_no-names.json")
+    assert "name" not in json.dumps([p["subject"] for p in [old["proband"]] + old["relatives"]])
+    found = identify_legacy(old)
+    assert found is not None and found.form == "phenopackets" and found.upgradable
+    new, changes, todo = upgrade(old, created=CREATED)
+    assert "HP:0032500" not in json.dumps(new)
+    assert any("carrier" in t for t in todo)
 
 
 def test_the_carrier_mistake_is_found_and_removed():

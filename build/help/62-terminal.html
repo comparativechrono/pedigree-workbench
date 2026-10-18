@@ -37,7 +37,7 @@ done
 for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedigree-ga4gh validate "$f" | tail -1)"; done</code></pre>
 
 <h2>hponorm and mondonorm here</h2>
-<p>These two ask about each name as they go, waiting for an answer typed at the keyboard. This terminal cannot answer a program's questions, so they stop at the first one, keeping the choices made so far. Here they take their answers from a file instead, whose names are in lower case:</p>
+<p>These two ask about each name as they go, waiting for an answer typed at the keyboard. This terminal cannot answer a program's questions, so they stop at the first one, keeping the choices made so far. Here they take their answers from a file instead:</p>
 <pre class="code"><code>{"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}}</code></pre>
 <pre class="code"><code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code></pre>
 <p>For most jobs, <code>phenotk normalise FILE --mapping terms.json</code> is simpler: it takes the workbench's terms files as they are, and fills in diseases and phenotypes in one go. To match names by pointing and clicking, use <a href="#h-tool-terms">Match conditions to terms</a>.</p>

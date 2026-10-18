@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from . import __version__
 from .converter import convert_file
 
 
@@ -15,7 +16,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "input",
-        help="Path to the input .ped file",
+        help="Path to the input .ped or .mped file",
     )
     parser.add_argument(
         "output",
@@ -44,9 +45,11 @@ def main(argv: list[str] | None = None) -> int:
         default="full",
         help="Fill coverage for affected individuals: 'full' for entire shape, 'half' for left half only (default: full).",
     )
+    parser.add_argument("--version", action="version", version=f"ped2studio {__version__}")
 
     args = parser.parse_args(argv)
 
+    notes: list[str] = []
     try:
         session = convert_file(
             args.input,
@@ -55,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
             use_shading=args.shading,
             shading_pattern=args.pattern,
             fill_type=args.fill,
+            notes=notes,
         )
         n_persons = len(session["persons"])
         n_pships = len(session["partnerships"])
@@ -64,9 +68,14 @@ def main(argv: list[str] | None = None) -> int:
             f"{n_pships} partnerships, "
             f"{n_clinks} child links → {args.output}"
         )
+        for note in notes:
+            print(f"  Note: {note}")
         return 0
-    except FileNotFoundError:
-        print(f"Error: file not found: {args.input}", file=sys.stderr)
+    except FileNotFoundError as e:
+        if e.filename and e.filename != args.input:
+            print(f"Error: cannot write {e.filename}: its folder does not exist", file=sys.stderr)
+        else:
+            print(f"Error: file not found: {args.input}", file=sys.stderr)
         return 1
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

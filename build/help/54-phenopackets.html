@@ -13,7 +13,7 @@
 <ul>
   <li>The proband is the drawing's proband (the index patient); the relatives are the other people with a condition. A relative with nothing to record is in the pedigree but has no Phenopacket.</li>
   <li>The pedigree's parents are the genetic ones: biological parents, and egg and sperm donors. Adoptive, foster and step-parents are not genetic parents, and are not written there.</li>
-  <li><code>consanguinousParents</code> is worked out from the relationships: true when the proband's parents are marked consanguineous or share an ancestor.</li>
+  <li><code>consanguinousParents</code> is worked out from the relationships: true when the proband's parents are marked consanguineous, or are related as second cousins or closer, which is what KIN means by consanguineous partners.</li>
   <li>Each Phenopacket has its own <code>metaData</code>, and so has the Family.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_phenopackets-family.json">Look at the Okafor Family</button> <button class="do" type="button" data-tool="view" data-input="/data/examples/okafor_phenopackets-family.json">See it as a table</button></div>
@@ -23,6 +23,7 @@
 <pre class="code"><code>"resources": [{"id": "hp", "name": "human phenotype ontology", "url": "http://purl.obolibrary.org/obo/hp.owl",
                "version": "2026-09-01", "namespacePrefix": "HP", "iriPrefix": "http://purl.obolibrary.org/obo/HP_"}]</code></pre>
 <p>Every term's prefix (<code>HP</code> in <code>HP:0000365</code>) must be declared there: that is the rule of phenopacket-tools that files most often break. The release comes from the terms file, the ontology file searched, or EBI's service; it is <code>unknown</code> when none of them says.</p>
+<p>The workbench knows the resources of 24 ontologies, from the HPO and Mondo to SNOMED CT and ICD-10-CM, and keeps any other that a file it reads declares in full. A term from an ontology it cannot declare is left out, with a warning, rather than making the file invalid.</p>
 
 <h2>In JSON</h2>
 <p>Phenopackets are defined in Protocol Buffers, and written as JSON the way proto3 writes it: field names in camelCase (<code>phenotypicFeatures</code>), values that are their defaults may be left out, and readers accept the proto spelling (<code>phenotypic_features</code>) too. The workbench writes camelCase and reads both.</p>

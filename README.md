@@ -155,14 +155,18 @@ schemas, `run_tests.py` also checks the packages' output against them, and
 `python/tools/official_check.py` checks any file the way phenopacket-tools
 does. The tests never contact EBI's Ontology Lookup Service.
 
-## Changes the other repositories need
+## The packages' own repositories
 
-Nothing has been changed in the packages' own repositories.
-**[docs/upstream.md](docs/upstream.md)** lists what should change there so
-that `pip install` gives what the workbench runs: pedigree-ga4gh as a package
-of its own; new versions of studio2ga4gh, ga4gh2studio and phenopacket-toolkit;
-the faults of abusua2ga4gh's GA4GH output; and smaller points for studio2ped,
-hponorm and mondonorm.
+Each package the workbench changed has a pull request in its own repository
+making the same changes, so that `pip install` will give what the workbench
+runs once they are released. The copies in `python/` are those pull
+requests' code. **[docs/upstream.md](docs/upstream.md)** lists them with what
+each changes, and the order to release them in. They cover:
+
+- pedigree-ga4gh, as a package of its own;
+- new versions of studio2ga4gh, ga4gh2studio and phenopacket-toolkit;
+- abusua2ga4gh and ga4gh2abusua, rewritten on pedigree-ga4gh;
+- studio2ped, ped2studio, hponorm and mondonorm.
 
 ## Files
 
@@ -179,7 +183,7 @@ data/
 build/                     what builds index.html, the examples, the notebook and the Studio copy
   help/                    the help pages
 python/                    the packages, their tests, and tools for the examples and checks
-docs/                      ga4gh.md (the GA4GH decision), upstream.md (changes for the other repositories)
+docs/                      ga4gh.md (the GA4GH decision), upstream.md (the packages' pull requests)
 tests/                     the help's code, command/Python equivalence, a browser test
 serve.py                   a small web server for trying it locally
 ```

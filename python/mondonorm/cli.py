@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
+from . import __version__
 from . import phenopackets as pp
 from .mondo import MondoIndex, normalise_curie
 from .ols import OlsClient
@@ -52,7 +52,13 @@ class UI:
     def err(self, text: str) -> None:
         self.say(f"[red]\u2717 {text}[/red]" if self.rich else f"\u2717 {text}")
 
-    def candidates(self, cands: list[Candidate]) -> None:
+    def candidates(self, cands: list[Candidate], error: str | None = None) -> None:
+        if error and not cands:
+            self.warn(f"{error}, so there are no suggestions. Try again with 's <search words>', "
+                      "enter an id with 'm <MONDO:id>', or run mondonorm with --backend local.")
+            return
+        if error:
+            self.warn(f"{error}; these suggestions are from the local copy of MONDO.")
         if not cands:
             self.warn("No suggestions found. Try 's <better search words>' or 'm <MONDO:id>'.")
             return
@@ -85,6 +91,7 @@ Choices:
   <number>        select that suggestion
   s <words>       search again with different words
   m <MONDO:id>    enter a MONDO id manually (e.g. m MONDO:0005015) - it is validated
+  r               reuse the decision remembered for this label (earlier, or from --mapping)
   k               keep the current term unchanged
   x               skip this label (leave it unmapped)
   ?               show this help
@@ -140,6 +147,97 @@ def _default_cache():
     return default_cache_dir()
 
 
+# ------------------------------------------------------------------ mapping
+# The --mapping file: names matched to terms, kept between runs. Names are
+# matched without regard to case. The same file can serve studio2ga4gh, phenotk
+# and hponorm: values may be mondonorm's {"id": ..., "label": ...} or a bare
+# id ("MONDO:0005015"), a phenotk decision log's {"resolved": {...}} is read too,
+# and entries for other ontologies are kept as they are.
+
+def _is_ours(curie: str) -> bool:
+    c = (curie or "").strip().upper()
+    ours = c.startswith("MONDO:") or c.startswith("MONDO_") or "/MONDO_" in c
+    return ours and normalise_curie(curie) is not None
+
+
+def _entries(data) -> dict:
+    """The name -> term part of a mapping file's JSON."""
+    if isinstance(data, dict) and isinstance(data.get("resolved"), dict):
+        return data["resolved"]
+    if isinstance(data, dict):
+        return data
+    raise ValueError("a mapping file holds a JSON object of names and terms")
+
+
+def _entry_term(value) -> tuple[str, str]:
+    """(id, label) of one entry's value; the label is '' when the file gives only the id."""
+    if isinstance(value, str):
+        return value.strip(), ""
+    if isinstance(value, dict):
+        return str(value.get("id") or value.get("curie") or "").strip(), str(value.get("label") or "").strip()
+    return "", ""
+
+
+def read_mapping(data) -> tuple[dict[str, dict], int]:
+    """The remembered decisions in a mapping file's JSON: ``({lower-case name: {"id", "label"}}, n)``,
+    where ``n`` counts the entries left alone because they are not MONDO terms."""
+    remembered: dict[str, dict] = {}
+    others = 0
+    for name, value in _entries(data).items():
+        cid, label = _entry_term(value)
+        if not _is_ours(cid):
+            others += 1
+            continue
+        key = str(name).strip().lower()
+        if key and key not in remembered:
+            remembered[key] = {"id": normalise_curie(cid), "label": label}
+    return remembered, others
+
+
+def update_mapping(data, decided: dict[str, dict]) -> tuple[dict, list[str]]:
+    """``data`` (a mapping file's JSON, or None) with this run's decisions put in.
+
+    An entry for the same name (in any case) is updated in its own form; a new
+    name is added in lower case, as ``{"id": ..., "label": ...}``. An entry for
+    another ontology's term is left alone, with a note."""
+    data = {} if data is None else data
+    entries = _entries(data)
+    keys = {}
+    for k in entries:
+        keys.setdefault(str(k).strip().lower(), k)
+    notes = []
+    for name, term in decided.items():
+        key = keys.get(name)
+        if key is None:
+            entries[name] = {"id": term["id"], "label": term["label"]}
+            continue
+        old = entries[key]
+        old_id, _ = _entry_term(old)
+        if old_id and not _is_ours(old_id):
+            notes.append(f"{key!r} is matched to {old_id} in the mapping file, which was left as it is "
+                         f"(the MONDO term chosen for it, {term['id']}, is in the decision log)")
+            continue
+        if isinstance(old, dict):
+            if normalise_curie(old_id or "") != term["id"]:
+                old.pop("version", None)  # the release it came from is not known for the new term
+            old.pop("curie", None)
+            old["id"], old["label"] = term["id"], term["label"]
+        elif isinstance(old, str):
+            entries[key] = term["id"]
+        else:
+            entries[key] = {"id": term["id"], "label": term["label"]}
+    return data, notes
+
+
+def _with_label(suggester: Suggester, mem: dict, fallback: str) -> dict:
+    """A remembered decision with its label: a mapping file may give only the id,
+    and then the label is looked up (or the file's own label kept)."""
+    if not mem.get("label"):
+        found = suggester.resolve(mem["id"])
+        mem["label"] = found.label if found else ""
+    return {"id": mem["id"], "label": mem["label"] or fallback}
+
+
 def review_group(
     ui: UI,
     suggester: Suggester,
@@ -167,19 +265,23 @@ def review_group(
                 f"Existing id {existing_id} resolves to {existing.id} '{existing.label}', "
                 f"which differs from the label '{label}'."
             )
+        elif suggester.last_error:
+            ui.warn(f"Existing id {existing_id!r} could not be checked: {suggester.last_error}.")
         else:
             ui.warn(f"Existing id {existing_id!r} could not be validated against MONDO.")
 
     query = label
     cands = suggester.suggest(query, limit=limit)
+    error = suggester.last_error
 
     # Float a remembered decision for this label to the very top.
     mem = remembered.get(label.lower())
     if mem:
-        ui.ok(f"Remembered from earlier: {mem['id']}  {mem['label']}  (enter 'r' to reuse)")
+        shown = f"  {mem['label']}" if mem.get("label") else ""
+        ui.ok(f"Remembered from earlier: {mem['id']}{shown}  (enter 'r' to reuse)")
 
     while True:
-        ui.candidates(cands)
+        ui.candidates(cands, error)
         raw = ui.prompt("Select [#, s words, m MONDO:id, r, k, x, ?, q]: ").strip()
 
         if raw == "":
@@ -194,13 +296,14 @@ def review_group(
         if raw in ("x", "skip"):
             return {"action": "skip"}
         if raw in ("r", "reuse") and mem:
-            return {"action": "map", "id": mem["id"], "label": mem["label"]}
+            return {"action": "map", **_with_label(suggester, mem, label)}
 
         # search again
         if raw.startswith("s ") or raw == "s":
             query = raw[2:].strip() or ui.prompt("Search words: ").strip()
             if query:
                 cands = suggester.suggest(query, limit=limit)
+                error = suggester.last_error
             continue
 
         # explicit manual id  (m MONDO:0005015)  or a bare curie
@@ -222,7 +325,10 @@ def review_group(
                 if _confirm(ui, "Use this term?"):
                     return {"action": "map", "id": resolved.id, "label": resolved.label}
                 continue
-            ui.warn(f"Could not validate {c} against MONDO.")
+            if suggester.last_error:
+                ui.warn(f"Could not check {c}: {suggester.last_error}.")
+            else:
+                ui.warn(f"Could not validate {c} against MONDO.")
             if _confirm(ui, f"Use {c} anyway with label {label!r}?"):
                 return {"action": "map", "id": c, "label": label}
             continue
@@ -262,11 +368,12 @@ def process_file(path: Path, args, ui: UI, suggester: Suggester, remembered: dic
         if stop:
             break
         if args.auto_remembered and label.lower() in remembered:
-            mem = remembered[label.lower()]
+            mem = _with_label(suggester, remembered[label.lower()], label)
             for r in group_refs:
                 r.apply(mem["id"], mem["label"])
             ui.ok(f"[auto] {label!r} -> {mem['id']} {mem['label']}")
-            decisions.append({"label": label, **mem, "action": "map", "count": len(group_refs)})
+            decisions.append({"label": label, "id": mem["id"], "label_mondo": mem["label"],
+                              "action": "map", "count": len(group_refs)})
             continue
 
         decision = review_group(
@@ -336,10 +443,11 @@ def main(argv: list[str] | None = None) -> int:
                    help="Do not use OLS even in auto mode.")
     p.add_argument("--limit", type=int, default=8, help="Suggestions shown per label.")
     p.add_argument("--mapping", help="JSON file of remembered label->term decisions to "
-                                     "load and update across runs.")
+                                     "load and update across runs (labels in any case).")
     p.add_argument("--auto-remembered", action="store_true",
                    help="Auto-apply remembered labels without prompting.")
     p.add_argument("--no-color", action="store_true", help="Disable rich/colour output.")
+    p.add_argument("--version", action="version", version="mondonorm " + __version__)
     args = p.parse_args(argv)
     args._files = args.files
 
@@ -351,12 +459,20 @@ def main(argv: list[str] | None = None) -> int:
 
     # Load remembered decisions, if any.
     remembered: dict[str, dict] = {}
+    mapping_data = None
+    mapping_ok = True
     if args.mapping and Path(args.mapping).exists():
         try:
-            remembered = json.loads(Path(args.mapping).read_text())
-            ui.say(f"Loaded {len(remembered)} remembered mapping(s) from {args.mapping}.")
-        except Exception:
-            ui.warn(f"Could not read mapping file {args.mapping}; starting fresh.")
+            mapping_data = json.loads(Path(args.mapping).read_text(encoding="utf-8-sig"))
+            remembered, others = read_mapping(mapping_data)
+            ui.say(f"Loaded {len(remembered)} remembered mapping(s) from {args.mapping}."
+                   + (f" ({others} entr{'y' if others == 1 else 'ies'} for other ontologies left as "
+                      f"they are.)" if others else ""))
+        except Exception as exc:
+            mapping_ok = False
+            ui.warn(f"Could not read mapping file {args.mapping} ({exc}); starting fresh, "
+                    "and it will not be overwritten.")
+    loaded = {k: dict(v) for k, v in remembered.items()}
 
     try:
         suggester = build_suggester(args, ui)
@@ -373,9 +489,14 @@ def main(argv: list[str] | None = None) -> int:
         summaries.append(process_file(path, args, ui, suggester, remembered))
 
     # Persist remembered decisions for next time.
-    if args.mapping:
+    if args.mapping and mapping_ok:
+        decided = {k: v for k, v in remembered.items() if loaded.get(k) != v and v.get("label")}
         try:
-            Path(args.mapping).write_text(json.dumps(remembered, indent=2, ensure_ascii=False))
+            data, notes = update_mapping(mapping_data, decided)
+            Path(args.mapping).write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                                          encoding="utf-8")
+            for note in notes:
+                ui.warn(note)
             ui.say(f"Saved {len(remembered)} remembered mapping(s) to {args.mapping}.")
         except Exception as exc:
             ui.warn(f"Could not write mapping file: {exc}")

@@ -1,8 +1,8 @@
 """studio2ga4gh: convert Pedigree Studio drawings to GA4GH files.
 
-This is the pedigree workbench's copy (0.4.0). It writes the GA4GH Pedigree
-and the Phenopackets Family through pedigree-ga4gh, the workbench's single
-implementation of GA4GH output; see that package for what the files contain.
+It writes the GA4GH Pedigree and the Phenopackets Family through
+pedigree-ga4gh, the one implementation of GA4GH output that the lab's
+pedigree tools share; see that package for what the files contain.
 """
 __version__ = "0.4.0"
 

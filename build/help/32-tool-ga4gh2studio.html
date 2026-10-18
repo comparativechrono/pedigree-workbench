@@ -21,7 +21,7 @@
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>ga4gh2studio /data/examples/okafor_ga4gh-pedigree.json -o ~/pedigrees/okafor-back.studio.json
 studio --tidy ~/pedigrees/okafor-back.studio.json</code></pre>
-<p>Without <code>-o</code>, the drawing is written beside the file, which for an example is not possible (the examples cannot be changed). Version 0.3's <code>-g FILE</code> and <code>-p FILE</code> still work.</p>
+<p>Without <code>-o</code>, the drawing is written beside the file and named after it (<code>okafor.studio.json</code> for <code>okafor_ga4gh-pedigree.json</code>), which for an example is not possible (the examples cannot be changed). That name is often the drawing's the file was made from, which holds names and notes the file does not, so a file of that name is never replaced unless you add <code>--force</code>: the tool stops and says so. A file you name with <code>-o</code> is replaced. Version 0.3's <code>-g FILE</code> and <code>-p FILE</code> still work.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>from ga4gh2studio import convert_file

@@ -44,15 +44,13 @@ def versions() -> Dict[str, str]:
     import importlib
     out = {}
     for mod, name in (("studio2ped", "studio2ped"), ("ped2studio", "ped2studio"), ("studio2ga4gh", "studio2ga4gh"),
-                      ("ga4gh2studio", "ga4gh2studio"), ("mpedtools", "mpedtools"),
-                      ("phenopacket_toolkit", "phenopacket-toolkit"), ("pedigree_ga4gh", "pedigree-ga4gh"),
-                      ("pedwb", "pedwb")):
+                      ("ga4gh2studio", "ga4gh2studio"), ("mpedtools", "mpedtools"), ("hponorm", "hponorm"),
+                      ("mondonorm", "mondonorm"), ("phenopacket_toolkit", "phenopacket-toolkit"),
+                      ("pedigree_ga4gh", "pedigree-ga4gh"), ("pedwb", "pedwb")):
         try:
             out[name] = getattr(importlib.import_module(mod), "__version__", "")
         except Exception:  # noqa: BLE001
             out[name] = ""
-    # hponorm and mondonorm carry no version in their code: it is that of the release they were copied from
-    out["hponorm"] = out["mondonorm"] = "1.0.0"
     return out
 
 
@@ -290,8 +288,8 @@ def _backend(ontology: str, source: str, file: Optional[str]):
     """What hponorm or mondonorm searches – their OLS client, or their index
     of a local OBO file – with the release it holds and a name for it.
 
-    (The packages' Suggester is not used here because it turns a failed
-    request into "no suggestions"; the Tools tab says why instead.)"""
+    (The packages' Suggester is not used here: the Tools tab asks the OLS
+    client or the index itself, so that it can say why a search failed.)"""
     from phenopacket_toolkit.ontology.backends import obo_version, ols_version
     o = _norm(ontology)
     if o == "HP":

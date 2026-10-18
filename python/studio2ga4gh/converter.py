@@ -1,9 +1,9 @@
 """Convert a Pedigree Studio drawing to a GA4GH Pedigree and a Phenopackets Family.
 
 The drawing is read into a :class:`pedigree_ga4gh.Kindred` (one per separate
-family on the canvas) and written out by pedigree-ga4gh, the workbench's one
-implementation of GA4GH output. This module only decides what each symbol and
-line in the drawing means:
+family on the canvas) and written out by pedigree-ga4gh, the one
+implementation of GA4GH output that the lab's pedigree tools share. This module
+only decides what each symbol and line in the drawing means:
 
 ========================================  ==============================================
 In Pedigree Studio                        In the GA4GH files
@@ -91,11 +91,77 @@ _KEY_CURIE = re.compile(r"^(.*?)\s*[\[(]\s*([A-Za-z][A-Za-z0-9.\-]*:[^\s\])]+)\s
 
 def split_key_label(text: str) -> Tuple[str, Optional[str]]:
     """Split a colour-key entry such as ``"Breast cancer [MONDO:0007254]"`` into
-    its name and ontology id. Without an id in brackets the id is ``None``."""
+    its name and ontology id. Without an id in brackets the id is ``None``.
+
+    Only an id of an ontology pedigree-ga4gh can declare in a Phenopacket
+    counts (the HPO, Mondo, OMIM, Orphanet, SNOMED CT ...): anything else in
+    brackets, such as a blood pressure in "Hypertension (BP:160/95)", is part
+    of the name.
+    """
     m = _KEY_CURIE.match(text or "")
-    if m and ontology.is_curie(ontology.tidy_curie(m.group(2))):
-        return m.group(1).strip() or m.group(2), ontology.tidy_curie(m.group(2))
+    if m:
+        curie = ontology.tidy_curie(m.group(2))
+        if ontology.is_curie(curie) and ontology.prefix_of(curie) in ontology.RESOURCES:
+            return m.group(1).strip() or curie, curie
     return (text or "").strip(), None
+
+
+def make_id(label: str) -> str:
+    """An identifier made from a label, by the same rule as studio2ped: spaces
+    become underscores, and anything but letters, digits, ``_`` and ``-`` is
+    dropped ("J. Mensah" -> ``J_Mensah``)."""
+    return re.sub(r"[^\w\-]", "", re.sub(r"\s+", "_", (label or "").strip()))
+
+
+def person_ids(s: Session, ids: str = "numbers") -> Tuple[Dict[str, str], List[str]]:
+    """The id each person in the drawing is given, and notes about any that had to change.
+
+    ``ids`` is ``"numbers"`` (pedigree numbers such as II-3), ``"drawing"`` (the
+    labels the drawing shows, which may be names) or ``"studio"`` (Pedigree
+    Studio's own ids). A label is made into an id by :func:`make_id`. An id that
+    would be empty, ``0`` (which a PED-style pedigree reads as "no parent") or
+    shared with someone else is replaced by the person's pedigree number, as in
+    studio2ped.
+    """
+    nums = s.numbers()
+    if ids not in ("numbers", "drawing", "studio"):
+        raise ValueError("ids must be numbers, drawing or studio, not {!r}".format(ids))
+    if ids == "numbers":
+        return dict(nums), []
+    labels = s.drawing_labels() if ids == "drawing" else {pid: pid for pid in s.persons}
+    people = [pid for pid, p in s.persons.items() if not p.is_marker]
+    notes: List[str] = []
+    out = {}
+    for pid in s.persons:
+        out[pid] = make_id(labels.get(pid) or "")
+        if pid not in people:
+            out[pid] = out[pid] or nums[pid]
+        elif out[pid] == "0":
+            out[pid] = nums[pid]
+            notes.append("{} is labelled 0, which a PED-style pedigree reads as 'no parent', so their pedigree "
+                         "number is used instead".format(nums[pid]))
+        elif not out[pid]:
+            out[pid] = nums[pid]
+            notes.append("{}'s label has nothing that can go into an id, so their pedigree number is used "
+                         "instead".format(nums[pid]))
+    while True:
+        counts = defaultdict(int)
+        for pid in people:
+            counts[out[pid]] += 1
+        clashes: Dict[str, List[str]] = defaultdict(list)
+        for pid in people:
+            if counts[out[pid]] > 1 and out[pid] != nums[pid]:
+                clashes[out[pid]].append(pid)
+        if not clashes:
+            break
+        for label, pids in clashes.items():
+            for pid in pids:
+                out[pid] = nums[pid]
+            who = [nums[pid] for pid in pids]
+            notes.append("'{}' would be the id of more than one person, so {} {} given {} pedigree number{} "
+                         "instead".format(label, who[0] if len(who) == 1 else ", ".join(who[:-1]) + " and " + who[-1],
+                                          "is" if len(who) == 1 else "are", "their", "" if len(who) == 1 else "s"))
+    return out, notes
 
 
 def _components(s: Session) -> List[List[str]]:
@@ -166,24 +232,8 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
     mapping = load_terms(terms or {})
     warnings: List[str] = []
     notes_all: List[str] = []
-    if ids == "drawing":
-        labels = s.drawing_labels()
-    elif ids == "studio":
-        labels = {pid: pid for pid in s.persons}
-    else:
-        labels = s.numbers()
-    # ids must be unique; fall back to pedigree numbers for any clash
-    counts: Dict[str, int] = defaultdict(int)
-    for pid, p in s.persons.items():
-        if not p.is_marker:
-            counts[labels[pid]] += 1
-    nums = s.numbers()
-    idmap = {}
-    for pid in s.persons:
-        lab = re.sub(r"\s+", "_", (labels.get(pid) or "").strip()) or nums[pid]
-        if counts[labels.get(pid)] > 1:
-            lab = nums[pid]
-        idmap[pid] = lab
+    idmap, id_notes = person_ids(s, ids)
+    warnings.extend(id_notes)
     conditions = [v.strip() for v in s.legend.values() if (v or "").strip()]
     conditions = list(dict.fromkeys(conditions))
     comps = _components(s)
@@ -292,7 +342,8 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
         if conds:
             parts.append("Conditions: {}.".format(", ".join(conds)))
         if notes:
-            parts.append(" ".join(n[0].upper() + n[1:] + "." for n in notes))
+            # each note starts with a person's id, which must stay as it is ("i2", not "I2")
+            parts.append(" ".join(n + "." for n in notes))
         k.narrative = " ".join(parts)
         notes_all.extend(notes)
         kindreds.append(k)
@@ -357,6 +408,7 @@ def convert_file(input_path: str, output_prefix: Optional[str] = None, output_di
     if output_dir is None:
         output_dir = os.path.dirname(input_path) or "."
     result = convert(data, output_prefix, **options)
+    os.makedirs(output_dir, exist_ok=True)
     written = []
     for name, text in result.files:
         path = os.path.join(output_dir, name)

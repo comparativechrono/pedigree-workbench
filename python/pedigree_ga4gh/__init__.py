@@ -1,7 +1,8 @@
 """pedigree-ga4gh: one implementation of GA4GH pedigree and Phenopacket output.
 
-Every tool in the pedigree workbench that reads or writes GA4GH files does so
-through this package, so they all agree on one form:
+studio2ga4gh, ga4gh2studio, abusua2ga4gh, ga4gh2abusua, the phenopacket toolkit
+(phenotk) and the Pedigree workbench all read and write GA4GH files through
+this package, so they agree on one form:
 
 * **GA4GH Pedigree** in its Phenopackets form: ``individuals`` are
   Phenopackets, ``relationships`` are ``{individualId, relation, relativeId}``

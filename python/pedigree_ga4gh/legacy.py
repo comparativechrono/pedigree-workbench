@@ -20,7 +20,9 @@ abusua2ga4gh up to 0.2, GA4GH Pedigree
 Both, Phenopackets
     Conditions with an empty ontology id; studio2ga4gh also left ``metaData``
     out of the embedded Phenopackets and ``phenopacketSchemaVersion`` out of
-    ``metaData``, and abusua2ga4gh put ``name`` in ``subject``.
+    ``metaData``, and abusua2ga4gh put ``name`` in ``subject`` when asked to.
+    abusua2ga4gh 0.2's Phenopackets and Families are recognised by that, or
+    by being signed ``abusua2ga4gh`` with no version, or by its carrier term.
 Both
     ``KIN:011`` labelled *isDizygoticMultipleBirthSiblingOf*; KIN calls it
     *isPolyzygoticMultipleBirthSiblingOf*.
@@ -48,7 +50,7 @@ from typing import Dict, List, Optional, Tuple
 
 from . import kin, ontology
 from . import phenopackets as pp
-from .kindred import DISEASE, Kindred, Member, Relation, Term, detect, to_ga4gh_pedigree
+from .kindred import Kindred, Member, Relation, detect, to_ga4gh_pedigree
 from .schema import camelise
 
 UPGRADED_BY = "pedigree-ga4gh upgrade"
@@ -77,7 +79,7 @@ class Legacy:
 
 
 # Fields of the draft of version 1 of the standard (ga4gh/pedigree pull request 50), in JSON and proto spelling,
-# that no form the workbench reads has: on its Individuals, and on its Relationships
+# that no form this package reads has: on its Individuals, and on its Relationships
 V1_DRAFT_INDIVIDUAL = ("sexAssignedAtBirth", "sex_assigned_at_birth", "genderIdentity", "gender_identity",
                        "eggParentId", "egg_parent_id", "spermParentId", "sperm_parent_id", "egg_parent",
                        "sperm_parent", "externalIdentifiers", "external_identifiers", "populationDescriptors",
@@ -87,8 +89,8 @@ V1_DRAFT_RELATIONSHIP = ("biologicalRelationship", "biological_relationship", "s
                          "consanguinity_note")
 V1_DRAFT = ("This GA4GH Pedigree is in the form of the draft of version 1 of the standard (ga4gh/pedigree pull "
             "request 50), which is not yet approved: its people are not Phenopackets, and its relationships have "
-            "lists of biological and social KIN terms. The workbench reads and writes the published form, and "
-            "cannot read or convert this one yet.")
+            "lists of biological and social KIN terms. pedigree-ga4gh, and the tools built on it, read and write the "
+            "published form, and cannot read or convert this one yet.")
 
 
 def _individuals(doc: Dict) -> List[Dict]:
@@ -129,7 +131,14 @@ def identify(doc: Dict) -> Optional[Legacy]:
         packets = _packets(doc, kind)
         md = doc.get("metaData") or doc.get("meta_data") or {}
         studio = (md.get("createdBy") == "studio2ga4gh" and "phenopacketSchemaVersion" not in md)
-        abusua = any("name" in (p.get("subject") or {}) for p in packets)
+        # abusua2ga4gh 0.2 put names in subject only when asked to, but it always signed its files
+        # "abusua2ga4gh" with no version (0.3 adds one), and it gave carriers HP:0032500
+        mds = [md] + [p.get("metaData") or p.get("meta_data") or {} for p in packets]
+        abusua = (any("name" in (p.get("subject") or {}) for p in packets)
+                  or any(isinstance(m, dict) and m.get("createdBy") == "abusua2ga4gh" for m in mds)
+                  or any(is_carrier_mistake((f or {}).get("type")) for p in packets
+                         for f in (p.get("phenotypicFeatures") or p.get("phenotypic_features") or [])
+                         if isinstance(f, dict)))
         if studio or abusua:
             return Legacy("phenopackets",
                           "This file was written by an older version of {} and does not meet the "
@@ -184,7 +193,9 @@ def upgrade(doc: Dict, *, created_by: str = UPGRADED_BY, created: Optional[str] 
         if carriers:
             notes.append("{} {} a carrier.".format(_who(carriers), "is" if len(carriers) == 1 else "are each"))
         if notes:
-            narrative = data.get("narrative") or ""
+            narrative = (data.get("narrative") or "").strip()
+            if narrative and not narrative.endswith((".", "!", "?")):
+                narrative += "."          # so that the notes read as sentences of their own
             extra = " ".join(notes)
             data["narrative"] = (narrative + " " + extra).strip() if narrative else extra
             changes.append("kept {} note(s) in the narrative".format(len(notes)))

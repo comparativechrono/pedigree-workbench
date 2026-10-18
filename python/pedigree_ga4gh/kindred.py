@@ -90,6 +90,9 @@ class Kindred:
     status: Optional[str] = None
     versions: Dict[str, str] = field(default_factory=dict)   # ontology prefix -> release
     files: List[Dict] = field(default_factory=list)          # Family-level files, kept on round trips
+    # complete resources read from a file, for ontologies this package does not know itself, so that
+    # their terms can still be declared when the family is written again
+    resources: Dict[str, Dict[str, str]] = field(default_factory=dict)
 
     # -- lookups --------------------------------------------------------------
     def member(self, member_id: str) -> Optional[Member]:
@@ -168,29 +171,47 @@ class Kindred:
 
     def ancestors(self, member_id: str) -> Set[str]:
         """Everyone ``member_id`` descends from biologically."""
-        out: Set[str] = set()
-        stack = [member_id]
-        while stack:
-            cur = stack.pop()
-            for r in self.relations_to(cur):
-                if kin.is_a(r.kin, kin.BIOLOGICAL_PARENT) and r.individual not in out:
-                    out.add(r.individual)
-                    stack.append(r.individual)
+        return set(self.ancestor_generations(member_id))
+
+    def ancestor_generations(self, member_id: str) -> Dict[str, int]:
+        """Each biological ancestor of ``member_id``, with the fewest generations back to them (a parent is 1)."""
+        out: Dict[str, int] = {}
+        frontier = [member_id]
+        depth = 0
+        while frontier:
+            depth += 1
+            nxt = []
+            for cur in frontier:
+                for r in self.relations_to(cur):
+                    if kin.is_a(r.kin, kin.BIOLOGICAL_PARENT) and r.individual not in out \
+                            and r.individual != member_id:
+                        out[r.individual] = depth
+                        nxt.append(r.individual)
+            frontier = nxt
         return out
 
     def consanguineous(self, a: str, b: str) -> bool:
-        """True if ``a`` and ``b`` are recorded as consanguineous partners or share an ancestor."""
+        """True if ``a`` and ``b`` are recorded as consanguineous partners, or are related as second
+        cousins or closer: an ancestor in common no more than three generations back from each (great-
+        grandparents, for second cousins), or one descended from the other within three generations.
+
+        That is KIN's definition of isConsanguineousPartnerOf ("closely related biologically (second
+        cousins or closer)"), and the usual one in clinical genetics.
+        """
         for r in self.relations:
             if {r.individual, r.relative} == {a, b} and r.kin in (
                     kin.CONSANGUINEOUS_PARTNER, kin.SEPARATED_CONSANGUINEOUS_PARTNER):
                 return True
-        anc_a, anc_b = self.ancestors(a), self.ancestors(b)
-        return bool(anc_a & anc_b) or a in anc_b or b in anc_a
+        gen_a, gen_b = self.ancestor_generations(a), self.ancestor_generations(b)
+        if gen_b.get(a, 99) <= 3 or gen_a.get(b, 99) <= 3:
+            return True
+        return any(gen_a[x] <= 3 and gen_b[x] <= 3 for x in set(gen_a) & set(gen_b))
 
 
 # -- writing -------------------------------------------------------------------
 
-def _term_entries(member: Member, warnings: List[str]) -> Tuple[List[Dict], List[Dict]]:
+def _term_entries(member: Member, warnings: List[str],
+                  known: Optional[Dict[str, Dict[str, str]]] = None) -> Tuple[List[Dict], List[Dict]]:
     diseases, features = [], []
     seen = set()
     for t in member.terms:
@@ -198,6 +219,14 @@ def _term_entries(member: Member, warnings: List[str]) -> Tuple[List[Dict], List
             warnings.append("{}: '{}' was left out because it has no ontology term; match it to "
                             "{} first".format(member.id, t.label or t.id,
                                               "Mondo" if t.kind == DISEASE else "the HPO"))
+            continue
+        prefix = ontology.prefix_of(ontology.tidy_curie(t.id))
+        if not ontology.can_declare(prefix, known):
+            # metaData must declare every ontology used, with all its details, or phenopacket-tools rejects it
+            warnings.append("{}: '{}' ({}) was left out: its ontology, {}, is not one this package can declare "
+                            "in metaData, and the file gave no details of it; use a term from Mondo, OMIM, "
+                            "Orphanet or the HPO".format(member.id, t.label or t.id, ontology.tidy_curie(t.id),
+                                                         prefix))
             continue
         key = (ontology.tidy_curie(t.id), t.kind, t.excluded)
         if key in seen:
@@ -244,10 +273,11 @@ def member_phenopacket(k: Kindred, m: Member, *, created_by: str, created: Optio
         detail = copy.deepcopy(kept["vitalStatus"])
         detail["status"] = subject["vitalStatus"]["status"]
         subject["vitalStatus"] = detail
-    diseases, features = _term_entries(m, warnings)
+    diseases, features = _term_entries(m, warnings, k.resources)
     packet_id = m.packet_id or "{}-{}".format(k.id, m.id)
     return pp.phenopacket(packet_id, subject, diseases=diseases, phenotypic_features=features,
-                          created_by=created_by, versions=k.versions, created=created, extra=m.extra)
+                          created_by=created_by, versions=k.versions, created=created, extra=m.extra,
+                          known=k.resources)
 
 
 def _relationships(k: Kindred, warnings: List[str]) -> List[Dict]:
@@ -347,7 +377,7 @@ def to_phenopackets_family(k: Kindred, *, created_by: str, created: Optional[str
     consang = bool(father and mother and k.consanguineous(father, mother))
     doc = pp.family(k.id, proband=packets[proband.id], relatives=relatives, persons=persons,
                     consanguineous_parents=consang, created_by=created_by, versions=k.versions,
-                    created=created, files=k.files)
+                    created=created, files=k.files, known=k.resources)
     return doc, _unique(warnings)
 
 
@@ -377,15 +407,21 @@ def detect(doc: Dict) -> str:
     return "unknown"
 
 
-def _versions_from(metadata: Dict, into: Dict[str, str]) -> None:
+def _versions_from(metadata: Dict, into: Dict[str, str], resources: Optional[Dict[str, Dict]] = None) -> None:
     for res in (metadata or {}).get("resources", []) or []:
+        if not isinstance(res, dict):
+            continue
         p = res.get("namespacePrefix")
         v = res.get("version")
         if p and v and v != ontology.UNKNOWN_VERSION:
             into.setdefault(p, v)
+        # keep the whole resource of an ontology this package does not know, so it can be declared again
+        if resources is not None and p and p not in ontology.RESOURCES and ontology.complete(res):
+            resources.setdefault(p, {f: res[f] for f in ontology.RESOURCE_FIELDS})
 
 
-def _member_from_packet(packet: Dict, versions: Dict[str, str]) -> Member:
+def _member_from_packet(packet: Dict, versions: Dict[str, str],
+                        resources: Optional[Dict[str, Dict]] = None) -> Member:
     subj = packet.get("subject") or {}
     m = Member(id=str(subj.get("id", "")))
     m.packet_id = packet.get("id") or None
@@ -418,7 +454,7 @@ def _member_from_packet(packet: Dict, versions: Dict[str, str]) -> Member:
     if subj_keep:
         keep["subject"] = subj_keep
     m.extra = keep
-    _versions_from(md, versions)
+    _versions_from(md, versions, resources)
     return m
 
 
@@ -438,7 +474,7 @@ def from_ga4gh_pedigree(doc: Dict) -> Tuple[Kindred, List[str]]:
     for i, packet in enumerate(data.get("individuals") or []):
         if not isinstance(packet, dict):
             continue
-        m = _member_from_packet(packet, k.versions)
+        m = _member_from_packet(packet, k.versions, k.resources)
         if not m.id:
             warnings.append("individuals[{}] has no subject id and was skipped".format(i))
             continue
@@ -474,7 +510,7 @@ def from_phenopackets_family(doc: Dict) -> Tuple[Kindred, List[str]]:
     data = camelise(doc, "Family")
     warnings: List[str] = []
     k = Kindred(id=str(data.get("id") or "family"))
-    _versions_from(data.get("metaData") or {}, k.versions)
+    _versions_from(data.get("metaData") or {}, k.versions, k.resources)
     k.files = copy.deepcopy(data.get("files") or [])
     persons = ((data.get("pedigree") or {}).get("persons")) or []
     for p in persons:
@@ -501,7 +537,7 @@ def from_phenopackets_family(doc: Dict) -> Tuple[Kindred, List[str]]:
         if isinstance(rel, dict):
             packets.append((rel, False))
     for packet, is_proband in packets:
-        m = _member_from_packet(packet, k.versions)
+        m = _member_from_packet(packet, k.versions, k.resources)
         existing = k.member(m.id)
         if existing is None:
             warnings.append("{} has a Phenopacket but is not in the pedigree".format(m.id))
@@ -531,7 +567,7 @@ def from_phenopackets(packets: Iterable[Dict], kindred_id: str = "cohort") -> Tu
     k = Kindred(id=kindred_id)
     warnings: List[str] = []
     for packet in packets:
-        m = _member_from_packet(camelise(packet, "Phenopacket"), k.versions)
+        m = _member_from_packet(camelise(packet, "Phenopacket"), k.versions, k.resources)
         if not m.id or k.member(m.id):
             warnings.append("a Phenopacket with a missing or repeated subject id was skipped")
             continue

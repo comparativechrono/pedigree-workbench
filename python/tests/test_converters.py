@@ -92,6 +92,16 @@ def test_features_drawing():
     assert any("does not name" in w for w in r.warnings)
 
 
+def test_notes_keep_ids_as_they_are():
+    """Pedigree Studio's own ids are in lower case (p6, c1): a note about one must not capitalise it."""
+    data = session("features")
+    carriers = [p["id"] for p in data["persons"] if p.get("centerText") == "dot"]
+    r = studio2ga4gh.convert(data, "features", ids="studio", created=CREATED)
+    narrative = loads(r.files[0][1])["narrative"]
+    assert carriers and all("{} is a carrier.".format(c) in narrative for c in carriers)
+    assert all(c.upper() not in narrative.split() for c in carriers)
+
+
 def test_round_trip_studio_ga4gh_studio():
     def signature(doc):
         k, _ = from_document(doc)
