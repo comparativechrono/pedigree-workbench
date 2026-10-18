@@ -496,7 +496,7 @@ for c in index.search("breast cancer", limit=5):
 </article>
 <article class="help-page" id="h-tools" data-title="The Tools tab" data-group="Tools" data-group-page="h-tools" data-keys="tools tab gui point and click form run result convert python packages command same terminal python map tasks file page" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.8-.6-.6-2.8z"/></svg>The Tools tab</h1>
-<p class="lede">The Tools tab gives each of our Python packages a simple form. Choose a file, set any options and press <b>Run</b>. The tool runs exactly the command you would type in the terminal, then shows you the files it wrote. Under every form you'll find that command too, and the same job written in Python, so you can always see what the tab is doing.</p>
+<p class="lede">The Tools tab gives you simple forms for our Python packages. Choose a file, set any options and press <b>Run</b>. The tool runs exactly the command you would type in the terminal, then shows you what it printed and the files it wrote. Under every form you'll find that command too, and the same job written in Python, so you can always see what the tab is doing.</p>
 
 <h2>Finding the tool you need</h2>
 <ul>
@@ -508,7 +508,7 @@ for c in index.search("breast cancer", limit=5):
 
 <h2>A tool's page</h2>
 <ol>
-  <li><b>The fields.</b> You can choose files from your files or the examples, or from your computer with <b>From my computer…</b>. For a drawing, you can also choose <b>The drawing in the Studio tab</b>, which uses the drawing that's open there and saves it first. <b>Look at it</b> opens the file you've chosen. The names of the files the tool will write are filled in for you, and you can change them. Results go in <code>~/results</code>, drawings in <code>~/pedigrees</code> and terms files in <code>~/terms</code>, unless you choose another folder.</li>
+  <li><b>The fields.</b> You can choose from your own files or the examples, or pick a file from your computer with <b>From my computer…</b>. For a drawing, you can also choose <b>The drawing in the Studio tab</b>, which uses the drawing that's open there and saves it first. <b>Look at it</b> opens the file you've chosen. The names of the files the tool will write are filled in for you, and you can change them. Results go in <code>~/results</code>, drawings in <code>~/pedigrees</code> and terms files in <code>~/terms</code>, unless you choose another folder.</li>
   <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. If a file would be overwritten, you're asked first.</li>
   <li><b>The result.</b> You'll see <i>Done</i>, or the error if something went wrong, then what the program printed and the files it wrote. Each file has buttons to open it in the Studio, look at it, check it, pass it to another tool or download it.</li>
   <li><b>The same in the terminal, and in Python</b> shows the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
@@ -561,8 +561,8 @@ for c in index.search("breast cancer", limit=5):
 <dl>
   <dt>The drawing</dt><dd>Choose a Pedigree Studio file, or the drawing in the Studio tab.</dd>
   <dt>Terms for its conditions</dt><dd>Choose a terms file that gives each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition that already has an id in the key, such as <i>Condition X [MONDO:0009061]</i>, doesn't need a terms file. Only an ontology's id counts, so <i>Hypertension (BP:160/95)</i> is just a name. A condition without a term is left out, because a GA4GH file has no place for a condition without one. <b>Match them to terms…</b>, under the table, opens the tool that finds the missing terms.</dd>
-  <dt>People are named by</dt><dd>The default, and the safe choice, is <b>pedigree numbers</b> such as II-3. You can also choose <b>the labels in the drawing</b>, which are often names, or <b>Pedigree Studio's own ids</b>. A label becomes an id in the same way as in studio2ped, so a person has the same id in both tools' files. For example, <i>J. Mensah</i> becomes <code>J_Mensah</code>. If an id would be empty, <code>0</code> or the same as someone else's, the pedigree number is used instead, with a note.</dd>
-  <dt>Family id</dt><dd>FAM gives FAM1, then FAM2 and so on if the drawing holds more than one family.</dd>
+  <dt>People are named by</dt><dd>The default, and the safe choice, is <b>pedigree numbers</b> such as II-3. You can also choose <b>the labels in the drawing</b>, which are often names, or <b>Pedigree Studio's own ids</b>. A label becomes an id in the same way as in studio2ped (<i>J. Mensah</i> becomes <code>J_Mensah</code>, for example), so a person has the same id in both tools' files. If an id would be empty, <code>0</code> or the same as someone else's, the pedigree number is used instead, with a note.</dd>
+  <dt>Family id</dt><dd>The default, FAM, gives FAM1, then FAM2 and so on if the drawing holds more than one family.</dd>
   <dt>Files to write</dt><dd>You can write both files, or just one of them.</dd>
   <dt>Save in, Start of the file names</dt><dd>The files are called <code><i>start</i>_ga4gh-pedigree.json</code> and <code><i>start</i>_phenopackets-family.json</code>. They're saved in <code>~/results</code> unless you choose another folder.</dd>
 </dl>
@@ -638,7 +638,7 @@ for note in result.warnings:
 
 <h2>What comes back</h2>
 <ul>
-  <li>Everyone comes back, with their sex and whether they've died. So do the couples, including consanguineous and separated ones, as well as twins, adoptions as dashed lines, and donors and surrogates. Pregnancies and losses come back too, and so do the markers the narrative records, such as a carrier.</li>
+  <li>Everyone comes back, with their sex and whether they've died. So do the couples, including consanguineous and separated ones. Twins, adoptions (drawn as dashed lines), donors, surrogates, pregnancies and losses come back too, as do the markers the narrative records, such as a carrier.</li>
   <li>Each condition gets a colour, and is named in the key as <i>label [ID]</i>. A person with two conditions is filled in halves, and a person with three or four in quarters.</li>
   <li>People are labelled with their ids, except when the ids are pedigree numbers such as II-3, because Pedigree Studio shows those itself.</li>
 </ul>
@@ -687,7 +687,7 @@ for note in result.warnings:
 <p>After writing the file, the tool checks it with mpedtools and shows the result underneath.</p>
 
 <div class="callout"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>The ids</div>
-<p>By default, people are named by their pedigree numbers, such as <code>II-3</code>, as in the GA4GH files. The other choices can give you names. The text under a symbol is often a name, for example <code>Grace_78</code> for <i>Grace, 78</i>, and a label may be one too. Check these ids before you share the file. A label is made into an id by turning spaces into underscores and dropping other punctuation, so <i>J. Mensah</i> becomes <code>J_Mensah</code>. studio2ga4gh does the same, so a person has the same id in both tools' files. If two people would share an id, or an id would be empty or <code>0</code> (which a PED file reads as “no parent”), the person's pedigree number is used instead, and the tool tells you.</p></div>
+<p>By default, people are named by their pedigree numbers, such as <code>II-3</code>, as in the GA4GH files. The other choices can give you names. The text under a symbol is often a name, and a label may be one too. For example, <i>Grace, 78</i> becomes <code>Grace_78</code>. Check these ids before you share the file. A label is made into an id by turning spaces into underscores and dropping other punctuation, so <i>J. Mensah</i> becomes <code>J_Mensah</code>. studio2ga4gh does the same, so a person has the same id in both tools' files. If two people would share an id, or an id would be empty or <code>0</code> (which a PED file reads as “no parent”), the person's pedigree number is used instead, and the tool tells you.</p></div>
 <p>Pedigree Studio stores the <i>no children</i> and <i>infertility</i> bars as children of the couple. They aren't people, so the tool leaves them out, and the notes say which couple had them. Version 0.1 wrote them as children of unknown sex.</p>
 
 <h2>In the terminal</h2>
@@ -719,7 +719,7 @@ for path, _ in result.files:
   <dt>The PED file</dt><dd>Choose a <code>.ped</code>, <code>.fam</code> or <code>.mped</code> file.</dd>
   <dt>Save the drawing as</dt><dd>The drawing is saved as a <code>.studio.json</code> file, in <code>~/pedigrees</code> unless you choose otherwise.</dd>
   <dt>Colour for affected people, Fill, Shade with a pattern</dt><dd>These set how affected people (status 2) are marked. Choose a colour to fill the whole symbol or its left half, or use stripes or dots instead of a fill. From an MPED file, each condition gets a colour of its own.</dd>
-  <dt>Tidy the drawing when it opens</dt><dd>The tidying is done in the Studio when you open the drawing from the result.</dd>
+  <dt>Tidy the drawing when it opens</dt><dd>When you open the drawing from the result, the Studio lays it out again with Pedigree Studio's Tidy.</dd>
 </dl>
 
 <h2>What comes out</h2>
@@ -768,7 +768,7 @@ print(len(session["persons"]), "people")</code></pre>
 <dl>
   <dt>The file</dt><dd>Choose a GA4GH Pedigree or a Phenopackets Family.</dd>
   <dt>Make</dt><dd>The tool chooses the other form for you.</dd>
-  <dt>Proband</dt><dd>When you're making a Family, give the id of the person to make the proband. If you don't, the tool uses the GA4GH Pedigree's index patient, or else the first affected person.</dd>
+  <dt>Proband</dt><dd>When you're making a Family, give the id of the person you want as the proband. If you don't, the tool uses the GA4GH Pedigree's index patient, or else the first affected person.</dd>
   <dt>Save as</dt><dd>The new file is saved as <code>~/results/<i>name</i>_phenopackets-family.json</code> or <code>…_ga4gh-pedigree.json</code>.</dd>
 </dl>
 <p>There are some things that each form can't say:</p>
@@ -814,7 +814,7 @@ for note in notes:
 
 <h2>The formats</h2>
 <dl>
-  <dt>A PED file</dt><dd>The six columns are family, person, father, mother, sex and affected status. It uses the file's ids, which are pedigree numbers such as II-3 in files from studio2ga4gh. If you make it from a <b>Phenopackets Family</b>, the status is the one its pedigree records: 1 for unaffected, 2 for affected. If you make it from a <b>GA4GH Pedigree</b>, people with a condition get 2 and everyone else gets 0, for unknown. That's because a GA4GH Pedigree records the conditions people have, not that they were found to have none. Either way, affected means having any of the file's conditions. To make a PED file for one condition out of several, use the other route in <a href="#h-walk-ped">Make a PED file for a linkage program</a>.</dd>
+  <dt>A PED file</dt><dd>The six columns are family, person, father, mother, sex and affected status. It uses the file's ids. In files from studio2ga4gh, these are pedigree numbers such as II-3, unless you chose otherwise. If you make it from a <b>Phenopackets Family</b>, the status is the one its pedigree records: 1 for unaffected, 2 for affected. If you make it from a <b>GA4GH Pedigree</b>, people with a condition get 2 and everyone else gets 0, which means unknown. That's because a GA4GH Pedigree records the conditions people have, not that they were found to have none. Either way, affected means having any of the file's conditions. To make a PED file for one condition out of several, use the other route in <a href="#h-walk-ped">Make a PED file for a linkage program</a>.</dd>
   <dt>A table (TSV)</dt><dd>The table has a row for each person and term. Each row gives the person's id and their role (proband or relative), and whether the term is a disease or a phenotype. It also gives the term's id and label, and whether it was excluded, which means it was looked for and not found. You can open it in a spreadsheet.</dd>
   <dt>YAML</dt><dd>This is the same document, written in YAML instead of JSON.</dd>
   <dt>JSON Lines</dt><dd>This puts one Phenopacket on each line, for programs that read many at a time.</dd>
@@ -849,7 +849,7 @@ print(to_format(doc, "tsv"))</code></pre>
 <dl>
   <dt>1 · The drawing</dt><dd>The drawing's conditions are listed under 3, with the number of people who have each one. <b>Start from a terms file</b> fills in the conditions that the terms file already has, and the matches you make are added to it when you save.</dd>
   <dt>2 · Search in</dt><dd>Choose <b>EBI's Ontology Lookup Service</b>, which is online and has the latest releases, or <b>copies of the ontologies on this computer</b>, which work offline. For the copies, choose <code>hp.obo</code> and <code>mondo.obo</code> from your files. You can download the HPO from here into <code>~/ontologies</code>. For Mondo, download its file with your browser from Mondo's download page, then add it with <b>From my computer…</b>.</dd>
-  <dt>3 · The conditions</dt><dd>Each condition has a choice of <b>a disease (Mondo)</b> or <b>a sign or symptom (HPO)</b>, the words to search for, and a <b>Suggest</b> button. The tool guesses which kind it is from the name, so check it. You get up to six suggestions, each with its id and label, a score out of 100 for how well it matches, and the definition. Each also says what your words matched: the term's label, or one of its synonyms. Choose one, or type an id and press <b>Use this id</b>. <b>Suggest terms for all</b> searches for every condition that hasn't been matched yet.</dd>
+  <dt>3 · The conditions</dt><dd>Each condition has a menu to choose <b>a disease (Mondo)</b> or <b>a sign or symptom (HPO)</b>, a box for the words to search for, and a <b>Suggest</b> button. The tool guesses which kind it is from the name, so check it. You get up to six suggestions, each with its id and label, a score out of 100 for how well it matches, and the definition. Each also says what your words matched: the term's label, or one of its synonyms. Choose one, or type an id and press <b>Use this id</b>. <b>Suggest terms for all</b> searches for every condition that hasn't been matched yet.</dd>
   <dt>4 · Keep the matches</dt><dd><b>Save</b> writes the terms file, <code>~/terms/<i>drawing</i>-terms.json</code>. If you tick <b>Also write the ids into the drawing's colour key</b>, it also writes a copy of the drawing, <code>~/pedigrees/<i>drawing</i>-with-terms.studio.json</code>. In the copy, the key has entries such as <i>Breast cancer [MONDO:0007254]</i>. <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file already chosen.</dd>
 </dl>
 
@@ -894,9 +894,9 @@ for c in index.search("hearing loss from birth", limit=6):
 <h2>The form</h2>
 <dl>
   <dt>The file</dt><dd>Choose a GA4GH Pedigree, or a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
-  <dt>Terms file</dt><dd>Choose a file of names and their terms (<a href="#h-terms">terms files</a>). Upper and lower case don't matter when the names are matched. The releases in the terms file are recorded in the file's resources.</dd>
+  <dt>Terms file</dt><dd>Choose a file of names and their terms (<a href="#h-terms">terms files</a>). Upper and lower case don't matter when the names are matched. The releases in the terms file are recorded in the new file's resources.</dd>
   <dt>Look up names without a term</dt><dd>Choose <b>No</b> to use only the terms file, or look names up on <b>EBI's Ontology Lookup Service</b>, which is online, or in <b>copies of the ontologies</b> on this computer. For the copies, choose <code>hp.obo</code> and <code>mondo.obo</code>.</dd>
-  <dt>Accept a looked-up match from</dt><dd>This is the lowest score, from 0.5 to 1, at which a term the tool finds is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name scores less. So the default, 0.98, only accepts a term whose own name or synonym is the condition's name. If a name's best match is less close than that, it's left without a term and listed. Entries in a terms file are always used.</dd>
+  <dt>Accept a looked-up match from</dt><dd>This is the lowest score, from 0.5 to 1, at which a term the tool finds is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name scores less. So the default, 0.98, only accepts a term whose own name or synonym is the condition's name. Match conditions to terms shows the same scores out of 100. If a name's best match is less close than that, it's left without a term and listed. Entries in a terms file are always used.</dd>
   <dt>Save as</dt><dd>The new file is saved as <code>~/results/<i>name</i>.normalised.json</code>. A log of every decision goes next to it, as <code>….normalised.log.json</code>.</dd>
 </dl>
 <p>By default, the tool doesn't guess. If neither the terms file nor a look-up finds a term for a name, its id stays empty and the summary lists it. You can lower the threshold to accept close matches as well, but each of those is a guess, and the log asks you to check it. Names that are spelt almost alike can mean opposite things. For example, <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>

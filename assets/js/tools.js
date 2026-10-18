@@ -81,7 +81,7 @@
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },
         { key: 'terms', type: 'file', label: 'Terms for its conditions', kinds: ['terms'], optional: true, none: 'none (conditions are left out)', conditions: true },
         { key: 'ids', type: 'select', label: 'People are named by', def: 'numbers', options: [['numbers', 'pedigree numbers, such as II-3'], ['drawing', 'the labels in the drawing (these may be names)'], ['studio', 'Pedigree Studio’s own ids']] },
-        { key: 'family', type: 'text', label: 'Family id', def: 'FAM', help: 'FAM gives FAM1, and FAM2 and so on if the drawing holds more than one family.' },
+        { key: 'family', type: 'text', label: 'Family id', def: 'FAM', help: 'The default, FAM, gives FAM1, then FAM2 and so on if the drawing holds more than one family.' },
         { key: 'only', type: 'select', label: 'Files to write', def: '', options: [['', 'both the GA4GH Pedigree and the Phenopackets Family'], ['pedigree', 'the GA4GH Pedigree only'], ['family', 'the Phenopackets Family only']] },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
         { key: 'prefix', type: 'text', label: 'Start of the file names', def: (v) => stemOf(v.input) }
