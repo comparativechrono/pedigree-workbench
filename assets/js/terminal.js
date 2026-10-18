@@ -403,7 +403,7 @@
             if (gone.length) this.note(`Lost with the stopped program: ${list(gone)}. Run the commands, or your script, again to make ${gone.length === 1 ? 'it' : 'them'}.`);
             // a file that was changed in the last seconds before the stop comes back as it was before that change
             const older = lost.filter((x) => this.fs.exists(x) && (this.fs.get(x).mtime || 0) < (times.get(x) || 0));
-            if (older.length) this.note(`Back as an earlier version (the newest had not been stored yet): ${list(older)}. Make ${older.length === 1 ? 'it' : 'them'} again.`);
+            if (older.length) this.note(`Restored as an earlier version, because the newest one hadn’t been stored yet: ${list(older)}. Make ${older.length === 1 ? 'it' : 'them'} again.`);
           });
         }
         return lost;
@@ -414,7 +414,7 @@
       if ((this.cancelled || force) && kr) {
         this.cancelled = true;
         this.kernelRun = null;
-        this.note(`${kr.K.label} was stopped by force and started again: its variables are forgotten – in the notebooks too.`);
+        this.note(`${kr.K.label} was stopped by force and started again. Its variables are forgotten, in the notebooks too.`);
         try {
           kr.K.restart();
         } catch (e) {
@@ -424,7 +424,7 @@
         return [];
       }
       // said once per command (the AI tab asks again and again until a command that ran for too long has ended)
-      if (!this.cancelled) this.note(`Stop requested: the program that is running finishes first, then the rest is skipped. If it does not finish, press ${this.locked ? 'Stop' : 'Ctrl+C'} again to stop it by force.`);
+      if (!this.cancelled) this.note(`Stop requested. The program that’s running will finish first, then the rest will be skipped. If it doesn’t finish, press ${this.locked ? 'Stop' : 'Ctrl+C'} again to stop it by force.`);
       this.cancelled = true;
       return [];
     }
@@ -480,7 +480,7 @@
         tick the student's tasks and do not offer "Ask the AI assistant" */
     async exec(line, opts = {}) {
       if (this.busy) {
-        this.note('The terminal is busy: wait for the current command to finish.');
+        this.note('The terminal is busy. Wait for the current command to finish.');
         return 125;
       }
       if (!opts.echoed) this._echo(line);
@@ -535,7 +535,7 @@
           }
         }
         this._tailLines = 0;
-        if (this._truncated) this.note(`… ${MG.shellUtil.fmtN(this._truncated)} lines are not shown here – the first ${MG.shellUtil.fmtN(HEAD_LINES)} and the last ${MG.shellUtil.fmtN(TAIL_LINES)} lines of what this command printed are. Use head, tail or grep to look at part of it, or write the output to a file with >.`);
+        if (this._truncated) this.note(`… ${MG.shellUtil.fmtN(this._truncated)} lines aren’t shown here. The terminal shows only the first ${MG.shellUtil.fmtN(HEAD_LINES)} and the last ${MG.shellUtil.fmtN(TAIL_LINES)} lines of what this command printed. Use head, tail or grep to look at part of it, or write the output to a file with >.`);
         for (const p of tail) if (p.text) this._append(p.cls, p.text);
         this.endProgress();
         this.busy = false;
@@ -587,11 +587,11 @@
     /** type a command into the prompt (and optionally run it) – used by ▶ buttons */
     async type(line, run) {
       if (this.locked) {
-        MG.toast('The AI agent is using the terminal – wait until it has finished.', 'warn');
+        MG.toast('The AI agent is using the terminal. Wait until it has finished.', 'warn');
         return;
       }
       if (this.busy) {
-        MG.toast('The terminal is still busy – wait for the current command to finish.', 'warn');
+        MG.toast('The terminal is still busy. Wait for the current command to finish.', 'warn');
         return;
       }
       this.focus();

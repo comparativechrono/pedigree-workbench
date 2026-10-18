@@ -54,7 +54,7 @@
           .then(() => MG.page.lazy[name](pane))
           .catch((e) => {
             console.error(e);
-            pane.firstElementChild.innerHTML = `<div class="wb-failed"><h3>${esc(TAB_NAME[name] || name)} could not start</h3><p>${esc(e.message || String(e))}</p><p>Reload the page to try again.</p></div>`;
+            pane.firstElementChild.innerHTML = `<div class="wb-failed"><h3>${esc(TAB_NAME[name] || name)} couldn’t start</h3><p>${esc(e.message || String(e))}</p><p>Reload the page to try again.</p></div>`;
           });
         building.set(name, p);
       } else if (building.has(name)) p = building.get(name);
@@ -98,7 +98,7 @@
     const t = $('#helpToggle');
     if (t) {
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
-      t.title = open ? 'Hide the help: the workbench fills the window (Ctrl+\\)' : 'Show the help (Ctrl+\\)';
+      t.title = open ? 'Hide the help so the workbench fills the window (Ctrl+\\)' : 'Show the help (Ctrl+\\)';
       t.innerHTML = MG.icon(open ? 'sidebarClose' : 'sidebarOpen');
     }
     const rail = $('#helpRail');
@@ -149,7 +149,7 @@
     const label = () => {
       const on = !!document.fullscreenElement;
       full.innerHTML = MG.icon(on ? 'shrink' : 'expand') + `<span>${on ? 'Exit full screen' : 'Full screen'}</span>`;
-      full.title = on ? 'Leave full screen (Esc)' : 'Full screen: the workbench fills the whole screen';
+      full.title = on ? 'Leave full screen (Esc)' : 'Make the workbench fill the whole screen';
     };
     if (!document.documentElement.requestFullscreen) full.hidden = true;
     full.addEventListener('click', async () => {
@@ -161,7 +161,7 @@
           await document.documentElement.requestFullscreen();
         }
       } catch (e) {
-        toast('This browser did not allow full screen here. Press F11 (or ⌃⌘F on a Mac) instead.', 'warn');
+        toast('This browser didn’t allow full screen here. Press F11 (or ⌃⌘F on a Mac) instead.', 'warn');
         if (helpBefore != null) setHelpOpen(helpBefore, { noSave: true });
         helpBefore = null;
       }
@@ -408,7 +408,7 @@
     body.hidden = true;
     results.hidden = false;
     if (!hits.length) {
-      results.appendChild(h('div.help-noresult', h('p', `Nothing in the help mentions “${q}”.`), h('p.muted', 'Try a shorter word, or the name of a program (studio2ped, phenotk) or a format (PED, GA4GH).')));
+      results.appendChild(h('div.help-noresult', h('p', `Nothing in the help mentions “${q}”.`), h('p.muted', 'Try a shorter word, or the name of a program or a format, such as studio2ped, phenotk, PED or GA4GH.')));
       return;
     }
     hits.slice(0, 30).forEach((x) => {
@@ -501,7 +501,7 @@
           }, 120);
         });
       if (!run && c.includes('\n')) {
-        toast('This command has several lines: use Run instead of typing it.', 'warn');
+        toast('This command has several lines, so use Run instead of typing it.', 'warn');
         return;
       }
       await T.type(c, run);
@@ -569,7 +569,7 @@
     const HOME = () => MG.app.HOME;
     btn.addEventListener('click', async () => {
       const u = await MG.project.usage();
-      const used = u && u.usage ? `${MG.humanSize(u.usage)}B used of about ${MG.humanSize(u.quota)}B` : '';
+      const used = u && u.usage ? `${MG.humanSize(u.usage)}B of about ${MG.humanSize(u.quota)}B used` : '';
       MG.popmenu(btn, [
         ['zip', 'Download all my files (.zip)', () => MG.project.download(HOME(), 'pedigree-workbench-files.zip')],
         ['upload', 'Add files from my computer…', () => MG.app.pickFiles(HOME(), false)],
@@ -601,7 +601,7 @@
   function startAfresh() {
     const m = MG.modal(
       'Start afresh?',
-      `<p>This deletes <b>every file</b> in your home folder (${esc(MG.app.fs.pretty(MG.app.HOME))}) – drawings, notebooks, uploads, results – and the drawing in the Studio tab, from this browser. It cannot be undone.</p>
+      `<p>This deletes <b>every file</b> in your home folder (${esc(MG.app.fs.pretty(MG.app.HOME))}) from this browser, including drawings, notebooks, uploads and results. It also deletes the drawing in the Studio tab. You can’t undo this.</p>
        <p>Download your files first if you want to keep any of them.</p>
        <p><label class="check"><input type="checkbox" data-x="sure"> I have downloaded what I want to keep</label></p>
        <div class="prompt-actions"><button class="btn" data-x="dl" type="button">${MG.icon('zip')}<span>Download all my files</span></button><span class="grow"></span><button class="btn" data-x="no" type="button">Cancel</button><button class="btn danger" data-x="yes" type="button" disabled>Delete everything</button></div>`
@@ -642,8 +642,8 @@
     const show = () => {
       const n = MG.user.name(), plain = n === MG.user.DEFAULT;
       if (label) label.textContent = n;
-      btn.title = plain ? 'Put your name into the workbench: the terminal shows it in place of user' : `Your name in the workbench: ${n} – click to change it`;
-      btn.setAttribute('aria-label', plain ? 'Your name in the workbench: user (click to put in yours)' : `Your name in the workbench: ${n}`);
+      btn.title = plain ? 'Put your name into the workbench, and the terminal will show it in place of user' : `Your name in the workbench is ${n}. Click to change it.`;
+      btn.setAttribute('aria-label', plain ? 'Your name in the workbench is user. Click to put in your own.' : `Your name in the workbench is ${n}`);
     };
     show();
     bus.on('user:name', show);
@@ -661,7 +661,7 @@
     const cancel = h('button.btn', { type: 'button' }, 'Cancel');
     const form = h(
       'form.user-form',
-      h('p', 'The terminal shows your name in its prompt, in place of ', h('code', D), '; ', h('code', 'whoami'), ', ', h('code', '$USER'), ', ', h('code', 'ls -l'), ' and Python use it too. It is kept in this browser only. Your home folder stays ', h('code', MG.app.HOME || '/home/user'), '.'),
+      h('p', 'The terminal shows your name in its prompt, in place of ', h('code', D), ', and ', h('code', 'whoami'), ', ', h('code', '$USER'), ', ', h('code', 'ls -l'), ' and Python use it too. It’s kept in this browser only. Your home folder stays ', h('code', MG.app.HOME || '/home/user'), '.'),
       h('label.user-label', { for: 'userNameIn' }, 'Your name'),
       input,
       h('p.user-prev', h('span.muted', 'The prompt: '), preview),
@@ -674,9 +674,9 @@
       const v = input.value.trim();
       const n = v === '' ? D : v === 'root' ? '' : MG.user.valid(v) ? v : MG.user.suggest(v);
       note.classList.toggle('bad', !n);
-      if (v === 'root') note.textContent = 'root is the name of the administrator here: choose another name.';
-      else if (!n) note.textContent = 'A name here begins with a letter and has letters, digits, dots, hyphens or underscores – no spaces: ada, ada.lovelace or a_lovelace, for example.';
-      else if (v && n !== v) note.textContent = `A name here has no spaces or other signs: it will be ${n}.`;
+      if (v === 'root') note.textContent = 'root is the name of the administrator here, so choose another name.';
+      else if (!n) note.textContent = 'A name here starts with a letter and has only letters, digits, dots, hyphens or underscores, with no spaces. For example: ada, ada.lovelace or a_lovelace.';
+      else if (v && n !== v) note.textContent = `A name here can’t have spaces or other symbols, so yours will be ${n}.`;
       else note.textContent = '';
       chosen = n;
       preview.textContent = `${n || '…'}@${host}:~$`;
@@ -688,7 +688,7 @@
       e.preventDefault();
       if (!chosen || !MG.user.set(chosen)) return;
       m.close();
-      toast(chosen === D ? `The terminal shows <b>${D}</b> again.` : `Saved: the terminal shows <b>${esc(chosen)}</b>@${esc(host)}.`, 'ok', 3500);
+      toast(chosen === D ? `The terminal shows <b>${D}</b> again.` : `Saved. The terminal now shows <b>${esc(chosen)}</b>@${esc(host)}.`, 'ok', 3500);
     });
     reset.addEventListener('click', () => {
       input.value = '';
@@ -715,10 +715,10 @@
       if (title) el.title = title;
     };
     if (!MG.project.ok) {
-      set('off', 'Not kept', 'This browser does not let the workbench keep files (private window?). Download your work before you close the page.');
+      set('off', 'Not kept', 'This browser doesn’t let the workbench keep files, perhaps because this is a private window. Download your work before you close the page.');
       return;
     }
-    const OK_TITLE = 'Your files and notebooks are kept in this browser on this computer. Use My files → Download to take them elsewhere.';
+    const OK_TITLE = 'Your files and notebooks are kept in this browser on this computer. Use My files → Download all my files (.zip) to take them elsewhere.';
     // More than config.storageWarnMB megabytes of files: the indicator says so, and once a visit a message too.
     // (Browsers limit what a site may keep; past that limit nothing more is saved.)
     let warned = false;
@@ -728,10 +728,10 @@
       if (limit && MG.app.fs) for (const [p, e] of MG.app.fs.entries) if (e.kind !== 'dir' && p.startsWith(MG.app.HOME + '/')) bytes += MG.app.fs.size(e) || 0;
       if (!limit || bytes <= limit * 1048576) return set('ok', 'Saved in this browser', OK_TITLE);
       const much = MG.humanSize(bytes) + 'B';
-      set('busy', `Saved · ${much}`, `Your files take ${much} in this browser. Download what you want to keep, and delete large files you no longer need.`);
+      set('busy', `Saved · ${much}`, `Your files take up ${much} in this browser. Download what you want to keep, and delete large files you no longer need.`);
       if (!warned) {
         warned = true;
-        toast(`Your files take <b>${much}</b> in this browser – more than ${limit} MB. Download what you want to keep, and delete large files you no longer need (copies of the ontologies, for example): browsers limit how much a site may keep.`, 'warn', 12000);
+        toast(`Your files take up <b>${much}</b> in this browser, which is more than ${limit} MB. Browsers limit how much a site may keep, so download what you want to keep and delete large files you no longer need, such as copies of the ontologies.`, 'warn', 12000);
       }
     };
     saved();
@@ -741,7 +741,7 @@
       clearTimeout(t);
       t = setTimeout(saved, 250);
     });
-    bus.on('files:notsaved', () => set('off', 'Not saved', 'The browser has no room left: download your files and delete some.'));
+    bus.on('files:notsaved', () => set('off', 'Not saved', 'The browser has no room left. Download your files, then delete some of them.'));
   }
 
   /* the name at the top of the page (config.js: courseTitle, courseSubtitle) */
@@ -771,7 +771,7 @@
       if (m.type === 'hello') ch.postMessage({ type: 'here', from: me });
       if ((m.type === 'hello' || m.type === 'here') && !warned) {
         warned = true;
-        toast('The workbench is open in another tab or window too. Use one at a time: both keep files in the same place, and one can overwrite what the other saved.', 'warn', 12000);
+        toast('The workbench is open in another tab or window too. Use only one at a time, because both keep files in the same place and one can overwrite what the other has saved.', 'warn', 12000);
       }
     };
     ch.postMessage({ type: 'hello', from: me });
@@ -793,7 +793,7 @@
       if (MG.page.init) await MG.page.init();
     } catch (e) {
       console.error(e);
-      toast('The workbench did not start properly: ' + esc(e.message || String(e)), 'error', 15000);
+      toast('The workbench didn’t start properly: ' + esc(e.message || String(e)), 'error', 15000);
     }
     initStoreStatus();
     initTabsWarning();

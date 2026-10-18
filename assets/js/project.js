@@ -85,7 +85,7 @@
       } catch (e) {
         this.ok = false;
         console.warn('The workbench cannot keep files in this browser (IndexedDB): ' + (e && e.message));
-        toast('This browser does not let the workbench keep your files (private window, or storage turned off). Your work is lost when the page closes: download what you want to keep.', 'warn', 12000);
+        toast('This browser doesn’t let the workbench keep your files, perhaps because this is a private window or storage is turned off. Your work will be lost when the page closes, so download what you want to keep.', 'warn', 12000);
         return 0;
       }
       const fresh = new Set();
@@ -237,7 +237,7 @@
             const size = fs.size(e);
             if (size > MAX_FILE) {
               this._big = this._big || new Set();
-              if (!this._big.has(p)) toast(`<b>${esc(fs.pretty(p))}</b> is larger than 1 GB: it is here while the page is open, but it is not kept in the browser. Download it if you need it.`, 'warn', 10000);
+              if (!this._big.has(p)) toast(`<b>${esc(fs.pretty(p))}</b> is larger than 1 GB. It’s here while the page is open, but it isn’t kept in the browser, so download it if you need it.`, 'warn', 10000);
               this._big.add(p);
               continue;
             }
@@ -272,7 +272,7 @@
           if (!this._warned) {
             this._warned = true;
             const full = err && /quota/i.test(String(err.name || err.message));
-            toast(full ? 'The browser has no more room for the workbench\'s files. Delete files you no longer need (or download them), so that new work can be kept.' : 'Your files could not be kept in this browser just now: ' + esc((err && err.message) || String(err)), 'warn', 12000);
+            toast(full ? 'The browser has no more room for the workbench\'s files. Download any files you want to keep, then delete the ones you no longer need, so that new work can be kept.' : 'Your files couldn’t be kept in this browser just now: ' + esc((err && err.message) || String(err)), 'warn', 12000);
           }
         }
       })();
@@ -364,12 +364,12 @@
         this.persist();
         bus.emit('files:uploaded', { paths: out });
       }
-      if (big) toast('Files larger than 1 GB are here while the page is open, but are not kept in the browser.', 'warn', 9000);
+      if (big) toast('Files larger than 1 GB are here while the page is open, but they aren’t kept in the browser.', 'warn', 9000);
       return out;
     },
     _askUnzip(name) {
       return new Promise((resolve) => {
-        const m = MG.modal('A .zip file', `<p><b>${esc(name)}</b> is a zip archive. Unpack its files into the folder, or keep the .zip as it is?</p><div class="prompt-actions"><button class="btn" data-x="keep" type="button">Keep the .zip</button><button class="btn primary" data-x="unzip" type="button">Unpack it</button></div>`);
+        const m = MG.modal('A .zip file', `<p><b>${esc(name)}</b> is a zip archive. Do you want to unpack its files into the folder, or keep it as a .zip?</p><div class="prompt-actions"><button class="btn" data-x="keep" type="button">Keep the .zip</button><button class="btn primary" data-x="unzip" type="button">Unpack it</button></div>`);
         m.box.querySelector('[data-x="keep"]').addEventListener('click', () => (m.close(), resolve(false)));
         m.box.querySelector('[data-x="unzip"]').addEventListener('click', () => (m.close(), resolve(true)));
       });
@@ -431,7 +431,7 @@
     async download(root, filename, opts) {
       const fs = MG.app.fs;
       if (!fs.isDir(root)) {
-        toast(`There is no folder ${esc(fs.pretty(root))}.`, 'warn');
+        toast(`There’s no folder ${esc(fs.pretty(root))}.`, 'warn');
         return null;
       }
       const { blob, n } = await this.zip(root, opts);
@@ -470,7 +470,7 @@
       const s = document.createElement('script');
       s.src = src;
       s.onload = resolve;
-      s.onerror = () => reject(new Error('Could not load ' + src));
+      s.onerror = () => reject(new Error('Couldn’t load ' + src));
       document.head.appendChild(s);
     });
   }

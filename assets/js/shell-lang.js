@@ -5427,7 +5427,7 @@
   /** run one line (or block) typed in the terminal */
   Shell.prototype.run = async function (line, io) {
     if (this.running) {
-      io.err('The terminal is busy: wait for the current command to finish.\n');
+      io.err('The terminal is busy. Wait for the current command to finish.\n');
       return 125;
     }
     const text = line.replace(/^\s+|\s+$/g, '');

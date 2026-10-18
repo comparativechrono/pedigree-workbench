@@ -221,7 +221,7 @@
     }
     _refuseNew(abs) {
       // (code: the status of a command of the shell that stops at it)
-      throw Object.assign(new Error(`${this.pretty ? this.pretty(abs) : abs}: Permission denied (the example data is read-only: copy it into your home folder first)`), { eacces: true, code: 1 });
+      throw Object.assign(new Error(`${this.pretty ? this.pretty(abs) : abs}: Permission denied (the example data is read-only, so copy it into your home folder first)`), { eacces: true, code: 1 });
     }
     mkdirp(p) {
       const abs = this.resolve(p);
@@ -459,7 +459,7 @@
       if (e.kind === 'blob') return e.blob;
       if (e.kind === 'url') return await (await fetch(e.url)).blob();
       if (e.kind === 'aioli') return new Blob([await MG.wasm.readBytes(e.apath)]);
-      throw new Error(`${p}: this simulated file cannot be downloaded`);
+      throw new Error(`${p}: this simulated file can’t be downloaded`);
     }
     /** paths for tab completion */
     complete(prefix) {
