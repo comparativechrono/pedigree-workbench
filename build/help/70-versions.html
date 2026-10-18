@@ -3,16 +3,16 @@
 <p class="lede">These are the versions that this copy of the workbench runs. When you report work done with it, say which versions you used. The files record them too, in their <code>metaData</code> (for example <code>createdBy: studio2ga4gh 0.4.0</code>).</p>
 
 <!--VERSIONS-->
-<p>Python itself is Pyodide's, which is loaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
+<p>Python itself comes from Pyodide, which is downloaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
 
 <h2>The same as on PyPI</h2>
-<p>Every package here is the version that is released on PyPI, so <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
+<p>Every package here except pedwb, the workbench's own runner, is the version released on PyPI. So <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
 <ul>
-  <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that the other packages share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
-  <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid, and its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept closer guesses.</li>
-  <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the “no children” and “infertility” marks, which aren't people.</li>
+  <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that studio2ga4gh, ga4gh2studio and the phenopacket toolkit share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
+  <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid. Its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept close matches too.</li>
+  <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers by default, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the <i>no children</i> and <i>infertility</i> bars, which aren't people.</li>
   <li><b>ped2studio 0.2.2</b> keeps apart families that reuse the same ids.</li>
-  <li><b>hponorm and mondonorm 1.1.0</b> score OLS's results by how well they match, take synonyms into account and read terms files whatever their case. They no longer treat names that are spelt alike but mean different things, such as hypothyroidism and hyperthyroidism, as close matches, and they search a local copy of an ontology much faster.</li>
+  <li><b>hponorm and mondonorm 1.1.0</b> score the results from EBI's Ontology Lookup Service by how well they match, take synonyms into account, and ignore capital letters in terms files. They no longer treat names that are spelt alike but mean different things, such as hypothyroidism and hyperthyroidism, as close matches, and they search a local copy of an ontology much faster.</li>
 </ul>
-<p>mpedtools is still at version 0.1.0. <a href="#h-own-computer">On your own computer</a> explains how to install the packages outside the browser.</p>
+<p>The releases before these were 0.3.0 of studio2ga4gh, ga4gh2studio and phenopacket-toolkit, 0.1.0 of studio2ped, 0.2.1 of ped2studio, and 1.0.0 of hponorm and mondonorm. mpedtools is still at version 0.1.0. <a href="#h-own-computer">On your own computer</a> explains how to install the packages outside the browser.</p>
 <!--CITE: pedigree-studio studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenotk pedigree-ga4gh phenopackets phenopacket-tools hpo mondo ga4gh-pedigree nomenclature pyodide-->

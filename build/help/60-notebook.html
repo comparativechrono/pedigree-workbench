@@ -8,11 +8,11 @@
 
 <h2>Working in a notebook</h2>
 <ul>
-  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>, or use <b>Run all</b> to run them all from the top. The first cell starts Python, which takes a few seconds, and the first time it also downloads about 10 MB.</li>
+  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>, or use <b>Run all</b> to run every cell from the top. The first cell you run starts Python, which takes a few seconds, and the very first time it also downloads about 10 MB.</li>
   <li><b>Code</b> and <b>Text</b> add cells, and text cells are written in Markdown. Use a cell's menu to move, duplicate, clear or delete it.</li>
   <li><b>Stop</b> stops a cell that's running for too long, and <b>Restart</b> forgets all the variables. The variables button lists everything the notebook has defined.</li>
   <li>The notebook is saved in your files as you work. <b>Download</b> gives you a copy as a Jupyter notebook, a Python script, or a web page with its results.</li>
-  <li>As in Jupyter, a notebook starts in its own folder. It reads and writes the same files as the other tabs: <code>/data/examples</code>, and your home folder, <code>/home/user</code>.</li>
+  <li>As in Jupyter, a notebook starts in its own folder. It uses the same files as the other tabs: the examples in <code>/data/examples</code>, and your home folder, <code>/home/user</code>.</li>
 </ul>
 
 <h2>Commands in a cell</h2>
@@ -21,12 +21,12 @@
 !pedigree-ga4gh validate ~/results/okafor-nb_ga4gh-pedigree.json</code></pre>
 <table>
 <tr><th></th><th></th></tr>
-<tr><td><code>!command</code></td><td>Runs a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python. For a pipe or redirection into them (<code>|</code> or <code>&gt;</code>), use the Terminal tab.</td></tr>
+<tr><td><code>!command</code></td><td>Runs a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python. To use them in a pipe or with redirection (<code>|</code> or <code>&gt;</code>), use the Terminal tab.</td></tr>
 <tr><td><code>%cd</code>, <code>%pwd</code>, <code>%ls</code></td><td>Change or show the folder, or list the files in it</td></tr>
 <tr><td><code>%pip install NAME</code></td><td>Installs a pure-Python package from PyPI, for this visit</td></tr>
 <tr><td><code>%%writefile FILE</code>, <code>%%bash</code>, <code>%%capture</code>, <code>%time</code>, <code>%run</code></td><td>Work as they do in Jupyter</td></tr>
 </table>
 
 <h2>The packages</h2>
-<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket_toolkit and pedigree_ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>), and PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
+<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
 <div class="callout info"><div class="co-t"><!--ICON:info-->One Python for three tabs</div><p>The Tools tab, the Notebook tab and the Terminal tab share one Python. While a notebook cell is running, a tool waits for it to finish, and the other way round.</p></div>

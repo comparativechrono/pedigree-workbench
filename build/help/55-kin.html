@@ -4,7 +4,7 @@
 
 <h2>How a relationship is written</h2>
 <pre class="code"><code>{"individualId": "III-3", "relation": {"id": "KIN:027", "label": "isBiologicalMotherOf"}, "relativeId": "IV-3"}</code></pre>
-<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is KIN's own, spelt exactly as KIN spells it. A symmetric relation, such as one between partners, twins or cousins, is written only once, in one direction.</p>
+<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is taken word for word from KIN. A symmetric relation, such as one between partners, twins or cousins, is written only once, in one direction.</p>
 
 <h2>The terms the converters use</h2>
 <table>
@@ -18,7 +18,7 @@
 <p>Brothers and sisters, grandparents, aunts and cousins aren't written, because they follow from the parents.</p>
 
 <h2>The 48 relationship terms</h2>
-<p>The terms come from <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea of 16 September 2024, which is still its latest). This is the file behind <code>http://purl.org/ga4gh/kin.owl</code>. KIN also has <code>KIN:031</code>, <i>hasSex</i>, but that's a property of one person rather than a relationship between two people. So the table leaves it out, and the workbench never uses it.</p>
+<p>The terms come from <code>kin.owl</code> in KIN's repository, ga4gh/pedigree_family_history_terminology (commit 71616ea of 16 September 2024, which is still its latest). This is the file behind <code>http://purl.org/ga4gh/kin.owl</code>. KIN also has <code>KIN:031</code>, <i>hasSex</i>, but that's a property of one person rather than a relationship between two people. So the table leaves it out, and the workbench never uses it.</p>
 <!--KIN-->
 
 <h2>Retired codes</h2>

@@ -18,8 +18,8 @@
   <dt>“EBI's Ontology Lookup Service did not answer”</dt>
   <dd>Either the service is down or slow, or your network blocks www.ebi.ac.uk. Try again later, or search copies of the ontologies on this computer instead (<i>2 · Search in</i>).</dd>
 
-  <dt>The PED file has names as ids</dt>
-  <dd>studio2ped names people by their pedigree numbers, unless you choose otherwise in <i>People are named by</i>. The drawing's labels, Pedigree Studio's own ids and the text under the symbols can all be names, so choose pedigree numbers instead. A PED file made by studio2ped 0.1 always used the text under the symbols, so make it again (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
+  <dt>The PED file has names as ids, or the same id twice</dt>
+  <dd>studio2ped names people by their pedigree numbers, unless you choose otherwise in <i>People are named by</i>. The drawing's labels, Pedigree Studio's own ids and the text under the symbols can all be names, so choose pedigree numbers instead. A PED file made by studio2ped 0.1 always used the text under the symbols, which can give names or the same id twice, so make it again (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
 
   <dt>The drawing a tool made looks untidy</dt>
   <dd>Press <b>Tidy</b> in the Studio tab, or tick <i>Tidy the drawing when it opens</i> before you run the tool.</dd>
@@ -31,7 +31,7 @@
   <dd>A notebook cell may be running. The tools share the notebook's Python, so they wait for the cell to finish. You can stop the cell in the Notebook tab. The first search of a local copy of Mondo also takes a while, because it reads the whole file.</dd>
 
   <dt>hponorm or mondonorm stops straight away in the terminal</dt>
-  <dd>They ask questions that this terminal can't answer. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
+  <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
 
   <dt>My files have gone</dt>
   <dd>Are you using the same browser, on the same computer, and not a private window? The browser keeps the files for this site only. If your browser clears site data when it closes, it deletes them too, so download anything you want to keep.</dd>
@@ -41,4 +41,4 @@
 </dl>
 
 <h2>Reporting a fault</h2>
-<p>If a tool fails and shows <i>Python’s traceback (for reporting a fault)</i> under the result, or a file the workbench made doesn't pass its own check, that's a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>. Include the traceback and, if you can, a file that shows the problem, such as an example or a de-identified copy of your own file. Never attach a family's real data.</p>
+<p>If a tool fails and shows <i>Python’s traceback (for reporting a fault)</i> under the result, or a file the workbench made doesn't pass its own check, that's a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>. Include the traceback and, if you can, a file that shows the problem, such as one of the examples, or a made-up file that does the same thing. Never attach a family's real data, even de-identified.</p>

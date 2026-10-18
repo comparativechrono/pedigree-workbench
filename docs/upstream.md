@@ -8,7 +8,7 @@ got a pull request making those changes, and all of them were merged and
 released on PyPI on 18 October 2026. The copies here are those releases, taken
 from their wheels, so `pip install` now gives exactly what the workbench runs.
 
-| Package | Before | Pull request | Released |
+| Package | On PyPI before | Pull request | Released |
 |---|---|---|---|
 | pedigree-ga4gh | – | [pedigree-ga4gh#1](https://github.com/comparativechrono/pedigree-ga4gh/pull/1) | **1.0.0**, new: the one GA4GH implementation |
 | studio2ga4gh | 0.3.0 | [studio2ga4gh#1](https://github.com/comparativechrono/studio2ga4gh/pull/1) | **0.4.0**, rewritten on pedigree-ga4gh |
@@ -26,8 +26,8 @@ from their wheels, so `pip install` now gives exactly what the workbench runs.
 
 ## Releasing a new version
 
-Every package's repository has a workflow, `release.yml`, that publishes the
-package to PyPI when a GitHub release is published. It uses PyPI's trusted
+Every repository that had a pull request now has a workflow, `release.yml`,
+that publishes the package to PyPI when a GitHub release is published. It uses PyPI's trusted
 publishing, so no token is stored anywhere; PyPI knows each repository as a
 trusted publisher (owner `comparativechrono`, the repository's name, workflow
 `release.yml`, environment `pypi`). To release a new version, set it in
@@ -48,9 +48,9 @@ October 2026 releases followed:
 
 studio2ped, ped2studio, hponorm and mondonorm depend on none of these and can
 be released at any time; phenopacket-toolkit works with hponorm and mondonorm
-1.0 or 1.1. A release whose tests ran before a package it needs reached PyPI
-stops at the install step; once that package is out, re-running the failed job
-publishes it.
+1.0 or 1.1. If a release's tests run before a package it needs has reached
+PyPI, the release stops at the install step. Once that package is out, re-run
+the failed job to publish it.
 
 ## 1. pedigree-ga4gh: a package of its own
 
@@ -96,8 +96,8 @@ In its pull request; the workbench's copy is the same. What changed:
   changes nothing: it decided how a condition without a term was written, and
   such conditions are now left out. Whether a matched condition is a disease
   or a phenotype follows its term (Mondo or HPO).
-* Carriers, pregnancies, losses and symbols for several people go into the
-  narrative.
+* Carriers, pregnancies and losses are noted in the narrative. A symbol for
+  several people is written as one person, with a note under the result.
 
 The README describes the new output. The command's options are backwards
 compatible, except that unmatched conditions are now left out. The notes in
@@ -179,8 +179,8 @@ instead of writing a Family without one.
 
 The 0.3.0 release has no repository link on PyPI, and its repository was
 empty: 0.4.0's metadata links the repository, which now holds the code, its
-first commit being 0.3.0 as released. (The lab's software page does not list
-the toolkit yet.)
+first commit being 0.3.0 as released. (ChronomicMedicine pull request 1 adds
+the toolkit to the lab's Software page; see section 10.)
 
 One change came from hponorm and mondonorm 1.1, which make their ontology
 index available at the top of the package. `filter --include-descendants`
@@ -252,7 +252,7 @@ session records a union.
 
 ## 6. ga4gh2abusua → 0.4.0
 
-The reverse of abusua2ga4gh, on PyPI at 0.3.0 with an empty repository. 0.3.0
+The reverse of abusua2ga4gh, which was on PyPI at 0.3.0 with an empty repository. 0.3.0
 read abusua2ga4gh 0.2's non-standard files and could not read the standard
 form properly: in a Phenopacket the conditions sit beside `subject`, not
 inside it, so a standard GA4GH Pedigree came back without them. It also took
@@ -345,7 +345,8 @@ What was wrong before 1.1:
 
 ## 10. The lab web site
 
-The Software page on comparativechrono.org listed seven of the packages.
+Before this, the Software page on comparativechrono.org listed seven of the
+packages.
 [ChronomicMedicine pull request 1](https://github.com/comparativechrono/ChronomicMedicine/pull/1)
 adds pedigree-ga4gh, abusua2ga4gh, ga4gh2abusua and phenopacket-toolkit, puts
 Abusua Pedigree Studio and pedigree-ga4gh on the map of formats, and links the

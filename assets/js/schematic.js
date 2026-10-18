@@ -108,7 +108,7 @@
     const svg = el('svg', { viewBox: VIEWBOX[layout], role: 'img', 'aria-labelledby': uid + 't' }, container);
     const title = el('title', { id: uid + 't' }, svg);
     title.textContent =
-      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. Its conditions are matched to HPO and Mondo terms, and phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them.';
+      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. The drawing’s conditions are matched to HPO and Mondo terms. phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them.';
     const defs = el('defs', {}, svg);
     const mk = (id, cls) => {
       const m = el('marker', { id, viewBox: '0 0 10 10', refX: 8.5, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);

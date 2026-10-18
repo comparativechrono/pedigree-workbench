@@ -5,7 +5,7 @@
 <h2>The standard so far</h2>
 <p>The GA4GH Pedigree Standard is still being developed. Its published documentation describes a conceptual model, in which a pedigree is a set of individuals and the relationships between them. Each relationship is named with a term from the Kinship Ontology, KIN. The model isn't a file format of its own. Instead, other standards carry it, in two forms:</p>
 <ul>
-  <li><b>In Phenopackets.</b> A new message called <i>Pedigree</i> was proposed for the Phenopackets schema in November 2022. In it, the individuals are Phenopackets and the relationships are named by KIN terms. The proposal was closed without being merged in September 2025, because the Pedigree group hadn't reached a decision yet. It isn't in any release of Phenopackets.</li>
+  <li><b>In Phenopackets.</b> A new message called <i>Pedigree</i> was proposed for the Phenopackets schema in November 2022. In it, the individuals are Phenopackets and the relationships are named by KIN terms. In September 2025 the proposal was closed without being merged, because the Pedigree group hadn't reached a decision yet. It isn't in any release of Phenopackets.</li>
   <li><b>In HL7 FHIR.</b> There's a draft implementation guide for this form. Each person is a FHIR Patient, and each relationship is a FamilyMemberHistory.</li>
 </ul>
 <p>Neither form has been approved yet. The approved GA4GH format that the workbench writes is <b>Phenopackets version 2</b>. That's the format of the Phenopackets Family, and of the Phenopackets inside the GA4GH Pedigree.</p>
@@ -39,9 +39,9 @@
 <ul>
   <li>Every individual is a complete Phenopacket version 2, with its own <code>metaData</code>. This means everything about a person – their sex, whether they're alive, their diseases and phenotypes – is held in a structure that is approved and can be checked. Only the wrapper, with its list of individuals and its relationships, comes from the proposal.</li>
   <li>Each relationship is written once, as one current KIN term, in what the standard calls the <i>reduced form</i>. Each parent is linked to each child. Partners are linked only if they have no children together, or if they're related or separated. All the twins in a set are linked to one of them. Brothers and sisters aren't linked at all, because the parents they share already show that. The page on <a href="#h-kin">KIN</a> lists the terms.</li>
-  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Their names are never written, because Phenopackets have no field for a name.</li>
+  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Phenopackets have no field for a name, so names are never written as such. If you choose to name people by the drawing's labels, though, their ids may be names.</li>
   <li>A condition without an ontology term is left out, with a note, because a disease or phenotype without an id is invalid.</li>
-  <li>Anything the standard has no field for, such as a carrier or a pregnancy, goes into the <code>narrative</code> so that it isn't lost.</li>
+  <li>Some things the standard has no field for, such as a carrier or a pregnancy, are noted in the <code>narrative</code> so that they aren't lost.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_ga4gh-pedigree.json">Look at the Okafor GA4GH Pedigree</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check it</button></div>
 
@@ -54,7 +54,7 @@
 <p>If the GA4GH settles on a different form, only one package, <code>pedigree-ga4gh</code>, will have to change, and the upgrade will rewrite files that are in this form.</p>
 
 <h2>One implementation</h2>
-<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>. This means studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. The package's check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, as well as the pedigree's own rules (<a href="#h-tool-validate">Check against the standard</a>).</p>
+<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>. This means studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. The package's check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, as well as the GA4GH Pedigree's own rules (<a href="#h-tool-validate">Check against the standard</a>).</p>
 
 <h2>Version 1, in draft</h2>
 <p>Since June 2026, the Pedigree group has been drafting version 1 of the standard. It hasn't been merged or approved yet, and it may change during review. As drafted, it would give the GA4GH Pedigree a schema of its own:</p>

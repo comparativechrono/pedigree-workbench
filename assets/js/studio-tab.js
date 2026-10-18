@@ -144,7 +144,7 @@
       this._check();
       if (!this.dirty) return true;
       const where = this.path ? `<b>${esc(this.fs.pretty(this.path))}</b>` : 'a file';
-      return MG.confirmBox('Leave the drawing unsaved?', `<p>The drawing you’re looking at has changes that aren’t saved in ${where}. ${esc(what)} will replace it, although Undo in the Studio can bring it back.</p>`, 'Go on without saving', { cancel: 'Keep it' });
+      return MG.confirmBox('Leave the drawing unsaved?', `<p>The drawing you’re looking at has changes that aren’t saved in ${where}. ${esc(what)} will replace it, although Undo in the Studio brings it back.</p>`, 'Go on without saving', { cancel: 'Keep it' });
     }
 
     /* ---------------- opening ---------------- */

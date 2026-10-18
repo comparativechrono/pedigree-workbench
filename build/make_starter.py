@@ -16,8 +16,8 @@ CELLS = [
     ("md", """# The pedigree packages in Python
 
 This notebook uses the workbench's Python packages directly. They are the same packages that the **Tools** tab and
-the **Terminal** run. Run the cells in order from the top: click a cell and press **Shift+Enter**. The first cell starts
-Python in your browser, which takes a few seconds the first time.
+the **Terminal** run. Run the cells in order from the top: click a cell and press **Shift+Enter**. The first code cell
+starts Python in your browser, which takes a few seconds the first time.
 
 The example files are in `/data/examples`, and can't be changed. Anything you make goes into your own folder, `~`
 (`/home/user`). On your own computer the same code works once you've installed the packages with
@@ -52,7 +52,8 @@ for path, _ in result.files:
     print("wrote", path)"""),
     ("md", """## Checking a file against the standard
 
-`pedigree_ga4gh` is the one GA4GH implementation that the other packages share. `validate` makes the checks of the
+`pedigree_ga4gh` is the GA4GH implementation that studio2ga4gh, ga4gh2studio and the phenopacket toolkit share.
+`validate` applies the checks of the
 Phenopackets v2 schema and of phenopacket-tools, and those of the GA4GH Pedigree, such as the KIN relations, the ids
 and the parents."""),
     ("code", """import pedigree_ga4gh as pg
@@ -88,7 +89,7 @@ shared = deidentify(family, remap_ids="seq")
 print("new ids:", shared.crosswalk)"""),
     ("md", """## PED files
 
-`mpedtools` reads PED files and MPED files, which hold several conditions in a column each."""),
+`mpedtools` reads PED files and MPED files, which hold several conditions, each in its own column."""),
     ("code", """import mpedtools
 
 ped = mpedtools.read("/data/examples/okafor.mped")

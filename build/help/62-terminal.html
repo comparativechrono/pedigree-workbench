@@ -11,7 +11,7 @@
 <tr><td><code>studio2ped</code>, <code>ped2studio</code></td><td>a drawing → a PED or MPED file, and back</td></tr>
 <tr><td><code>mpedtools</code></td><td>PED and MPED files: <code>info</code>, <code>validate</code>, <code>extract</code>, <code>merge</code>, <code>split</code>, <code>convert</code> …</td></tr>
 <tr><td><code>phenotk</code></td><td>the phenopacket toolkit: <code>view</code>, <code>stats</code>, <code>validate</code>, <code>normalise</code>, <code>filter</code>, <code>deidentify</code>, <code>convert</code>, <code>upgrade</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>ped</code>, <code>sort</code></td></tr>
-<tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation the others share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
+<tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation that studio2ga4gh, ga4gh2studio and phenotk share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
 <tr><td><code>hponorm</code>, <code>mondonorm</code></td><td>match the names in a GA4GH file to HPO or Mondo terms (see below)</td></tr>
 <tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out from scratch)</td></tr>
 </table>
@@ -37,7 +37,7 @@ done
 for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedigree-ga4gh validate "$f" | tail -1)"; done</code></pre>
 
 <h2>hponorm and mondonorm here</h2>
-<p>As they go, these two programs ask you about each name and wait for you to type an answer. This terminal can't answer a program's questions, so they stop at the first question, keeping the choices made so far. In this terminal, they take their answers from a file instead:</p>
+<p>As they go, these two programs ask you about each name and wait for you to type an answer. This terminal can't pass your answers to a program while it's running, so they stop at the first question, keeping the choices made so far. Here, they take their answers from a file instead:</p>
 <pre class="code"><code>{"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}}</code></pre>
 <pre class="code"><code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code></pre>
 <p>For most jobs, <code>phenotk normalise FILE --mapping terms.json</code> is simpler. It accepts the workbench's terms files unchanged, and fills in diseases and phenotypes in one go. To match names by pointing and clicking, use <a href="#h-tool-terms">Match conditions to terms</a>.</p>

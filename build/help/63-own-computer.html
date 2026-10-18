@@ -1,10 +1,11 @@
 <!-- id: h-own-computer | title: On your own computer | group: Notebook and terminal | summary: Using the same packages outside the browser | keys: own computer local install pip pypi python packages download bundle zip pythonpath offline server pipeline -->
 <h1><!--ICON:download-->On your own computer</h1>
-<p class="lede">The packages that run here are ordinary Python packages, so the commands and code the workbench shows you will also run on your own computer: in a pipeline, on a server, or over many families at once.</p>
+<p class="lede">The packages that run here are ordinary Python packages, so the commands and code that the workbench shows you will also work on your own computer: in a pipeline, on a server, or over many families at once.</p>
 
 <h2>Installing them</h2>
-<p>All of them are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
+<p>All of them except pedwb, the workbench's own runner, are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
 <pre class="code"><code>pip install pedigree-ga4gh studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenopacket-toolkit</code></pre>
+<p>If you installed them before October 2026, add <code>--upgrade</code> to that command. The earlier releases of studio2ga4gh, ga4gh2studio and phenopacket-toolkit write or read the older forms that the workbench now upgrades.</p>
 <p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code> and <code>pedigree-ga4gh</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
 
 <h2>The workbench's own copies</h2>
@@ -18,8 +19,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <h2>What else they use</h2>
 <ul>
-  <li><b>PyYAML</b> reads and writes YAML files: <code>pip install pyyaml</code>.</li>
-  <li><b>rapidfuzz</b> is optional. If it's installed, hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word: <code>pip install rapidfuzz</code>. You don't need it for speed, and the scores are the same without it.</li>
+  <li><b>PyYAML</b> is needed only for YAML files: <code>pip install pyyaml</code>.</li>
+  <li><b>rapidfuzz</b> is optional (<code>pip install rapidfuzz</code>). If it's installed, hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word. You don't need it for speed, and the scores are the same without it.</li>
   <li><b>rich</b>, if it's installed, gives hponorm and mondonorm their coloured questions.</li>
 </ul>
-<p>Everything else is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they were designed to, which the terminal here can't do.</p>
+<p>Everything else is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they go, which they can't do in the terminal here.</p>

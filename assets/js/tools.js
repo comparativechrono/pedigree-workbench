@@ -110,7 +110,7 @@
       pkg: 'ga4gh2studio',
       what: 'Draw a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio, with its conditions in the colour key.',
       about:
-        'The family is laid out from its relationships. Each condition gets a colour, and the key names it with its term (“breast cancer [MONDO:0007254]”), so the drawing converts back to the same terms. Files made by older versions of our tools need upgrading first (Check and look inside → Upgrade).',
+        'The family is laid out from its relationships. Each condition gets a colour, and the key names it with its term (“breast cancer [MONDO:0007254]”), so the drawing converts back to the same terms. Files made by older versions of our tools need upgrading first (Check and look inside → Upgrade a file from an older tool).',
       help: 'h-tool-ga4gh2studio',
       fields: [
         { key: 'input', type: 'file', label: 'The GA4GH file', kinds: ['pedigree', 'family'] },
@@ -129,7 +129,7 @@
       pkg: 'studio2ped',
       what: 'Write a drawing as a PED file for linkage and association programs (an MPED file when it shows several conditions or carriers).',
       about:
-        'A PED file has one line per person, giving their family, their id, their father and mother, their sex and whether they are affected. The father and mother are the genetic parents, so adoptive parents and surrogates are written as 0. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but these are often names, so check them before you share the file. If an id would be empty, 0 or shared by two people, the pedigree number is used instead. The “no children” and “infertility” bars are left out, as they aren’t people.',
+        'A PED file has one line per person, giving their family, their id, their father and mother, their sex and whether they are affected. The father and mother are the genetic parents, so an adopted child, or a child carried by a surrogate, gets 0 in place of those parents. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but these are often names, so check them before you share the file. If an id would be empty, 0 or shared by two people, the pedigree number is used instead. The “no children” and “infertility” bars are left out, as they aren’t people.',
       help: 'h-tool-studio2ped',
       fields: [
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },
@@ -156,7 +156,7 @@
       pkg: 'ped2studio',
       what: 'Draw a PED file in Pedigree Studio: the people, their parents, and who is affected.',
       about:
-        'Founders, couples and their children are laid out generation by generation, and affected people (status 2) are filled in with the colour you choose. Pedigree Studio’s Tidy will make the drawing neater. A PED file says nothing about twins, deaths or adoptions, so add those in the Studio.',
+        'Founders, couples and their children are laid out generation by generation, and affected people (status 2) are filled in with the colour you choose. Pedigree Studio’s Tidy usually makes the drawing neater. A PED file says nothing about twins, deaths or adoptions, so add those in the Studio.',
       help: 'h-tool-ped2studio',
       fields: [
         { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
@@ -235,7 +235,7 @@
       pkg: 'phenotk',
       what: 'Give terms to the findings in a GA4GH or Phenopackets file that have a name but no id, from a terms file or by looking them up.',
       about:
-        'Findings that have a name but no ontology id, as older files often do, get their id from a terms file. If you allow it, names can also be looked up in the HPO (for phenotypes) or Mondo (for diseases), and by default a term is used only when the name is its label or one of its synonyms. The tool also tidies the file into the standard form, and writes a log of every decision next to the new file.',
+        'Findings that have a name but no ontology id, which are common in older files, get their id from a terms file. If you allow it, names can also be looked up in the HPO (for phenotypes) or Mondo (for diseases). By default, a looked-up term is used only when the name is its label or one of its synonyms. The tool also tidies the file into the standard form, and writes a log of every decision next to the new file.',
       help: 'h-tool-normalise',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -272,7 +272,7 @@
       pkg: 'pedigree-ga4gh',
       what: 'Check a GA4GH Pedigree, Phenopackets Family, Cohort or Phenopacket against the standards, and say how to fix what is wrong.',
       about:
-        'It makes the checks of the Phenopackets v2 schema and of phenopacket-tools, the Phenopackets team’s own validator, such as required fields, ontology ids, ages and the resources in metaData. For a GA4GH Pedigree it also checks the KIN relations, that everyone named in a relationship or as an index patient is in the file, the sexes of parents, and that nobody is their own ancestor. Errors make a file invalid, warnings are worth fixing, and notes are for information.',
+        'It applies the checks of the Phenopackets v2 schema and of phenopacket-tools, the Phenopackets team’s own validator, such as required fields, ontology ids, ages and the resources in metaData. For a GA4GH Pedigree it also checks the KIN relations, that everyone named in a relationship or as an index patient is in the file, the sexes of parents, and that nobody is their own ancestor. Errors make a file invalid, warnings are worth fixing, and notes are for information.',
       help: 'h-tool-validate',
       fields: [{ key: 'input', type: 'file', label: 'The file', kinds: GA4GH }],
       argv: (v) => ['pedigree-ga4gh', 'validate', v.input],
@@ -304,7 +304,7 @@
       title: 'Look inside a GA4GH file',
       pkg: 'phenotk',
       what: 'Show a GA4GH or Phenopackets file as a table of people and their terms, or count what is in it.',
-      about: 'A quick way to read a file without wading through its JSON. You can see who is in it, with their sex, status, diseases and phenotypes, or just count the people, terms and relationships.',
+      about: 'It’s a quick way to read a file without wading through its JSON. You can see who is in it, with their sex, status, diseases and phenotypes, or just count the people, terms and relationships.',
       help: 'h-tool-view',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -341,7 +341,7 @@
       pkg: 'phenotk',
       what: 'Give people new ids, and take out dates of birth, other ids and, if you like, who made the file.',
       about:
-        'The ids are replaced in the same way everywhere they appear (the relationships, the pedigree and the index patient) with IND-0001, IND-0002 and so on, or with codes made from the old ids. The key from old ids to new can be saved in a separate file, which you should keep apart from the file you share. De-identifying removes what the file says directly. Whether the family could still be recognised from what’s left, such as a rare condition or a large family, is for you to judge.',
+        'The ids are replaced with IND-0001, IND-0002 and so on, or with codes made from the old ids. Each new id is used everywhere the old one appeared: in the relationships, the pedigree and the index patient. The key from old ids to new can be saved in a separate file, which you should keep apart from the file you share. De-identifying removes what the file says directly. Whether the family could still be recognised from what’s left, such as a rare condition or a large family, is for you to judge.',
       help: 'h-tool-deidentify',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -377,7 +377,7 @@
       pkg: 'phenotk',
       what: 'Make a smaller file with only the proband, the affected people, one sex or the people you name, or with only some terms.',
       about:
-        'Filters on people keep or drop whole people. In a GA4GH Pedigree, the relationships of the people who have gone are always dropped too, and in a Family, “Tidy the pedigree” takes them out of its pedigree. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
+        'Filters on people keep or drop whole people. In a GA4GH Pedigree, the relationships of the people left out are always dropped too, and in a Family, “Tidy the pedigree” takes them out of its pedigree. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
       help: 'h-tool-filter',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -437,7 +437,7 @@
       pkg: 'phenotk',
       what: 'Merge Phenopackets (or Families) into one Cohort, or into one Family.',
       about:
-        'A Cohort is a set of people who needn’t be related, such as the probands of several families. If someone’s id is already used by a person in another file (IV-3 in two families, say), they are renamed after their file’s id. A Family is one family. Its pedigree comes from the Families and GA4GH Pedigrees among the files, and anyone who appears in more than one file is kept once.',
+        'A Cohort is a set of people who needn’t be related, such as the probands of several families. In a Cohort, if someone’s id is already used by a person in another file (IV-3 in two families, say), they are renamed after their file’s id. A Family is one family. Its pedigree comes from the Families and GA4GH Pedigrees among the files, and anyone who appears in more than one file is kept once.',
       help: 'h-tool-merge',
       fields: [
         { key: 'inputs', type: 'files', label: 'The files', kinds: GA4GH },
@@ -787,7 +787,7 @@
         grid.appendChild(card);
       }
       M.appendChild(grid);
-      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser when you first run a tool. On your first visit it downloads about 10 MB, which your browser then keeps. Your files never leave this computer.'));
+      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. Your files never leave this computer.'));
     }
     /** under the map: what can be done with a kind of file */
     _kindPanel(kind, panel) {
@@ -1206,7 +1206,7 @@
   function missing(tool, x) {
     for (const f of tool.fields) {
       if (f.show && !f.show(x)) continue;
-      if ((f.type === 'file' && !f.optional && !x[f.key]) || (f.type === 'files' && !(x[f.key] || []).length)) return `Choose ${f.label.toLowerCase().replace(/^the /, 'the ')}.`;
+      if ((f.type === 'file' && !f.optional && !x[f.key]) || (f.type === 'files' && !(x[f.key] || []).length)) return `Choose ${f.label.replace(/^The /, 'the ')}.`;
       if ((f.type === 'folder' || f.type === 'path') && !f.optional && !x[f.key]) return `Fill in “${f.label}”.`;
       if ((f.type === 'folder' || f.type === 'path') && x[f.key] && !(x[f.key] === HOME() || x[f.key].startsWith(HOME() + '/'))) return 'Results can only be saved in your home folder (~).';
       if (f.type === 'files' && f.key === 'inputs' && tool.id.endsWith('merge') && (x[f.key] || []).length < 2) return 'Choose at least two files.';
@@ -1317,7 +1317,7 @@
     }
     const rows = r.result.conditions;
     if (!rows.length) {
-      box.appendChild(h('p.muted', 'The drawing’s colour key names no conditions.'));
+      box.appendChild(h('p.muted', 'The drawing’s colour key doesn’t name any conditions.'));
       return;
     }
     const t = h('table.tl-condtable', h('tr', h('th', 'Condition in the key'), h('th', 'Term'), h('th', '')));
@@ -1384,7 +1384,7 @@
       const R = this.root;
       R.appendChild(h('div.tl-toolhead', h('h2.tl-title', 'Match conditions to terms'), h('span.tl-pkg', 'hponorm · mondonorm')));
       R.appendChild(h('p.tl-lead', 'GA4GH and Phenopackets files name conditions by ontology terms, using Mondo for diseases and the Human Phenotype Ontology (HPO) for signs and symptoms. Here you can find the term for each condition in a drawing’s colour key, and keep the matches in a terms file for Drawing → GA4GH to use.'));
-      const more = h('details.tl-about', h('summary', 'More about matching'), h('p', { html: 'The searches are hponorm’s and mondonorm’s. EBI’s Ontology Lookup Service has the latest releases and finds terms that a local search can miss, but it needs the internet, and it sends the names you search for (though not the drawing) to EBI. A copy of an ontology on this computer works offline. You can download the HPO here (about 11 MB). Mondo’s file, which is about 50 MB, has to be downloaded with your browser from its release page and then added, because its host doesn’t let web pages download it.' }));
+      const more = h('details.tl-about', h('summary', 'More about matching'), h('p', { html: 'The searches are the ones hponorm and mondonorm use. EBI’s Ontology Lookup Service has the latest releases and finds terms that a local search can miss. But it needs the internet, and it sends the names you search for to EBI, though not the drawing. A copy of an ontology on this computer works offline. You can download the HPO here (about 11 MB). Mondo’s file, which is about 50 MB, has to be downloaded with your browser from its download page and then added, because its host doesn’t let web pages download it.' }));
       const hb = h('button.linkbtn', { type: 'button', html: icon('book') + '<span>Help and a walkthrough</span>' });
       hb.addEventListener('click', () => MG.app.showHelp('h-tool-terms'));
       more.appendChild(h('p', hb));
@@ -1668,7 +1668,7 @@
       const details = h('details.tl-samebox', h('summary', { html: icon('code') + '<span>The same in Python</span>' }));
       const pre = h('pre.code', { dataset: { run: 'py' } }, h('code', code.join('\n')));
       details.appendChild(h('div.tl-code', h('div.tl-code-t', 'Python (a notebook cell)'), pre));
-      details.appendChild(h('p.tl-help', { html: 'There’s no terminal command that reads a drawing’s key. hponorm and mondonorm match the names in GA4GH and Phenopackets files and ask you questions as they go, which this terminal can’t answer, so here they take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code>.' }));
+      details.appendChild(h('p.tl-help', { html: 'There’s no terminal command that reads a drawing’s key. hponorm and mondonorm match the names in GA4GH and Phenopackets files, and they ask you questions as they go. This terminal can’t pass your answers to them, so here they take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code>.' }));
       box.appendChild(details);
       MG.app.decorateCode(pre);
     }

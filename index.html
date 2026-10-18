@@ -44,7 +44,7 @@
       <div class="help-body" id="helpBody">
 <article class="help-page" id="h-home" data-title="Help" data-group="Start here" data-group-page="h-home" data-keys="help index topics contents start" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>The Pedigree workbench</h1>
-<p class="lede">Draw a family in Pedigree Studio, then turn the drawing into the files that other people and other programs need. Linkage programs read PED files, and the GA4GH Pedigree and Phenopackets files let you share a family's pedigree and findings in the international standard. The tools that do this are our Python packages, which run here in your browser. You can use them by pointing and clicking in the Tools tab, or as commands in the Terminal tab and code in the Notebook tab.</p>
+<p class="lede">Draw a family in Pedigree Studio, then turn the drawing into the files that other people and other programs need. Linkage programs read PED files, and the GA4GH Pedigree and Phenopackets files let you share a family's pedigree and findings in the international standard. The tools that do this are our Python packages, which run here in your browser. You can use them by pointing and clicking in the Tools tab, by typing commands in the Terminal tab, or by writing code in the Notebook tab.</p>
 <div class="help-start">
   <button type="button" data-goto="h-start"><b><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 4l13 8-13 8z"/></svg>A first session</b><span>ten minutes: draw, convert, check</span></button>
   <button type="button" data-bench="studio"><b><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Studio</b><span>draw a pedigree</span></button>
@@ -57,11 +57,11 @@
 <div class="pw-map"></div>
 
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Everything stays on this computer</div>
-<p>Pedigree Studio and Python run inside this web page. Your drawings and files are kept in this browser, on this computer, and aren't sent anywhere, with one exception. If you ask Match conditions to terms or Fill in missing terms to search EBI's Ontology Lookup Service, the names you search for go to EBI, but nothing else does. <a href="#h-privacy">Privacy</a> has the details, and <a href="#h-files">Your files</a> explains how to keep copies.</p></div>
+<p>Pedigree Studio and Python run inside this web page. Your drawings and files are kept in this browser, on this computer, and aren't sent anywhere, with one exception. If you ask <b>Match conditions to terms</b> or <b>Fill in missing terms</b> to search EBI's Ontology Lookup Service, the names you search for, and any ids you type, go to EBI. Nothing else is sent, not even the drawing. <a href="#h-privacy">Privacy</a> has the details, and <a href="#h-files">Your files</a> explains how to keep copies.</p></div>
 <div class="help-topics">
 <section><h2><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 6H15a3.5 3.5 0 0 1 0 7H9a3.5 3.5 0 0 0 0 7h7.5"/></svg><a href="#h-walks">Walkthroughs</a></h2><ul>
 <li><a href="#h-walk-ga4gh">Share a family in the GA4GH standard<small>Draw, match terms, convert, check, de-identify, download</small></a></li>
-<li><a href="#h-walk-ped">Make a PED file for a linkage program<small>Drawing → MPED, take one condition out, check the ids</small></a></li>
+<li><a href="#h-walk-ped">Make a PED file for a linkage program<small>Drawing → MPED, check the ids, take one condition out</small></a></li>
 <li><a href="#h-walk-draw-ped">Draw a PED file you have been sent<small>Upload it, draw it, tidy it, add what a PED file cannot say</small></a></li>
 <li><a href="#h-walk-draw-ga4gh">Draw a GA4GH or Phenopackets file<small>Upgrade it if it is old, draw it, check the key</small></a></li>
 <li><a href="#h-walk-check">Check a GA4GH file, or update an old one<small>What the check reports, and how to fix each kind of problem</small></a></li>
@@ -133,7 +133,7 @@
 <p>Under the form, <b>The same in the terminal, and in Python</b> shows exactly what the tool runs: a command for the Terminal tab and code for a notebook. You can use them to do the same job again without the form.</p>
 
 <h2>4 · Check the result</h2>
-<p>The files it writes appear under the result, and are saved in <code>~/results</code>. Press <b>Check</b> next to a file to check it against the standards in the same way as phenopacket-tools, the Phenopackets team's own validator. It also tells you how to fix anything that's wrong.</p>
+<p>The files the tool writes appear under the result and are saved in <code>~/results</code>. Press <b>Check</b> next to a file to check it against the standards. The check works in the same way as phenopacket-tools, the Phenopackets team's own validator, and it also tells you how to fix anything that's wrong.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check the example GA4GH Pedigree</button></div>
 
 <h2>5 · Back to a drawing, or on to a PED file</h2>
@@ -171,23 +171,23 @@
 
 <h2>At the top right</h2>
 <ul>
-  <li><b>Saved in this browser</b> shows that your files are being stored. If the browser doesn't let the page keep them (in a private window, for example), it tells you.</li>
+  <li><b>Saved in this browser</b> shows that your files are being stored. If the browser doesn't let the page keep them (in a private window, for example), it changes to <i>Not kept</i>.</li>
   <li><b>user</b> lets you put your own name in the terminal's prompt, if you want it there. The name is kept in this browser only.</li>
-  <li><b>My files</b> lets you download all your files as a .zip, add files or folders from your computer, or delete everything and start again.</li>
+  <li><b>My files</b> lets you download all your files as a .zip, add files or folders from your computer, or delete them all with <b>Start afresh</b>.</li>
   <li><b>Full screen</b>.</li>
 </ul>
 
 <h2>On a phone or tablet</h2>
 <p>The workbench works on a phone, but a pedigree is easier to draw on a larger screen. On a narrow screen, the button at the top left opens the help over the workbench, and the Tools tab's list of tools is behind <b>All tools</b>. Pedigree Studio has its own layout for touch screens.</p>
 
-<div class="callout warn"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>One tab at a time</div><p>If the workbench is open in two browser tabs at once, both keep their files in the same place, so one tab can overwrite what the other has saved. The workbench warns you when this happens, so keep to one of the tabs.</p></div>
+<div class="callout warn"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>One tab at a time</div><p>If the workbench is open in two browser tabs at once, both keep their files in the same place, so one tab can overwrite what the other has saved. The workbench warns you when it finds itself open in another tab. If you see that warning, carry on in just one of them.</p></div>
 </article>
 <article class="help-page" id="h-walks" data-title="Walkthroughs" data-group="Walkthroughs" data-group-page="h-walks" data-keys="walkthrough walkthroughs tutorial how to steps guide task jobs recipe" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 6H15a3.5 3.5 0 0 1 0 7H9a3.5 3.5 0 0 0 0 7h7.5"/></svg>Walkthroughs</h1>
 <p class="lede">Each walkthrough takes you through one job from beginning to end, with a button for every step. They use the example families, so you can follow one through before you try it with a family of your own.</p>
 <ul class="help-grouplist">
 <li><a href="#h-walk-ga4gh">Share a family in the GA4GH standard<small>Draw, match terms, convert, check, de-identify, download</small></a></li>
-<li><a href="#h-walk-ped">Make a PED file for a linkage program<small>Drawing → MPED, take one condition out, check the ids</small></a></li>
+<li><a href="#h-walk-ped">Make a PED file for a linkage program<small>Drawing → MPED, check the ids, take one condition out</small></a></li>
 <li><a href="#h-walk-draw-ped">Draw a PED file you have been sent<small>Upload it, draw it, tidy it, add what a PED file cannot say</small></a></li>
 <li><a href="#h-walk-draw-ga4gh">Draw a GA4GH or Phenopackets file<small>Upgrade it if it is old, draw it, check the key</small></a></li>
 <li><a href="#h-walk-check">Check a GA4GH file, or update an old one<small>What the check reports, and how to fix each kind of problem</small></a></li>
@@ -216,7 +216,7 @@
 <h2>3 · Convert the drawing</h2>
 <p><b>Drawing → GA4GH Pedigree and Phenopackets</b> writes the two files. Choose the drawing and the terms file. Under the terms file, a table shows the term each condition will get. A condition without a term is left out of the files, so match it first. Then press <b>Run</b>.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/okafor.studio.json" data-terms="/data/examples/example-terms.json">Convert the Okafor family</button></div>
-<p>It writes <code>~/results/okafor_ga4gh-pedigree.json</code> and <code>~/results/okafor_phenopackets-family.json</code>. They hold everyone in the drawing, with their sex, whether they're alive and their conditions as terms. They also hold the relationships between people, and say who the proband is. Anything the files have no place for, such as a pregnancy or a carrier, is written in the GA4GH Pedigree's narrative. If something didn't go in as drawn, such as a symbol that stands for several people, the tool tells you under the result.</p>
+<p>It writes <code>~/results/okafor_ga4gh-pedigree.json</code> and <code>~/results/okafor_phenopackets-family.json</code>. They hold everyone in the drawing, with their sex, whether they're alive and their conditions as terms. They also hold the relationships between people, and say who the proband is. Some things the files have no field for, such as a pregnancy or a carrier, are noted in the GA4GH Pedigree's narrative. If something didn't go in as drawn, such as a symbol that stands for several people, the tool tells you under the result.</p>
 
 <h2>4 · Check the files</h2>
 <p>Press <b>Check</b> next to a file, or use <b>Check against the standard</b> in the Tools tab. It checks the file in the same way as phenopacket-tools, the Phenopackets team's own validator. For a GA4GH Pedigree, it checks the family as well. It should say <b>Valid</b>. Errors make a file invalid, and warnings are worth reading. Notes are for information, such as an ontology release that wasn't recorded. The example files were made by the tool in step 3, so you can try the check on them now:</p>
@@ -255,12 +255,12 @@ phenotk deidentify ~/results/okafor_phenopackets-family.json -o ~/results/okafor
 
 <h2>From the drawing</h2>
 <h3>1 · Write the MPED file</h3>
-<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition. When the drawing has more, it writes an MPED file, which is a PED file with a column for each condition.</p>
+<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition. When the drawing has more, or shows carriers, it writes an MPED file, which is a PED file with a column for each condition.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/okafor.studio.json">Make the Okafor family's MPED file</button></div>
 <p>It checks the file with mpedtools straight away, and tells you if anything is wrong.</p>
 
 <h3>2 · Check the ids</h3>
-<p>studio2ped names each person by their pedigree number, such as <code>II-3</code>, just as the GA4GH files do. This means you can share the file without anyone's name in it. With <b>People are named by</b>, you can choose the drawing's labels, Pedigree Studio's own ids (<code>p-ggf</code>) or the text under the symbols instead, as version 0.1 did. In the Okafor family, that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. If two people would get the same id, the pedigree number is used instead, with a note.</p>
+<p>studio2ped names each person by their pedigree number, such as <code>II-3</code>, just as the GA4GH files do. This means you can share the file without anyone's name in it. With <b>People are named by</b>, you can choose the drawing's labels or Pedigree Studio's own ids (<code>p-ggf</code>) instead, or the text under the symbols, which is what version 0.1 used. In the Okafor family, that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. If two people would get the same id, the pedigree number is used instead, with a note.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="mped-info" data-input="/data/examples/okafor.mped">Summary and check of the Okafor MPED file</button></div>
 
 <h3>3 · One condition at a time</h3>
@@ -281,7 +281,7 @@ phenotk convert /data/examples/okafor_phenopackets-family.json --to ped -o ~/res
 </article>
 <article class="help-page" id="h-walk-draw-ped" data-title="Draw a PED file you have been sent" data-group="Walkthroughs" data-group-page="h-walks" data-keys="draw ped mped file sent received linkage view picture diagram plot pedigree drawing ped2studio tidy upload" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Draw a PED file you have been sent</h1>
-<p class="lede">It's hard to read a family from a PED file. Once the file is drawn in Pedigree Studio, you can check the family at a glance, add what the PED file leaves out, and save the drawing as a picture or convert it on to the GA4GH files. The example is the PED file of the Lynch family, in which several people have had bowel or pancreatic cancer.</p>
+<p class="lede">It's hard to read a family from a PED file. Once the file is drawn in Pedigree Studio, you can check the family at a glance, add what the PED file leaves out, and save the drawing as a picture, or go on to convert it to the GA4GH files. The example is the PED file of the Lynch family, in which several people have had bowel or pancreatic cancer.</p>
 
 <h2>1 · Add the file</h2>
 <p>Add the PED file to your files with <b>My files → Add files from my computer…</b> at the top right. Or use <b>From my computer…</b> under the file box of the tool in the next step. This puts the file in <code>~/data</code>. The workbench recognises a PED file by its ending, <code>.ped</code> or <code>.fam</code> (PLINK's name for the same six columns), and an MPED file by <code>.mped</code>. If your file ends in something else, rename it.</p>
@@ -289,7 +289,7 @@ phenotk convert /data/examples/okafor_phenopackets-family.json --to ped -o ~/res
 <h2>2 · Draw it</h2>
 <p><b>PED or MPED → drawing</b> lays the family out generation by generation and fills in the affected people (status 2). Choose the colour, and whether to fill the whole symbol or the left half, or to shade with a pattern. An MPED file's conditions each get a colour of their own.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="/data/examples/lynch.ped">Draw the Lynch family</button></div>
-<p>The drawing is saved in <code>~/pedigrees</code>. To see it, press <b>Open the drawing in Studio</b> under the result. If the box is ticked, Pedigree Studio's Tidy lays it out again as it opens, which usually gives the neatest drawing.</p>
+<p>The drawing is saved in <code>~/pedigrees</code>. To see it, press <b>Open the drawing in Studio</b> under the result. If <i>Tidy the drawing when it opens</i> was ticked on the form, Pedigree Studio's Tidy lays the drawing out again as it opens, which usually gives the neatest result.</p>
 
 <h2>3 · Finish it in the Studio</h2>
 <p>A PED file gives only each person's parents, sex and affected status, so that's all the drawing has. In the Studio, you can add the rest:</p>
@@ -312,21 +312,21 @@ studio --tidy ~/pedigrees/lynch.studio.json</code></pre>
 </article>
 <article class="help-page" id="h-walk-draw-ga4gh" data-title="Draw a GA4GH or Phenopackets file" data-group="Walkthroughs" data-group-page="h-walks" data-keys="draw ga4gh pedigree phenopackets family phenopacket file sent received picture drawing ga4gh2studio upgrade older studio2ga4gh abusua2ga4gh" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Draw a GA4GH or Phenopackets file</h1>
-<p class="lede">This walkthrough draws a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio, with each condition in the colour key under its term. You can change the drawing and convert it back, and the terms come back with it.</p>
+<p class="lede">This walkthrough shows you how to draw a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio, with each condition in the colour key under its term. You can change the drawing and convert it back, and the terms come back with it.</p>
 
 <h2>1 · Add the file</h2>
-<p>Add it with <b>My files → Add files from my computer…</b>, or with <b>From my computer…</b> under the tool's file box. The workbench tells GA4GH files apart by what's in them, whatever they're called. If it shows a file as plain JSON, it hasn't recognised it as a GA4GH file, but <b>Upgrade a file from an older tool</b> may still be able to read it.</p>
+<p>Add it with <b>My files → Add files from my computer…</b>, or with <b>From my computer…</b> under the file box of the tool you use next. The workbench tells GA4GH files apart by what's in them, whatever they're called. If it shows a file as plain JSON, it hasn't recognised it as a GA4GH file, but <b>Upgrade a file from an older tool</b> may still be able to read it.</p>
 
 <h2>2 · If it was made by an older tool, upgrade it</h2>
 <p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 aren't in the standard form, and the tools refuse them with a message explaining this. <b>Upgrade a file from an older tool</b> rewrites such a file in the standard form. You only need to do this once for each file. It lists what it changed, and anything it couldn't do.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">Upgrade an older example</button></div>
-<p>The older files often name conditions without a term. The upgrade lists them, and <b>Fill in missing terms</b> gives them their terms from a terms file (<a href="#h-walk-terms">here's how</a>). The drawing doesn't need the terms, because a condition without one is drawn with its name. The GA4GH files do need them, though. A GA4GH Pedigree from studio2ga4gh 0.3 recorded only <i>whether</i> people were affected, not what they were affected by. Draw from the Phenopackets file made with it instead, because that has the conditions.</p>
+<p>The older files often name conditions without a term. The upgrade lists them, and <b>Fill in missing terms</b> gives them their terms from a terms file (<a href="#h-walk-terms">here's how</a>). The drawing doesn't need the terms, because a condition without one is drawn with its name, but the GA4GH files do. A GA4GH Pedigree from studio2ga4gh 0.3 recorded only <i>whether</i> people were affected, not what they were affected by. Draw from the Phenopackets file made with it instead, because that has the conditions.</p>
 <p>To find out whether a file needs upgrading, open its summary in the Tools tab with the <b>More…</b> button next to the file. The summary says <i>Older form</i> if the file needs upgrading.</p>
 
 <h2>3 · Draw it</h2>
 <p><b>GA4GH or Phenopackets → drawing</b> lays the family out from its relationships. It gives each condition a colour, and names it in the colour key with its term, such as <i>breast cancer [MONDO:0007254]</i>.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="ga4gh2studio" data-input="/data/examples/okafor_ga4gh-pedigree.json">Draw the Okafor GA4GH Pedigree</button></div>
-<p>Under the result, <b>Open the drawing in Studio</b> shows it. If the box is ticked, Pedigree Studio's Tidy lays it out again as it opens.</p>
+<p>Under the result, <b>Open the drawing in Studio</b> shows it. If <i>Tidy the drawing when it opens</i> was ticked, Pedigree Studio's Tidy lays the drawing out again as it opens.</p>
 
 <h2>4 · Check the drawing</h2>
 <p>How much of the family comes back depends on the file:</p>
@@ -388,7 +388,7 @@ pedigree-ga4gh validate ~/results/abusua_phenopackets-family.json</code></pre>
 </article>
 <article class="help-page" id="h-walk-terms" data-title="Give the conditions ontology terms" data-group="Walkthroughs" data-group-page="h-walks" data-keys="ontology terms hpo mondo match matching normalise normalize curie id label disease phenotype sign symptom ols lookup hponorm mondonorm terms file mapping" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.4"/></svg>Give the conditions ontology terms</h1>
-<p class="lede">GA4GH and Phenopackets files name each condition by a term from an ontology, so that software and people everywhere read it in the same way. A disease is named by a term from the Mondo Disease Ontology, and a sign or symptom by a term from the Human Phenotype Ontology (HPO). This walkthrough finds the terms for a drawing's conditions, and fills in the terms that an existing file lacks.</p>
+<p class="lede">GA4GH and Phenopackets files name each condition by a term from an ontology, so that software and people everywhere read it in the same way. A disease is named by a term from the Mondo Disease Ontology, and a sign or symptom by a term from the Human Phenotype Ontology (HPO). This walkthrough shows you how to find the terms for a drawing's conditions, and how to fill in the terms that an existing file lacks.</p>
 
 <h2>For a drawing: Match conditions to terms</h2>
 <h3>1 · Choose the drawing</h3>
@@ -397,38 +397,38 @@ pedigree-ga4gh validate ~/results/abusua_phenopackets-family.json</code></pre>
 
 <h3>2 · Choose where to search</h3>
 <ul>
-  <li><b>EBI's Ontology Lookup Service</b> searches the latest releases, and finds terms that a local search can miss. It needs the internet, and it sends EBI the words you search for. That's the condition's name, not the drawing.</li>
-  <li><b>Copies of the ontologies on this computer</b> work without the internet and send nothing. You can download the HPO, which is about 11 MB, from the tool into <code>~/ontologies</code>. Mondo's file is about 50 MB, and its host doesn't let web pages download it. Instead, download <code>mondo.obo</code> with your browser from Mondo's download page, then add it with <b>From my computer…</b>. The first search of a file reads all of it, which takes several seconds.</li>
+  <li><b>EBI's Ontology Lookup Service</b> searches the latest releases, and finds terms that a local search can miss. It needs the internet, and it sends EBI the words you search for and any ids you type, but never the drawing.</li>
+  <li><b>Copies of the ontologies on this computer</b> work without the internet and send nothing. The tool can download the HPO (about 11 MB) into <code>~/ontologies</code> for you. Mondo's file is about 50 MB, and its host doesn't let web pages download it. Instead, download <code>mondo.obo</code> with your browser from Mondo's download page, then add it with <b>From my computer…</b>. The first search of a file reads all of it, which takes several seconds.</li>
 </ul>
 
 <h3>3 · Match each condition</h3>
-<p>For each condition, say whether it's <b>a disease</b> (Mondo) or <b>a sign or symptom</b> (HPO). The tool makes a first guess from the name. Then press <b>Suggest</b>. Each suggestion shows the term's id and label, whether its label or a synonym matched, a score and the term's definition. Choose the one that's right. If none is, change the words and search again. If you already know the id, type it and press <b>Use this id</b>. The tool looks it up, so that its label and release are recorded.</p>
+<p>For each condition, the tool guesses from the name whether it's <b>a disease</b> (Mondo) or <b>a sign or symptom</b> (HPO). Change its choice if it's wrong, then press <b>Suggest</b>. Each suggestion shows the term's id and label, whether its label or a synonym matched, a score and the term's definition. Choose the one that's right. If none is, change the words and search again. If you already know the id, type it and press <b>Use this id</b>. The tool looks it up, so that its label and release are recorded.</p>
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Choosing a term</div>
 <p>Choose the most specific term that's true of everyone with the condition in this family. <i>Hearing impairment</i> (HP:0000365) is true of the Okafor twins. If their hearing loss is known to be sensorineural, <i>Congenital sensorineural hearing impairment</i> (HP:0008527) says more. Use a Mondo term when there's a diagnosis, and HPO terms for features without one. Read the definition, because two terms can share a name, as <i>breast cancer</i> (MONDO:0007254) and <i>breast carcinoma</i> (MONDO:0004989) nearly do.</p></div>
 
 <h3>4 · Keep the matches</h3>
-<p><b>Save</b> writes the terms file, which for the Price family is <code>~/terms/price-terms.json</code>. Tick <b>Also write the ids into the drawing's colour key</b> to make a copy of the drawing whose key reads <i>Breast cancer [MONDO:0007254]</i>. A drawing like that carries its terms wherever it goes, and converts without a terms file. Then <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file already chosen.</p>
+<p><b>Save</b> writes the terms file, which for the Price family is <code>~/terms/price-terms.json</code>. Tick <b>Also write the ids into the drawing's colour key</b> to make a copy of the drawing whose key reads <i>Breast cancer [MONDO:0007254]</i>. A drawing like that carries its terms wherever it goes, and converts without a terms file. Then press <b>Next</b> to open Drawing → GA4GH with the drawing and the terms file already chosen.</p>
 
 <h2>For a GA4GH file: Fill in missing terms</h2>
-<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one its id from a terms file, ignoring case when it matches the names. It can also look up names that aren't in the terms file. It uses a term it finds when the term's name, or one of its synonyms, is the same as the condition's name, whatever the case and punctuation. With a lower threshold it takes close matches too, but each of those is a guess for you to check. It writes a log of what it decided next to the new file, <code>….normalised.log.json</code>.</p>
+<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one its id from a terms file, ignoring capital letters when it matches the names. It can also look up names that aren't in the terms file. It uses a term it finds when the term's name, or one of its synonyms, is the same as the condition's name, ignoring capital letters and punctuation. With a lower threshold it takes close matches too, but each of those is a guess for you to check. It writes a log of what it decided next to the new file, <code>….normalised.log.json</code>.</p>
 <p>A file made by an older tool must be upgraded first, and the tool tells you when that's needed. To try this, upgrade the older example, then fill in its terms from the examples' terms file. The tool picks your newest file, which is the upgraded one.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">1 · Upgrade the older example</button> <button class="do" type="button" data-tool="normalise" data-mapping="/data/examples/example-terms.json">2 · Fill in missing terms</button></div>
 
 <h2>A terms file</h2>
-<p>A terms file is a small JSON file. It lists each condition's name in the drawing, with its term and the release of the ontology the term came from. You can also write one by hand, and an id on its own is enough.</p>
+<p>A terms file is a small JSON file. It lists each condition's name in the drawing, with its term and the release of the ontology the term came from. You can also write one by hand, giving just the id if you like.</p>
 <pre class="code"><code>{
   "Breast cancer": {"id": "MONDO:0007254", "label": "breast cancer", "version": "2026-10-06"},
   "Hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment", "version": "2026-09-01"},
   "Ovarian cancer": "MONDO:0008170"
 }</code></pre>
-<p>One terms file can serve many drawings, and the names are matched whatever their case. <a href="#h-terms">Ontology terms and terms files</a> has more.</p>
+<p>One terms file can serve many drawings, and capital letters don't matter when the names are matched. <a href="#h-terms">Ontology terms and terms files</a> has more.</p>
 
 <h2>The same in the terminal and in Python</h2>
-<p>There's no command that reads a drawing's colour key and lets you work through each condition with the mouse. That's what the tool is for. These commands use a terms file:</p>
+<p>There's no command that reads a drawing's colour key and lets you work through each condition with the mouse. That's what the tool is for. These commands convert the Price family with a terms file, then upgrade the older example and fill in its terms from the same file:</p>
 <pre class="code" data-run="term"><code>studio2ga4gh /data/examples/price.studio.json -t /data/examples/example-terms.json -d ~/results
 pedigree-ga4gh upgrade /data/examples/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/older_phenopackets-family.json
 phenotk normalise ~/results/older_phenopackets-family.json --mapping /data/examples/example-terms.json --no-online -o ~/results/older.normalised.json</code></pre>
-<p><code>hponorm</code> and <code>mondonorm</code>, the programs behind the searches, match the names in a GA4GH or Phenopackets file by asking you about each one as they go. This terminal can't answer their questions, so here they stop at the first one. They can take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code>. In Python, their searches look like this:</p>
+<p><code>hponorm</code> and <code>mondonorm</code>, the programs behind the searches, match the names in a GA4GH or Phenopackets file by asking you about each one as they go. This terminal can't pass your answers to them, so here they stop at the first question. They can take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code>. In Python, their searches look like this:</p>
 <pre class="code" data-run="py"><code>from hponorm.ols import OlsClient            # EBI's Ontology Lookup Service (online)
 for c in OlsClient().search("hearing loss from birth", limit=5):
     print(c.id, c.label, c.score)
@@ -462,12 +462,12 @@ for c in index.search("breast cancer", limit=5):
 
 <h2>Where the drawing is kept</h2>
 <p>A saved drawing is one of your files, and like the others it's kept in this browser (<a href="#h-files">Your files</a>). Pedigree Studio also keeps the drawing you're working on, just as you left it. So if you close the page without saving, the drawing is still there when you come back. If it has a file, you'll see <i>unsaved changes</i> next to the file's name until you save it. If it has never been saved, the bar says <i>not saved yet</i>.</p>
-<p>Pedigree Studio's own <b>File</b> menu still works as it does when you use Pedigree Studio on its own. It saves the drawing as a file on your computer, opens a drawing from your computer, and exports pictures as PNG, or as SVG for documents and posters. To keep a drawing among your files, use <b>Save</b> on the bar.</p>
+<p>Pedigree Studio's own <b>File</b> menu still works just as it does when you use Pedigree Studio by itself. It saves the drawing as a file on your computer, opens a drawing from your computer, and exports pictures as PNG, or as SVG for documents and posters. To keep a drawing among your files, use <b>Save</b> on the bar.</p>
 
 <h2 data-anchor="drawing">Drawing a pedigree</h2>
 <p>Pedigree Studio's own help, under its <b>?</b> button, explains how to draw, covering the symbols, the toolbar and the panels. In short:</p>
 <ol>
-  <li><b>Add the first person</b> with <b>Male</b>, <b>Female</b> or <b>Unknown</b> on the toolbar. This is usually the person the pedigree is for, so mark them as the <b>proband</b> in the panel.</li>
+  <li><b>Add the first person</b> with <b>Male</b>, <b>Female</b> or <b>Unknown</b> on the toolbar. This is usually the person the pedigree is for, and the one you mark as the <b>proband</b> in the panel.</li>
   <li><b>Build out from them</b> with <b>Add a relative</b>. With someone selected, it adds a partner, a child, parents, or a brother or sister, already joined up.</li>
   <li><b>Join people yourself</b> with <b>Partners</b>, <b>Child</b> and <b>Twins</b>.</li>
   <li><b>Describe each person</b> in the panel. You can add notes under the symbol, mark someone as deceased and add shading for a condition. You can also put a mark inside the symbol for a carrier, a pregnancy, a donor or a surrogate.</li>
@@ -477,15 +477,15 @@ for c in index.search("breast cancer", limit=5):
 
 <h3>What the tools read from a drawing</h3>
 <ul>
-  <li><b>The colour key names the conditions.</b> Give each condition its own colour (or a half, a quarter or a pattern), and name it in the key with the <b>Key</b> button. A colour that the key doesn't name isn't counted as a condition. An id in brackets after the name, as in <i>Breast cancer [MONDO:0007254]</i>, gives the condition its term (<a href="#h-terms">Ontology terms</a>).</li>
+  <li><b>The colour key names the conditions.</b> Give each condition its own colour (or a half, a quarter or a pattern), and name it in the key with the <b>Key</b> button. A colour that the key doesn't name isn't counted as a condition. An id in brackets after the name, as in <i>Breast cancer [MONDO:0007254]</i>, gives the condition its term (<a href="#h-terms">Ontology terms and terms files</a>).</li>
   <li><b>The proband</b> becomes the index patient in the GA4GH files.</li>
   <li><b>The notes under the symbols</b> stay in the drawing. The GA4GH and PED files name people by their pedigree numbers, unless you choose otherwise.</li>
   <li><b>Carriers, pregnancies, losses, donors and surrogates</b> are written in the ways the standard allows. Losses and pregnancies are written as people, and donors and surrogates by their KIN relationships. Anything that has no place of its own, such as a carrier, goes in the GA4GH Pedigree's narrative.</li>
-  <li><b>A symbol that stands for several people</b>, shown by a number inside it, is written as one person with a note.</li>
+  <li><b>A symbol that stands for several people</b>, shown by a number inside it, is written as one person, and the tool tells you so under the result.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-studio="/data/examples/features.studio.json">Open the drawing with every kind of symbol</button> <button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/features.studio.json" data-terms="/data/examples/example-terms.json">See how the tools write it</button></div>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Pedigree Studio</dt>
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
@@ -587,7 +587,7 @@ for c in index.search("breast cancer", limit=5):
 <p>Every Phenopacket has its own <code>metaData</code>. This lists a resource for each ontology its terms come from, with that ontology's release, taken from the terms file. <a href="#h-ga4gh">The GA4GH Pedigree</a> and <a href="#h-phenopackets">Phenopackets</a> describe the files in full.</p>
 
 <h2>Under the result</h2>
-<p>The tool tells you what it wrote. It also notes anything that didn't go in as drawn, such as a condition without a term, a symbol that stands for several people (written as one person) or a carrier. Read the notes before you send the files.</p>
+<p>The tool tells you what it wrote. It also notes anything that didn't go in as drawn, such as a condition without a term, or a symbol that stands for several people (written as one person). Read the notes before you send the files.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>studio2ga4gh /data/examples/okafor.studio.json -t /data/examples/example-terms.json -d ~/results</code></pre>
@@ -610,7 +610,7 @@ print(result.summary)
 for note in result.warnings:
     print("note:", note)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>studio2ga4gh</dt>
 <dd>Hearn TJ. studio2ga4gh [software]. <a href="https://github.com/comparativechrono/studio2ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/studio2ga4gh</a></dd>
@@ -658,7 +658,7 @@ print(result.summary)
 for note in result.warnings:
     print("note:", note)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>ga4gh2studio</dt>
 <dd>Hearn TJ. ga4gh2studio [software]. <a href="https://github.com/comparativechrono/ga4gh2studio" target="_blank" rel="noopener">github.com/comparativechrono/ga4gh2studio</a></dd>
@@ -703,7 +703,7 @@ print(result.summary)
 for path, _ in result.files:
     print("wrote", path)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>studio2ped</dt>
 <dd>Hearn TJ. studio2ped [software]. <a href="https://github.com/comparativechrono/studio2ped" target="_blank" rel="noopener">github.com/comparativechrono/studio2ped</a></dd>
@@ -742,7 +742,7 @@ session = convert_file("/data/examples/lynch.ped", "/home/user/pedigrees/lynch.s
                        affected_color="#e67e22", use_shading=False, shading_pattern="stripes", fill_type="full")
 print(len(session["persons"]), "people")</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>ped2studio</dt>
 <dd>Hearn TJ. ped2studio [software]. <a href="https://github.com/comparativechrono/ped2studio" target="_blank" rel="noopener">github.com/comparativechrono/ped2studio</a></dd>
@@ -793,7 +793,7 @@ ptk.write(new, "/home/user/results/okafor-again_phenopackets-family.json")
 for note in notes:
     print("note:", note)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -834,7 +834,7 @@ doc = ptk.read("/data/examples/okafor_phenopackets-family.json")
 print(to_format(doc, "ped"))
 print(to_format(doc, "tsv"))</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -872,7 +872,7 @@ index = HpoIndex.load("/home/user/ontologies/hp.obo", allow_download=False)
 for c in index.search("hearing loss from birth", limit=6):
     print(c.id, c.label, c.score)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>hponorm</dt>
 <dd>Hearn TJ. hponorm [software]. <a href="https://github.com/comparativechrono/hponorm" target="_blank" rel="noopener">github.com/comparativechrono/hponorm</a></dd>
@@ -894,9 +894,9 @@ for c in index.search("hearing loss from birth", limit=6):
 <h2>The form</h2>
 <dl>
   <dt>The file</dt><dd>Choose a GA4GH Pedigree, or a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
-  <dt>Terms file</dt><dd>Choose a file of names and their terms (<a href="#h-terms">terms files</a>). Upper and lower case don't matter when the names are matched. The releases in the terms file are recorded in the new file's resources.</dd>
+  <dt>Terms file</dt><dd>Choose a file of names and their terms (<a href="#h-terms">terms files</a>). Capital letters don't matter when the names are matched. The releases in the terms file are recorded in the new file's resources.</dd>
   <dt>Look up names without a term</dt><dd>Choose <b>No</b> to use only the terms file, or look names up on <b>EBI's Ontology Lookup Service</b>, which is online, or in <b>copies of the ontologies</b> on this computer. For the copies, choose <code>hp.obo</code> and <code>mondo.obo</code>.</dd>
-  <dt>Accept a looked-up match from</dt><dd>This is the lowest score, from 0.5 to 1, at which a term the tool finds is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name scores less. So the default, 0.98, only accepts a term whose own name or synonym is the condition's name. Match conditions to terms shows the same scores out of 100. If a name's best match is less close than that, it's left without a term and listed. Entries in a terms file are always used.</dd>
+  <dt>Accept a looked-up match from</dt><dd>This is the lowest score, from 0.5 to 1, at which a term the tool finds is used. A term's own name scores 1 and one of its synonyms 0.98, ignoring capital letters and punctuation, and any other name scores less. So the default, 0.98, only accepts a term whose own name or synonym is the condition's name. Match conditions to terms shows the same scores out of 100. If a name's best match is less close than that, it's left without a term and listed. Entries in a terms file are always used.</dd>
   <dt>Save as</dt><dd>The new file is saved as <code>~/results/<i>name</i>.normalised.json</code>. A log of every decision goes next to it, as <code>….normalised.log.json</code>.</dd>
 </dl>
 <p>By default, the tool doesn't guess. If neither the terms file nor a look-up finds a term for a name, its id stays empty and the summary lists it. You can lower the threshold to accept close matches as well, but each of those is a guess, and the log asks you to check it. Names that are spelt almost alike can mean opposite things. For example, <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>
@@ -926,7 +926,7 @@ new, log = normalise(doc, mapping=mapping, use_ontology=False)
 ptk.write(new, "/home/user/results/older.normalised.json")
 print(log.summary())</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -983,7 +983,7 @@ findings = pg.validate(doc)
 print(pg.render_findings(findings))
 print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>pedigree-ga4gh</dt>
 <dd>Hearn TJ. pedigree-ga4gh [software]. <a href="https://github.com/comparativechrono/pedigree-ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-ga4gh</a></dd>
@@ -1039,7 +1039,7 @@ for c in changes:
 for t in todo:
     print("to do:", t)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>pedigree-ga4gh</dt>
 <dd>Hearn TJ. pedigree-ga4gh [software]. <a href="https://github.com/comparativechrono/pedigree-ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-ga4gh</a></dd>
@@ -1075,7 +1075,7 @@ doc = ptk.read("/data/examples/okafor_phenopackets-family.json")
 print(render(doc))
 print(render_stats(stats(doc)))</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1113,7 +1113,7 @@ a = ptk.read("/data/examples/okafor_phenopackets-family.json")
 b = ptk.read("/data/examples/okafor-later_phenopackets-family.json")
 print(render_diff(diff(a, b)))</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1130,7 +1130,7 @@ print(render_diff(diff(a, b)))</code></pre>
   <dt>Secret for the codes</dt><dd>Use any words you like, and keep them private. Without a secret, anyone who has the old ids could make the codes again, and so match each code to its old id.</dd>
   <dt>Keep dates of birth, Ages</dt><dd>Dates of birth are taken out unless you choose to keep them. You can put the age at the last encounter into bands of 5 or 10 years. For example, in 5-year bands, 47 becomes 45. Ages of onset aren't changed.</dd>
   <dt>Keep other ids</dt><dd>A person's other ids (<code>alternateIds</code>, such as a hospital number) are taken out unless you choose to keep them.</dd>
-  <dt>Hide who made the file, and when</dt><dd>The <code>metaData</code> has to say who made the file and when. So instead of the original <code>createdBy</code> and <code>created</code>, it says <i>phenotk deidentify</i> and the time of the de-identification. The record of updates and <code>submittedBy</code> are taken out.</dd>
+  <dt>Hide who made the file and when</dt><dd>The <code>metaData</code> has to say who made the file and when. So instead of the original <code>createdBy</code> and <code>created</code>, it says <i>phenotk deidentify</i> and the time of the de-identification. The record of updates and <code>submittedBy</code> are taken out.</dd>
   <dt>Save the key as</dt><dd>This is a JSON file of old id → new id. Keep it apart from the shared file, because with it, anyone can follow the new ids back to the old ones.</dd>
 </dl>
 
@@ -1164,7 +1164,7 @@ json.dump(res.crosswalk, open("/home/user/results/okafor.key.json", "w"), indent
 for w in res.warnings:
     print("warning:", w)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1199,7 +1199,7 @@ doc = ptk.read("/data/examples/okafor_ga4gh-pedigree.json")
 new = filter_document(doc, affected_only=True, prune_pedigree=True)
 ptk.write(new, "/home/user/results/okafor.affected.json")</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1233,7 +1233,7 @@ for packet in split(doc, affected_only=True):
     sid = packet.proband().subject.id
     ptk.write(packet, os.path.join("/home/user/results/okafor-people", sid + ".json"))</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1274,7 +1274,7 @@ ptk.write(new, "/home/user/results/okafor-affected.json")
 for note in notes:
     print("note:", note)</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1308,7 +1308,7 @@ doc = ptk.read("/data/examples/okafor_phenopackets-family.json")
 new = add(doc, "IV-4", phenotypes=[{"id_": "HP:0008527", "label": "Congenital sensorineural hearing impairment", "onset": "P0D"}])
 ptk.write(new, "/home/user/results/okafor-added.json")</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
@@ -1357,7 +1357,7 @@ one = mpedtools.extract_phenotype(ped, "Hearing_loss_from_birth")
 mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped")</code></pre>
 <p><a href="#h-ped">The PED and MPED formats</a> describes the columns, the codes and the MPED header.</p>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>mpedtools</dt>
 <dd>Hearn TJ. mpedtools [software]. <a href="https://github.com/comparativechrono/mpedtools" target="_blank" rel="noopener">github.com/comparativechrono/mpedtools</a></dd>
@@ -1365,7 +1365,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 </article>
 <article class="help-page" id="h-files" data-title="Your files" data-group="Files and standards" data-group-page="h-files" data-keys="files tab folders home examples upload download zip kept stored browser storage indexeddb delete rename start afresh private window quota space" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 9z"/><path d="M3 19l3.5-8H22l-3.5 8z"/></svg>Your files</h1>
-<p class="lede">Your drawings, the files the tools write and your notebooks are all kept as files in a home folder, <code>~</code> (<code>/home/user</code>), which every tab shares. The <b>Files</b> tab shows them, along with the examples.</p>
+<p class="lede">Your drawings, your notebooks and the files the tools write are all kept in a home folder, <code>~</code> (<code>/home/user</code>), which every tab shares. The <b>Files</b> tab shows them, along with the examples.</p>
 
 <h2>The folders</h2>
 <table>
@@ -1376,7 +1376,8 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <tr><td><code>~/ontologies</code></td><td>copies of the HPO and Mondo, for searching without the internet</td></tr>
 <tr><td><code>~/notebooks</code></td><td>notebooks, starting with <code>pedigree-tools.ipynb</code></td></tr>
 <tr><td><code>~/data</code></td><td>files added from your computer with a tool's <b>From my computer…</b></td></tr>
-<tr><td><code>/data/examples</code></td><td>the examples, which can't be changed, so copy one with <b>Copy to my files</b> if you want to change it</td></tr>
+<tr><td><code>~/examples</code></td><td>your own copies of the examples, made with <b>Copy to my files</b></td></tr>
+<tr><td><code>/data/examples</code></td><td>the examples, which can't be changed. To change one, copy it with <b>Copy to my files</b>.</td></tr>
 </table>
 
 <h2>The Files tab</h2>
@@ -1410,7 +1411,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 </article>
 <article class="help-page" id="h-formats" data-title="Which file is which" data-group="Files and standards" data-group-page="h-files" data-keys="formats kinds files which file json studio ga4gh pedigree phenopackets family cohort phenopacket ped mped fam terms obo yaml tsv recognise" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>Which file is which</h1>
-<p class="lede">The workbench works with a handful of kinds of file. Most of them are JSON, so their names say what they are, and the workbench also looks inside a JSON file to tell which kind it is.</p>
+<p class="lede">The workbench works with a handful of kinds of file. Most of them are JSON. The end of a file's name, such as <code>.studio.json</code>, usually shows which kind it is, and the workbench also looks inside a JSON file to tell.</p>
 
 <div class="pw-map"></div>
 
@@ -1432,12 +1433,12 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 </article>
 <article class="help-page" id="h-studio-format" data-title="The Pedigree Studio file" data-group="Files and standards" data-group-page="h-files" data-keys="studio json format drawing session persons partnerships childlinks twinlinks legendlabels colour key fill quarters halves shading text numbering" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>The Pedigree Studio file</h1>
-<p class="lede">A drawing is a JSON file, and it's the same whether you save it with the Studio tab's <b>Save</b> or with Pedigree Studio's own <b>File</b> menu. It describes the drawing, with its symbols, lines, positions and colours, rather than the family as data. The converters turn it into data.</p>
+<p class="lede">A drawing is a JSON file, and it's the same whether you save it with the Studio tab's <b>Save</b> or with Pedigree Studio's own <b>File</b> menu. It records what the drawing looks like, with its symbols, lines, positions and colours, rather than the family as data. The converters turn it into data.</p>
 
 <h2>What is in it</h2>
 <table>
 <tr><th>Field</th><th>What it holds</th></tr>
-<tr><td><code>persons</code></td><td>One entry per symbol: its <code>id</code>, <code>shape</code> (<code>male</code>, <code>female</code>, <code>unknown</code>, their adopted forms, <code>miscarriage</code> for a pregnancy loss, and the <code>no-offspring</code> and <code>infertile</code> bars), position, the <code>text</code> under it, <code>deceased</code>, <code>proband</code>, the mark inside it (<code>centerText</code>: <code>dot</code> for a carrier, <code>line</code> for presymptomatic, <code>D</code> for a donor, <code>S</code> for a surrogate, <code>P</code> for a pregnancy, or a number when the symbol stands for several people), and how it's filled: <code>fillMode</code>, <code>fillColor</code>, <code>halves</code>, <code>quarters</code> and the shading pattern.</td></tr>
+<tr><td><code>persons</code></td><td>One entry per symbol: its <code>id</code>, <code>shape</code> (<code>male</code>, <code>female</code>, <code>unknown</code>, their adopted forms, <code>miscarriage</code> for a pregnancy loss, and the <code>no-offspring</code> and <code>infertile</code> bars), position, the <code>text</code> under it, <code>deceased</code>, <code>proband</code>, the mark inside it (<code>centerText</code>: <code>dot</code> for a carrier, <code>line</code> for a presymptomatic carrier, <code>D</code> for a donor, <code>S</code> for a surrogate, <code>P</code> for a pregnancy, or a number when the symbol stands for several people), and how it's filled: <code>fillMode</code>, <code>fillColor</code>, <code>halves</code>, <code>quarters</code> and the shading pattern.</td></tr>
 <tr><td><code>partnerships</code></td><td>The lines between partners: the two people, and the <code>type</code> (<code>normal</code>, <code>consanguineous</code>, <code>separated</code>, <code>consanguineous-separated</code>).</td></tr>
 <tr><td><code>childLinks</code></td><td>The lines from a couple to each child, <code>dashed</code> for adoption.</td></tr>
 <tr><td><code>twinLinks</code></td><td>Twins: the two children, and <code>identical</code> or <code>nonidentical</code>.</td></tr>
@@ -1459,7 +1460,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <p>The text under the symbols is whatever was typed there, which is often names, ages and dates of birth. In a drawing made by another program, even the ids may be names, such as <code>p-nnamdi</code> in the examples. Treat a drawing as you would the family's notes. The GA4GH files, and the PED files from studio2ped, leave the text out and name people by pedigree numbers. But you can ask studio2ped to use the text as ids instead (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>).</p>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor.studio.json">Look at the Okafor drawing as JSON</button></div>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Pedigree Studio</dt>
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
@@ -1472,7 +1473,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <h2>The standard so far</h2>
 <p>The GA4GH Pedigree Standard is still being developed. Its published documentation describes a conceptual model, in which a pedigree is a set of individuals and the relationships between them. Each relationship is named with a term from the Kinship Ontology, KIN. The model isn't a file format of its own. Instead, other standards carry it, in two forms:</p>
 <ul>
-  <li><b>In Phenopackets.</b> A new message called <i>Pedigree</i> was proposed for the Phenopackets schema in November 2022. In it, the individuals are Phenopackets and the relationships are named by KIN terms. The proposal was closed without being merged in September 2025, because the Pedigree group hadn't reached a decision yet. It isn't in any release of Phenopackets.</li>
+  <li><b>In Phenopackets.</b> A new message called <i>Pedigree</i> was proposed for the Phenopackets schema in November 2022. In it, the individuals are Phenopackets and the relationships are named by KIN terms. In September 2025 the proposal was closed without being merged, because the Pedigree group hadn't reached a decision yet. It isn't in any release of Phenopackets.</li>
   <li><b>In HL7 FHIR.</b> There's a draft implementation guide for this form. Each person is a FHIR Patient, and each relationship is a FamilyMemberHistory.</li>
 </ul>
 <p>Neither form has been approved yet. The approved GA4GH format that the workbench writes is <b>Phenopackets version 2</b>. That's the format of the Phenopackets Family, and of the Phenopackets inside the GA4GH Pedigree.</p>
@@ -1506,9 +1507,9 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <ul>
   <li>Every individual is a complete Phenopacket version 2, with its own <code>metaData</code>. This means everything about a person – their sex, whether they're alive, their diseases and phenotypes – is held in a structure that is approved and can be checked. Only the wrapper, with its list of individuals and its relationships, comes from the proposal.</li>
   <li>Each relationship is written once, as one current KIN term, in what the standard calls the <i>reduced form</i>. Each parent is linked to each child. Partners are linked only if they have no children together, or if they're related or separated. All the twins in a set are linked to one of them. Brothers and sisters aren't linked at all, because the parents they share already show that. The page on <a href="#h-kin">KIN</a> lists the terms.</li>
-  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Their names are never written, because Phenopackets have no field for a name.</li>
+  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Phenopackets have no field for a name, so names are never written as such. If you choose to name people by the drawing's labels, though, their ids may be names.</li>
   <li>A condition without an ontology term is left out, with a note, because a disease or phenotype without an id is invalid.</li>
-  <li>Anything the standard has no field for, such as a carrier or a pregnancy, goes into the <code>narrative</code> so that it isn't lost.</li>
+  <li>Some things the standard has no field for, such as a carrier or a pregnancy, are noted in the <code>narrative</code> so that they aren't lost.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_ga4gh-pedigree.json">Look at the Okafor GA4GH Pedigree</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check it</button></div>
 
@@ -1521,7 +1522,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <p>If the GA4GH settles on a different form, only one package, <code>pedigree-ga4gh</code>, will have to change, and the upgrade will rewrite files that are in this form.</p>
 
 <h2>One implementation</h2>
-<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>. This means studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. The package's check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, as well as the pedigree's own rules (<a href="#h-tool-validate">Check against the standard</a>).</p>
+<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>. This means studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. The package's check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, as well as the GA4GH Pedigree's own rules (<a href="#h-tool-validate">Check against the standard</a>).</p>
 
 <h2>Version 1, in draft</h2>
 <p>Since June 2026, the Pedigree group has been drafting version 1 of the standard. It hasn't been merged or approved yet, and it may change during review. As drafted, it would give the GA4GH Pedigree a schema of its own:</p>
@@ -1557,7 +1558,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
   <li>The <a href="https://ga4gh.github.io/pedigree-fhir-ig/" target="_blank" rel="noopener">FHIR implementation guide</a> (draft 0.1.0).</li>
 </ul>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
@@ -1601,7 +1602,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <h2>In JSON</h2>
 <p>Phenopackets are defined in Protocol Buffers, and written as JSON in the way proto3 writes it. Field names are in camelCase (<code>phenotypicFeatures</code>), and values that are their defaults may be left out. Readers also accept the proto spelling (<code>phenotypic_features</code>). The workbench writes camelCase and reads both.</p>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
@@ -1615,7 +1616,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 
 <h2>How a relationship is written</h2>
 <pre class="code"><code>{"individualId": "III-3", "relation": {"id": "KIN:027", "label": "isBiologicalMotherOf"}, "relativeId": "IV-3"}</code></pre>
-<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is KIN's own, spelt exactly as KIN spells it. A symmetric relation, such as one between partners, twins or cousins, is written only once, in one direction.</p>
+<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is taken word for word from KIN. A symmetric relation, such as one between partners, twins or cousins, is written only once, in one direction.</p>
 
 <h2>The terms the converters use</h2>
 <table>
@@ -1629,7 +1630,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <p>Brothers and sisters, grandparents, aunts and cousins aren't written, because they follow from the parents.</p>
 
 <h2>The 48 relationship terms</h2>
-<p>The terms come from <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea of 16 September 2024, which is still its latest). This is the file behind <code>http://purl.org/ga4gh/kin.owl</code>. KIN also has <code>KIN:031</code>, <i>hasSex</i>, but that's a property of one person rather than a relationship between two people. So the table leaves it out, and the workbench never uses it.</p>
+<p>The terms come from <code>kin.owl</code> in KIN's repository, ga4gh/pedigree_family_history_terminology (commit 71616ea of 16 September 2024, which is still its latest). This is the file behind <code>http://purl.org/ga4gh/kin.owl</code>. KIN also has <code>KIN:031</code>, <i>hasSex</i>, but that's a property of one person rather than a relationship between two people. So the table leaves it out, and the workbench never uses it.</p>
 <div class="help-xscroll"><table class="kin-table kin-terms">
 <tr><th>Code</th><th>Label</th><th>KIN's definition</th></tr>
 <tr><td><code>KIN:001</code></td><td>isRelativeOf</td><td>A relation that indicates that a person is connected to another biologically or through a socio-legal relationship.<br><small>the same both ways</small></td></tr>
@@ -1708,7 +1709,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <pre class="code" data-run="term"><code>pedigree-ga4gh kin
 pedigree-ga4gh kin | grep -i sibling</code></pre>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use this program in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>GA4GH Pedigree Standard</dt>
 <dd>GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">pedigree.readthedocs.io</a></dd>
@@ -1725,7 +1726,7 @@ pedigree-ga4gh kin | grep -i sibling</code></pre>
 <tr><th>Column</th><th>Holds</th></tr>
 <tr><td>1 · family</td><td>The family's id, such as <code>FAM1</code></td></tr>
 <tr><td>2 · person</td><td>The person's id, which is unique within the family</td></tr>
-<tr><td>3 · father, 4 · mother</td><td>The genetic parents' ids, or <code>0</code> for a founder (someone with no parents in the file). Adoptive parents and a surrogate aren't genetic parents, so studio2ped writes <code>0</code> for them.</td></tr>
+<tr><td>3 · father, 4 · mother</td><td>The genetic parents' ids, or <code>0</code> for a founder (someone with no parents in the file). Adoptive parents and a surrogate aren't genetic parents, so studio2ped writes <code>0</code> in their place.</td></tr>
 <tr><td>5 · sex</td><td><code>1</code> male, <code>2</code> female, <code>0</code> unknown</td></tr>
 <tr><td>6 · status</td><td><code>1</code> unaffected, <code>2</code> affected, <code>0</code> unknown</td></tr>
 </table>
@@ -1750,7 +1751,7 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/cf-cousins.mped">Look at an MPED file</button> <button class="do" type="button" data-tool="mped-info" data-input="/data/examples/cf-cousins.mped">Summary and check</button></div>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>mpedtools</dt>
 <dd>Hearn TJ. mpedtools [software]. <a href="https://github.com/comparativechrono/mpedtools" target="_blank" rel="noopener">github.com/comparativechrono/mpedtools</a></dd>
@@ -1774,7 +1775,7 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 <h2>Ids and releases</h2>
 <ul>
   <li>An id is a CURIE: a prefix, a colon and a number, such as <code>HP:0000365</code> or <code>MONDO:0007254</code>. Some web pages write <code>HP_0000365</code>, which is the same term, but the workbench writes the colon.</li>
-  <li>New releases of the ontologies come out every month or so. A term may change its label, and now and then a term is made obsolete and replaced. So each GA4GH file records the release its terms came from in its <code>metaData</code>.</li>
+  <li>New releases of the ontologies come out every month or so. A term may change its label, and now and then a term is made obsolete and replaced. So each GA4GH file records in its <code>metaData</code> the release that its terms came from.</li>
 </ul>
 
 <h2>Where a condition gets its term</h2>
@@ -1799,7 +1800,7 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 <h2>Looking terms up</h2>
 <p>You can search the HPO and Mondo on their own websites, on EBI's <a href="https://www.ebi.ac.uk/ols4/" target="_blank" rel="noopener">Ontology Lookup Service</a>, or here with Match conditions to terms. That tool searches online through EBI, or offline in copies of the ontologies (<code>hp.obo</code>, <code>mondo.obo</code>). <a href="#h-walk-terms">Give the conditions ontology terms</a> has advice on choosing a term.</p>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Human Phenotype Ontology</dt>
 <dd class="cite-note">Give the release you used, too (the terms file records it).</dd>
@@ -1819,11 +1820,11 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 
 <h2>Working in a notebook</h2>
 <ul>
-  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>, or use <b>Run all</b> to run them all from the top. The first cell starts Python, which takes a few seconds, and the first time it also downloads about 10 MB.</li>
+  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>, or use <b>Run all</b> to run every cell from the top. The first cell you run starts Python, which takes a few seconds, and the very first time it also downloads about 10 MB.</li>
   <li><b>Code</b> and <b>Text</b> add cells, and text cells are written in Markdown. Use a cell's menu to move, duplicate, clear or delete it.</li>
   <li><b>Stop</b> stops a cell that's running for too long, and <b>Restart</b> forgets all the variables. The variables button lists everything the notebook has defined.</li>
   <li>The notebook is saved in your files as you work. <b>Download</b> gives you a copy as a Jupyter notebook, a Python script, or a web page with its results.</li>
-  <li>As in Jupyter, a notebook starts in its own folder. It reads and writes the same files as the other tabs: <code>/data/examples</code>, and your home folder, <code>/home/user</code>.</li>
+  <li>As in Jupyter, a notebook starts in its own folder. It uses the same files as the other tabs: the examples in <code>/data/examples</code>, and your home folder, <code>/home/user</code>.</li>
 </ul>
 
 <h2>Commands in a cell</h2>
@@ -1832,14 +1833,14 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 !pedigree-ga4gh validate ~/results/okafor-nb_ga4gh-pedigree.json</code></pre>
 <table>
 <tr><th></th><th></th></tr>
-<tr><td><code>!command</code></td><td>Runs a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python. For a pipe or redirection into them (<code>|</code> or <code>&gt;</code>), use the Terminal tab.</td></tr>
+<tr><td><code>!command</code></td><td>Runs a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python. To use them in a pipe or with redirection (<code>|</code> or <code>&gt;</code>), use the Terminal tab.</td></tr>
 <tr><td><code>%cd</code>, <code>%pwd</code>, <code>%ls</code></td><td>Change or show the folder, or list the files in it</td></tr>
 <tr><td><code>%pip install NAME</code></td><td>Installs a pure-Python package from PyPI, for this visit</td></tr>
 <tr><td><code>%%writefile FILE</code>, <code>%%bash</code>, <code>%%capture</code>, <code>%time</code>, <code>%run</code></td><td>Work as they do in Jupyter</td></tr>
 </table>
 
 <h2>The packages</h2>
-<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket_toolkit and pedigree_ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>), and PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
+<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>One Python for three tabs</div><p>The Tools tab, the Notebook tab and the Terminal tab share one Python. While a notebook cell is running, a tool waits for it to finish, and the other way round.</p></div>
 </article>
 <article class="help-page" id="h-python" data-title="The packages in Python" data-group="Notebook and terminal" data-group-page="h-notebook" data-keys="python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm notebook code" hidden>
@@ -1942,7 +1943,7 @@ for path in sorted(glob.glob("/data/examples/*.studio.json")):
 <tr><td><code>studio2ped</code>, <code>ped2studio</code></td><td>a drawing → a PED or MPED file, and back</td></tr>
 <tr><td><code>mpedtools</code></td><td>PED and MPED files: <code>info</code>, <code>validate</code>, <code>extract</code>, <code>merge</code>, <code>split</code>, <code>convert</code> …</td></tr>
 <tr><td><code>phenotk</code></td><td>the phenopacket toolkit: <code>view</code>, <code>stats</code>, <code>validate</code>, <code>normalise</code>, <code>filter</code>, <code>deidentify</code>, <code>convert</code>, <code>upgrade</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>ped</code>, <code>sort</code></td></tr>
-<tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation the others share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
+<tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation that studio2ga4gh, ga4gh2studio and phenotk share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
 <tr><td><code>hponorm</code>, <code>mondonorm</code></td><td>match the names in a GA4GH file to HPO or Mondo terms (see below)</td></tr>
 <tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out from scratch)</td></tr>
 </table>
@@ -1968,7 +1969,7 @@ done
 for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedigree-ga4gh validate "$f" | tail -1)"; done</code></pre>
 
 <h2>hponorm and mondonorm here</h2>
-<p>As they go, these two programs ask you about each name and wait for you to type an answer. This terminal can't answer a program's questions, so they stop at the first question, keeping the choices made so far. In this terminal, they take their answers from a file instead:</p>
+<p>As they go, these two programs ask you about each name and wait for you to type an answer. This terminal can't pass your answers to a program while it's running, so they stop at the first question, keeping the choices made so far. Here, they take their answers from a file instead:</p>
 <pre class="code"><code>{"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}}</code></pre>
 <pre class="code"><code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code></pre>
 <p>For most jobs, <code>phenotk normalise FILE --mapping terms.json</code> is simpler. It accepts the workbench's terms files unchanged, and fills in diseases and phenotypes in one go. To match names by pointing and clicking, use <a href="#h-tool-terms">Match conditions to terms</a>.</p>
@@ -1978,11 +1979,12 @@ for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedig
 </article>
 <article class="help-page" id="h-own-computer" data-title="On your own computer" data-group="Notebook and terminal" data-group-page="h-notebook" data-keys="own computer local install pip pypi python packages download bundle zip pythonpath offline server pipeline" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>On your own computer</h1>
-<p class="lede">The packages that run here are ordinary Python packages, so the commands and code the workbench shows you will also run on your own computer: in a pipeline, on a server, or over many families at once.</p>
+<p class="lede">The packages that run here are ordinary Python packages, so the commands and code that the workbench shows you will also work on your own computer: in a pipeline, on a server, or over many families at once.</p>
 
 <h2>Installing them</h2>
-<p>All of them are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
+<p>All of them except pedwb, the workbench's own runner, are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
 <pre class="code"><code>pip install pedigree-ga4gh studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenopacket-toolkit</code></pre>
+<p>If you installed them before October 2026, add <code>--upgrade</code> to that command. The earlier releases of studio2ga4gh, ga4gh2studio and phenopacket-toolkit write or read the older forms that the workbench now upgrades.</p>
 <p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code> and <code>pedigree-ga4gh</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
 
 <h2>The workbench's own copies</h2>
@@ -1996,11 +1998,11 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <h2>What else they use</h2>
 <ul>
-  <li><b>PyYAML</b> reads and writes YAML files: <code>pip install pyyaml</code>.</li>
-  <li><b>rapidfuzz</b> is optional. If it's installed, hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word: <code>pip install rapidfuzz</code>. You don't need it for speed, and the scores are the same without it.</li>
+  <li><b>PyYAML</b> is needed only for YAML files: <code>pip install pyyaml</code>.</li>
+  <li><b>rapidfuzz</b> is optional (<code>pip install rapidfuzz</code>). If it's installed, hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word. You don't need it for speed, and the scores are the same without it.</li>
   <li><b>rich</b>, if it's installed, gives hponorm and mondonorm their coloured questions.</li>
 </ul>
-<p>Everything else is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they were designed to, which the terminal here can't do.</p>
+<p>Everything else is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they go, which they can't do in the terminal here.</p>
 </article>
 <article class="help-page" id="h-versions" data-title="Versions, and how to cite" data-group="Reference" data-group-page="h-versions" data-keys="versions version cite citation reference papers pypi release studio2ga4gh 0.4.0 pedigree-ga4gh 1.0.0 phenopacket-toolkit zenodo doi" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Versions, and how to cite</h1>
@@ -2017,23 +2019,23 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <tr><td>mondonorm</td><td>1.1.0</td></tr>
 <tr><td>phenopacket-toolkit (phenotk)</td><td>0.4.0</td></tr>
 <tr><td>pedigree-ga4gh</td><td>1.0.0</td></tr>
-<tr><td>pedwb (the workbench&#x27;s own package, which runs the programs and the Tools tab)</td><td>1.0.0</td></tr>
+<tr><td>pedwb (the workbench&#x27;s own runner, not on PyPI)</td><td>1.0.0</td></tr>
 <tr><td>Pedigree Studio</td><td>commit <code>9e6b524</code> of 2026-10-17</td></tr>
 </table>
-<p>Python itself is Pyodide's, which is loaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
+<p>Python itself comes from Pyodide, which is downloaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
 
 <h2>The same as on PyPI</h2>
-<p>Every package here is the version that is released on PyPI, so <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
+<p>Every package here except pedwb, the workbench's own runner, is the version released on PyPI. So <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
 <ul>
-  <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that the other packages share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
-  <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid, and its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept closer guesses.</li>
-  <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the “no children” and “infertility” marks, which aren't people.</li>
+  <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that studio2ga4gh, ga4gh2studio and the phenopacket toolkit share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
+  <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid. Its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept close matches too.</li>
+  <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers by default, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the <i>no children</i> and <i>infertility</i> bars, which aren't people.</li>
   <li><b>ped2studio 0.2.2</b> keeps apart families that reuse the same ids.</li>
-  <li><b>hponorm and mondonorm 1.1.0</b> score OLS's results by how well they match, take synonyms into account and read terms files whatever their case. They no longer treat names that are spelt alike but mean different things, such as hypothyroidism and hyperthyroidism, as close matches, and they search a local copy of an ontology much faster.</li>
+  <li><b>hponorm and mondonorm 1.1.0</b> score the results from EBI's Ontology Lookup Service by how well they match, take synonyms into account, and ignore capital letters in terms files. They no longer treat names that are spelt alike but mean different things, such as hypothyroidism and hyperthyroidism, as close matches, and they search a local copy of an ontology much faster.</li>
 </ul>
-<p>mpedtools is still at version 0.1.0. <a href="#h-own-computer">On your own computer</a> explains how to install the packages outside the browser.</p>
+<p>The releases before these were 0.3.0 of studio2ga4gh, ga4gh2studio and phenopacket-toolkit, 0.1.0 of studio2ped, 0.2.1 of ped2studio, and 1.0.0 of hponorm and mondonorm. mpedtools is still at version 0.1.0. <a href="#h-own-computer">On your own computer</a> explains how to install the packages outside the browser.</p>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Pedigree Studio</dt>
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
@@ -2102,7 +2104,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <p>Pedigrees are personal data about whole families, including people who haven't consented to anything. Use the workbench as your institution's rules on patient data allow, and follow this advice:</p>
 <ul>
   <li>Prefer pedigree numbers to names. The GA4GH and PED files use them by default, and the drawing is the only place names need to be.</li>
-  <li>If you name the people in a PED file by the drawing's labels or the text under the symbols, check the ids, because they're often names (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>).</li>
+  <li>If you name people in any other way, such as by the drawing's labels, Pedigree Studio's ids or the text under the symbols, check the ids before you share the file, because they're often names (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>).</li>
   <li>De-identify files before you pass them on, and keep the key separately (<a href="#h-tool-deidentify">De-identify</a>). Remember that de-identified doesn't mean anonymous.</li>
   <li>On a shared computer, download your work and use <b>My files → Start afresh</b> when you finish.</li>
 </ul>
@@ -2127,8 +2129,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <dt>“EBI's Ontology Lookup Service did not answer”</dt>
   <dd>Either the service is down or slow, or your network blocks www.ebi.ac.uk. Try again later, or search copies of the ontologies on this computer instead (<i>2 · Search in</i>).</dd>
 
-  <dt>The PED file has names as ids</dt>
-  <dd>studio2ped names people by their pedigree numbers, unless you choose otherwise in <i>People are named by</i>. The drawing's labels, Pedigree Studio's own ids and the text under the symbols can all be names, so choose pedigree numbers instead. A PED file made by studio2ped 0.1 always used the text under the symbols, so make it again (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
+  <dt>The PED file has names as ids, or the same id twice</dt>
+  <dd>studio2ped names people by their pedigree numbers, unless you choose otherwise in <i>People are named by</i>. The drawing's labels, Pedigree Studio's own ids and the text under the symbols can all be names, so choose pedigree numbers instead. A PED file made by studio2ped 0.1 always used the text under the symbols, which can give names or the same id twice, so make it again (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
 
   <dt>The drawing a tool made looks untidy</dt>
   <dd>Press <b>Tidy</b> in the Studio tab, or tick <i>Tidy the drawing when it opens</i> before you run the tool.</dd>
@@ -2140,7 +2142,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <dd>A notebook cell may be running. The tools share the notebook's Python, so they wait for the cell to finish. You can stop the cell in the Notebook tab. The first search of a local copy of Mondo also takes a while, because it reads the whole file.</dd>
 
   <dt>hponorm or mondonorm stops straight away in the terminal</dt>
-  <dd>They ask questions that this terminal can't answer. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
+  <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
 
   <dt>My files have gone</dt>
   <dd>Are you using the same browser, on the same computer, and not a private window? The browser keeps the files for this site only. If your browser clears site data when it closes, it deletes them too, so download anything you want to keep.</dd>
@@ -2150,7 +2152,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 </dl>
 
 <h2>Reporting a fault</h2>
-<p>If a tool fails and shows <i>Python’s traceback (for reporting a fault)</i> under the result, or a file the workbench made doesn't pass its own check, that's a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>. Include the traceback and, if you can, a file that shows the problem, such as an example or a de-identified copy of your own file. Never attach a family's real data.</p>
+<p>If a tool fails and shows <i>Python’s traceback (for reporting a fault)</i> under the result, or a file the workbench made doesn't pass its own check, that's a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>. Include the traceback and, if you can, a file that shows the problem, such as one of the examples, or a made-up file that does the same thing. Never attach a family's real data, even de-identified.</p>
 </article>
 <article class="help-page" id="h-credits" data-title="Credits and licences" data-group="Reference" data-group-page="h-versions" data-keys="credits licences licenses copyright mit apache open source pedigree studio packages kin hpo mondo pyodide codemirror marked dompurify jszip pedigree practical examples third party" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Credits and licences</h1>
@@ -2183,7 +2185,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <li>The example families come from the lab's pedigree practical, and have been made into Pedigree Studio drawings. The files made from them were written by the packages themselves.</li>
 </ul>
 <h2 data-anchor="cite">References</h2>
-<p>The papers to cite when you use these programs in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
 <dl class="cite-list">
 <dt>Pedigree Studio</dt>
 <dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
@@ -2237,7 +2239,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <script>window.WB_EXAMPLES = [{"p":"README.md","s":2029},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":523},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224}];
 window.WB_STARTERS = [{"p":"notebooks/pedigree-tools.ipynb"}];
-window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"e296a8fb888ef71d04e480e5507954e8c528091b3c2cede7b67c8e26cc692ba4","bytes":211290,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
+window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"9a58c9481ec3c8b1beb0e8669a989d7cbcea87bf6148339dbacb99f20567bd0f","bytes":211338,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
 window.WB_STUDIO = "9e6b524d4469";
 window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/ga4gh/pedigree_family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/pedigree_family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/ga4gh/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh [software]. <a href=\"https://github.com/comparativechrono/pedigree-ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-ga4gh<\/a>"};</script>
 <script src="assets/js/config.js"></script>

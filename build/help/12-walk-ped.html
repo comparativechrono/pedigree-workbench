@@ -1,4 +1,4 @@
-<!-- id: h-walk-ped | title: Make a PED file for a linkage program | group: Walkthroughs | summary: Drawing → MPED, take one condition out, check the ids | keys: ped mped linkage association merlin plink superlink allegro genehunter fam file pedigree file make write export one condition affected status ids names -->
+<!-- id: h-walk-ped | title: Make a PED file for a linkage program | group: Walkthroughs | summary: Drawing → MPED, check the ids, take one condition out | keys: ped mped linkage association merlin plink superlink allegro genehunter fam file pedigree file make write export one condition affected status ids names -->
 <h1><!--ICON:table-->Make a PED file for a linkage program</h1>
 <p class="lede">Linkage and association programs read pedigrees as PED files. A PED file has one line per person, giving their parents, their sex and whether they're affected. There are two ways to make one from a drawing, and they differ in how they deal with more than one condition and with carriers.</p>
 
@@ -12,12 +12,12 @@
 
 <h2>From the drawing</h2>
 <h3>1 · Write the MPED file</h3>
-<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition. When the drawing has more, it writes an MPED file, which is a PED file with a column for each condition.</p>
+<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition. When the drawing has more, or shows carriers, it writes an MPED file, which is a PED file with a column for each condition.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/okafor.studio.json">Make the Okafor family's MPED file</button></div>
 <p>It checks the file with mpedtools straight away, and tells you if anything is wrong.</p>
 
 <h3>2 · Check the ids</h3>
-<p>studio2ped names each person by their pedigree number, such as <code>II-3</code>, just as the GA4GH files do. This means you can share the file without anyone's name in it. With <b>People are named by</b>, you can choose the drawing's labels, Pedigree Studio's own ids (<code>p-ggf</code>) or the text under the symbols instead, as version 0.1 did. In the Okafor family, that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. If two people would get the same id, the pedigree number is used instead, with a note.</p>
+<p>studio2ped names each person by their pedigree number, such as <code>II-3</code>, just as the GA4GH files do. This means you can share the file without anyone's name in it. With <b>People are named by</b>, you can choose the drawing's labels or Pedigree Studio's own ids (<code>p-ggf</code>) instead, or the text under the symbols, which is what version 0.1 used. In the Okafor family, that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. If two people would get the same id, the pedigree number is used instead, with a note.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="mped-info" data-input="/data/examples/okafor.mped">Summary and check of the Okafor MPED file</button></div>
 
 <h3>3 · One condition at a time</h3>

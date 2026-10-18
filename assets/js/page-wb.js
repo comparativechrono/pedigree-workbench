@@ -263,7 +263,7 @@
     if (fs.isDir(src)) {
       for (const [p, e] of Array.from(fs.entries)) if (p.startsWith(src + '/') && e.kind !== 'dir') fs.copy(p, dest + p.slice(src.length));
     } else fs.copy(src, dest);
-    toast(`Copied to <b>${esc(fs.pretty(dest))}</b> – a copy of your own that you can change.`, 'ok');
+    toast(`Copied to <b>${esc(fs.pretty(dest))}</b>. This copy is yours to change.`, 'ok');
   };
   /* a file in the Files tab, as text (a drawing too, which data-open would show in the Studio) */
   MG.actions.edit = async (path) => MG.app.editFile(path.replace(/^~(?=\/|$)/, HOME));

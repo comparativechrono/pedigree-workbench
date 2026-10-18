@@ -114,7 +114,7 @@
   };
 
   /* ------------------------------------------------------------------ curl, wget: the web, through the browser */
-  const CORS_NOTE = 'A web page can only download from servers that allow it (CORS). Those that do include EBI (ebi.ac.uk, the Ontology Lookup Service), raw.githubusercontent.com (the HPO: see  man curl) and Zenodo. For other files: download them with your browser, then add them with My files → Add files.';
+  const CORS_NOTE = 'A web page can only download from servers that allow it (CORS). Those that do include EBI (ebi.ac.uk, the Ontology Lookup Service), raw.githubusercontent.com (for the HPO, see  man curl) and Zenodo. Download other files with your browser, then add them with “Add files from my computer…” in My files.';
   function webErr(ctx, prog, url, e) {
     const msg = String((e && e.message) || e);
     if (/Failed to fetch|NetworkError|Load failed|CORS/i.test(msg)) {
@@ -710,7 +710,7 @@
         ['code', 'Download as a shell script (.sh)', () => MG.downloadText(this.toSh(T), name + '.sh', 'text/x-shellscript')],
         ['trash', 'Start a new session record (forget these commands)', () => {
           (T || MG.app.term).transcript = [];
-          MG.toast('The session record is now empty. Commands you run from now on will be recorded.');
+          MG.toast('The session record is empty now. Commands you run from now on will be recorded.');
         }]
       ]);
     }
@@ -744,7 +744,7 @@
   const OWN_MAN = {
     python: 'python – Python (Pyodide) in your browser: the same Python as the notebooks, with the pedigree packages installed.\n\n  python script.py [ARGUMENTS]\n  python -c "import pedigree_ga4gh as pg; print(pg.__version__)"\n  python -m json.tool FILE.json           print a JSON file tidily\n  python -m studio2ped FILE.studio.json   (the same as  studio2ped FILE.studio.json)\n  python --version\n\nOther packages: pip install NAME (pure-Python ones, and those Pyodide has built – pandas, matplotlib …).\nFor Python line by line use the Notebook tab.',
     pip: 'pip – installs Python packages for this visit of the page (micropip): pure-Python packages from PyPI, and those Pyodide has built.\n\n  pip install NAME …\n  pip list\n  pip show NAME\n\nThe pedigree packages are installed already, at the versions released on PyPI (help lists them).',
-    studio: 'studio – open a Pedigree Studio drawing in the Studio tab.\n\n  studio ~/pedigrees/okafor.studio.json\n  studio --tidy ~/pedigrees/lynch.studio.json     tidy the layout with Pedigree Studio’s Tidy (for drawings made by ped2studio or ga4gh2studio)\n\nThe Studio tab saves the drawing back to the same file with its Save button.',
+    studio: 'studio – open a Pedigree Studio drawing in the Studio tab.\n\n  studio ~/pedigrees/okafor.studio.json\n  studio --tidy ~/pedigrees/lynch.studio.json     lay it out again with Pedigree Studio’s Tidy (for drawings made by ped2studio or ga4gh2studio)\n\nThe Studio tab saves the drawing back to the same file with its Save button.',
     curl: 'curl – download from the web (through the browser). Only servers that allow web pages to read them (CORS) can be reached, such as EBI and raw.githubusercontent.com.\n\n  curl -o ~/ontologies/hp.obo https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo\n  curl -s "https://www.ebi.ac.uk/ols4/api/search?q=hearing+loss&ontology=hp&rows=5"\n\nOptions: -o FILE, -O, -s, -S, -f, -L, -H HEADER, -X METHOD, -d DATA, --data-binary @FILE, -I, -w \'%{http_code}\', --compressed (ignored).',
     wget: 'wget – download from the web (through the browser); the same reach as curl.\n\n  wget -P ~/ontologies https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo\n\nOptions: -O FILE (- for the screen), -q, -P FOLDER, -nc.',
     unzip: 'unzip – unpack a .zip archive.\n\n  unzip data.zip                 into the folder you are in\n  unzip data.zip -d data         into a folder\n  unzip -l data.zip              list what is in it\n  unzip -o data.zip              overwrite without asking (the default here)',
@@ -776,7 +776,7 @@
       0,
       MG.shellUtil.ABSENT.length,
       [/^(plink|plink2|merlin|linkdemo|superlink|madeline2|madeline|kinship2|pedtools|haploview|vcftools|bcftools|samtools|gatk)$/, 'isn’t installed in this terminal, which is for pedigree files (type  help  to see its programs). The PED files you make here with studio2ped open in PLINK, Merlin and similar programs on your own computer.'],
-      [/^(awk|gawk|mawk|nawk|perl|ruby|node|java|julia|R|Rscript|jq)$/, 'isn’t installed in this terminal. For PED files, mpedtools does most jobs (mpedtools info, extract, convert). For JSON, python -m json.tool FILE prints a file neatly, and phenotk view shows a GA4GH file as a table. For anything else a line of Python usually does it, for example  python -c "import sys; [print(l.split()[1]) for l in open(sys.argv[1])]" family.ped'],
+      [/^(awk|gawk|mawk|nawk|perl|ruby|node|java|julia|R|Rscript|jq)$/, 'isn’t installed in this terminal. For PED files, mpedtools does most jobs (mpedtools info, extract, convert). For JSON, python -m json.tool FILE prints a file neatly, and phenotk view shows a GA4GH file as a table. For anything else, a line of Python will do, for example  python -c "import sys; [print(l.split()[1]) for l in open(sys.argv[1])]" family.ped'],
       [/^(ipython|ipython3|jupyter)$/, 'isn’t a command here. Use the Notebook tab to run Python a line at a time.'],
       [/^(conda|mamba|micromamba|virtualenv|pipenv|poetry|pyenv|uv)$/, 'isn’t needed here, so the workbench doesn’t include it. The pedigree packages are already installed, and you can add other Python packages with  pip install NAME  (they last until you reload the page).'],
       [/^(apt|apt-get|yum|dnf|brew|docker|singularity|apptainer|git|make|module|cmake|gcc|cc|g\+\+|snakemake|nextflow)$/, 'isn’t available in this terminal, because programs can’t be installed or compiled in a web page. You can still add Python packages with  pip install NAME.'],
@@ -800,7 +800,7 @@
       [
         'Commands in this terminal – every one runs here, in your browser.  (man NAME: examples; NAME --help: options)',
         '',
-        'The pedigree programs (Python packages, which install with pip on your own computer):',
+        'The pedigree programs (Python packages, which you can install with pip on your own computer):',
         ...Object.entries(PROGRAMS).map(([n, [what]]) => row(n + ver(n), what)),
         row('studio FILE', 'open a drawing in the Studio tab'),
         '',
