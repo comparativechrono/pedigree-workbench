@@ -1,6 +1,6 @@
 <!-- id: h-python | title: The packages in Python | group: Notebook and terminal | summary: The main functions of each package, with examples | keys: python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm notebook code -->
 <h1><!--ICON:python-->The packages in Python</h1>
-<p class="lede">The main functions of each package, for notebooks and scripts. Each box can be added to the open notebook. The packages' own help – <code>help(studio2ga4gh.convert_file)</code> – says more.</p>
+<p class="lede">These are the main functions of each package, for use in notebooks and scripts. You can add each box to the open notebook. The packages' own help, such as <code>help(studio2ga4gh.convert_file)</code>, tells you more.</p>
 
 <h2>studio2ga4gh, ga4gh2studio</h2>
 <pre class="code" data-run="py"><code>import json
@@ -40,7 +40,7 @@ old = pg.load("/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json")
 new, changes, todo = pg.upgrade(old)
 print(len(changes), "changes;", todo)</code></pre>
 
-<h2>phenopacket_toolkit: the jobs of phenotk</h2>
+<h2>phenopacket_toolkit: what phenotk does</h2>
 <pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
 from phenopacket_toolkit.ops import render, stats, render_stats, filter_document, deidentify, to_kind, to_format
 
@@ -54,7 +54,7 @@ print(to_format(family, "ped"))
 
 shared = deidentify(doc, remap_ids="seq")
 ptk.write(shared.document, "/home/user/results/okafor-py.deidentified.json")</code></pre>
-<p>The other operations – <code>normalise</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>sort</code> – are in <code>phenopacket_toolkit.ops</code> as well.</p>
+<p>The other operations – <code>normalise</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code> and <code>sort</code> – are in <code>phenopacket_toolkit.ops</code> too.</p>
 
 <h2>mpedtools</h2>
 <pre class="code" data-run="py"><code>import mpedtools
@@ -70,7 +70,7 @@ mpedtools.write(cf, "/home/user/results/cf.ped", force_format="ped")</code></pre
 index = MondoIndex.load("/home/user/ontologies/mondo.obo", allow_download=False)
 for c in index.search("bowel cancer", limit=5):
     print(c.id, c.label, c.score, c.matched_on)</code></pre>
-<p><code>hponorm.hpo.HpoIndex</code> does the same for the HPO. <code>OlsClient().search(…)</code> asks EBI's Ontology Lookup Service instead, over the internet.</p>
+<p><code>hponorm.hpo.HpoIndex</code> does the same for the HPO. <code>OlsClient().search(…)</code> searches EBI's Ontology Lookup Service over the internet instead.</p>
 
 <h2>Many families at once</h2>
 <pre class="code" data-run="py"><code>import glob, json, os

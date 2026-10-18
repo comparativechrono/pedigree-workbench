@@ -1,31 +1,31 @@
 <!-- id: h-start | title: A first session | group: Start here | summary: Ten minutes: open a drawing, convert it, check the result | keys: tour tutorial begin getting started first steps introduction example okafor -->
 <h1><!--ICON:play-->A first session</h1>
-<p class="lede">Ten minutes to see what the workbench is for, using one of the example families. Each step has a button that does it for you.</p>
+<p class="lede">Take ten minutes to see what the workbench is for, using one of the example families. Each step has a button that does it for you.</p>
 
 <h2>1 · Open a drawing</h2>
-<p>The <b>Studio</b> tab is Pedigree Studio. Open the Okafor family, one of the examples: four generations, with twin boys who have had hearing loss from birth, whose parents are cousins, and their grandmother, who has had breast cancer.</p>
+<p>The <b>Studio</b> tab is Pedigree Studio. Open the Okafor family, one of the examples. It has four generations, with twin boys who have had hearing loss from birth and whose parents are cousins. The twins' grandmother has had breast cancer.</p>
 <div class="tryrow"><button class="do" type="button" data-studio="/data/examples/okafor.studio.json">Open the Okafor family in Studio</button></div>
-<p>The bar above the drawing says which file the drawing belongs to. An example cannot be changed, so it opens as a drawing that is not in a file of yours yet: change it as you like, and use <b>Save as…</b> to keep your version in <code>~/pedigrees</code>. The Studio's own toolbar and its <b>?</b> button explain the drawing itself.</p>
+<p>The bar above the drawing says which file the drawing belongs to. The examples can't be changed, so an example opens as a new drawing that hasn't been saved yet. Change it as much as you like, then use <b>Save as…</b> to keep your version in <code>~/pedigrees</code>. The Studio's own toolbar and its <b>?</b> button explain how to draw.</p>
 
 <h2>2 · Give its conditions ontology terms</h2>
-<p>The colour key names two conditions. A GA4GH file names conditions by ontology terms rather than by free text: diseases by the Mondo Disease Ontology, signs and symptoms by the Human Phenotype Ontology (HPO). The examples come with a terms file that matches them already; for a family of your own you make one with the <b>Match conditions to terms</b> tool (<a href="#h-walk-terms">how</a>).</p>
+<p>The colour key names two conditions. A GA4GH file names conditions by ontology terms rather than in free text: diseases by the Mondo Disease Ontology, and signs and symptoms by the Human Phenotype Ontology (HPO). The examples come with a terms file that already matches them. For a family of your own, make one with the <b>Match conditions to terms</b> tool (<a href="#h-walk-terms">here's how</a>).</p>
 <div class="tryrow"><button class="do" type="button" data-tool="terms" data-input="/data/examples/okafor.studio.json">Open Match conditions to terms</button></div>
 
 <h2>3 · Convert it</h2>
-<p>The <b>Tools</b> tab has a form for each of our tools. <b>Drawing → GA4GH Pedigree and Phenopackets</b> writes the family as a GA4GH Pedigree and a Phenopackets Family. The button below opens it with the drawing and the examples' terms file (<code>/data/examples/example-terms.json</code>) chosen; press <b>Run</b>. The first run starts Python in your browser, which takes a few seconds (and downloads about 10 MB the first time).</p>
+<p>The <b>Tools</b> tab has a form for each of our tools. <b>Drawing → GA4GH Pedigree and Phenopackets</b> writes the family as a GA4GH Pedigree and a Phenopackets Family. The button below opens the tool with the drawing and the examples' terms file (<code>/data/examples/example-terms.json</code>) already chosen. Then press <b>Run</b>. The first run starts Python in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/okafor.studio.json" data-terms="/data/examples/example-terms.json">Open Drawing → GA4GH</button></div>
-<p>Under the form, <b>The same in the terminal, and in Python</b> shows exactly what the tool runs – a command for the Terminal tab and code for a notebook – so that you can do the same again without the form.</p>
+<p>Under the form, <b>The same in the terminal, and in Python</b> shows exactly what the tool runs: a command for the Terminal tab and code for a notebook. You can use them to do the same job again without the form.</p>
 
 <h2>4 · Check the result</h2>
-<p>The files it writes appear under the result, in <code>~/results</code>. <b>Check</b> next to a file checks it against the standards, the way phenopacket-tools, the Phenopackets team's own validator, does, and says how to fix anything wrong.</p>
+<p>The files it writes appear under the result, and are saved in <code>~/results</code>. Press <b>Check</b> next to a file to check it against the standards in the same way as phenopacket-tools, the Phenopackets team's own validator. It also tells you how to fix anything that's wrong.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check the example GA4GH Pedigree</button></div>
 
 <h2>5 · Back to a drawing, or on to a PED file</h2>
 <ul>
-  <li><b>GA4GH or Phenopackets → drawing</b> draws a GA4GH file in Pedigree Studio – one made here, or one someone has sent you.</li>
+  <li><b>GA4GH or Phenopackets → drawing</b> draws a GA4GH file in Pedigree Studio, whether you made it here or someone has sent it to you.</li>
   <li><b>Drawing → PED or MPED</b> writes the PED file that linkage programs read.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-tool="ga4gh2studio" data-input="/data/examples/okafor_ga4gh-pedigree.json">Draw the GA4GH file</button> <button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/okafor.studio.json">Make a PED file</button></div>
 
 <h2>6 · Keep your work</h2>
-<p>Everything you make is kept in this browser on this computer. To keep it anywhere else, download it: a file's <b>Download</b> button, or <b>My files → Download all my files (.zip)</b> at the top right. <a href="#h-files">Your files</a> has the details.</p>
+<p>Everything you make is kept in this browser, on this computer. To keep it anywhere else, download it with a file's <b>Download</b> button, or with <b>My files → Download all my files (.zip)</b> at the top right. <a href="#h-files">Your files</a> has the details.</p>

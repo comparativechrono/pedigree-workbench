@@ -1,37 +1,37 @@
-<!-- id: h-walk-ped | title: Make a PED file for a linkage program | group: Walkthroughs | summary: Drawing → MPED, one condition out, check the ids | keys: ped mped linkage association merlin plink superlink allegro genehunter fam file pedigree file make write export one condition affected status ids names -->
+<!-- id: h-walk-ped | title: Make a PED file for a linkage program | group: Walkthroughs | summary: Drawing → MPED, take one condition out, check the ids | keys: ped mped linkage association merlin plink superlink allegro genehunter fam file pedigree file make write export one condition affected status ids names -->
 <h1><!--ICON:table-->Make a PED file for a linkage program</h1>
-<p class="lede">Linkage and association programs read pedigrees as PED files: one line per person, with their parents, sex and whether they are affected. There are two ways to make one from a drawing, which differ in how they deal with more than one condition and with carriers.</p>
+<p class="lede">Linkage and association programs read pedigrees as PED files. A PED file has one line per person, giving their parents, their sex and whether they're affected. There are two ways to make one from a drawing, and they differ in how they deal with more than one condition and with carriers.</p>
 
 <table>
 <tr><th></th><th>From the drawing (studio2ped)</th><th>Through the GA4GH files (phenotk)</th></tr>
 <tr><td>People are named by</td><td>their pedigree numbers (II-3), or another choice of ids</td><td>their pedigree numbers (II-3)</td></tr>
-<tr><td>Several conditions</td><td>an MPED file with a column for each; then a PED file for each condition</td><td>one column: affected means having any of the conditions</td></tr>
+<tr><td>Several conditions</td><td>an MPED file with a column for each, then a PED file for each condition</td><td>one column, in which affected means having any of the conditions</td></tr>
 <tr><td>Carriers</td><td>marked 3 in the MPED file</td><td>not marked</td></tr>
-<tr><td>Best for</td><td>a family with several conditions, or carriers</td><td>a family with one condition, when you have the GA4GH files already</td></tr>
+<tr><td>Best for</td><td>a family with several conditions, or carriers</td><td>a family with one condition, when you already have the GA4GH files</td></tr>
 </table>
 
 <h2>From the drawing</h2>
 <h3>1 · Write the MPED file</h3>
-<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition, and an MPED file – a PED file with a column for each condition – when it has more.</p>
+<p><b>Drawing → PED or MPED</b> writes a PED file for a drawing with one condition. When the drawing has more, it writes an MPED file, which is a PED file with a column for each condition.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/okafor.studio.json">Make the Okafor family's MPED file</button></div>
-<p>It checks what it wrote with mpedtools straight away and says if anything is wrong.</p>
+<p>It checks the file with mpedtools straight away, and tells you if anything is wrong.</p>
 
 <h3>2 · Check the ids</h3>
-<p>studio2ped names each person by their pedigree number, <code>II-3</code>, the same as the GA4GH files do, so the file can leave you without anyone's name in it. <b>People are named by</b> can choose the drawing's labels, Pedigree Studio's own ids (<code>p-ggf</code>) or the text under the symbols instead, as version 0.1 did; in the Okafor family that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. An id that two people would share falls back to the pedigree number, with a note.</p>
+<p>studio2ped names each person by their pedigree number, such as <code>II-3</code>, just as the GA4GH files do. This means you can share the file without anyone's name in it. With <b>People are named by</b>, you can choose the drawing's labels, Pedigree Studio's own ids (<code>p-ggf</code>) or the text under the symbols instead, as version 0.1 did. In the Okafor family, that text gives <code>Grace_78</code> and <code>Emeka_d_70</code>, which are names. If two people would get the same id, the pedigree number is used instead, with a note.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="mped-info" data-input="/data/examples/okafor.mped">Summary and check of the Okafor MPED file</button></div>
 
 <h3>3 · One condition at a time</h3>
-<p>Most linkage programs read one condition at a time. <b>Take one condition out</b> makes a plain PED file for one column of the MPED file (or for each, if you leave the condition empty). A plain PED file has no code for a carrier, so carriers become unaffected (1).</p>
+<p>Most linkage programs read one condition at a time. <b>Take one condition out</b> makes a plain PED file for one column of the MPED file, or one for each column if you leave the condition empty. A plain PED file has no code for a carrier, so carriers become unaffected (1).</p>
 <div class="tryrow"><button class="do" type="button" data-tool="mped-extract" data-input="/data/examples/okafor.mped">Take one condition out</button></div>
 
 <h2>Through the GA4GH files</h2>
-<p>First write the GA4GH files (<a href="#h-walk-ga4gh">Share a family in the GA4GH standard</a>, steps 1 to 3). Then <b>GA4GH → PED, table or YAML</b> makes the PED file, with the pedigree numbers as ids.</p>
+<p>First write the GA4GH files, following steps 1 to 3 of <a href="#h-walk-ga4gh">Share a family in the GA4GH standard</a>. Then <b>GA4GH → PED, table or YAML</b> makes the PED file, with the pedigree numbers as ids.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="export" data-input="/data/examples/okafor_phenopackets-family.json">PED file from the Phenopackets Family</button></div>
-<p>Make it from the <b>Phenopackets Family</b>: its pedigree records who is unaffected (1) as well as who is affected (2). A GA4GH Pedigree records only the conditions people have, so a PED file made from it marks everyone else 0, unknown. In the Okafor family, affected means having either condition – the grandmother with breast cancer and the twins with hearing loss – which is not what a linkage analysis of one of them wants: for that, take the first route.</p>
+<p>Make it from the <b>Phenopackets Family</b>, because its pedigree records who is unaffected (1) as well as who is affected (2). A GA4GH Pedigree records only the conditions people have, so a PED file made from it marks everyone else 0, unknown. In the Okafor family, affected means having either condition, so the grandmother with breast cancer and the twins with hearing loss are all affected. That isn't what you need for a linkage analysis of one of the conditions. For that, take the first route.</p>
 
 <h2>The same in the terminal</h2>
 <pre class="code" data-run="term"><code>studio2ped /data/examples/okafor.studio.json -d ~/results -o okafor
 mpedtools validate ~/results/okafor.mped
 mpedtools extract ~/results/okafor.mped Hearing_loss_from_birth -o ~/results/okafor_hearing.ped
 phenotk convert /data/examples/okafor_phenopackets-family.json --to ped -o ~/results/okafor-numbers.ped</code></pre>
-<p><a href="#h-ped">PED and MPED files</a> describes the columns and codes.</p>
+<p><a href="#h-ped">The PED and MPED formats</a> describes the columns and codes.</p>

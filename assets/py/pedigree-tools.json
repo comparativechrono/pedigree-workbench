@@ -1,7 +1,7 @@
 {
   "archive": "pedigree-tools.zip",
-  "sha256": "6b7684db52c16c0dd227a7e35f60ce6f43098591e3be6401800a9722fe6ee478",
-  "bytes": 211129,
+  "sha256": "e296a8fb888ef71d04e480e5507954e8c528091b3c2cede7b67c8e26cc692ba4",
+  "bytes": 211290,
   "packages": {
     "studio2ped": "0.2.0",
     "ped2studio": "0.2.2",

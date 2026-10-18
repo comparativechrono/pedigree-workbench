@@ -1,6 +1,6 @@
 <!-- id: h-terminal | title: The Terminal | group: Notebook and terminal | summary: The pedigree programs as commands, in a shell in the browser | keys: terminal shell bash command line commands programs studio2ga4gh phenotk pedigree-ga4gh mpedtools hponorm mondonorm man help pipe grep sed scripts session -->
 <h1><!--ICON:terminal-->The Terminal</h1>
-<p class="lede">The Terminal tab is a Linux-style shell, in your browser, with the pedigree programs as commands – exactly as they run on a computer where the packages are installed with pip. Every tool in the Tools tab shows its command, with a button to run it here.</p>
+<p class="lede">The Terminal tab is a Linux-style shell in your browser. The pedigree programs are commands in it, and they run exactly as they do on a computer where the packages have been installed with pip. Every tool in the Tools tab shows its command, with a button to run it here.</p>
 <div class="tryrow"><button class="do" type="button" data-term-run="help">Show the commands</button> <button class="do" type="button" data-term-run="man studio2ga4gh">man studio2ga4gh</button></div>
 
 <h2>The pedigree programs</h2>
@@ -13,9 +13,9 @@
 <tr><td><code>phenotk</code></td><td>the phenopacket toolkit: <code>view</code>, <code>stats</code>, <code>validate</code>, <code>normalise</code>, <code>filter</code>, <code>deidentify</code>, <code>convert</code>, <code>upgrade</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>ped</code>, <code>sort</code></td></tr>
 <tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation the others share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
 <tr><td><code>hponorm</code>, <code>mondonorm</code></td><td>match the names in a GA4GH file to HPO or Mondo terms (see below)</td></tr>
-<tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out afresh)</td></tr>
+<tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out from scratch)</td></tr>
 </table>
-<p><code>man NAME</code> gives examples and the options; <code>NAME --help</code> the options alone, from the program itself. Each also runs as <code>python -m pedwb NAME …</code>.</p>
+<p><code>man NAME</code> shows examples and the options, and <code>NAME --help</code> shows just the options, from the program itself. Each program also runs as <code>python -m pedwb NAME …</code>.</p>
 <pre class="code" data-run="term"><code>cd ~/results
 studio2ga4gh /data/examples/lynch.studio.json -t /data/examples/example-terms.json -d . -o lynch
 pedigree-ga4gh validate lynch_ga4gh-pedigree.json
@@ -24,11 +24,11 @@ ls -l</code></pre>
 
 <h2>The shell</h2>
 <ul>
-  <li>It is bash: pipes, redirection, variables, loops, functions, scripts (<code>bash script.sh</code>). <kbd>↑</kbd> and <kbd>↓</kbd> recall commands, <kbd>Tab</kbd> completes names, <kbd>Ctrl</kbd>+<kbd>C</kbd> stops a command.</li>
-  <li>The text programs – <code>cat</code>, <code>head</code>, <code>grep</code>, <code>sed</code>, <code>cut</code>, <code>sort</code>, <code>uniq</code>, <code>wc</code>, <code>diff</code>, <code>column</code> and others – are written for this terminal after the GNU ones; <code>NAME --help</code> says which options each has.</li>
-  <li><code>python</code> runs Python scripts, <code>python -c "…"</code> and <code>python -m json.tool FILE</code>; <code>pip install NAME</code> adds pure-Python packages for this visit.</li>
-  <li><code>curl</code> and <code>wget</code> download through the browser, from servers that allow web pages to (EBI, raw.githubusercontent.com); <code>download FILE</code> saves a file or folder to your computer.</li>
-  <li>Not here: programs that are not in the list (<code>help</code> lists them all), background jobs (<code>&amp;</code>), <code>sudo</code>.</li>
+  <li>It's bash, so you can use pipes, redirection, variables, loops, functions and scripts (<code>bash script.sh</code>). <kbd>↑</kbd> and <kbd>↓</kbd> recall earlier commands, <kbd>Tab</kbd> completes names, and <kbd>Ctrl</kbd>+<kbd>C</kbd> stops a command.</li>
+  <li>The text programs – <code>cat</code>, <code>head</code>, <code>grep</code>, <code>sed</code>, <code>cut</code>, <code>sort</code>, <code>uniq</code>, <code>wc</code>, <code>diff</code>, <code>column</code> and others – were written for this terminal, modelled on the GNU ones. <code>NAME --help</code> tells you which options each one has.</li>
+  <li><code>python</code> runs Python scripts, <code>python -c "…"</code> and <code>python -m json.tool FILE</code>. <code>pip install NAME</code> adds pure-Python packages, for this visit.</li>
+  <li><code>curl</code> and <code>wget</code> download through the browser, from servers that let web pages download from them, such as EBI and raw.githubusercontent.com. <code>download FILE</code> saves a file or folder to your computer.</li>
+  <li>A few things aren't available here: programs that aren't in the list (<code>help</code> lists all the ones that are), background jobs with <code>&amp;</code>, and <code>sudo</code>.</li>
 </ul>
 <pre class="code" data-run="term"><code>for f in /data/examples/*.studio.json; do
   name=$(basename "$f" .studio.json)
@@ -37,10 +37,10 @@ done
 for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedigree-ga4gh validate "$f" | tail -1)"; done</code></pre>
 
 <h2>hponorm and mondonorm here</h2>
-<p>These two ask about each name as they go, waiting for an answer typed at the keyboard. This terminal cannot answer a program's questions, so they stop at the first one, keeping the choices made so far. Here they take their answers from a file instead:</p>
+<p>As they go, these two programs ask you about each name and wait for you to type an answer. This terminal can't answer a program's questions, so they stop at the first question, keeping the choices made so far. In this terminal, they take their answers from a file instead:</p>
 <pre class="code"><code>{"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}}</code></pre>
 <pre class="code"><code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code></pre>
-<p>For most jobs, <code>phenotk normalise FILE --mapping terms.json</code> is simpler: it takes the workbench's terms files as they are, and fills in diseases and phenotypes in one go. To match names by pointing and clicking, use <a href="#h-tool-terms">Match conditions to terms</a>.</p>
+<p>For most jobs, <code>phenotk normalise FILE --mapping terms.json</code> is simpler. It accepts the workbench's terms files unchanged, and fills in diseases and phenotypes in one go. To match names by pointing and clicking, use <a href="#h-tool-terms">Match conditions to terms</a>.</p>
 
 <h2>Keeping a session</h2>
-<p><code>export-session session.ipynb</code> (or the <b>Save session</b> button above the terminal) saves the commands of this session, with their output, as a notebook; <code>export-session session.sh</code> as a script.</p>
+<p><code>export-session session.ipynb</code> saves the commands of this session, with their output, as a notebook, and so does the <b>Save session</b> button above the terminal. <code>export-session session.sh</code> saves them as a script.</p>

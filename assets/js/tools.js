@@ -75,14 +75,14 @@
       pkg: 'studio2ga4gh',
       what: 'Write a drawing as a GA4GH Pedigree and a Phenopackets Family, the standard files for sharing a family’s pedigree and findings.',
       about:
-        'Each person becomes a Phenopacket; the lines between them become relationships named with the KIN kinship terms. The conditions in the colour key go in as the Mondo (diseases) or HPO (phenotypes) terms you give them in a <b>terms file</b> – a condition without a term is left out, because the files have no place for a name without one. People are named by their pedigree numbers (II-3) unless you choose otherwise.',
+        'Each person becomes a Phenopacket, and the lines between people become relationships named with KIN’s kinship terms. The conditions in the colour key go in as the Mondo terms (for diseases) or HPO terms (for phenotypes) that you give them in a <b>terms file</b>. A condition without a term is left out, because the files have no place for a condition that is only a name. People are named by their pedigree numbers (II-3) unless you choose otherwise.',
       help: 'h-tool-studio2ga4gh',
       fields: [
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },
-        { key: 'terms', type: 'file', label: 'Terms for its conditions', kinds: ['terms'], optional: true, none: 'none – conditions are left out', conditions: true },
+        { key: 'terms', type: 'file', label: 'Terms for its conditions', kinds: ['terms'], optional: true, none: 'none (conditions are left out)', conditions: true },
         { key: 'ids', type: 'select', label: 'People are named by', def: 'numbers', options: [['numbers', 'pedigree numbers, such as II-3'], ['drawing', 'the labels in the drawing (these may be names)'], ['studio', 'Pedigree Studio’s own ids']] },
-        { key: 'family', type: 'text', label: 'Family id', def: 'FAM', help: 'FAM gives FAM1 (and FAM2 … for more families in one drawing).' },
-        { key: 'only', type: 'select', label: 'Files to write', def: '', options: [['', 'both: the GA4GH Pedigree and the Phenopackets Family'], ['pedigree', 'the GA4GH Pedigree only'], ['family', 'the Phenopackets Family only']] },
+        { key: 'family', type: 'text', label: 'Family id', def: 'FAM', help: 'FAM gives FAM1, and FAM2 and so on if the drawing holds more than one family.' },
+        { key: 'only', type: 'select', label: 'Files to write', def: '', options: [['', 'both the GA4GH Pedigree and the Phenopackets Family'], ['pedigree', 'the GA4GH Pedigree only'], ['family', 'the Phenopackets Family only']] },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
         { key: 'prefix', type: 'text', label: 'Start of the file names', def: (v) => stemOf(v.input) }
       ],
@@ -110,12 +110,12 @@
       pkg: 'ga4gh2studio',
       what: 'Draw a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio, with its conditions in the colour key.',
       about:
-        'The family is laid out from its relationships, and each condition gets a colour, named in the key with its term (“breast cancer [MONDO:0007254]”), so that the drawing converts back to the same terms. Files from older versions of our tools must be upgraded first (Check and look inside → Upgrade).',
+        'The family is laid out from its relationships. Each condition gets a colour, and the key names it with its term (“breast cancer [MONDO:0007254]”), so the drawing converts back to the same terms. Files made by older versions of our tools need upgrading first (Check and look inside → Upgrade).',
       help: 'h-tool-ga4gh2studio',
       fields: [
         { key: 'input', type: 'file', label: 'The GA4GH file', kinds: ['pedigree', 'family'] },
         { key: 'out', type: 'path', label: 'Save the drawing as', def: (v) => `~/pedigrees/${stemOf(v.input)}.studio.json` },
-        { key: 'tidy', type: 'check', label: 'Lay it out afresh with Pedigree Studio’s Tidy when it opens', def: true, gui: true }
+        { key: 'tidy', type: 'check', label: 'Tidy the drawing when it opens', def: true, gui: true }
       ],
       argv: (v) => ['ga4gh2studio', v.input, '-o', v.out],
       outputs: (v) => [v.out],
@@ -129,7 +129,7 @@
       pkg: 'studio2ped',
       what: 'Write a drawing as a PED file for linkage and association programs (an MPED file when it shows several conditions or carriers).',
       about:
-        'A PED file has one line per person: family, person, father, mother, sex and whether they are affected. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but those are often names, so check them before the file leaves you; an id two people would share falls back to the pedigree number. The “no children” and “infertility” bars are left out: they are not people.',
+        'A PED file has one line per person, giving their family, their id, their father and mother, their sex and whether they are affected. The father and mother are the genetic parents, so adoptive parents and surrogates are written as 0. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but these are often names, so check them before you share the file. If an id would be empty, 0 or shared by two people, the pedigree number is used instead. The “no children” and “infertility” bars are left out, as they aren’t people.',
       help: 'h-tool-studio2ped',
       fields: [
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },
@@ -144,7 +144,7 @@
         for (const f of res.files.filter((p) => /\.m?ped$/i.test(p))) {
           const r = await runArgv(['mpedtools', 'validate', f]);
           const text = (r.stdout || '').trim();
-          if (r.code) out.appendChild(h('div.tl-warn', h('b', `${tilde(f)}: `), 'mpedtools found problems in it:', h('pre.tl-pre', text), h('p', 'Check the people and lines it names in the drawing, and, if they are not named by pedigree numbers, their labels.')));
+          if (r.code) out.appendChild(h('div.tl-warn', h('b', `${tilde(f)}: `), 'mpedtools found problems in this file:', h('pre.tl-pre', text), h('p', 'Look at the people and lines it mentions in the drawing. If people aren’t named by their pedigree numbers, check their labels too.')));
           else out.appendChild(h('div.tl-ok', h('b', `${tilde(f)}: `), text || 'valid'));
         }
       }
@@ -156,7 +156,7 @@
       pkg: 'ped2studio',
       what: 'Draw a PED file in Pedigree Studio: the people, their parents, and who is affected.',
       about:
-        'Founders, couples and their children are laid out generation by generation; affected people (status 2) are filled in with the colour you choose. Use Pedigree Studio’s Tidy for a neater drawing. A PED file says nothing about twins, deaths or adoption: add those in the Studio.',
+        'Founders, couples and their children are laid out generation by generation, and affected people (status 2) are filled in with the colour you choose. Pedigree Studio’s Tidy will make the drawing neater. A PED file says nothing about twins, deaths or adoptions, so add those in the Studio.',
       help: 'h-tool-ped2studio',
       fields: [
         { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
@@ -165,7 +165,7 @@
         { key: 'fill', type: 'select', label: 'Fill', def: 'full', options: [['full', 'the whole symbol'], ['half', 'the left half']] },
         { key: 'shading', type: 'check', label: 'Shade with a pattern instead of filling', def: false },
         { key: 'pattern', type: 'select', label: 'Pattern', def: 'stripes', options: [['stripes', 'stripes'], ['dots', 'dots']], show: (v) => v.shading },
-        { key: 'tidy', type: 'check', label: 'Lay it out afresh with Pedigree Studio’s Tidy when it opens', def: true, gui: true }
+        { key: 'tidy', type: 'check', label: 'Tidy the drawing when it opens', def: true, gui: true }
       ],
       argv: (v) => ['ped2studio', v.input, v.out, ...optArgs(v.colour && v.colour.toLowerCase() !== '#1a2332', '--colour', v.colour), ...optArgs(v.shading, '--shading'), ...optArgs(v.shading && v.pattern !== 'stripes', '--pattern', v.pattern), ...optArgs(v.fill !== 'full', '--fill', v.fill)],
       outputs: (v) => [v.out],
@@ -180,7 +180,7 @@
       pkg: 'phenotk',
       what: 'Turn a GA4GH Pedigree into a Phenopackets Family, or the other way round.',
       about:
-        'The two carry the same family in different ways. A GA4GH Pedigree lists everyone and the KIN relationships between them; a Phenopackets Family has a proband, the relatives with findings and a PED-style pedigree. Going to a Family you can choose the proband (otherwise the pedigree’s index patient, or the first affected person).',
+        'The two hold the same family in different ways. A GA4GH Pedigree lists everyone and the KIN relationships between them, while a Phenopackets Family has a proband, the relatives with findings, and a pedigree laid out like a PED file. When you make a Family you can choose the proband. Otherwise it’s the pedigree’s index patient, or the first affected person.',
       help: 'h-tool-ga4gh-convert',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: ['pedigree', 'family'] },
@@ -200,7 +200,7 @@
       pkg: 'phenotk',
       what: 'Write a GA4GH or Phenopackets file as a PED file, a table (TSV) of people and terms, YAML or JSON Lines.',
       about:
-        'The PED file names people by their ids in the GA4GH file (pedigree numbers, from studio2ga4gh). Made from a Phenopackets Family it marks people unaffected (1) as its pedigree does; made from a GA4GH Pedigree, people without a condition are 0 (unknown), because a GA4GH Pedigree does not record that someone is unaffected. The table has a row for each person and term.',
+        'The PED file uses the people’s ids from the GA4GH file, which are pedigree numbers if studio2ga4gh made it. From a Phenopackets Family, people its pedigree marks as unaffected get 1. From a GA4GH Pedigree, people without a condition get 0 (unknown), because a GA4GH Pedigree doesn’t record that someone is unaffected. The table has one row for each person and term.',
       help: 'h-tool-export',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -235,15 +235,15 @@
       pkg: 'phenotk',
       what: 'Give terms to the findings in a GA4GH or Phenopackets file that have a name but no id, from a terms file or by looking them up.',
       about:
-        'Findings with a name and no ontology id (older files have them) get the id from a terms file, or, if you allow it, the best match from the HPO (phenotypes) or Mondo (diseases) when it is close enough. It also tidies the file into the standard form. What it decided is written to a log beside the new file.',
+        'Findings that have a name but no ontology id, as older files often do, get their id from a terms file. If you allow it, names can also be looked up in the HPO (for phenotypes) or Mondo (for diseases), and by default a term is used only when the name is its label or one of its synonyms. The tool also tidies the file into the standard form, and writes a log of every decision next to the new file.',
       help: 'h-tool-normalise',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
         { key: 'mapping', type: 'file', label: 'Terms file', kinds: ['terms'], optional: true, none: 'none' },
-        { key: 'lookup', type: 'select', label: 'Look up names without a term', def: 'no', options: [['no', 'no – use the terms file only'], ['ols', 'yes, on EBI’s Ontology Lookup Service (online)'], ['local', 'yes, in copies of the ontologies on this computer']] },
+        { key: 'lookup', type: 'select', label: 'Look up names without a term', def: 'no', options: [['no', 'no, use the terms file only'], ['ols', 'yes, on EBI’s Ontology Lookup Service (online)'], ['local', 'yes, in copies of the ontologies on this computer']] },
         { key: 'hpo', type: 'file', label: 'HPO (hp.obo)', kinds: ['obo'], optional: true, none: 'none', show: (v) => v.lookup === 'local' },
         { key: 'mondo', type: 'file', label: 'Mondo (mondo.obo)', kinds: ['obo'], optional: true, none: 'none', show: (v) => v.lookup === 'local' },
-        { key: 'threshold', type: 'number', label: 'Accept a looked-up match from', def: 0.98, min: 0.5, max: 1, step: 0.01, show: (v) => v.lookup !== 'no', help: 'The lowest score at which a looked-up term is used: 0.98, the default, takes only a term whose name or synonym is the condition\'s name. Below 0.98 it is a guess, to be checked.' },
+        { key: 'threshold', type: 'number', label: 'Accept a looked-up match from', def: 0.98, min: 0.5, max: 1, step: 0.01, show: (v) => v.lookup !== 'no', help: 'The lowest score a looked-up term needs before it is used. The default, 0.98, accepts only a term whose label or synonym is the condition’s name. Anything lower is a guess that you should check.' },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}.normalised.json` }
       ],
       argv: (v) => ['phenotk', 'normalise', v.input, '-o', v.out, '--log', v.out.replace(/\.json$/, '') + '.log.json', ...optArgs(v.mapping, '--mapping', v.mapping), ...(v.lookup === 'no' ? ['--no-online'] : ['--backend', v.lookup, '--threshold', String(v.threshold)]), ...optArgs(v.lookup === 'local' && v.hpo, '--hpo-file', v.hpo), ...optArgs(v.lookup === 'local' && v.mondo, '--mondo-file', v.mondo)],
@@ -272,7 +272,7 @@
       pkg: 'pedigree-ga4gh',
       what: 'Check a GA4GH Pedigree, Phenopackets Family, Cohort or Phenopacket against the standards, and say how to fix what is wrong.',
       about:
-        'The checks are those of the Phenopackets v2 schema and of phenopacket-tools, the Phenopackets team’s own validator – required fields, ontology ids, ages, the resources in metaData – and of the GA4GH Pedigree: KIN relations, people named in relationships and index patients, parents’ sexes, loops of ancestry. Errors make a file invalid; warnings are worth fixing; notes are for information.',
+        'It makes the checks of the Phenopackets v2 schema and of phenopacket-tools, the Phenopackets team’s own validator, such as required fields, ontology ids, ages and the resources in metaData. For a GA4GH Pedigree it also checks the KIN relations, that everyone named in a relationship or as an index patient is in the file, the sexes of parents, and that nobody is their own ancestor. Errors make a file invalid, warnings are worth fixing, and notes are for information.',
       help: 'h-tool-validate',
       fields: [{ key: 'input', type: 'file', label: 'The file', kinds: GA4GH }],
       argv: (v) => ['pedigree-ga4gh', 'validate', v.input],
@@ -287,7 +287,7 @@
       pkg: 'pedigree-ga4gh',
       what: 'Rewrite a file made by an older version of studio2ga4gh or abusua2ga4gh (or any non-standard file) in the standard form.',
       about:
-        'Earlier versions of our tools wrote GA4GH files that the standard does not accept: names in the subject, diseases in the wrong place, retired KIN codes, empty ontology ids, missing metaData. The upgrade fixes what it can and lists what it changed; findings it cannot give a term to are listed for you to match (Fill in missing terms).',
+        'Earlier versions of our tools wrote GA4GH files that the standard doesn’t accept, with names in the subject, diseases in the wrong place, retired KIN codes, empty ontology ids or no metaData. The upgrade fixes what it can and lists every change. Findings it can’t give a term to are listed for you to match with Fill in missing terms.',
       help: 'h-tool-upgrade',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH.concat(['json']) },
@@ -304,7 +304,7 @@
       title: 'Look inside a GA4GH file',
       pkg: 'phenotk',
       what: 'Show a GA4GH or Phenopackets file as a table of people and their terms, or count what is in it.',
-      about: 'A quick way to read a file without its JSON: who is in it, their sex and status, and their diseases and phenotypes; or the numbers of people, terms and relationships.',
+      about: 'A quick way to read a file without wading through its JSON. You can see who is in it, with their sex, status, diseases and phenotypes, or just count the people, terms and relationships.',
       help: 'h-tool-view',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -319,8 +319,8 @@
       group: 'check',
       title: 'Compare two files',
       pkg: 'phenotk',
-      what: 'What differs between two GA4GH or Phenopackets files – people, terms, relationships – leaving out the order of things and when they were made.',
-      about: 'Useful to see what a conversion changed, or what is new in a second version of a family’s file.',
+      what: 'Show what differs between two GA4GH or Phenopackets files, in their people, terms and relationships, ignoring the order of things and when the files were made.',
+      about: 'Use it to see what a conversion changed, or what’s new in a later version of a family’s file.',
       help: 'h-tool-diff',
       fields: [
         { key: 'input', type: 'file', label: 'The first file', kinds: GA4GH },
@@ -339,18 +339,18 @@
       group: 'share',
       title: 'De-identify',
       pkg: 'phenotk',
-      what: 'Replace the people’s ids with new ones, and take out dates of birth, other ids and (if you like) who made the file.',
+      what: 'Give people new ids, and take out dates of birth, other ids and, if you like, who made the file.',
       about:
-        'The ids are replaced consistently everywhere – relationships, the pedigree, the index patient – with IND-0001, IND-0002 … or with codes made from the old ids. The key from old ids to new can be written to a file of its own: keep it apart from the shared file. De-identifying removes what the file says directly; whether the family can still be recognised from what is left (a rare condition, a large family) is for you to judge.',
+        'The ids are replaced in the same way everywhere they appear (the relationships, the pedigree and the index patient) with IND-0001, IND-0002 and so on, or with codes made from the old ids. The key from old ids to new can be saved in a separate file, which you should keep apart from the file you share. De-identifying removes what the file says directly. Whether the family could still be recognised from what’s left, such as a rare condition or a large family, is for you to judge.',
       help: 'h-tool-deidentify',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
         { key: 'remap', type: 'select', label: 'New ids', def: 'seq', options: [['seq', 'IND-0001, IND-0002 … in order'], ['hash', 'codes made from the old ids (the same each time, with the same secret)'], ['keep', 'keep the ids as they are']] },
-        { key: 'salt', type: 'text', label: 'Secret for the codes', def: '', show: (v) => v.remap === 'hash', placeholder: 'any words; keep them private', help: 'With the same secret, the same person gets the same code in every file.' },
+        { key: 'salt', type: 'text', label: 'Secret for the codes', def: '', show: (v) => v.remap === 'hash', placeholder: 'any words (keep them private)', help: 'With the same secret, the same person gets the same code in every file.' },
         { key: 'keepDob', type: 'check', label: 'Keep dates of birth', def: false },
         { key: 'binAge', type: 'select', label: 'Ages', def: '', options: [['', 'as they are'], ['5y', 'in 5-year bands'], ['10y', 'in 10-year bands']] },
         { key: 'keepNames', type: 'check', label: 'Keep other ids (alternateIds)', def: false },
-        { key: 'dropProv', type: 'check', label: 'Hide who made the file, and when (the de-identification takes their place)', def: false },
+        { key: 'dropProv', type: 'check', label: 'Hide who made the file and when (the de-identification is recorded instead)', def: false },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}.deidentified.json` },
         { key: 'keyfile', type: 'path', label: 'Save the key (old id → new) as', def: (v) => `~/results/${stemOf(v.input)}.key.json`, optional: true, show: (v) => v.remap !== 'keep' }
       ],
@@ -375,9 +375,9 @@
       group: 'share',
       title: 'Keep some people or terms',
       pkg: 'phenotk',
-      what: 'Make a smaller file: only the proband, the affected, one sex or the people you name – or only some terms.',
+      what: 'Make a smaller file with only the proband, the affected people, one sex or the people you name, or with only some terms.',
       about:
-        'Filters on people keep or drop whole people (with “tidy the pedigree”, relationships to people who are gone are dropped too). Filters on terms keep only the terms you list (one CURIE a line) – or drop them, if you reverse it.',
+        'Filters on people keep or drop whole people. With “Tidy the pedigree”, relationships to the people who have gone are dropped too. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
       help: 'h-tool-filter',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -423,7 +423,7 @@
       help: 'h-tool-split',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: ['pedigree', 'family', 'cohort'] },
-        { key: 'affected', type: 'check', label: 'Only the people with findings', def: false },
+        { key: 'affected', type: 'check', label: 'Only the affected people', def: false },
         { key: 'outdir', type: 'folder', label: 'Save in the folder', def: (v) => `~/results/${stemOf(v.input)}-people` }
       ],
       argv: (v) => ['phenotk', 'split', v.input, '--out-dir', v.outdir, ...optArgs(v.affected, '--affected-only')],
@@ -437,7 +437,7 @@
       pkg: 'phenotk',
       what: 'Merge Phenopackets (or Families) into one Cohort, or into one Family.',
       about:
-        'A Cohort is a set of people who need not be related, such as the probands of several families: a person whose id is taken already by someone in another file (IV-3 in two families) is renamed after their file’s id. A Family is one family: its pedigree comes from the Families and GA4GH Pedigrees among the files, and a person in more than one file is kept once.',
+        'A Cohort is a set of people who needn’t be related, such as the probands of several families. If someone’s id is already used by a person in another file (IV-3 in two families, say), they are renamed after their file’s id. A Family is one family. Its pedigree comes from the Families and GA4GH Pedigrees among the files, and anyone who appears in more than one file is kept once.',
       help: 'h-tool-merge',
       fields: [
         { key: 'inputs', type: 'files', label: 'The files', kinds: GA4GH },
@@ -457,7 +457,7 @@
       pkg: 'phenotk',
       what: 'Add diseases or phenotypes (with an age of onset), or a vital status, to the proband, to everyone, or to one person.',
       about:
-        'Write each term as its id, with its label after an = if you like: <code>HP:0000365=Hearing impairment</code>. Phenotypes can be marked as looked for and not found (excluded). For a gene variant and other details, see phenotk add in the terminal (man phenotk).',
+        'Write each term as its id, followed by = and its label if you like: <code>HP:0000365=Hearing impairment</code>. Phenotypes can be marked as looked for but not found (excluded). To add a gene variant or other details, use phenotk add in the terminal (see man phenotk).',
       help: 'h-tool-add',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -502,7 +502,7 @@
       group: 'ped',
       title: 'Summary and check',
       pkg: 'mpedtools',
-      what: 'What is in a PED or MPED file – families, people, conditions, who is affected – and whether it is valid.',
+      what: 'See what a PED or MPED file holds (families, people, conditions and who is affected) and whether it is valid.',
       about: 'The check finds people listed twice, parents who are not in the file, parents of the wrong sex, and status codes other than 0, 1, 2 and 3.',
       help: 'h-tool-mpedtools',
       fields: [{ key: 'input', type: 'file', label: 'The file', kinds: ['ped', 'mped'] }],
@@ -519,12 +519,12 @@
       group: 'ped',
       title: 'Take one condition out',
       pkg: 'mpedtools',
-      what: 'Make a plain PED file for one condition of an MPED file – or one for each condition.',
-      about: 'Most linkage programs read one condition at a time: this makes the PED file they want from the MPED file studio2ped writes for a drawing with several conditions.',
+      what: 'Make a plain PED file for one condition in an MPED file, or one for each condition.',
+      about: 'Most linkage programs read one condition at a time. This makes the PED file they need from the MPED file that studio2ped writes for a drawing with several conditions.',
       help: 'h-tool-mpedtools',
       fields: [
         { key: 'input', type: 'file', label: 'The MPED file', kinds: ['mped'] },
-        { key: 'which', type: 'text', label: 'The condition (its column name)', def: '', placeholder: 'e.g. Breast_cancer – or leave empty for every condition', help: 'The names are in the file’s first line (# MPED v1 …), or run Summary and check.' },
+        { key: 'which', type: 'text', label: 'The condition (its column name)', def: '', placeholder: 'e.g. Breast_cancer, or leave it empty for every condition', help: 'The names are on the file’s first line (# MPED v1 …), or run Summary and check to see them.' },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
         { key: 'prefix', type: 'text', label: 'Start of the file names', def: (v) => stemOf(v.input) }
       ],
@@ -540,7 +540,7 @@
       title: 'Put PED files together',
       pkg: 'mpedtools',
       what: 'Merge PED files of the same people, one condition each, into one MPED file.',
-      about: 'The files must list the same families and people; each gives one condition column, named as you say (or after its file).',
+      about: 'The files must list the same families and people. Each one gives a condition column, named as you choose or after its file.',
       help: 'h-tool-mpedtools',
       fields: [
         { key: 'inputs', type: 'files', label: 'The PED files', kinds: ['ped'] },
@@ -573,12 +573,12 @@
       title: 'PED ⇄ MPED, and columns',
       pkg: 'mpedtools',
       what: 'Turn a PED file into an MPED file or back, or add or remove a condition column.',
-      about: 'An MPED file is a PED file with a header line naming its condition columns, so that it can hold several. A new column starts with every person at the value you give (0 unknown, 1 unaffected, 2 affected, 3 carrier).',
+      about: 'An MPED file is a PED file with a header line that names its condition columns, so it can hold several conditions. In a new column, everyone starts with the value you choose (0 unknown, 1 unaffected, 2 affected, 3 carrier).',
       help: 'h-tool-mpedtools',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: ['ped', 'mped'] },
         { key: 'action', type: 'select', label: 'Do', def: (v) => (MG.app.pedKind(v.input || '') === 'mped' ? 'to-ped' : 'to-mped'), options: [['to-mped', 'make it an MPED file'], ['to-ped', 'make it a plain PED file'], ['add', 'add a condition column'], ['remove', 'remove a condition column']] },
-        { key: 'column', type: 'text', label: 'Condition (column name)', def: '', placeholder: 'e.g. Hearing_loss', show: (v) => v.action !== 'to-mped', help: 'For a plain PED file: which condition to keep (empty: the first).' },
+        { key: 'column', type: 'text', label: 'Condition (column name)', def: '', placeholder: 'e.g. Hearing_loss', show: (v) => v.action !== 'to-mped', help: 'For a plain PED file, the condition to keep (leave it empty for the first).' },
         { key: 'value', type: 'select', label: 'New column starts at', def: '0', options: [['0', '0 – unknown'], ['1', '1 – unaffected'], ['2', '2 – affected'], ['3', '3 – carrier']], show: (v) => v.action === 'add' },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}${v.action === 'to-ped' ? '.ped' : v.action === 'to-mped' ? '.mped' : MG.app.pedKind(v.input || '') === 'mped' ? '.mped' : '.mped'}` }
       ],
@@ -720,7 +720,7 @@
           text = K.statusText || 'Starting Python…';
         } else if (K.state === 'failed') {
           state = 'bad';
-          text = 'Python could not start';
+          text = 'Python couldn’t start';
         }
       }
       this.pill.innerHTML = `<span class="kdot ${state === 'ok' ? 'ok' : state === 'busy' ? 'busy' : state === 'bad' ? 'bad' : 'off'}"></span><span>${esc(text)}</span>`;
@@ -733,10 +733,10 @@
         .map(([n, ver]) => `<tr><td><code>${esc(n)}</code></td><td>${esc(ver || '')}</td></tr>`)
         .join('');
       const m = MG.modal(
-        'The Python of the tools',
-        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}), in your browser: nothing is sent anywhere, except the names you look up on EBI’s Ontology Lookup Service when you choose to. It is the same Python as the Notebook and Terminal tabs.</p>
-         <table class="table small"><tr><th>Package</th><th>Version here</th></tr>${rows}</table>
-         <p class="muted small">studio2ga4gh, ga4gh2studio and phenopacket-toolkit here are newer than their releases on PyPI: they write the corrected GA4GH form, through pedigree-ga4gh (see the help: Reference → Versions).</p>
+        'Python for the tools',
+        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python.</p>
+         <table class="table small"><tr><th>Package</th><th>Version</th></tr>${rows}</table>
+         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer (see the help: Reference → Versions, and how to cite).</p>
          <div class="prompt-actions"><button class="btn" data-x="start" type="button">${K.state === 'ready' ? 'Restart Python' : 'Start Python now'}</button></div>`
       );
       m.box.querySelector('[data-x="start"]').addEventListener('click', () => {
@@ -752,7 +752,7 @@
       this.crumb.textContent = 'Tools';
       const M = this.main;
       M.appendChild(h('h2.tl-title', 'What would you like to do?'));
-      M.appendChild(h('p.tl-lead', 'Each tool runs one command of our Python packages on a file of yours or an example, and shows you that command, for the terminal and for Python, so that you can do the same again there. Click an arrow on the map for the tool that makes that step, or a box for what can be done with that kind of file.'));
+      M.appendChild(h('p.tl-lead', 'Each tool runs one command from our Python packages on one of your files or an example. It also shows you that command, for the terminal and in Python, so you can do the same again there. Click an arrow on the map to open the tool for that step, or click a box to see what you can do with that kind of file.'));
       const mapBox = h('div.tl-mapbox');
       M.appendChild(mapBox);
       const hint = h('p.tl-maphint', ' ');
@@ -762,7 +762,7 @@
         onFormat: (k) => this._kindPanel(k, panel),
         onHover: (name) => {
           const t = TOOL[name];
-          hint.textContent = t ? `${t.title} – ${t.what}` : name && KIND()[name] ? `${KIND()[name]}: click to see what can be done with it` : ' ';
+          hint.textContent = t ? `${t.title} – ${t.what}` : name && KIND()[name] ? `${KIND()[name]}: click to see what you can do with it` : ' ';
         }
       });
       const panel = h('div.tl-kindpanel');
@@ -787,7 +787,7 @@
         grid.appendChild(card);
       }
       M.appendChild(grid);
-      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool (it downloads about 10 MB the first time, then your browser keeps it). Your files never leave this computer.'));
+      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser when you first run a tool. On your first visit it downloads about 10 MB, which your browser then keeps. Your files never leave this computer.'));
     }
     /** under the map: what can be done with a kind of file */
     _kindPanel(kind, panel) {
@@ -803,7 +803,7 @@
         list.appendChild(b);
       });
       if (kind === 'studio') {
-        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Draw or change it in the Studio tab'), h('small', 'Pedigree Studio: symbols, couples, children, twins, the colour key.'));
+        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Draw or change it in the Studio tab'), h('small', 'Draw people, couples, children and twins, and name the conditions in the colour key.'));
         b.addEventListener('click', () => MG.app.showWorkbench('studio'));
         list.prepend(b);
       }
@@ -838,7 +838,7 @@
         b.addEventListener('click', () => this.choose(t.id, t.id === 'terms' ? { drawing: path } : { input: path }));
         list.appendChild(b);
       });
-      if (!tools.length) list.appendChild(h('p.muted', 'None of the tools reads this kind of file. Open it in the Files tab to look at it.'));
+      if (!tools.length) list.appendChild(h('p.muted', 'None of the tools reads this kind of file, but you can open it in the Files tab to look at it.'));
       panel.appendChild(list);
       // what is in it (Python)
       try {
@@ -848,7 +848,7 @@
         info.appendChild(fileSummary(r.result));
       } catch (e) {
         info.innerHTML = '';
-        info.appendChild(h('p.muted', 'Could not read it: ' + (e.message || e)));
+        info.appendChild(h('p.muted', 'Couldn’t read this file: ' + (e.message || e)));
       }
     }
 
@@ -958,7 +958,7 @@
     async _run(tool, x, result, runBtn) {
       // files it would replace
       const outs = tool.outputs ? tool.outputs(x).filter((p) => p && this.fs.exists(p)) : [];
-      if (outs.length && !(await MG.confirmBox('Replace these files?', `<p>Running the tool writes over:</p><ul>${outs.map((p) => `<li><code>${esc(tilde(p))}</code></li>`).join('')}</ul>`, 'Replace them'))) return;
+      if (outs.length && !(await MG.confirmBox('Replace these files?', `<p>Running the tool will replace:</p><ul>${outs.map((p) => `<li><code>${esc(tilde(p))}</code></li>`).join('')}</ul>`, 'Replace them'))) return;
       // the folders it writes into
       for (const f of tool.fields) {
         if (f.type === 'folder' && x[f.key]) this.fs.mkdirp(x[f.key]);
@@ -969,7 +969,7 @@
       runBtn.classList.add('running');
       result.innerHTML = '';
       const K = kernel();
-      const status = h('div.tl-status', h('span.spinner.small'), h('span', K.state === 'ready' ? (K.cellRunning ? 'Waiting for Python: a notebook cell is running…' : 'Running…') : 'Starting Python in your browser (the first time, this downloads about 10 MB)…'));
+      const status = h('div.tl-status', h('span.spinner.small'), h('span', K.state === 'ready' ? (K.cellRunning ? 'Waiting for Python, which is busy with a notebook cell…' : 'Running…') : 'Starting Python in your browser (about 10 MB to download the first time)…'));
       result.appendChild(status);
       const t0 = performance.now();
       try {
@@ -996,7 +996,7 @@
         await this._result(tool, x, res, result, secs);
       } catch (e) {
         status.remove();
-        result.appendChild(h('div.tl-fail', h('b', 'The tool could not run: '), String((e && e.message) || e)));
+        result.appendChild(h('div.tl-fail', h('b', 'The tool couldn’t run: '), String((e && e.message) || e)));
       } finally {
         runBtn.disabled = false;
         runBtn.classList.remove('running');
@@ -1178,7 +1178,7 @@
         });
         list.appendChild(h('li', h('code', tilde(p)), x));
       });
-      if (!items.length) list.appendChild(h('li.muted', 'No files yet: choose them below, one by one.'));
+      if (!items.length) list.appendChild(h('li.muted', 'No files chosen yet. Add them one by one below.'));
     };
     const refresh = () => {
       const { mine, ex } = filesOfKinds(f.kinds);
@@ -1207,7 +1207,7 @@
     for (const f of tool.fields) {
       if (f.show && !f.show(x)) continue;
       if ((f.type === 'file' && !f.optional && !x[f.key]) || (f.type === 'files' && !(x[f.key] || []).length)) return `Choose ${f.label.toLowerCase().replace(/^the /, 'the ')}.`;
-      if ((f.type === 'folder' || f.type === 'path') && !f.optional && !x[f.key]) return `Say where to save it (${f.label.toLowerCase()}).`;
+      if ((f.type === 'folder' || f.type === 'path') && !f.optional && !x[f.key]) return `Fill in “${f.label}”.`;
       if ((f.type === 'folder' || f.type === 'path') && x[f.key] && !(x[f.key] === HOME() || x[f.key].startsWith(HOME() + '/'))) return 'Results can only be saved in your home folder (~).';
       if (f.type === 'files' && f.key === 'inputs' && tool.id.endsWith('merge') && (x[f.key] || []).length < 2) return 'Choose at least two files.';
     }
@@ -1274,7 +1274,7 @@
       if (info.relationships != null) row('Relationships', String(info.relationships));
       if (info.indexPatients && info.indexPatients.length) row('Index patient', info.indexPatients.join(', '));
       if (info.proband) row('Proband', info.proband);
-      if (info.legacy) row(info.legacy.upgradable === false ? 'Draft form' : 'Older form', info.legacy.description + (info.legacy.upgradable === false ? '' : ' Upgrade it to use it with the other tools.'));
+      if (info.legacy) row(info.legacy.upgradable === false ? 'Draft form' : 'Older form', info.legacy.description + (info.legacy.upgradable === false ? '' : ' Upgrade it before using it with the other tools.'));
     } else if (info.kind === 'ped' || info.kind === 'mped') {
       row('People', String(info.people));
       row('Families', (info.families || []).join(', '));
@@ -1304,7 +1304,7 @@
         kernel()
           .ensure()
           .then(() => showConditions(box, x, tab))
-          .catch(() => (box.textContent = 'Python could not start.'));
+          .catch(() => (box.textContent = 'Python couldn’t start.'));
       });
       box.appendChild(b);
       return;
@@ -1323,7 +1323,7 @@
     const t = h('table.tl-condtable', h('tr', h('th', 'Condition in the key'), h('th', 'Term'), h('th', '')));
     let gaps = 0;
     rows.forEach((c) => {
-      const term = c.id ? h('span', h('code', c.id), ' ', c.label && c.label !== c.name ? c.label : '', c.from === 'key' ? h('small.muted', ' (written in the key)') : '') : h('span.tl-gap', 'none – it will be left out');
+      const term = c.id ? h('span', h('code', c.id), ' ', c.label && c.label !== c.name ? c.label : '', c.from === 'key' ? h('small.muted', ' (written in the key)') : '') : h('span.tl-gap', 'none, so it will be left out');
       if (!c.id) gaps++;
       t.appendChild(h('tr', h('td', c.name, h('small.muted', ` · ${c.people} ${c.people === 1 ? 'person' : 'people'}`)), h('td', term), h('td', c.id ? h('span.tl-okmark', { html: icon('check') }) : '')));
     });
@@ -1333,7 +1333,7 @@
       b.addEventListener('click', () => tab.choose('terms', { drawing: x.input, terms: x.terms }));
       box.appendChild(h('div.tl-condnote', `${gaps} of the ${rows.length} conditions ${gaps === 1 ? 'has' : 'have'} no term. `, b));
     }
-    if (r.result.unnamed && r.result.unnamed.length) box.appendChild(h('p.tl-help', `Some symbols are coloured ${r.result.unnamed.join(', ')}, which the key does not name: name the colour in the Studio’s key to include it.`));
+    if (r.result.unnamed && r.result.unnamed.length) box.appendChild(h('p.tl-help', `Some symbols are coloured ${r.result.unnamed.join(', ')}, which the key doesn’t name. To include ${r.result.unnamed.length === 1 ? 'that colour' : 'those colours'}, name ${r.result.unnamed.length === 1 ? 'it' : 'them'} in the Studio’s key.`));
   }
 
   /** the findings of a check, as a table */
@@ -1383,8 +1383,8 @@
     _build() {
       const R = this.root;
       R.appendChild(h('div.tl-toolhead', h('h2.tl-title', 'Match conditions to terms'), h('span.tl-pkg', 'hponorm · mondonorm')));
-      R.appendChild(h('p.tl-lead', 'GA4GH and Phenopackets files name conditions by ontology terms: diseases by Mondo, signs and symptoms by the Human Phenotype Ontology (HPO). Here you find the term for each condition in a drawing’s colour key and keep the matches in a terms file, which Drawing → GA4GH uses.'));
-      const more = h('details.tl-about', h('summary', 'More about matching'), h('p', { html: 'The searches are those of hponorm and mondonorm. EBI’s Ontology Lookup Service ranks matches best but needs the internet, and sends the names you search for to EBI (not the drawing). A copy of an ontology on this computer works offline: the HPO can be downloaded here (about 11 MB); Mondo’s file has to be downloaded with your browser from its release page and added (it is about 50 MB, and its host does not let web pages download it).' }));
+      R.appendChild(h('p.tl-lead', 'GA4GH and Phenopackets files name conditions by ontology terms, using Mondo for diseases and the Human Phenotype Ontology (HPO) for signs and symptoms. Here you can find the term for each condition in a drawing’s colour key, and keep the matches in a terms file for Drawing → GA4GH to use.'));
+      const more = h('details.tl-about', h('summary', 'More about matching'), h('p', { html: 'The searches are hponorm’s and mondonorm’s. EBI’s Ontology Lookup Service has the latest releases and finds terms that a local search can miss, but it needs the internet, and it sends the names you search for (though not the drawing) to EBI. A copy of an ontology on this computer works offline. You can download the HPO here (about 11 MB). Mondo’s file, which is about 50 MB, has to be downloaded with your browser from its release page and then added, because its host doesn’t let web pages download it.' }));
       const hb = h('button.linkbtn', { type: 'button', html: icon('book') + '<span>Help and a walkthrough</span>' });
       hb.addEventListener('click', () => MG.app.showHelp('h-tool-terms'));
       more.appendChild(h('p', hb));
@@ -1392,7 +1392,7 @@
       // 1. the drawing (and a terms file to start from)
       const f1 = h('div.tl-form');
       const fDraw = { key: 'drawing', type: 'file', label: '1 · The drawing', kinds: ['studio'], studio: true };
-      const fTerms = { key: 'terms', type: 'file', label: 'Start from a terms file (optional)', kinds: ['terms'], optional: true, none: 'none – start afresh' };
+      const fTerms = { key: 'terms', type: 'file', label: 'Start from a terms file (optional)', kinds: ['terms'], optional: true, none: 'none (start with an empty list)' };
       const v = { drawing: this.drawing, terms: this.termsIn };
       if (!v.drawing) {
         const { mine, ex } = filesOfKinds(['studio']);
@@ -1468,7 +1468,7 @@
       });
       const dl = h('button.btn.small', { type: 'button', html: icon('download') + '<span>Download the HPO here (11 MB)</span>' });
       dl.addEventListener('click', () => this.downloadHpo(dl, rH));
-      rH.row.appendChild(h('div.tl-help', dl, ' from github.com/obophenotype/human-phenotype-ontology, into ~/ontologies.'));
+      rH.row.appendChild(h('div.tl-help', dl, ' (from github.com/obophenotype/human-phenotype-ontology, saved in ~/ontologies).'));
       rM.row.appendChild(h('div.tl-help', { html: 'Download <code>mondo.obo</code> with your browser from <a href="https://mondo.monarchinitiative.org/pages/download/" target="_blank" rel="noopener">Mondo’s download page</a>, then add it with “From my computer…” above.' }));
       B.append(rH.row, rM.row);
       this.hpoRow = rH;
@@ -1495,7 +1495,7 @@
       } catch (e) {
         lab.textContent = 'Download the HPO here (11 MB)';
         btn.disabled = false;
-        toast('The HPO could not be downloaded: ' + esc(e.message) + '. Check the internet connection.', 'error', 8000);
+        toast('The HPO couldn’t be downloaded (' + esc(e.message) + '). Check your internet connection.', 'error', 8000);
       }
     }
     /** the drawing's conditions, with the terms they have already */
@@ -1508,7 +1508,7 @@
         return;
       }
       this.outIn.value = this.termsIn && this.termsIn.startsWith(HOME() + '/') ? tilde(this.termsIn) : `~/terms/${stemOf(this.drawing)}-terms.json`;
-      T.appendChild(h('div.tl-status', h('span.spinner.small'), h('span', kernel().state === 'ready' ? 'Reading the colour key…' : 'Starting Python in your browser (the first time, this downloads about 10 MB)…')));
+      T.appendChild(h('div.tl-status', h('span.spinner.small'), h('span', kernel().state === 'ready' ? 'Reading the colour key…' : 'Starting Python in your browser (about 10 MB to download the first time)…')));
       const r = await pyCall('pedwb.gui.conditions', { path: this.drawing, terms: this.termsIn || null });
       T.innerHTML = '';
       if (!r.ok) {
@@ -1517,7 +1517,7 @@
       }
       const conds = r.result.conditions;
       if (!conds.length) {
-        T.appendChild(h('p', 'The drawing’s colour key names no conditions. Name them in the Studio (the Key button), then come back.'));
+        T.appendChild(h('p', 'The drawing’s colour key doesn’t name any conditions. Name them in the Studio with the Key button, then come back.'));
         return;
       }
       const all = h('button.btn.small', { type: 'button', html: icon('search') + '<span>Suggest terms for all</span>' });
@@ -1526,7 +1526,7 @@
         for (const row of this.rows) if (!row.chosen) await row.suggest();
         all.disabled = false;
       });
-      T.appendChild(h('div.tl-termsbar', all, h('span.muted', ' or one at a time below.')));
+      T.appendChild(h('div.tl-termsbar', all, h('span.muted', ' or match them one at a time below.')));
       conds.forEach((c) => this.rows.push(this._row(c)));
       this._same();
     }
@@ -1562,7 +1562,7 @@
           chosenEl.append(h('span.tl-okmark', { html: icon('check') }), ' ', h('code', row.chosen.id), ' ', row.chosen.label, row.chosen.version ? h('small.muted', ` (release ${row.chosen.version})`) : '', ' · ', clear);
           box.classList.add('done');
         } else {
-          chosenEl.appendChild(h('span.muted', 'No term yet: this condition would be left out of the GA4GH files.'));
+          chosenEl.appendChild(h('span.muted', 'No term yet, so this condition would be left out of the GA4GH files.'));
           box.classList.remove('done');
         }
       };
@@ -1576,7 +1576,7 @@
         }
         go.disabled = true;
         row.cands.innerHTML = '';
-        row.cands.appendChild(h('div.tl-status', h('span.spinner.small'), h('span', src === 'local' ? `Searching ${base(file)} (the first search reads the whole file: a few seconds)…` : 'Asking EBI’s Ontology Lookup Service…')));
+        row.cands.appendChild(h('div.tl-status', h('span.spinner.small'), h('span', src === 'local' ? `Searching ${base(file)} (the first search reads the whole file, which takes a few seconds)…` : 'Asking EBI’s Ontology Lookup Service…')));
         const r = await pyCall('pedwb.gui.suggest', { names: [q.value.trim() || c.name], ontology: row.ontology, source: src, file, limit: 6 });
         go.disabled = false;
         row.cands.innerHTML = '';
@@ -1588,7 +1588,7 @@
         const err = r.result.errors[name];
         const list = r.result.results[name] || [];
         if (err) row.cands.appendChild(h('div.tl-fail', err));
-        else if (!list.length) row.cands.appendChild(h('p.muted', 'Nothing found: try other words, or the other ontology.'));
+        else if (!list.length) row.cands.appendChild(h('p.muted', 'Nothing found. Try other words, or the other ontology.'));
         list.forEach((cand, i) => {
           const id = `cand-${Math.random().toString(36).slice(2, 7)}`;
           const radio = h('input', { type: 'radio', name: 'c-' + c.name, id });
@@ -1622,18 +1622,18 @@
         check.disabled = false;
         if (r && r.ok && r.result.found) {
           row.chosen = { id: r.result.id, label: r.result.label, version: r.result.version || '' };
-          if (r.result.obsolete) toast(`${esc(r.result.id)} is obsolete in this release: look for the term that replaces it.`, 'warn', 8000);
+          if (r.result.obsolete) toast(`${esc(r.result.id)} is obsolete in this release. Look for the term that replaces it.`, 'warn', 8000);
         } else if (r && r.ok && !r.result.found && !/did not answer/.test(r.result.error || '')) {
           toast(esc(r.result.error), 'warn', 7000);
           return;
         } else {
           // (not checked: no copy of that ontology here, or the service did not answer) – kept as typed, with the name
           if (!/^[A-Za-z][\w.-]*:\S+$/.test(id)) {
-            toast('That is not an ontology id: they look like MONDO:0007254 or HP:0000365.', 'warn', 6000);
+            toast('That isn’t an ontology id. Ontology ids look like MONDO:0007254 or HP:0000365.', 'warn', 6000);
             return;
           }
           row.chosen = { id, label: c.name, version: '' };
-          toast(`${esc(id)} could not be checked here, so it is used as typed, with the label “${esc(c.name)}”.`, null, 6000);
+          toast(`${esc(id)} couldn’t be checked here, so it’s used as you typed it, with the label “${esc(c.name)}”.`, null, 6000);
         }
         showChosen();
         this._same();
@@ -1668,7 +1668,7 @@
       const details = h('details.tl-samebox', h('summary', { html: icon('code') + '<span>The same in Python</span>' }));
       const pre = h('pre.code', { dataset: { run: 'py' } }, h('code', code.join('\n')));
       details.appendChild(h('div.tl-code', h('div.tl-code-t', 'Python (a notebook cell)'), pre));
-      details.appendChild(h('p.tl-help', { html: 'In the terminal there is no command that reads a drawing’s key: hponorm and mondonorm match the names in GA4GH and Phenopackets files, asking as they go – which this terminal cannot answer – so there they take the answers from a file: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code>.' }));
+      details.appendChild(h('p.tl-help', { html: 'There’s no terminal command that reads a drawing’s key. hponorm and mondonorm match the names in GA4GH and Phenopackets files and ask you questions as they go, which this terminal can’t answer, so here they take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered</code>.' }));
       box.appendChild(details);
       MG.app.decorateCode(pre);
     }
@@ -1707,11 +1707,11 @@
       const list = h('div.tl-files');
       files.forEach((p) => list.appendChild(fileChip(p)));
       this.after.appendChild(list);
-      const next = h('button.btn.primary', { type: 'button', html: icon('convert') + '<span>Next: the drawing → GA4GH, with these terms</span>' });
+      const next = h('button.btn.primary', { type: 'button', html: icon('convert') + '<span>Next: Drawing → GA4GH, with these terms</span>' });
       next.addEventListener('click', () => this.tab.choose('studio2ga4gh', { input: files[1] || this.drawing, terms: out }));
       this.after.appendChild(h('div.tl-next', next));
       this.unmatched = this.rows.filter((r) => !r.chosen).map((r) => r.c.name);
-      if (this.unmatched.length) this.after.appendChild(h('p.tl-warn', `Not matched yet: ${this.unmatched.join(', ')} – left out of the GA4GH files until it has a term.`));
+      if (this.unmatched.length) this.after.appendChild(h('p.tl-warn', `Not matched yet: ${this.unmatched.join(', ')}. ${this.unmatched.length === 1 ? 'It' : 'They'} will be left out of the GA4GH files until ${this.unmatched.length === 1 ? 'it has' : 'they have'} a term.`));
     }
     /** a copy of the drawing with the ids in its key → its path */
     async _writeKey(terms) {
@@ -1719,7 +1719,7 @@
       try {
         doc = JSON.parse(await this.fs.readText(this.drawing));
       } catch (err) {
-        toast('The drawing could not be read: ' + esc(err.message), 'warn', 6000);
+        toast('The drawing couldn’t be read: ' + esc(err.message), 'warn', 6000);
         return null;
       }
       const lower = Object.fromEntries(Object.entries(terms).map(([k, val]) => [k.toLowerCase(), val]));

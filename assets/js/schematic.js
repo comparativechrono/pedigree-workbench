@@ -108,7 +108,7 @@
     const svg = el('svg', { viewBox: VIEWBOX[layout], role: 'img', 'aria-labelledby': uid + 't' }, container);
     const title = el('title', { id: uid + 't' }, svg);
     title.textContent =
-      'A Pedigree Studio drawing in the middle. studio2ped and ped2studio convert it to and from PED files; studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family; its conditions are matched to HPO and Mondo terms; phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them.';
+      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. Its conditions are matched to HPO and Mondo terms, and phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them.';
     const defs = el('defs', {}, svg);
     const mk = (id, cls) => {
       const m = el('marker', { id, viewBox: '0 0 10 10', refX: 8.5, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
@@ -140,7 +140,7 @@
       return r;
     });
     const nodes = Object.entries(NODES).map(([kind, n]) => {
-      const g = el('g', { class: 'pm-node' + (n.main ? ' main' : ''), tabindex: '0', role: 'button', 'aria-label': `${n.title}: what can be done with it` }, nodesG);
+      const g = el('g', { class: 'pm-node' + (n.main ? ' main' : ''), tabindex: '0', role: 'button', 'aria-label': `${n.title}: what you can do with it` }, nodesG);
       el('rect', { x: n.x - n.w / 2, y: n.y - 26, width: n.w, height: 52, rx: 12 }, g);
       text(g, n.x, n.y - 3, n.title, 'pm-title');
       text(g, n.x, n.y + 16, n.sub, 'pm-sub');

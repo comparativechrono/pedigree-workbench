@@ -1,18 +1,18 @@
 <!-- id: h-tool-ped2studio | title: PED or MPED → drawing | group: Tools | summary: ped2studio: a PED file drawn in Pedigree Studio | keys: ped2studio draw drawing ped mped fam import linkage picture colour fill shading pattern half -->
 <h1><!--ICON:pedigree-->PED or MPED → drawing</h1>
-<p class="lede">ped2studio draws a PED or MPED file in Pedigree Studio: the people, their parents and partners, and who is affected.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="/data/examples/lynch.ped">Open it with the Lynch PED file</button></div>
+<p class="lede">ped2studio draws a PED or MPED file in Pedigree Studio, showing the people, their parents and partners, and who is affected.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="/data/examples/lynch.ped">Try it with the Lynch PED file</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>The PED file</dt><dd>A <code>.ped</code>, <code>.fam</code> or <code>.mped</code> file.</dd>
-  <dt>Save the drawing as</dt><dd>A <code>.studio.json</code> file, in <code>~/pedigrees</code> unless you choose otherwise.</dd>
-  <dt>Colour for affected people, Fill, Shade with a pattern</dt><dd>How the affected people (status 2) are marked: a colour, over the whole symbol or its left half, or stripes or dots instead of a fill. An MPED file's conditions each get a colour of their own.</dd>
-  <dt>Lay it out afresh with Pedigree Studio's Tidy when it opens</dt><dd>Done in the Studio when you open the drawing from the result.</dd>
+  <dt>The PED file</dt><dd>Choose a <code>.ped</code>, <code>.fam</code> or <code>.mped</code> file.</dd>
+  <dt>Save the drawing as</dt><dd>The drawing is saved as a <code>.studio.json</code> file, in <code>~/pedigrees</code> unless you choose otherwise.</dd>
+  <dt>Colour for affected people, Fill, Shade with a pattern</dt><dd>These set how affected people (status 2) are marked. Choose a colour to fill the whole symbol or its left half, or use stripes or dots instead of a fill. From an MPED file, each condition gets a colour of its own.</dd>
+  <dt>Tidy the drawing when it opens</dt><dd>The tidying is done in the Studio when you open the drawing from the result.</dd>
 </dl>
 
 <h2>What comes out</h2>
-<p>Founders, couples and their children, generation by generation; the condition in the key, named <i>Affected</i> (or, from an MPED file, after each column); each person labelled with their id. A PED file says nothing of twins, deaths, adoptions or pregnancies, nor what the condition is: add those in the Studio, and name the condition in the key so that it can be given a term. Several families in one file are drawn side by side. <a href="#h-walk-draw-ped">Draw a PED file you have been sent</a> goes through it step by step.</p>
+<p>The drawing shows the founders, couples and their children, generation by generation, and labels each person with their id. In the key, the condition is called <i>Affected</i>. From an MPED file, each condition is named after its column instead. A PED file says nothing about twins, deaths, adoptions or pregnancies, or about what the condition is. Add those in the Studio, and name the condition in the key so that it can be given a term. If one file holds several families, they're drawn side by side. <a href="#h-walk-draw-ped">Draw a PED file you have been sent</a> goes through it step by step.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>ped2studio /data/examples/lynch.ped ~/pedigrees/lynch.studio.json --colour '#e67e22'

@@ -157,11 +157,12 @@ does. The tests never contact EBI's Ontology Lookup Service.
 
 ## The packages' own repositories
 
-Each package the workbench changed has a pull request in its own repository
-making the same changes, so that `pip install` will give what the workbench
-runs once they are released. The copies in `python/` are those pull
-requests' code. **[docs/upstream.md](docs/upstream.md)** lists them with what
-each changes, and the order to release them in. They cover:
+Each package the workbench changed had a pull request in its own repository
+making the same changes, and all of them were released on PyPI on 18 October
+2026, so `pip install` gives exactly what the workbench runs. The copies in
+`python/` are taken from those releases' wheels.
+**[docs/upstream.md](docs/upstream.md)** lists the pull requests with what each
+changed, and how to release new versions. They cover:
 
 - pedigree-ga4gh, as a package of its own;
 - new versions of studio2ga4gh, ga4gh2studio and phenopacket-toolkit;

@@ -19,7 +19,7 @@
     "hponorm": {"authors": ["Hearn TJ"], "title": "hponorm [software]", "url": "https://github.com/comparativechrono/hponorm"},
     "mondonorm": {"authors": ["Hearn TJ"], "title": "mondonorm [software]", "url": "https://github.com/comparativechrono/mondonorm"},
     "phenopackettoolkit": {"authors": ["Hearn TJ"], "title": "phenopacket-toolkit [software]", "url": "https://pypi.org/project/phenopacket-toolkit/"},
-    "pedigreega4gh": {"authors": ["Hearn TJ"], "title": "pedigree-ga4gh, in the Pedigree workbench [software]", "url": "https://github.com/comparativechrono/pedigree-workbench"}
+    "pedigreega4gh": {"authors": ["Hearn TJ"], "title": "pedigree-ga4gh [software]", "url": "https://github.com/comparativechrono/pedigree-ga4gh"}
   },
   "programs": {
     "phenopackets": {"name": "Phenopackets", "refs": ["phenopackets2022"]},
@@ -32,12 +32,12 @@
     "pyodide": {"name": "Pyodide", "refs": ["pyodide"]},
     "studio2ped": {"name": "studio2ped", "refs": ["studio2ped"]},
     "ped2studio": {"name": "ped2studio", "refs": ["ped2studio"]},
-    "studio2ga4gh": {"name": "studio2ga4gh", "refs": ["studio2ga4gh"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
-    "ga4gh2studio": {"name": "ga4gh2studio", "refs": ["ga4gh2studio"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
+    "studio2ga4gh": {"name": "studio2ga4gh", "refs": ["studio2ga4gh"]},
+    "ga4gh2studio": {"name": "ga4gh2studio", "refs": ["ga4gh2studio"]},
     "mpedtools": {"name": "mpedtools", "refs": ["mpedtools"]},
     "hponorm": {"name": "hponorm", "refs": ["hponorm"]},
     "mondonorm": {"name": "mondonorm", "refs": ["mondonorm"]},
-    "phenotk": {"name": "phenopacket-toolkit (phenotk)", "refs": ["phenopackettoolkit"], "note": "The workbench carries version 0.4.0, which is newer than the release on PyPI."},
+    "phenotk": {"name": "phenopacket-toolkit (phenotk)", "refs": ["phenopackettoolkit"]},
     "pedigree-ga4gh": {"name": "pedigree-ga4gh", "refs": ["pedigreega4gh"]}
   }
 }

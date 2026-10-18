@@ -1,10 +1,10 @@
 <!-- id: h-kin | title: KIN, the kinship terms | group: Files and standards | summary: The Kinship Ontology's 48 relations, which the GA4GH Pedigree uses | keys: kin kinship ontology relations relationship terms codes labels mother father parent sibling twin cousin partner consanguineous donor surrogate adoptive foster retired draft version 1 v1 -->
 <h1><!--ICON:network-->KIN, the kinship terms</h1>
-<p class="lede">The Kinship Ontology, KIN, is the GA4GH Pedigree Standard's vocabulary of relationships: each relationship in a GA4GH Pedigree is one KIN term, such as <code>KIN:027</code> <i>isBiologicalMotherOf</i>.</p>
+<p class="lede">The Kinship Ontology, KIN, is the GA4GH Pedigree Standard's vocabulary of relationships. Each relationship in a GA4GH Pedigree is one KIN term, such as <code>KIN:027</code> <i>isBiologicalMotherOf</i>.</p>
 
 <h2>How a relationship is written</h2>
 <pre class="code"><code>{"individualId": "III-3", "relation": {"id": "KIN:027", "label": "isBiologicalMotherOf"}, "relativeId": "IV-3"}</code></pre>
-<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is KIN's own, as it is written in KIN. A symmetric relation (partners, twins, cousins) is written once, in one direction.</p>
+<p>It reads as a sentence: III-3 <i>is the biological mother of</i> IV-3. The label is KIN's own, spelt exactly as KIN spells it. A symmetric relation, such as one between partners, twins or cousins, is written only once, in one direction.</p>
 
 <h2>The terms the converters use</h2>
 <table>
@@ -15,18 +15,19 @@
 <tr><td>identical and non-identical twins</td><td><code>KIN:010</code> isMonozygoticMultipleBirthSiblingOf, <code>KIN:011</code> isPolyzygoticMultipleBirthSiblingOf</td></tr>
 <tr><td>partners: consanguineous, separated, or with no children</td><td><code>KIN:030</code> isConsanguineousPartnerOf, <code>KIN:050</code> isSeparatedPartnerOf, <code>KIN:051</code> isSeparatedConsanguineousPartnerOf, <code>KIN:026</code> isPartnerOf</td></tr>
 </table>
-<p>Brothers and sisters, grandparents, aunts and cousins are not written: they follow from the parents.</p>
+<p>Brothers and sisters, grandparents, aunts and cousins aren't written, because they follow from the parents.</p>
 
-<h2>All 48 terms</h2>
-<p>From <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea, 16 September 2024, still its latest), the file behind <code>http://purl.org/ga4gh/kin.owl</code>. <code>KIN:031</code>, <i>hasSex</i>, is a property of a person rather than a relationship between two, and is never used.</p>
+<h2>The 48 relationship terms</h2>
+<p>The terms come from <code>kin.owl</code> in the GA4GH Pedigree Standard's repository (commit 71616ea of 16 September 2024, which is still its latest). This is the file behind <code>http://purl.org/ga4gh/kin.owl</code>. KIN also has <code>KIN:031</code>, <i>hasSex</i>, but that's a property of one person rather than a relationship between two people. So the table leaves it out, and the workbench never uses it.</p>
 <!--KIN-->
 
 <h2>Retired codes</h2>
-<p>Earlier drafts of KIN had codes that the current one does not; some turn up in older files. The check reports them, and the upgrade replaces them:</p>
+<p>Earlier drafts of KIN had codes that the current version doesn't have, and some of them turn up in older files. The check reports them, and the upgrade replaces them:</p>
 <!--KIN-RETIRED-->
 
 <h2>KIN version 1, in draft</h2>
-<p>A revised KIN is being drafted with version 1 of the standard (see <a href="#h-ga4gh">The GA4GH Pedigree</a>), and is not yet merged. It would add 22 terms (<code>KIN:200</code> to <code>KIN:221</code>), which tell biological relatives apart from social and legal ones, and retire ten, among them <code>KIN:003</code> (replaced by <code>KIN:200</code>) and <code>KIN:030</code> and <code>KIN:051</code>, whose consanguinity would become a flag on the relationship. Ten codes would keep their number with a narrower meaning: <code>KIN:017</code> <i>isGrandparentOf</i>, for instance, would become <i>isSocialLegalGrandparentOf</i>. Until the draft is merged, the terms above are KIN's current ones, and they are what the workbench writes.</p>
+<p>A revised KIN is being drafted alongside version 1 of the standard (see <a href="#h-ga4gh">The GA4GH Pedigree</a>), and it hasn't been merged yet. It would add 22 terms (<code>KIN:200</code> to <code>KIN:221</code>), which tell biological relatives apart from social and legal ones. It would also retire ten terms. Among them are <code>KIN:003</code>, which <code>KIN:200</code> would replace, and <code>KIN:030</code> and <code>KIN:051</code>, whose consanguinity would become a flag on the relationship.</p>
+<p>Ten codes would keep their number but have a narrower meaning. For example, <code>KIN:017</code> <i>isGrandparentOf</i> would become <i>isSocialLegalGrandparentOf</i>. Until the draft is merged, the terms above are KIN's current ones, and they're what the workbench writes.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh kin

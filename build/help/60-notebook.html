@@ -1,32 +1,32 @@
 <!-- id: h-notebook | title: The Notebook | group: Notebook and terminal | summary: Python notebooks with the pedigree packages, in the browser | keys: notebook jupyter ipynb python cells run shift enter markdown pip magic cd bash writefile download restart variables starter pedigree-tools -->
 <h1><!--ICON:notebook-->The Notebook</h1>
-<p class="lede">The Notebook tab runs Python notebooks – the same <code>.ipynb</code> files as Jupyter – in your browser, with all the pedigree packages installed. It is for work the forms do not cover: many families at once, your own checks, a record of an analysis that can be run again.</p>
+<p class="lede">The Notebook tab runs Python notebooks in your browser, with all the pedigree packages installed. They're the same <code>.ipynb</code> files that Jupyter uses. The tab is for work the forms don't cover, such as many families at once, your own checks, or a record of an analysis that can be run again.</p>
 <div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-tools.ipynb">Open the welcome notebook</button> <button class="do" type="button" data-new-nb="python">Start a new notebook</button></div>
 
 <h2>The welcome notebook</h2>
-<p><code>~/notebooks/pedigree-tools.ipynb</code> walks through the packages: reading a drawing, converting it, checking the result, the family as Python objects, the phenopacket toolkit, PED files, and commands from a cell. Run its cells from the top.</p>
+<p><code>~/notebooks/pedigree-tools.ipynb</code> walks you through the packages. It covers reading a drawing, converting it and checking the result, the family as Python objects, the phenopacket toolkit, PED files, and running commands from a cell. Run its cells from the top.</p>
 
 <h2>Working in a notebook</h2>
 <ul>
-  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>; <b>Run all</b> runs them from the top. The first cell starts Python, which takes a few seconds (and downloads about 10 MB the first time).</li>
-  <li><b>Code</b> and <b>Text</b> add cells; a text cell is Markdown. Each cell's menu moves, duplicates, clears or deletes it.</li>
-  <li><b>Stop</b> stops a cell that runs too long, and <b>Restart</b> forgets the variables. The variables button lists what the notebook has defined.</li>
-  <li>The notebook is saved among your files as you work. <b>Download</b> gives it as a Jupyter notebook, a Python script, or a web page with its results.</li>
-  <li>A notebook starts in its own folder, as in Jupyter, and reads and writes the same files as the other tabs: <code>/data/examples</code>, and your home, <code>/home/user</code>.</li>
+  <li><b>Run</b> a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>, or use <b>Run all</b> to run them all from the top. The first cell starts Python, which takes a few seconds, and the first time it also downloads about 10 MB.</li>
+  <li><b>Code</b> and <b>Text</b> add cells, and text cells are written in Markdown. Use a cell's menu to move, duplicate, clear or delete it.</li>
+  <li><b>Stop</b> stops a cell that's running for too long, and <b>Restart</b> forgets all the variables. The variables button lists everything the notebook has defined.</li>
+  <li>The notebook is saved in your files as you work. <b>Download</b> gives you a copy as a Jupyter notebook, a Python script, or a web page with its results.</li>
+  <li>As in Jupyter, a notebook starts in its own folder. It reads and writes the same files as the other tabs: <code>/data/examples</code>, and your home folder, <code>/home/user</code>.</li>
 </ul>
 
 <h2>Commands in a cell</h2>
-<p>As in Jupyter, a line that starts with <code>!</code> runs a command, and <code>%</code> lines are the notebook's own commands:</p>
+<p>As in Jupyter, a line that starts with <code>!</code> runs a command, and lines that start with <code>%</code> are the notebook's own commands:</p>
 <pre class="code" data-run="py"><code>!studio2ga4gh /data/examples/okafor.studio.json -t /data/examples/example-terms.json -d ~/results -o okafor-nb
 !pedigree-ga4gh validate ~/results/okafor-nb_ga4gh-pedigree.json</code></pre>
 <table>
 <tr><th></th><th></th></tr>
-<tr><td><code>!command</code></td><td>a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python; for a pipe (<code>|</code>) or redirection (<code>&gt;</code>) into them, use the Terminal tab</td></tr>
-<tr><td><code>%cd</code>, <code>%pwd</code>, <code>%ls</code></td><td>change or show the folder, list files</td></tr>
-<tr><td><code>%pip install NAME</code></td><td>install a pure-Python package from PyPI, for this visit</td></tr>
-<tr><td><code>%%writefile FILE</code>, <code>%%bash</code>, <code>%%capture</code>, <code>%time</code>, <code>%run</code></td><td>as in Jupyter</td></tr>
+<tr><td><code>!command</code></td><td>Runs a command, as in the Terminal tab. The pedigree programs and <code>python</code> run in the notebook's own Python. For a pipe or redirection into them (<code>|</code> or <code>&gt;</code>), use the Terminal tab.</td></tr>
+<tr><td><code>%cd</code>, <code>%pwd</code>, <code>%ls</code></td><td>Change or show the folder, or list the files in it</td></tr>
+<tr><td><code>%pip install NAME</code></td><td>Installs a pure-Python package from PyPI, for this visit</td></tr>
+<tr><td><code>%%writefile FILE</code>, <code>%%bash</code>, <code>%%capture</code>, <code>%time</code>, <code>%run</code></td><td>Work as they do in Jupyter</td></tr>
 </table>
 
 <h2>The packages</h2>
-<p>studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket_toolkit and pedigree_ga4gh are installed, in the versions the workbench carries (<a href="#h-versions">Versions</a>), with PyYAML. <a href="#h-python">The packages in Python</a> shows the main functions of each. Every tool in the Tools tab shows its Python under <b>The same in the terminal, and in Python</b>, with <b>Add to notebook</b>.</p>
-<div class="callout info"><div class="co-t"><!--ICON:info-->One Python for three tabs</div><p>The Tools tab, the Notebook and the Terminal share one Python. While a notebook cell runs, a tool waits for it to finish, and the other way round.</p></div>
+<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket_toolkit and pedigree_ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>), and PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->One Python for three tabs</div><p>The Tools tab, the Notebook tab and the Terminal tab share one Python. While a notebook cell is running, a tool waits for it to finish, and the other way round.</p></div>

@@ -1,25 +1,25 @@
-<!-- id: h-tool-deidentify | title: De-identify | group: Tools | summary: phenotk deidentify: new ids, no dates of birth, a key kept apart | keys: deidentify de-identify anonymise anonymize pseudonymise pseudonymize privacy ids remap hash salt key crosswalk date of birth age bands provenance share gdpr -->
+<!-- id: h-tool-deidentify | title: De-identify | group: Tools | summary: phenotk deidentify: new ids, no dates of birth, and a key kept separately | keys: deidentify de-identify anonymise anonymize pseudonymise pseudonymize privacy ids remap hash salt key crosswalk date of birth age bands provenance share gdpr -->
 <h1><!--ICON:eyeOff-->De-identify</h1>
-<p class="lede">Makes a copy of a GA4GH or Phenopackets file for sharing: everyone gets a new id, used consistently everywhere in the file, and dates of birth, other ids and, if you like, who made the file are taken out. The key from the old ids to the new ones can be kept in a file of its own.</p>
+<p class="lede">This tool makes a copy of a GA4GH or Phenopackets file for sharing. Everyone gets a new id, which is used consistently everywhere in the file. Dates of birth and other ids are taken out, and you can also hide who made the file. You can keep the key from the old ids to the new ones in a separate file.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="deidentify" data-input="/data/examples/okafor_ga4gh-pedigree.json">De-identify the Okafor GA4GH Pedigree</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>New ids</dt><dd><b>IND-0001, IND-0002 …</b> in the order the people come in the file; <b>codes made from the old ids</b> (such as <code>IND-3f9a1c2b7d40</code>), which with the same secret are the same in every file, so that the same person can be followed across files without their id; or <b>the ids as they are</b>.</dd>
-  <dt>Secret for the codes</dt><dd>Any words, kept private. Without a secret, anyone with the old ids could make the codes again and so undo them.</dd>
-  <dt>Keep dates of birth, Ages</dt><dd>Dates of birth are taken out unless you keep them. The age at the last encounter can be put in bands of 5 or 10 years (47 becomes 45); ages of onset are left as they are.</dd>
-  <dt>Keep other ids</dt><dd>Other ids of a person (<code>alternateIds</code>, such as a hospital number) are taken out unless you keep them.</dd>
-  <dt>Hide who made the file, and when</dt><dd>The <code>metaData</code> must say who made the file and when, so instead of the original <code>createdBy</code> and <code>created</code> it says <i>phenotk deidentify</i> and the time of the de-identification; the record of updates goes.</dd>
-  <dt>Save the key as</dt><dd>A JSON file of old id → new id. Keep it apart from the shared file: with it, the new ids lead back to the old ones.</dd>
+  <dt>New ids</dt><dd>Choose <b>IND-0001, IND-0002 …</b> to number the people in the order they come in the file. With <b>codes made from the old ids</b> (such as <code>IND-3f9a1c2b7d40</code>), a person gets the same code in every file, as long as you use the same secret. This means you can follow the same person across files without their id. Or you can keep <b>the ids as they are</b>.</dd>
+  <dt>Secret for the codes</dt><dd>Use any words you like, and keep them private. Without a secret, anyone who has the old ids could make the codes again, and so match each code to its old id.</dd>
+  <dt>Keep dates of birth, Ages</dt><dd>Dates of birth are taken out unless you choose to keep them. You can put the age at the last encounter into bands of 5 or 10 years. For example, in 5-year bands, 47 becomes 45. Ages of onset aren't changed.</dd>
+  <dt>Keep other ids</dt><dd>A person's other ids (<code>alternateIds</code>, such as a hospital number) are taken out unless you choose to keep them.</dd>
+  <dt>Hide who made the file, and when</dt><dd>The <code>metaData</code> has to say who made the file and when. So instead of the original <code>createdBy</code> and <code>created</code>, it says <i>phenotk deidentify</i> and the time of the de-identification. The record of updates and <code>submittedBy</code> are taken out.</dd>
+  <dt>Save the key as</dt><dd>This is a JSON file of old id → new id. Keep it apart from the shared file, because with it, anyone can follow the new ids back to the old ones.</dd>
 </dl>
 
 <h2>What changes in the file</h2>
 <ul>
-  <li>The ids, everywhere: each Phenopacket and its subject, the relationships, the index patient, a Family's pedigree, biosamples, genomic interpretations and files.</li>
-  <li>The ids in a GA4GH Pedigree's narrative too (<i>proband IV-3</i> becomes <i>proband IND-0014</i>). The narrative is free text, so read it before you share: the tool reminds you.</li>
-  <li>Nothing else: terms, sexes, relationships and the shape of the family stay as they were.</li>
+  <li>The ids change everywhere: in each Phenopacket and its subject, the relationships, the index patient, a Family's pedigree, biosamples, genomic interpretations and files.</li>
+  <li>The ids in a GA4GH Pedigree's narrative change too. For example, <i>proband IV-3</i> becomes <i>proband IND-0014</i>. The narrative is free text, so read it before you share the file. The tool reminds you to. If some of the ids are bare numbers, the tool can't tell them from other numbers in the text, so it leaves the narrative unchanged and warns you.</li>
+  <li>Nothing else changes. Terms, sexes, relationships and the shape of the family stay as they were.</li>
 </ul>
-<div class="callout warn"><div class="co-t"><!--ICON:warning-->De-identified is not anonymous</div><p>This removes what the file says directly. A family can still be recognised from what is left – a rare condition, a large or unusual family, ages, the place it came from – especially by someone who knows it. Whether a file can be shared, and with whom, is for you to judge under your institution's rules, and the law, on patient data.</p></div>
+<div class="callout warn"><div class="co-t"><!--ICON:warning-->De-identified is not anonymous</div><p>De-identifying removes what the file says directly. But a family can still be recognised from what's left, such as a rare condition, a large or unusual family, people's ages or where it came from. Someone who knows the family is especially likely to recognise it. It's for you to judge whether a file can be shared, and with whom, under your institution's rules and the law on patient data.</p></div>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk deidentify /data/examples/okafor_ga4gh-pedigree.json -o ~/results/okafor.deidentified.json --keyfile ~/results/okafor.key.json

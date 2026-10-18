@@ -1,30 +1,30 @@
 <!-- id: h-tool-ga4gh-convert | title: GA4GH Pedigree ⇄ Phenopackets Family | group: Tools | summary: phenotk convert: one GA4GH form into the other | keys: convert ga4gh pedigree phenopackets family proband relatives pedigree persons phenotk pedigree-ga4gh -->
 <h1><!--ICON:convert-->GA4GH Pedigree ⇄ Phenopackets Family</h1>
-<p class="lede">The two GA4GH files carry the same family in two ways. This tool turns either into the other – for a file someone has sent you in only one of the forms, for example.</p>
+<p class="lede">The two GA4GH files describe the same family in two different ways. This tool turns either one into the other. You might use it, for example, when someone has sent you a file in only one of the forms.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="ga4gh-convert" data-input="/data/examples/okafor_ga4gh-pedigree.json">Make a Family from the Okafor GA4GH Pedigree</button></div>
 
 <h2>The two forms</h2>
 <table>
 <tr><th></th><th>GA4GH Pedigree</th><th>Phenopackets Family</th></tr>
-<tr><td>Who is in it</td><td>everyone, each a Phenopacket</td><td>the proband, the relatives with findings, and everyone in its pedigree</td></tr>
+<tr><td>Who is in it</td><td>everyone, each as a Phenopacket</td><td>the proband, the relatives with findings, and everyone in its pedigree</td></tr>
 <tr><td>How they are related</td><td>relationships named with KIN terms: parents, donors, adoption, partners, twins, cousins…</td><td>a PED-style pedigree: father, mother, sex, affected or not</td></tr>
 <tr><td>Standard</td><td>proposed for the GA4GH Pedigree Standard, still being written</td><td>Phenopackets version 2, approved</td></tr>
 </table>
-<p>Going to a Family loses what a PED-style pedigree cannot say – twins, adoptions, separated couples, and that a parent was a donor rather than a partner – and the narrative. Going to a GA4GH Pedigree, the relationships come from the parents in the Family's pedigree; the proband's parents are marked consanguineous if the Family says so and the pedigree does not show it already. <a href="#h-ga4gh">The GA4GH Pedigree</a> has the details.</p>
+<p>When you convert to a Family, you lose the narrative and everything a PED-style pedigree can't say: twins, adoptions, separated couples, and the fact that a parent was a donor rather than a partner. When you convert to a GA4GH Pedigree, the relationships come from the parents in the Family's pedigree. The proband's parents are marked as consanguineous if the Family says so and the pedigree doesn't already show it. <a href="#h-ga4gh">The GA4GH Pedigree</a> has the details.</p>
 
 <h2>The form</h2>
 <dl>
-  <dt>The file</dt><dd>A GA4GH Pedigree or a Phenopackets Family.</dd>
-  <dt>Make</dt><dd>The other form (chosen for you).</dd>
-  <dt>Proband</dt><dd>Going to a Family: the person's id to make the proband. Without one, the GA4GH Pedigree's index patient is used, or the first affected person.</dd>
-  <dt>Save as</dt><dd><code>~/results/<i>name</i>_phenopackets-family.json</code> or <code>…_ga4gh-pedigree.json</code>.</dd>
+  <dt>The file</dt><dd>Choose a GA4GH Pedigree or a Phenopackets Family.</dd>
+  <dt>Make</dt><dd>The tool chooses the other form for you.</dd>
+  <dt>Proband</dt><dd>When you're making a Family, give the id of the person to make the proband. If you don't, the tool uses the GA4GH Pedigree's index patient, or else the first affected person.</dd>
+  <dt>Save as</dt><dd>The new file is saved as <code>~/results/<i>name</i>_phenopackets-family.json</code> or <code>…_ga4gh-pedigree.json</code>.</dd>
 </dl>
-<p>Some things each form cannot say:</p>
+<p>There are some things that each form can't say:</p>
 <ul>
-  <li>A person in the GA4GH Pedigree with nothing recorded is in the Family's pedigree, but has no Phenopacket among its relatives. Their status in the Family's pedigree is <i>missing</i> (unknown) rather than unaffected, because a GA4GH Pedigree records the conditions people have, not that they were found to have none.</li>
-  <li>From a Family, the people with no Phenopacket in it come into the GA4GH Pedigree with their sex and parents only: the Family's pedigree does not say whether they are alive.</li>
+  <li>If nothing is recorded for a person in the GA4GH Pedigree, they're in the Family's pedigree, but there's no Phenopacket for them among its relatives. Their status in the Family's pedigree is <i>missing</i> (unknown) rather than unaffected. That's because a GA4GH Pedigree records the conditions people have, not that they were found to have none.</li>
+  <li>Going the other way, people who have no Phenopacket in the Family come into the GA4GH Pedigree with only their sex and parents. The Family's pedigree doesn't say whether they're alive.</li>
 </ul>
-<p>So convert each way only when you need to: keep both of the files studio2ga4gh writes, rather than making one from the other.</p>
+<p>So only convert between the two forms when you need to. It's better to keep both of the files that studio2ga4gh writes than to make one from the other.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk convert /data/examples/okafor_ga4gh-pedigree.json --to family -o ~/results/okafor-again_phenopackets-family.json

@@ -1,17 +1,18 @@
-<!-- id: h-versions | title: Versions, and how to cite | group: Reference | summary: The versions of the packages and of Pedigree Studio here, and the papers to cite | keys: versions version cite citation reference papers pypi release studio2ga4gh 0.4.0 pedigree-ga4gh 1.0.0 phenopacket-toolkit zenodo doi -->
+<!-- id: h-versions | title: Versions, and how to cite | group: Reference | summary: Which versions of the packages and of Pedigree Studio the workbench runs, and the papers to cite | keys: versions version cite citation reference papers pypi release studio2ga4gh 0.4.0 pedigree-ga4gh 1.0.0 phenopacket-toolkit zenodo doi -->
 <h1><!--ICON:info-->Versions, and how to cite</h1>
-<p class="lede">What this copy of the workbench runs. Say which versions you used when you report work done with it – the files record it too, in their <code>metaData</code> (<code>createdBy: studio2ga4gh 0.4.0</code>).</p>
+<p class="lede">These are the versions that this copy of the workbench runs. When you report work done with it, say which versions you used. The files record them too, in their <code>metaData</code> (for example <code>createdBy: studio2ga4gh 0.4.0</code>).</p>
 
 <!--VERSIONS-->
-<p>Python is Pyodide's, loaded from jsDelivr when Python first starts; <code>python --version</code> in the terminal, or the Python pill in the Tools tab, says which.</p>
+<p>Python itself is Pyodide's, which is loaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
 
-<h2>Newer than PyPI</h2>
-<p>All the packages here but mpedtools are newer than their releases on PyPI, and are on their way there:</p>
+<h2>The same as on PyPI</h2>
+<p>Every package here is the version that is released on PyPI, so <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
 <ul>
-  <li>studio2ga4gh, ga4gh2studio and phenopacket-toolkit are version 0.4.0 (0.3.0 on PyPI). They read and write GA4GH files through pedigree-ga4gh, which is new, and so write the one corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>). The 0.4.0 toolkit also fixes faults of 0.3.0 that made some of its files invalid.</li>
-  <li>studio2ped is 0.2.0 (0.1.0 on PyPI). It names people by their pedigree numbers, as studio2ga4gh does, and leaves out the “no children” and “infertility” marks, which are not people.</li>
-  <li>ped2studio is 0.2.2 (0.2.1 on PyPI). It keeps apart families that reuse the same ids.</li>
-  <li>hponorm and mondonorm are 1.1.0 (1.0.0 on PyPI). They score OLS's results by how well they match, take synonyms into account, read terms files in any case, and search a local copy of an ontology much faster.</li>
+  <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that the other packages share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
+  <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid, and its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept closer guesses.</li>
+  <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the “no children” and “infertility” marks, which aren't people.</li>
+  <li><b>ped2studio 0.2.2</b> keeps apart families that reuse the same ids.</li>
+  <li><b>hponorm and mondonorm 1.1.0</b> score OLS's results by how well they match, take synonyms into account and read terms files whatever their case. They no longer treat names that are spelt alike but mean different things, such as hypothyroidism and hyperthyroidism, as close matches, and they search a local copy of an ontology much faster.</li>
 </ul>
-<p><a href="#h-own-computer">On your own computer</a> says how to use these versions outside the browser.</p>
+<p>mpedtools is still at version 0.1.0. <a href="#h-own-computer">On your own computer</a> explains how to install the packages outside the browser.</p>
 <!--CITE: pedigree-studio studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenotk pedigree-ga4gh phenopackets phenopacket-tools hpo mondo ga4gh-pedigree nomenclature pyodide-->

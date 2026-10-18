@@ -1,43 +1,43 @@
 <!-- id: h-walk-ga4gh | title: Share a family in the GA4GH standard | group: Walkthroughs | summary: Draw, match terms, convert, check, de-identify, download | keys: share sharing send collaborator database ga4gh phenopackets family pedigree standard export deidentify de-identify anonymise check validate download -->
 <h1><!--ICON:eyeOff-->Share a family in the GA4GH standard</h1>
-<p class="lede">From a drawing to files you can send to a collaborator, a registry or another program: a GA4GH Pedigree and a Phenopackets Family. The buttons use the Okafor family, one of the examples; with a family of your own, choose your drawing instead.</p>
+<p class="lede">This walkthrough takes you from a drawing to files you can send to a collaborator, a registry or another program: a GA4GH Pedigree and a Phenopackets Family. The buttons use the Okafor family, one of the examples. With a family of your own, choose your drawing instead.</p>
 
 <div class="callout info"><div class="co-t"><!--ICON:info-->Which of the two files to send</div>
-<p>The <b>Phenopackets Family</b> is Phenopackets version 2, an approved GA4GH standard: send it to anything that reads Phenopackets. The <b>GA4GH Pedigree</b> holds the whole family, with every relationship named by a kinship term, in the form proposed for the GA4GH Pedigree Standard, which is still being written. If you are not sure what the recipient reads, send both. <a href="#h-ga4gh">The GA4GH Pedigree</a> explains the difference.</p></div>
+<p>The <b>Phenopackets Family</b> follows Phenopackets version 2, an approved GA4GH standard, so you can send it to anything that reads Phenopackets. The <b>GA4GH Pedigree</b> holds the whole family, with every relationship named by a kinship term. It's in the form proposed for the GA4GH Pedigree Standard, which is still being written. If you're not sure what the recipient reads, send both. <a href="#h-ga4gh">The GA4GH Pedigree</a> explains the difference.</p></div>
 
 <h2>1 · The drawing</h2>
-<p>Draw the family in the Studio tab, or open the drawing you have. Every condition needs a colour, and a name in the colour key (the Studio's <b>Key</b> button): the name is how the tools know what the colour means. Save the drawing among your files with <b>Save as…</b>; the tools work on saved files.</p>
+<p>Draw the family in the Studio tab, or open the drawing you have. Every condition needs a colour, and a name in the colour key (the Studio's <b>Key</b> button). The name is how the tools know what the colour means. Save the drawing among your files with <b>Save as…</b>, because the tools work on saved files.</p>
 <div class="tryrow"><button class="do" type="button" data-studio="/data/examples/okafor.studio.json">Open the Okafor family in Studio</button></div>
-<p>Whatever you write under the symbols – names, ages, notes – stays in the drawing. The files name people by their pedigree numbers (I-1, II-3, IV-3), unless you choose otherwise in step 3.</p>
+<p>Whatever you write under the symbols, such as names, ages and notes, stays in the drawing. The files name people by their pedigree numbers (I-1, II-3, IV-3), unless you choose otherwise in step 3.</p>
 
 <h2>2 · Terms for the conditions</h2>
-<p>A GA4GH file names a condition by an ontology term: a disease by its Mondo term, a sign or symptom by its HPO term. <b>Match conditions to terms</b> finds them for the conditions in the drawing's key and keeps your choices in a terms file. For each condition, choose whether it is a disease or a sign, press <b>Suggest</b>, pick the right term, and <b>Save</b>.</p>
+<p>A GA4GH file names a condition by an ontology term: a disease by its Mondo term, and a sign or symptom by its HPO term. <b>Match conditions to terms</b> finds the terms for the conditions in the drawing's colour key, and keeps your choices in a terms file. For each condition, choose whether it's a disease or a sign, press <b>Suggest</b> and pick the right term. When you've done them all, press <b>Save</b>.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="terms" data-input="/data/examples/okafor.studio.json">Match the Okafor family's conditions</button></div>
-<p>The examples come with a terms file that has these already, <code>/data/examples/example-terms.json</code>, so with the Okafor family you can skip this step. <a href="#h-walk-terms">Give the conditions ontology terms</a> goes through it in more detail.</p>
+<p>The examples come with a terms file, <code>/data/examples/example-terms.json</code>, that already has these terms, so you can skip this step with the Okafor family. <a href="#h-walk-terms">Give the conditions ontology terms</a> goes through it in more detail.</p>
 
 <h2>3 · Convert the drawing</h2>
-<p><b>Drawing → GA4GH Pedigree and Phenopackets</b> writes the two files. Choose the drawing and the terms file. Under the terms file, a table shows the term each condition will get; a condition without one is left out of the files, so match it first. Then press <b>Run</b>.</p>
+<p><b>Drawing → GA4GH Pedigree and Phenopackets</b> writes the two files. Choose the drawing and the terms file. Under the terms file, a table shows the term each condition will get. A condition without a term is left out of the files, so match it first. Then press <b>Run</b>.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/okafor.studio.json" data-terms="/data/examples/example-terms.json">Convert the Okafor family</button></div>
-<p>It writes <code>~/results/okafor_ga4gh-pedigree.json</code> and <code>~/results/okafor_phenopackets-family.json</code>. In them is everyone in the drawing with their sex, whether they are alive, and their conditions as terms; the relationships between them; and the proband. What the files have no place for, such as a pregnancy or a symbol that stands for several people, is written in the GA4GH Pedigree's narrative, and the tool notes it under the result.</p>
+<p>It writes <code>~/results/okafor_ga4gh-pedigree.json</code> and <code>~/results/okafor_phenopackets-family.json</code>. They hold everyone in the drawing, with their sex, whether they're alive and their conditions as terms. They also hold the relationships between people, and say who the proband is. Anything the files have no place for, such as a pregnancy or a carrier, is written in the GA4GH Pedigree's narrative. If something didn't go in as drawn, such as a symbol that stands for several people, the tool tells you under the result.</p>
 
 <h2>4 · Check the files</h2>
-<p><b>Check</b> beside a file (or <b>Check against the standard</b> in the Tools tab) checks it as phenopacket-tools, the Phenopackets team's own validator, would, and for a GA4GH Pedigree checks the family as well. It should say <b>Valid</b>. Errors make a file invalid; warnings are worth reading; notes are for information, such as an ontology release that was not recorded. The examples were made with this tool, so you can try the check on them now:</p>
+<p>Press <b>Check</b> next to a file, or use <b>Check against the standard</b> in the Tools tab. It checks the file in the same way as phenopacket-tools, the Phenopackets team's own validator. For a GA4GH Pedigree, it checks the family as well. It should say <b>Valid</b>. Errors make a file invalid, and warnings are worth reading. Notes are for information, such as an ontology release that wasn't recorded. The example files were made by the tool in step 3, so you can try the check on them now:</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check the GA4GH Pedigree</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_phenopackets-family.json">Check the Phenopackets Family</button></div>
 
 <h2>5 · Look at what is in them</h2>
-<p><b>Look inside a GA4GH file</b> shows a file as a table: each person, their sex and status, and their terms, then the relationships. It is the quickest way to make sure the files say what you meant.</p>
+<p><b>Look inside a GA4GH file</b> shows a file as a table. It lists each person with their sex, status and terms, and then the relationships. It's the quickest way to make sure the files say what you meant.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="view" data-input="/data/examples/okafor_ga4gh-pedigree.json">Look inside the GA4GH Pedigree</button></div>
 
 <h2>6 · De-identify before the files leave you</h2>
-<p><b>De-identify</b> gives everyone a new id (IND-0001, IND-0002 …) everywhere in the file, and takes out dates of birth and other ids. It can also write a key from the old ids to the new ones: keep the key, and the drawing, apart from what you share.</p>
+<p><b>De-identify</b> gives everyone a new id (IND-0001, IND-0002 …) everywhere in the file, and takes out dates of birth and other ids. It can also write a key that matches the old ids to the new ones. Keep the key, and the drawing, separate from what you share.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="deidentify" data-input="/data/examples/okafor_phenopackets-family.json">De-identify the Phenopackets Family</button></div>
-<div class="callout warn"><div class="co-t"><!--ICON:warning-->What de-identifying does not do</div><p>It removes what the file says directly. A family can still be recognised from what is left – a rare condition, the shape of a large family, ages – so whether a file is safe to share is a judgement for you, and for your institution's rules on sharing patient data.</p></div>
+<div class="callout warn"><div class="co-t"><!--ICON:warning-->What de-identifying does not do</div><p>It removes what the file says directly, but a family can still be recognised from what's left, such as a rare condition, the shape of a large family or people's ages. So whether a file is safe to share is a judgement for you, and for your institution's rules on sharing patient data.</p></div>
 
 <h2>7 · Download them</h2>
-<p>Each file under a result has <b>Download</b>. To take everything at once, use <b>My files → Download all my files (.zip)</b> at the top right.</p>
+<p>Each file under a result has a <b>Download</b> button. To take everything at once, use <b>My files → Download all my files (.zip)</b> at the top right.</p>
 
 <h2>The same in the terminal</h2>
-<p>Every step is a command, so the whole job can be done again in one go:</p>
+<p>Every step is a command, so you can do the whole job again in one go:</p>
 <pre class="code" data-run="term"><code>studio2ga4gh /data/examples/okafor.studio.json -t /data/examples/example-terms.json -d ~/results
 pedigree-ga4gh validate ~/results/okafor_ga4gh-pedigree.json
 phenotk view ~/results/okafor_ga4gh-pedigree.json

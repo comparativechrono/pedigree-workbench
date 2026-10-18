@@ -1,46 +1,46 @@
 <!-- id: h-walk-terms | title: Give the conditions ontology terms | group: Walkthroughs | summary: Match a drawing's conditions, or fill in the terms a GA4GH file lacks | keys: ontology terms hpo mondo match matching normalise normalize curie id label disease phenotype sign symptom ols lookup hponorm mondonorm terms file mapping -->
 <h1><!--ICON:tag-->Give the conditions ontology terms</h1>
-<p class="lede">GA4GH and Phenopackets files name each condition by a term from an ontology, so that software and people everywhere read it the same way: a disease by the Mondo Disease Ontology, a sign or symptom by the Human Phenotype Ontology (HPO). This walkthrough finds the terms for a drawing's conditions, and fills in the terms that an existing file lacks.</p>
+<p class="lede">GA4GH and Phenopackets files name each condition by a term from an ontology, so that software and people everywhere read it in the same way. A disease is named by a term from the Mondo Disease Ontology, and a sign or symptom by a term from the Human Phenotype Ontology (HPO). This walkthrough finds the terms for a drawing's conditions, and fills in the terms that an existing file lacks.</p>
 
 <h2>For a drawing: Match conditions to terms</h2>
 <h3>1 · Choose the drawing</h3>
-<p>The tool lists the conditions in the drawing's colour key, with how many people have each. If you keep a terms file for a project, start from it: conditions it has already are filled in, and new matches are added to it.</p>
+<p>The tool lists the conditions in the drawing's colour key, with the number of people who have each one. If you keep a terms file for a project, start from it. Conditions it already has are filled in, and your new matches are added to it.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="terms" data-input="/data/examples/price.studio.json">Match the Price family's conditions</button></div>
 
 <h3>2 · Choose where to search</h3>
 <ul>
-  <li><b>EBI's Ontology Lookup Service</b> searches the latest releases and ranks matches well. It needs the internet, and it sends EBI the words you search for – the condition's name, not the drawing.</li>
-  <li><b>Copies of the ontologies on this computer</b> work without the internet and send nothing. The HPO can be downloaded from the tool (about 11 MB, into <code>~/ontologies</code>). Mondo's file is about 50 MB and its host does not let web pages download it: download <code>mondo.obo</code> with your browser from Mondo's download page, then add it with <b>From my computer…</b>. The first search of a file reads all of it, which takes some seconds.</li>
+  <li><b>EBI's Ontology Lookup Service</b> searches the latest releases, and finds terms that a local search can miss. It needs the internet, and it sends EBI the words you search for. That's the condition's name, not the drawing.</li>
+  <li><b>Copies of the ontologies on this computer</b> work without the internet and send nothing. You can download the HPO, which is about 11 MB, from the tool into <code>~/ontologies</code>. Mondo's file is about 50 MB, and its host doesn't let web pages download it. Instead, download <code>mondo.obo</code> with your browser from Mondo's download page, then add it with <b>From my computer…</b>. The first search of a file reads all of it, which takes several seconds.</li>
 </ul>
 
 <h3>3 · Match each condition</h3>
-<p>For each condition, say whether it is <b>a disease</b> (Mondo) or <b>a sign or symptom</b> (HPO) – the tool guesses from the name – and press <b>Suggest</b>. Each suggestion shows the term's id and label, whether its label or a synonym matched, a score, and the term's definition. Choose the one that is right; if none is, change the words and search again. If you know the id already, type it and press <b>Use this id</b>: it is looked up, so that its label and release are recorded.</p>
+<p>For each condition, say whether it's <b>a disease</b> (Mondo) or <b>a sign or symptom</b> (HPO). The tool makes a first guess from the name. Then press <b>Suggest</b>. Each suggestion shows the term's id and label, whether its label or a synonym matched, a score and the term's definition. Choose the one that's right. If none is, change the words and search again. If you already know the id, type it and press <b>Use this id</b>. The tool looks it up, so that its label and release are recorded.</p>
 <div class="callout info"><div class="co-t"><!--ICON:info-->Choosing a term</div>
-<p>Choose the most specific term that is true of everyone with the condition in this family. <i>Hearing impairment</i> (HP:0000365) is true of the Okafor twins; if their hearing loss is known to be sensorineural, <i>Congenital sensorineural hearing impairment</i> (HP:0008527) says more. Use a Mondo term when there is a diagnosis, and HPO terms for features without one. Read the definition: two terms can share a name, as <i>breast cancer</i> (MONDO:0007254) and <i>breast carcinoma</i> (MONDO:0004989) nearly do.</p></div>
+<p>Choose the most specific term that's true of everyone with the condition in this family. <i>Hearing impairment</i> (HP:0000365) is true of the Okafor twins. If their hearing loss is known to be sensorineural, <i>Congenital sensorineural hearing impairment</i> (HP:0008527) says more. Use a Mondo term when there's a diagnosis, and HPO terms for features without one. Read the definition, because two terms can share a name, as <i>breast cancer</i> (MONDO:0007254) and <i>breast carcinoma</i> (MONDO:0004989) nearly do.</p></div>
 
 <h3>4 · Keep the matches</h3>
-<p><b>Save</b> writes the terms file, <code>~/terms/price-terms.json</code> for the Price family. Tick <b>Also write the ids into the drawing's colour key</b> to make a copy of the drawing whose key reads <i>Breast cancer [MONDO:0007254]</i>: a drawing like that carries its terms wherever it goes, and converts without a terms file. Then <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file chosen.</p>
+<p><b>Save</b> writes the terms file, which for the Price family is <code>~/terms/price-terms.json</code>. Tick <b>Also write the ids into the drawing's colour key</b> to make a copy of the drawing whose key reads <i>Breast cancer [MONDO:0007254]</i>. A drawing like that carries its terms wherever it goes, and converts without a terms file. Then <b>Next</b> opens Drawing → GA4GH with the drawing and the terms file already chosen.</p>
 
 <h2>For a GA4GH file: Fill in missing terms</h2>
-<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one the id from a terms file, matching the names without regard to case. It can also look up names the terms file does not have, and use a term it finds whose name, or one of whose synonyms, is the condition's name, whatever the case and punctuation; a lower threshold takes close matches too, each a guess to check. What it decided goes in a log beside the new file, <code>….normalised.log.json</code>.</p>
-<p>A file made by an older tool must be upgraded first, and the tool says so if it needs to be. To try it: upgrade the older example, then fill in its terms from the examples' terms file (the tool chooses your newest file, which is the upgraded one).</p>
+<p>Files from older tools, or from elsewhere, may name conditions without their ids. <b>Fill in missing terms</b> gives each one its id from a terms file, ignoring case when it matches the names. It can also look up names that aren't in the terms file. It uses a term it finds when the term's name, or one of its synonyms, is the same as the condition's name, whatever the case and punctuation. With a lower threshold it takes close matches too, but each of those is a guess for you to check. It writes a log of what it decided next to the new file, <code>….normalised.log.json</code>.</p>
+<p>A file made by an older tool must be upgraded first, and the tool tells you when that's needed. To try this, upgrade the older example, then fill in its terms from the examples' terms file. The tool picks your newest file, which is the upgraded one.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">1 · Upgrade the older example</button> <button class="do" type="button" data-tool="normalise" data-mapping="/data/examples/example-terms.json">2 · Fill in missing terms</button></div>
 
 <h2>A terms file</h2>
-<p>A terms file is a small JSON file: each condition's name in the drawing, with its term and the release of the ontology it came from. You can write one by hand, too; an id alone is enough.</p>
+<p>A terms file is a small JSON file. It lists each condition's name in the drawing, with its term and the release of the ontology the term came from. You can also write one by hand, and an id on its own is enough.</p>
 <pre class="code"><code>{
   "Breast cancer": {"id": "MONDO:0007254", "label": "breast cancer", "version": "2026-10-06"},
   "Hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment", "version": "2026-09-01"},
   "Ovarian cancer": "MONDO:0008170"
 }</code></pre>
-<p>One terms file can serve many drawings: the names are matched without regard to case. <a href="#h-terms">Ontology terms and terms files</a> has more.</p>
+<p>One terms file can serve many drawings, and the names are matched whatever their case. <a href="#h-terms">Ontology terms and terms files</a> has more.</p>
 
 <h2>The same in the terminal and in Python</h2>
-<p>There is no command that reads a drawing's key and asks about each condition with the mouse; that is what the tool is for. A terms file is used by:</p>
+<p>There's no command that reads a drawing's colour key and lets you work through each condition with the mouse. That's what the tool is for. These commands use a terms file:</p>
 <pre class="code" data-run="term"><code>studio2ga4gh /data/examples/price.studio.json -t /data/examples/example-terms.json -d ~/results
 pedigree-ga4gh upgrade /data/examples/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/older_phenopackets-family.json
 phenotk normalise ~/results/older_phenopackets-family.json --mapping /data/examples/example-terms.json --no-online -o ~/results/older.normalised.json</code></pre>
-<p><code>hponorm</code> and <code>mondonorm</code>, the programs behind the searches, match the names in a GA4GH or Phenopackets file by asking about each one as they go. This terminal cannot answer their questions, so here they stop at the first one; they can take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code>. In Python, their searches are these:</p>
+<p><code>hponorm</code> and <code>mondonorm</code>, the programs behind the searches, match the names in a GA4GH or Phenopackets file by asking you about each one as they go. This terminal can't answer their questions, so here they stop at the first one. They can take their answers from a file instead: <code>hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json</code>. In Python, their searches look like this:</p>
 <pre class="code" data-run="py"><code>from hponorm.ols import OlsClient            # EBI's Ontology Lookup Service (online)
 for c in OlsClient().search("hearing loss from birth", limit=5):
     print(c.id, c.label, c.score)

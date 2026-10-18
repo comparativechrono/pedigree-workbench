@@ -1,41 +1,41 @@
-<!-- id: h-tool-validate | title: Check against the standard | group: Tools | summary: pedigree-ga4gh validate: is a GA4GH file correct, and how to fix it | keys: validate check validator valid invalid errors warnings notes phenopacket-tools schema metadata resources kin curie json exit status -->
+<!-- id: h-tool-validate | title: Check against the standard | group: Tools | summary: pedigree-ga4gh validate: whether a GA4GH file is correct, and how to fix it | keys: validate check validator valid invalid errors warnings notes phenopacket-tools schema metadata resources kin curie json exit status -->
 <h1><!--ICON:badgeCheck-->Check against the standard</h1>
-<p class="lede">Checks a GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket, and says for each problem what it is, where it is in the file, and how to fix it. It needs nothing but the file: no Java, no internet.</p>
+<p class="lede">This tool checks a GA4GH Pedigree, or a Phenopackets Family, Cohort or Phenopacket. For each problem it finds, it tells you what the problem is, where it is in the file and how to fix it. It works from the file alone, without needing Java or an internet connection.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check a correct file</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Check a file with problems</button></div>
 
 <h2>What is checked</h2>
-<h3>As phenopacket-tools does</h3>
-<p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. The check applies its rules:</p>
+<h3>The phenopacket-tools rules</h3>
+<p>phenopacket-tools is the validator for Phenopackets written by the team behind the Phenopackets schema. This check applies the same rules:</p>
 <ul>
-  <li><b>The Phenopackets version 2 schema</b>: the fields each part may have and must have, their types, the allowed values (sex, vital status, progress status …), the groups of which exactly one must be given, and minimum lengths and counts. A field the schema does not have is an error, because Phenopackets readers reject it.</li>
-  <li><b>The ontologies</b>: every term's id is a CURIE (<code>PREFIX:ID</code>), and every prefix used is declared among the resources in the file's <code>metaData</code>, with all six of the resource's fields filled in. phenopacket-tools reads an empty field as a missing one.</li>
-  <li><b>Values</b>: ages are ISO 8601 durations (<code>P45Y</code>), dates and times are in the right form.</li>
+  <li><b>The Phenopackets version 2 schema</b>: which fields each part must have and which it may have, their types, the values allowed (for sex, vital status, progress status …), groups of fields where exactly one must be given, and minimum lengths and counts. A field that isn't in the schema is an error, because programs that read Phenopackets reject it.</li>
+  <li><b>The ontologies</b>: every term's id must be a CURIE (<code>PREFIX:ID</code>), and every prefix used must be declared among the resources in the file's <code>metaData</code>, with all six of the resource's fields filled in. phenopacket-tools treats an empty field as a missing one.</li>
+  <li><b>Values</b>: ages must be ISO 8601 durations (<code>P45Y</code>), and dates and times must be in the right form.</li>
 </ul>
 <h3>And for a GA4GH Pedigree</h3>
 <ul>
-  <li>Every id in the relationships and the index patients is the subject of one of the individuals, and no two individuals share an id.</li>
-  <li>Every relation is a current KIN term, written with KIN's own label; retired codes from earlier drafts of KIN are reported.</li>
-  <li>No one is related to themselves; a biological mother is female and a father male; no one has more than two genetic parents; no one is their own ancestor.</li>
+  <li>Every id in the relationships and the index patients must refer to the subject of one of the individuals, and no two individuals may share an id.</li>
+  <li>Every relation must be a current KIN term, written with KIN's own label. Retired codes from earlier drafts of KIN are reported.</li>
+  <li>No one may be related to themselves. A biological mother must be female, and a father male. No one may have more than two genetic parents, or be their own ancestor.</li>
 </ul>
 <h3>And for a Family</h3>
 <ul>
-  <li>Everyone with a Phenopacket – the proband and the relatives – is in the pedigree, and no one is in it twice or has two Phenopackets.</li>
-  <li>Every father and mother in the pedigree is a person in it; a father is not recorded as female, nor a mother as male; no one is both someone's father and their mother; no one is their own ancestor.</li>
-  <li>No one's id is <code>0</code>, which a PED file uses for “no parent”: their children would read as having none.</li>
+  <li>Everyone with a Phenopacket, whether the proband or a relative, must be in the pedigree. No one may be in it twice or have two Phenopackets.</li>
+  <li>Every father and mother named in the pedigree must also be a person in it. A father mustn't be recorded as female, or a mother as male. No one may be both someone's father and their mother, or be their own ancestor.</li>
+  <li>No one's id may be <code>0</code>, which a PED file uses for “no parent”. If someone had that id, their children would read as having no parent.</li>
 </ul>
-<h3>And one mistake of older files</h3>
+<h3>And one mistake in older files</h3>
 <ul>
-  <li><code>HP:0032500</code> used for a carrier. It is valid in form – a real HPO term – but it is <i>Exacerbated by tobacco use</i>.</li>
+  <li><code>HP:0032500</code> used for a carrier. It's a real HPO term, so it's valid in form, but it means <i>Exacerbated by tobacco use</i>.</li>
 </ul>
-<p>The check does not look terms up, so it cannot tell whether a term is the right one for the person: only that it is well formed and declared.</p>
+<p>The check doesn't look terms up, so it can't tell whether a term is the right one for the person. It can only tell you that the term is well formed and declared.</p>
 
 <h2>The result</h2>
-<p><b>Valid</b> or <b>Not valid</b>, then a line for each finding: errors (the file is invalid), warnings (allowed, but probably a mistake), and notes (for information). Each has a code, such as <code>empty-term-id</code>, the place in the file, and how to fix it. A file from an older tool is recognised as such, with a button to upgrade it. <a href="#h-walk-check">Check a GA4GH file, or update an old one</a> lists the commonest findings and their fixes.</p>
+<p>You'll see <b>Valid</b> or <b>Not valid</b>, then a line for each finding. An error means the file is invalid, a warning means something is allowed but probably a mistake, and a note is for information. Each finding has a code, such as <code>empty-term-id</code>, its place in the file, and how to fix it. If a file comes from an older tool, the check recognises this and gives you a button to upgrade it. <a href="#h-walk-check">Check a GA4GH file, or update an old one</a> lists the commonest findings and their fixes.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh validate /data/examples/okafor_phenopackets-family.json
 pedigree-ga4gh validate --json /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json | head -20</code></pre>
-<p>The exit status is 0 for a valid file and 1 for an invalid one. <code>--json</code> prints the findings as JSON. <code>phenotk validate FILE</code> runs the same checks on a file in the standard form; a file from an older tool it refuses, with a message saying to upgrade it.</p>
+<p>The exit status is 0 for a valid file and 1 for an invalid one. <code>--json</code> prints the findings as JSON. <code>phenotk validate FILE</code> runs the same checks on a file in the standard form. It refuses a file from an older tool, with a message telling you to upgrade it.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import pedigree_ga4gh as pg

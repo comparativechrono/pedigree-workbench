@@ -1,34 +1,34 @@
-<!-- id: h-ped | title: PED and MPED files | group: Files and standards | summary: The six columns, the codes, and the MPED header | keys: ped mped fam linkage format columns family individual father mother sex affected status codes 0 1 2 3 carrier header plink merlin -->
-<h1><!--ICON:table-->PED and MPED files</h1>
-<p class="lede">A PED file is a pedigree as a table: one line per person, which linkage and association programs (and PLINK, as a <code>.fam</code> file) read. An MPED file is a PED file with a column for each of several conditions.</p>
+<!-- id: h-ped | title: The PED and MPED formats | group: Files and standards | summary: The six columns, the codes, and the MPED header | keys: ped mped fam linkage format columns family individual father mother sex affected status codes 0 1 2 3 carrier header plink merlin -->
+<h1><!--ICON:table-->The PED and MPED formats</h1>
+<p class="lede">A PED file is a pedigree written as a table, with one line per person. Linkage and association programs read PED files, and PLINK reads them as <code>.fam</code> files. An MPED file is a PED file with a column for each of several conditions.</p>
 
 <h2>The columns</h2>
 <table>
 <tr><th>Column</th><th>Holds</th></tr>
-<tr><td>1 · family</td><td>the family's id: <code>FAM1</code></td></tr>
-<tr><td>2 · person</td><td>the person's id, unique within the family</td></tr>
-<tr><td>3 · father, 4 · mother</td><td>the genetic parents' ids, or <code>0</code> for a founder (no parents in the file); adoptive parents and a surrogate are not genetic parents, so studio2ped writes <code>0</code> for them</td></tr>
+<tr><td>1 · family</td><td>The family's id, such as <code>FAM1</code></td></tr>
+<tr><td>2 · person</td><td>The person's id, which is unique within the family</td></tr>
+<tr><td>3 · father, 4 · mother</td><td>The genetic parents' ids, or <code>0</code> for a founder (someone with no parents in the file). Adoptive parents and a surrogate aren't genetic parents, so studio2ped writes <code>0</code> for them.</td></tr>
 <tr><td>5 · sex</td><td><code>1</code> male, <code>2</code> female, <code>0</code> unknown</td></tr>
 <tr><td>6 · status</td><td><code>1</code> unaffected, <code>2</code> affected, <code>0</code> unknown</td></tr>
 </table>
 <pre class="code"><code>FAM1	I-1	0	0	1	2
 FAM1	II-2	I-1	I-2	1	2
 FAM1	III-2	II-2	II-1	2	2</code></pre>
-<p>The columns are separated by tabs or spaces. Some programs write <code>-9</code> for an unknown status; the workbench writes <code>0</code>, and mpedtools warns about <code>-9</code> (an unknown parent may be <code>-9</code> too, which it reads as <code>0</code>).</p>
+<p>The columns are separated by tabs or spaces. Some programs write <code>-9</code> for an unknown status, but the workbench writes <code>0</code>, and mpedtools warns about <code>-9</code>. An unknown parent may be <code>-9</code> too, and mpedtools reads that as <code>0</code>.</p>
 
 <h2>MPED files</h2>
-<p>An MPED file starts with a line naming its condition columns, and has one status column per condition:</p>
+<p>An MPED file starts with a line that names its condition columns, and it has one status column for each condition:</p>
 <pre class="code"><code># MPED v1	Cystic_fibrosis	Carrier
 # FamID	IndID	FatherID	MotherID	Sex	Cystic_fibrosis	Carrier
 FAM1	Michael	John	p-jw	1	3	3
 FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
-<p>In an MPED file, <code>3</code> marks a carrier. A plain PED file has no code for one, so a carrier becomes unaffected when one condition is taken out.</p>
+<p>In an MPED file, <code>3</code> marks a carrier. A plain PED file has no code for a carrier, so when you take one condition out, a carrier becomes unaffected.</p>
 
 <h2>Which tool for what</h2>
 <ul>
-  <li>A drawing → <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>, or through the GA4GH files: <a href="#h-walk-ped">Make a PED file for a linkage program</a> compares the two.</li>
-  <li>A PED file → a drawing: <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</li>
-  <li>Checking, taking conditions out, merging and splitting: <a href="#h-tool-mpedtools">mpedtools</a>.</li>
+  <li>To make a PED file from a drawing, use <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>, or go through the GA4GH files. <a href="#h-walk-ped">Make a PED file for a linkage program</a> compares the two ways.</li>
+  <li>To draw a PED file, use <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</li>
+  <li>To check PED files, take conditions out of them, or merge and split them, use <a href="#h-tool-mpedtools">mpedtools</a>.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/cf-cousins.mped">Look at an MPED file</button> <button class="do" type="button" data-tool="mped-info" data-input="/data/examples/cf-cousins.mped">Summary and check</button></div>
 <!--CITE: mpedtools studio2ped ped2studio-->

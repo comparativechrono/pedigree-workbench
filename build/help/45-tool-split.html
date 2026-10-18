@@ -1,15 +1,15 @@
 <!-- id: h-tool-split | title: One file for each person | group: Tools | summary: phenotk split: a Phenopacket for each person in a Family, Cohort or GA4GH Pedigree | keys: split explode one file each person individual phenopacket separate proband affected phenotk -->
 <h1><!--ICON:file-->One file for each person</h1>
-<p class="lede">Splits a Phenopackets Family, a Cohort or a GA4GH Pedigree into a Phenopacket for each person – or for each person with findings. Use it to send one person's findings without the rest of the family.</p>
+<p class="lede">This tool splits a Phenopackets Family, a Cohort or a GA4GH Pedigree into a separate Phenopacket for each person, or for each affected person. Use it to send one person's findings without the rest of the family.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="split" data-input="/data/examples/okafor_ga4gh-pedigree.json">Split the Okafor GA4GH Pedigree</button></div>
 
 <h2>The form</h2>
 <dl>
   <dt>The file</dt><dd>A GA4GH Pedigree, a Phenopackets Family or a Cohort.</dd>
-  <dt>Only the people with findings</dt><dd>Leave out the people with no disease or phenotype recorded.</dd>
-  <dt>Save in the folder</dt><dd><code>~/results/<i>name</i>-people</code>: each file is named after its person's id, such as <code>IV-3.json</code>.</dd>
+  <dt>Only the affected people</dt><dd>Tick this to make files only for the people who are affected. In a Phenopackets Family, they're the people its pedigree marks as affected. In a GA4GH Pedigree or a Cohort, they're the people with at least one disease or phenotype that is present rather than excluded.</dd>
+  <dt>Save in the folder</dt><dd>By default, this is <code>~/results/<i>name</i>-people</code>. Each file is named after its person's id, such as <code>IV-3.json</code>.</dd>
 </dl>
-<p>Each Phenopacket is complete on its own, with its <code>metaData</code> (taken from the file's when it has none of its own). A Phenopacket says nothing about relatives, so the family's structure stays behind – which is the point, when one person's findings are all that should go.</p>
+<p>Each Phenopacket is complete on its own, with its <code>metaData</code>. If a Phenopacket has none of its own, it's given the file's. A Phenopacket says nothing about relatives, so the family's structure stays behind. That's what you want when only one person's findings should be sent.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk split /data/examples/okafor_ga4gh-pedigree.json --out-dir ~/results/okafor-people --affected-only
