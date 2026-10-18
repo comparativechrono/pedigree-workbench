@@ -66,7 +66,7 @@
       hostname: CFG.hostname || 'pedigrees',
       env: {},
       welcome:
-        `A Linux terminal (bash) in your browser, with the pedigree programs: studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools, hponorm, mondonorm, phenotk and pedigree-ga4gh. Your files: ~ (${HOME}). Examples (read-only): /data/examples. Type  help  for what is here,  man NAME  for one command.` +
+        `A Linux terminal (bash) in your browser, with the pedigree programs studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools, hponorm, mondonorm, phenotk and pedigree-ga4gh. Your files are in ~ (${HOME}), and the examples, which can’t be changed, are in /data/examples. Type  help  to see what’s here, or  man NAME  to read about a command.` +
         (MG.user.name() === MG.user.DEFAULT ? ' To see your name in place of user, click “user” at the top of the page.' : '')
     });
     MG.app.nbApp = new MG.NotebookApp(document.getElementById('nbRoot'), { fs, dir: HOME + '/notebooks' });
@@ -182,7 +182,7 @@
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'ped' || k === 'mped') {
       out.push(['pedigree', 'Draw in Studio', 'Draw this PED file in Pedigree Studio (ped2studio)', tool('ped2studio')]);
-      out.push(['table', 'Summary', 'What is in this file, and whether it is valid (mpedtools)', tool('mped-info')]);
+      out.push(['table', 'Summary', 'See what’s in this file and whether it’s valid (mpedtools)', tool('mped-info')]);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'terms') {
       out.push(['tag', 'Use in Match conditions to terms', 'Open the tool Match conditions to terms with this terms file', () => MG.app.useTool('terms', { terms: path })]);
@@ -221,7 +221,7 @@
   MG.app.studioOpen = async (path, opts = {}) => {
     await MG.app.showWorkbench('studio');
     const S = await waitFor(() => MG.app.studio, 8000);
-    if (!S) throw new Error('The Studio tab could not start.');
+    if (!S) throw new Error('The Studio tab couldn’t start.');
     await S.ready;
     return S.openFile(MG.app.fs.resolve(path), opts);
   };
@@ -263,7 +263,7 @@
     if (fs.isDir(src)) {
       for (const [p, e] of Array.from(fs.entries)) if (p.startsWith(src + '/') && e.kind !== 'dir') fs.copy(p, dest + p.slice(src.length));
     } else fs.copy(src, dest);
-    toast(`Copied to <b>${esc(fs.pretty(dest))}</b> – your own copy, which you can change.`, 'ok');
+    toast(`Copied to <b>${esc(fs.pretty(dest))}</b>. This copy is yours to change.`, 'ok');
   };
   /* a file in the Files tab, as text (a drawing too, which data-open would show in the Studio) */
   MG.actions.edit = async (path) => MG.app.editFile(path.replace(/^~(?=\/|$)/, HOME));

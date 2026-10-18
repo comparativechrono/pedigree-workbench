@@ -307,14 +307,14 @@ def _backend(ontology: str, source: str, file: Optional[str]):
     if source != "local":
         raise ValueError("source must be ols or local")
     if not file:
-        raise ValueError("choose the {} file to search".format("HPO (hp.obo)" if o == "HP" else "Mondo (mondo.obo)"))
+        raise ValueError("Choose the {} file to search.".format("HPO (hp.obo)" if o == "HP" else "Mondo (mondo.obo)"))
     path = os.path.expanduser(file)
     if not os.path.exists(path):
-        raise FileNotFoundError("there is no file {}".format(file))
+        raise FileNotFoundError("There's no file called {}.".format(file))
     held = ontology_file(path).get("ontology", "") if path.endswith(".obo") else ""
     if held and held != olsname:
-        raise ValueError("{} holds the {} ontology, not {}".format(
-            os.path.basename(path), {"hp": "HPO", "mondo": "Mondo"}.get(held, held), "the HPO" if o == "HP" else "Mondo"))
+        raise ValueError("{} holds {}, not {}.".format(
+            os.path.basename(path), {"hp": "the HPO", "mondo": "Mondo"}.get(held, held), "the HPO" if o == "HP" else "Mondo"))
     st = os.stat(path)
     key = (o, path, st.st_size, int(st.st_mtime))
     if key not in _INDEXES:
@@ -355,10 +355,10 @@ def lookup(curie: str, ontology: Optional[str] = None, source: str = "ols", file
     m = re.match(r"^([A-Za-z]+)_(\d+)$", raw)  # HP_0000365, as in the terms' web addresses
     c = onto.tidy_curie(m.group(1) + ":" + m.group(2) if m else raw)
     if not onto.is_curie(c):
-        return {"id": curie, "found": False, "error": "{!r} is not an ontology id (they look like MONDO:0007254 or HP:0000365)".format(curie)}
+        return {"id": curie, "found": False, "error": "{!r} isn't an ontology id. Ontology ids look like MONDO:0007254 or HP:0000365.".format(curie)}
     o = ontology or onto.prefix_of(c)
     if _norm_or_none(o) is None:
-        return {"id": c, "found": False, "error": "only HPO (HP:) and Mondo (MONDO:) ids can be checked here"}
+        return {"id": c, "found": False, "error": "Only HPO (HP:) and Mondo (MONDO:) ids can be checked here."}
     try:
         backend, version, where = _backend(o, source, file)
         hit = backend.get(c)
@@ -367,7 +367,10 @@ def lookup(curie: str, ontology: Optional[str] = None, source: str = "ols", file
     if not hit:
         if source == "ols" and hasattr(backend, "available") and not backend.available():
             return {"id": c, "found": False, "error": _explain(RuntimeError("no answer"), source)}
-        return {"id": c, "found": False, "error": "{} is not in {} ({})".format(c, _norm(o), where)}
+        name = "the HPO" if _norm(o) == "HP" else "Mondo"
+        if where == "EBI OLS":
+            return {"id": c, "found": False, "error": "{} isn't in {} on EBI's Ontology Lookup Service.".format(c, name)}
+        return {"id": c, "found": False, "error": "{} isn't in your copy of {} ({}).".format(c, name, where)}
     out = _cand(hit)
     out.update(found=True, version=version, source=where, obsolete=bool(getattr(hit, "obsolete", False)))
     return out
@@ -383,7 +386,7 @@ def _norm_or_none(o):
 def _explain(e: Exception, source: str) -> str:
     msg = str(e) or type(e).__name__
     if source == "ols" and ("URLError" in type(e).__name__ or "no answer" in msg or "CORS" in msg or "XMLHttpRequest" in msg):
-        return ("EBI's Ontology Lookup Service did not answer ({}). Check the internet connection, or search a "
+        return ("EBI's Ontology Lookup Service did not answer ({}). Check your internet connection, or search a "
                 "copy of the ontology on this computer instead.".format(msg))
     return msg
 

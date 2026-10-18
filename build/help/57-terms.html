@@ -1,39 +1,39 @@
 <!-- id: h-terms | title: Ontology terms and terms files | group: Files and standards | summary: HPO and Mondo, CURIEs, releases, and the terms file | keys: ontology terms hpo mondo human phenotype ontology disease curie id label release version terms file mapping obo ols colour key brackets -->
 <h1><!--ICON:tag-->Ontology terms and terms files</h1>
-<p class="lede">An ontology is a curated list of terms, each with an id, a label, a definition and its place among the others. GA4GH files name conditions by such terms, so that software everywhere reads <i>breast cancer</i> the same way, whatever it was called in the clinic.</p>
+<p class="lede">An ontology is a curated list of terms, each with an id, a label, a definition and its place among the others. GA4GH files name conditions with these terms, so that software everywhere reads <i>breast cancer</i> in the same way, whatever it was called in the clinic.</p>
 
 <h2>The two ontologies</h2>
 <dl>
-  <dt>The Human Phenotype Ontology (HPO)</dt><dd>Signs and symptoms – phenotypes – such as <code>HP:0000365</code> <i>Hearing impairment</i>. In a Phenopacket they are <code>phenotypicFeatures</code>, and can be marked <i>excluded</i> (looked for and not found).</dd>
-  <dt>The Mondo Disease Ontology</dt><dd>Diseases, such as <code>MONDO:0007254</code> <i>breast cancer</i>, brought together from other disease vocabularies (OMIM, Orphanet, ICD and others). In a Phenopacket they are <code>diseases</code>.</dd>
+  <dt>The Human Phenotype Ontology (HPO)</dt><dd>The HPO covers phenotypes, which are signs and symptoms such as <code>HP:0000365</code> <i>Hearing impairment</i>. In a Phenopacket they're recorded as <code>phenotypicFeatures</code>, and they can be marked <i>excluded</i>, which means they were looked for and not found.</dd>
+  <dt>The Mondo Disease Ontology</dt><dd>Mondo covers diseases, such as <code>MONDO:0007254</code> <i>breast cancer</i>. It brings them together from other disease vocabularies, including OMIM, Orphanet and ICD. In a Phenopacket they're recorded as <code>diseases</code>.</dd>
 </dl>
-<p>Use a Mondo term when there is a diagnosis, and HPO terms for what was seen, with or without one.</p>
+<p>Use a Mondo term when there's a diagnosis, and HPO terms for what was seen, with or without one.</p>
 
 <h2>Ids and releases</h2>
 <ul>
-  <li>An id is a CURIE: a prefix, a colon and a number – <code>HP:0000365</code>, <code>MONDO:0007254</code>. (<code>HP_0000365</code>, as some web pages write it, is the same term; the workbench writes the colon.)</li>
-  <li>The ontologies are released every month or so; a term may change its label, and now and then is made obsolete and replaced. So each GA4GH file records the release its terms came from, in its <code>metaData</code>.</li>
+  <li>An id is a CURIE: a prefix, a colon and a number, such as <code>HP:0000365</code> or <code>MONDO:0007254</code>. Some web pages write <code>HP_0000365</code>, which is the same term, but the workbench writes the colon.</li>
+  <li>New releases of the ontologies come out every month or so. A term may change its label, and now and then a term is made obsolete and replaced. So each GA4GH file records in its <code>metaData</code> the release that its terms came from.</li>
 </ul>
 
 <h2>Where a condition gets its term</h2>
 <ol>
-  <li><b>In the drawing's colour key</b>: an id in brackets after the name – <i>Condition X [MONDO:0009061]</i>. It must be an ontology's id: <i>Hypertension (BP:160/95)</i> is read as a name. The drawing then carries its term wherever it goes. <a href="#h-tool-terms">Match conditions to terms</a> can write the ids into a copy of the drawing.</li>
-  <li><b>In a terms file</b>, given to Drawing → GA4GH or to Fill in missing terms.</li>
+  <li><b>In the drawing's colour key</b>, as an id in brackets after the name, such as <i>Condition X [MONDO:0009061]</i>. It must be an ontology's id. <i>Hypertension (BP:160/95)</i>, for example, is read as a name. The drawing then carries its term wherever it goes. <a href="#h-tool-terms">Match conditions to terms</a> can write the ids into a copy of the drawing.</li>
+  <li><b>In a terms file</b>, which you give to Drawing → GA4GH or to Fill in missing terms.</li>
 </ol>
 
 <h2 data-anchor="file">The terms file</h2>
-<p>A JSON file that maps each condition's name, as the colour key has it, to its term. Match conditions to terms writes it, with each term's label and release:</p>
+<p>A terms file is a JSON file that maps each condition's name, as it appears in the colour key, to its term. Match conditions to terms writes it, with each term's label and release:</p>
 <pre class="code"><code>{
   "Breast cancer": {"id": "MONDO:0007254", "label": "breast cancer", "version": "2026-10-06"},
   "Hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment", "version": "2026-09-01"}
 }</code></pre>
 <ul>
-  <li>An id alone will do: <code>"Ovarian cancer": "MONDO:0008170"</code>. Without a label, the condition's own name is used; without a release, it is recorded as unknown.</li>
-  <li>The names are matched without regard to case, so one terms file can serve many drawings of a project.</li>
+  <li>An id on its own will do, as in <code>"Ovarian cancer": "MONDO:0008170"</code>. If there's no label, the condition's own name is used, and if there's no release, the release is recorded as unknown.</li>
+  <li>Capital letters don't matter when the names are matched, so one terms file can serve many drawings in a project.</li>
   <li>The log that Fill in missing terms writes (<code>….log.json</code>) can be used as a terms file too.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/example-terms.json">Look at the examples' terms file</button></div>
 
 <h2>Looking terms up</h2>
-<p>The HPO and Mondo can be searched on their own sites, on EBI's <a href="https://www.ebi.ac.uk/ols4/" target="_blank" rel="noopener">Ontology Lookup Service</a>, or here with Match conditions to terms – online through EBI, or offline in copies of the ontologies (<code>hp.obo</code>, <code>mondo.obo</code>). <a href="#h-walk-terms">Give the conditions ontology terms</a> has advice on choosing.</p>
+<p>You can search the HPO and Mondo on their own websites, on EBI's <a href="https://www.ebi.ac.uk/ols4/" target="_blank" rel="noopener">Ontology Lookup Service</a>, or here with Match conditions to terms. That tool searches online through EBI, or offline in copies of the ontologies (<code>hp.obo</code>, <code>mondo.obo</code>). <a href="#h-walk-terms">Give the conditions ontology terms</a> has advice on choosing a term.</p>
 <!--CITE: hpo mondo-->

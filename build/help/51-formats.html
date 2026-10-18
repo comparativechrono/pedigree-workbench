@@ -1,6 +1,6 @@
 <!-- id: h-formats | title: Which file is which | group: Files and standards | summary: The kinds of file, how to tell them apart, and the tools between them | keys: formats kinds files which file json studio ga4gh pedigree phenopackets family cohort phenopacket ped mped fam terms obo yaml tsv recognise -->
 <h1><!--ICON:file-->Which file is which</h1>
-<p class="lede">The workbench works with a handful of kinds of file. Most are JSON, so their names say what they are, and the workbench also looks inside a JSON file to tell.</p>
+<p class="lede">The workbench works with a handful of kinds of file. Most of them are JSON. The end of a file's name, such as <code>.studio.json</code>, usually shows which kind it is, and the workbench also looks inside a JSON file to tell.</p>
 
 <div class="pw-map"></div>
 
@@ -10,12 +10,12 @@
 <tr><td><b>GA4GH Pedigree</b></td><td><code>*_ga4gh-pedigree.json</code></td><td>The whole family: a Phenopacket for each person and the relationships between them (<a href="#h-ga4gh">the GA4GH Pedigree</a>).</td></tr>
 <tr><td><b>Phenopackets Family</b></td><td><code>*_phenopackets-family.json</code></td><td>The proband and relatives with findings, as Phenopackets, and a PED-style pedigree (<a href="#h-phenopackets">Phenopackets</a>).</td></tr>
 <tr><td><b>Phenopacket</b>, <b>Cohort</b></td><td><code>*.json</code></td><td>One person's findings; a set of Phenopackets.</td></tr>
-<tr><td><b>PED file</b>, <b>MPED file</b></td><td><code>*.ped</code>, <code>*.fam</code>; <code>*.mped</code></td><td>The pedigree as a table for linkage programs; with a column for each of several conditions (<a href="#h-ped">PED and MPED</a>).</td></tr>
+<tr><td><b>PED file</b>, <b>MPED file</b></td><td><code>*.ped</code>, <code>*.fam</code>; <code>*.mped</code></td><td>The pedigree as a table for linkage programs. An MPED file has a column for each of several conditions (<a href="#h-ped">PED and MPED</a>).</td></tr>
 <tr><td><b>Terms file</b></td><td><code>*-terms.json</code></td><td>Condition names and their ontology terms (<a href="#h-terms">terms files</a>).</td></tr>
 <tr><td><b>Ontology</b></td><td><code>hp.obo</code>, <code>mondo.obo</code></td><td>A copy of the HPO or Mondo, to search without the internet.</td></tr>
 <tr><td>Other</td><td><code>*.tsv</code>, <code>*.yaml</code>, <code>*.jsonl</code>, <code>*.log.json</code></td><td>What the tools export: a table, YAML, JSON Lines, a log of decisions.</td></tr>
 </table>
 
 <h2>How the workbench tells them apart</h2>
-<p>By the name first, then, for a JSON file, by what is in it: a drawing has <code>persons</code> and <code>partnerships</code>; a GA4GH Pedigree has <code>individuals</code> and <code>relationships</code>; a Family has a <code>proband</code>; a Cohort has <code>members</code>; a Phenopacket has a <code>subject</code>. A file the workbench does not recognise is shown as plain JSON or text. The Tools tab shows a file's kind on its page, with a summary of what is in it.</p>
-<div class="callout info"><div class="co-t"><!--ICON:info-->Older GA4GH files</div><p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 are recognised as GA4GH files, but in an older form that the standard does not accept: a file's page says <i>Older form</i>, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it.</p></div>
+<p>The workbench looks at the name first. Then, for a JSON file, it looks at what's inside: a drawing has <code>persons</code> and <code>partnerships</code>, a GA4GH Pedigree has <code>individuals</code> and <code>relationships</code>, a Family has a <code>proband</code>, a Cohort has <code>members</code> and a Phenopacket has a <code>subject</code>. If the workbench doesn't recognise a file, it shows it as plain JSON or text. In the Tools tab, a file's page shows its kind, with a summary of what's in it.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->Older GA4GH files</div><p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 are recognised as GA4GH files, but in an older form that the standard doesn't accept. A file like this has <i>Older form</i> on its page, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it.</p></div>

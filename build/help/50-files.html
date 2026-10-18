@@ -1,44 +1,45 @@
 <!-- id: h-files | title: Your files | group: Files and standards | summary: The Files tab, the examples, uploading, downloading, and where files are kept | keys: files tab folders home examples upload download zip kept stored browser storage indexeddb delete rename start afresh private window quota space -->
 <h1><!--ICON:folder-->Your files</h1>
-<p class="lede">Your drawings, the files the tools write and your notebooks are files in a home folder, <code>~</code> (<code>/home/user</code>), which every tab shares. The <b>Files</b> tab shows them, with the examples beside them.</p>
+<p class="lede">Your drawings, your notebooks and the files the tools write are all kept in a home folder, <code>~</code> (<code>/home/user</code>), which every tab shares. The <b>Files</b> tab shows them, along with the examples.</p>
 
 <h2>The folders</h2>
 <table>
 <tr><th>Folder</th><th>What goes in it</th></tr>
-<tr><td><code>~/pedigrees</code></td><td>drawings (<code>.studio.json</code>): the Studio's Save as…, and drawings the tools make</td></tr>
+<tr><td><code>~/pedigrees</code></td><td>drawings (<code>.studio.json</code>) saved with the Studio's Save as…, and drawings the tools make</td></tr>
 <tr><td><code>~/results</code></td><td>what the tools write, unless you choose another folder</td></tr>
 <tr><td><code>~/terms</code></td><td>terms files, from Match conditions to terms</td></tr>
 <tr><td><code>~/ontologies</code></td><td>copies of the HPO and Mondo, for searching without the internet</td></tr>
 <tr><td><code>~/notebooks</code></td><td>notebooks, starting with <code>pedigree-tools.ipynb</code></td></tr>
 <tr><td><code>~/data</code></td><td>files added from your computer with a tool's <b>From my computer…</b></td></tr>
-<tr><td><code>/data/examples</code></td><td>the examples: they cannot be changed, so copy one (<b>Copy to my files</b>) to change it</td></tr>
+<tr><td><code>~/examples</code></td><td>your own copies of the examples, made with <b>Copy to my files</b></td></tr>
+<tr><td><code>/data/examples</code></td><td>the examples, which can't be changed. To change one, copy it with <b>Copy to my files</b>.</td></tr>
 </table>
 
 <h2>The Files tab</h2>
-<p>Click a file to look at it: JSON, PED files and text open in an editor, which saves with <b>Save</b> or <kbd>Ctrl</kbd>+<kbd>S</kbd>. A drawing opens in the Studio tab and a notebook in the Notebook tab. The buttons above a pedigree file lead to the tools that use it – <b>Draw in Studio</b>, <b>Check</b>, <b>Convert…</b>, <b>More…</b> – and each file and folder has a menu (<b>⋯</b>) to rename, duplicate, delete, download, copy its path, or open its folder in the terminal.</p>
+<p>Click a file to look at it. JSON, PED files and text open in an editor, where you save your changes with <b>Save</b> or <kbd>Ctrl</kbd>+<kbd>S</kbd>. A drawing opens in the Studio tab, and a notebook in the Notebook tab. The buttons above a pedigree file lead to the tools that use it: <b>Draw in Studio</b>, <b>Check</b>, <b>Convert…</b> and <b>More…</b>. Each file and folder also has a menu (<b>⋯</b>), where you can rename, duplicate, delete or download it, copy its path, or open its folder in the terminal.</p>
 <div class="tryrow"><button class="do" type="button" data-bench="editor">Open the Files tab</button> <button class="do" type="button" data-example="okafor.studio.json">Copy an example to ~/examples</button></div>
 
 <h2>Adding files</h2>
 <ul>
-  <li><b>My files → Add files from my computer…</b> or <b>Add a folder…</b>, at the top right; or drag files onto the Files tab.</li>
-  <li>A folder's menu: <b>Upload files here…</b>.</li>
+  <li><b>My files → Add files from my computer…</b> or <b>Add a folder from my computer…</b>, at the top right. You can also drag files onto the Files tab.</li>
+  <li>In a folder's menu: <b>Upload files here…</b>.</li>
   <li>In a tool, under a file box: <b>From my computer…</b>.</li>
   <li>In the Studio: <b>Open… → Open a drawing from my computer…</b>.</li>
 </ul>
 
-<h2>Taking files away</h2>
+<h2>Downloading files</h2>
 <ul>
-  <li><b>Download</b> beside a file a tool has written, or in a file's menu.</li>
-  <li><b>Download as a .zip</b> in a folder's menu.</li>
-  <li><b>My files → Download all my files (.zip)</b>: everything in your home folder.</li>
+  <li><b>Download</b>, next to a file a tool has written, or in a file's menu.</li>
+  <li><b>Download as a .zip</b>, in a folder's menu.</li>
+  <li><b>My files → Download all my files (.zip)</b>, for everything in your home folder.</li>
   <li>In the terminal: <code>download FILE</code>, or <code>zip</code> then <code>download</code>.</li>
 </ul>
 
 <h2 data-anchor="kept">Where the files are kept</h2>
-<p>In this browser, on this computer: the workbench keeps them in the browser's own storage for this site (IndexedDB), and they are there when you come back. They are not sent anywhere, and they are not on any other computer, or in another browser on this one.</p>
+<p>Your files stay in this browser, on this computer. The workbench keeps them in the browser's own storage for this site (IndexedDB), so they're still there when you come back. They aren't sent anywhere, and they aren't on any other computer, or in another browser on this one.</p>
 <ul>
-  <li>The browser may not keep them in a private window, and it deletes them if you clear this site's data. <i>Saved in this browser</i>, at the top right, says whether they are being kept.</li>
-  <li>Browsers give a site a share of the disk, which is usually plenty: <b>My files</b> shows how much is used.</li>
-  <li>On a computer that others use, anyone who opens the workbench in your browser account sees your files. <b>My files → Start afresh</b> deletes them all, with your notebooks and the drawing in the Studio.</li>
+  <li>The browser may not keep them in a private window, and it deletes them if you clear this site's data. <i>Saved in this browser</i>, at the top right, tells you whether they're being kept.</li>
+  <li>Browsers give each site a share of the disk, which is usually plenty. <b>My files</b> shows how much is used.</li>
+  <li>On a computer that other people use, anyone who opens the workbench in your browser account can see your files. <b>My files → Start afresh</b> deletes them all, along with your notebooks and the drawing in the Studio.</li>
 </ul>
-<div class="callout warn"><div class="co-t"><!--ICON:warning-->Keep copies of what matters</div><p>A browser's storage is not a backup. Download anything you need to keep – the drawings above all – and keep it where you keep other work.</p></div>
+<div class="callout warn"><div class="co-t"><!--ICON:warning-->Keep copies of what matters</div><p>A browser's storage isn't a backup. Download anything you need to keep, especially your drawings, and store it with the rest of your work.</p></div>

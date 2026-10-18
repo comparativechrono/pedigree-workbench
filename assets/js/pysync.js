@@ -153,7 +153,7 @@
       try {
         await K.ensure();
       } catch (e) {
-        throw MG.shellUtil.userErr('Python could not start: ' + e.message);
+        throw MG.shellUtil.userErr('Python couldn’t start: ' + e.message);
       }
       // (Ctrl+C while Python was starting: the command does not run)
       if (ctx.term && ctx.term.cancelled) return 130;

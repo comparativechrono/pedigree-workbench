@@ -1,17 +1,17 @@
 <!-- id: h-ga4gh | title: The GA4GH Pedigree | group: Files and standards | summary: What the standard is, the form the workbench writes, and why | keys: ga4gh pedigree standard kin phenopackets fhir form proposal pull request 364 conceptual model individuals relationships indexPatients narrative older studio2ga4gh abusua2ga4gh correct compliant draft version 1 v1 schema reduced form fhir -->
 <h1><!--ICON:tag-->The GA4GH Pedigree</h1>
-<p class="lede">The Global Alliance for Genomics and Health (GA4GH) is writing a standard for pedigrees. This page says what that standard is so far, the form in which the workbench writes a GA4GH Pedigree, why, and what was wrong with the files our older tools wrote.</p>
+<p class="lede">The Global Alliance for Genomics and Health (GA4GH) is writing a standard for pedigrees. This page explains what the standard looks like so far, how the workbench writes a GA4GH Pedigree and why, and what was wrong with the files our older tools wrote.</p>
 
-<h2>The standard, so far</h2>
-<p>The GA4GH Pedigree Standard is still in development. Its published documentation describes a conceptual model: a pedigree is a set of individuals and the relationships between them, each relationship named with a term of the Kinship Ontology, KIN. It is not a file format of its own. It is carried by other standards, in two forms:</p>
+<h2>The standard so far</h2>
+<p>The GA4GH Pedigree Standard is still being developed. Its published documentation describes a conceptual model, in which a pedigree is a set of individuals and the relationships between them. Each relationship is named with a term from the Kinship Ontology, KIN. The model isn't a file format of its own. Instead, other standards carry it, in two forms:</p>
 <ul>
-  <li><b>In Phenopackets.</b> A new message, a <i>Pedigree</i> with its individuals as Phenopackets and its relationships named by KIN terms, was proposed for the Phenopackets schema in November 2022. The proposal was closed without being merged in September 2025, because the pedigree group had not yet decided. It is in no release of Phenopackets.</li>
-  <li><b>In HL7 FHIR</b>, with a draft implementation guide, in which each person is a FHIR Patient and each relationship a FamilyMemberHistory.</li>
+  <li><b>In Phenopackets.</b> A new message called <i>Pedigree</i> was proposed for the Phenopackets schema in November 2022. In it, the individuals are Phenopackets and the relationships are named by KIN terms. In September 2025 the proposal was closed without being merged, because the Pedigree group hadn't reached a decision yet. It isn't in any release of Phenopackets.</li>
+  <li><b>In HL7 FHIR.</b> There's a draft implementation guide for this form. Each person is a FHIR Patient, and each relationship is a FamilyMemberHistory.</li>
 </ul>
-<p>Neither form is approved yet. The approved GA4GH format that the workbench writes is <b>Phenopackets version 2</b>: the Phenopackets Family, and the Phenopackets inside the GA4GH Pedigree.</p>
+<p>Neither form has been approved yet. The approved GA4GH format that the workbench writes is <b>Phenopackets version 2</b>. That's the format of the Phenopackets Family, and of the Phenopackets inside the GA4GH Pedigree.</p>
 
 <h2>The form the workbench writes</h2>
-<p>A GA4GH Pedigree from the workbench is the Phenopackets form of the proposal, written as Phenopackets' JSON is written (field names in camelCase):</p>
+<p>A GA4GH Pedigree from the workbench uses the Phenopackets form of the proposal. It's written in the same way as Phenopackets' JSON, with field names in camelCase:</p>
 <pre class="code"><code>{
   "id": "FAM1",
   "narrative": "Pedigree drawn in Pedigree Studio: 16 people; proband IV-3. …",
@@ -37,56 +37,56 @@
   ]
 }</code></pre>
 <ul>
-  <li>Every individual is a complete Phenopacket version 2, with its own <code>metaData</code>, so that everything about a person – sex, whether they are alive, diseases, phenotypes – is in an approved, checked structure. Only the wrapper, the list of individuals and the relationships, comes from the proposal.</li>
-  <li>Each relationship is one current KIN term, given once, in what the standard calls the <i>reduced form</i>: each parent to each child; partners only when they have no children together, or are related or separated; all twins relative to one of them; and no brothers and sisters, since shared parents say that already. <a href="#h-kin">KIN</a> lists the terms.</li>
-  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Names are never written: Phenopackets have no field for a name.</li>
-  <li>A condition with no ontology term is left out, with a note, because a disease or phenotype without an id is invalid.</li>
-  <li>What the standard has no field for – a carrier, a pregnancy, a symbol that stands for several people – goes into the <code>narrative</code>, so that it is not lost.</li>
+  <li>Every individual is a complete Phenopacket version 2, with its own <code>metaData</code>. This means everything about a person – their sex, whether they're alive, their diseases and phenotypes – is held in a structure that is approved and can be checked. Only the wrapper, with its list of individuals and its relationships, comes from the proposal.</li>
+  <li>Each relationship is written once, as one current KIN term, in what the standard calls the <i>reduced form</i>. Each parent is linked to each child. Partners are linked only if they have no children together, or if they're related or separated. All the twins in a set are linked to one of them. Brothers and sisters aren't linked at all, because the parents they share already show that. The page on <a href="#h-kin">KIN</a> lists the terms.</li>
+  <li>People are named by their pedigree numbers (II-3) unless you choose otherwise. Phenopackets have no field for a name, so names are never written as such. If you choose to name people by the drawing's labels, though, their ids may be names.</li>
+  <li>A condition without an ontology term is left out, with a note, because a disease or phenotype without an id is invalid.</li>
+  <li>Some things the standard has no field for, such as a carrier or a pregnancy, are noted in the <code>narrative</code> so that they aren't lost.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor_ga4gh-pedigree.json">Look at the Okafor GA4GH Pedigree</button> <button class="do" type="button" data-tool="validate" data-input="/data/examples/okafor_ga4gh-pedigree.json">Check it</button></div>
 
 <h2>Why this form</h2>
 <ul>
-  <li>The Phenopackets Family that goes with it is Phenopackets version 2 already, and the phenopacket toolkit is built around Phenopackets: one model throughout.</li>
-  <li>With each individual a Phenopacket, all that is said about a person can be checked against an approved schema, as phenopacket-tools, the Phenopackets team's own validator, checks it.</li>
+  <li>The Phenopackets Family that goes with it is already Phenopackets version 2, and the phenopacket toolkit is built around Phenopackets. So there's one model throughout.</li>
+  <li>Because each individual is a Phenopacket, everything recorded about a person can be checked against an approved schema, in the same way that phenopacket-tools, the Phenopackets team's own validator, checks it.</li>
   <li>The standard's own published examples use this form.</li>
 </ul>
-<p>If the GA4GH settles on a different form, one module of the workbench's packages (<code>pedigree_ga4gh</code>) changes, and the upgrade rewrites files from this form.</p>
+<p>If the GA4GH settles on a different form, only one package, <code>pedigree-ga4gh</code>, will have to change, and the upgrade will rewrite files that are in this form.</p>
 
 <h2>One implementation</h2>
-<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>: studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. Its check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, and those of the pedigree (<a href="#h-tool-validate">Check against the standard</a>).</p>
+<p>All of the workbench's tools read and write GA4GH files through one package, <b>pedigree-ga4gh</b>. This means studio2ga4gh, ga4gh2studio and the phenopacket toolkit can no longer disagree about the form. The package's check applies the rules of the Phenopackets schema and of phenopacket-tools, the Phenopackets team's validator, as well as the GA4GH Pedigree's own rules (<a href="#h-tool-validate">Check against the standard</a>).</p>
 
 <h2>Version 1, in draft</h2>
-<p>Since June 2026 the Pedigree group has been drafting a version 1 of the standard. It is not yet merged or approved, and its review may change it. As drafted, it would give the GA4GH Pedigree a schema of its own:</p>
+<p>Since June 2026, the Pedigree group has been drafting version 1 of the standard. It hasn't been merged or approved yet, and it may change during review. As drafted, it would give the GA4GH Pedigree a schema of its own:</p>
 <ul>
-  <li>People would be listed with their sex assigned at birth, dates and genetic parents, and <i>linked</i> to their Phenopackets, rather than being Phenopackets. Whether someone is affected would be recorded in their Phenopacket.</li>
+  <li>People would be listed with their sex assigned at birth, their dates and their genetic parents. They would be <i>linked</i> to their Phenopackets, rather than being Phenopackets themselves. Whether someone is affected would be recorded in their Phenopacket.</li>
   <li>A relationship would have separate biological and social KIN terms, a twin type, and a flag for consanguinity.</li>
-  <li>KIN itself would gain 22 terms and retire ten. Three of those it retires are terms the workbench writes: <code>KIN:003</code>, a biological parent whose sex is not known, and the two terms for partners who are related.</li>
+  <li>KIN itself would gain 22 terms and retire ten. Three of the terms it would retire are ones the workbench writes: <code>KIN:003</code>, for a biological parent whose sex isn't known, and the two terms for partners who are related.</li>
 </ul>
-<p>Until version 1 is approved, the workbench follows the published version. A file in the draft's form is recognised, and the tools say what it is rather than misreading it; it cannot be converted yet. When version 1 is approved, the change is in one package (<code>pedigree_ga4gh</code>), the Phenopackets Family stays as it is, and <a href="#h-tool-upgrade">the upgrade</a> will rewrite files written now.</p>
+<p>Until version 1 is approved, the workbench follows the published version. The tools recognise a file in the draft's form and tell you what it is, rather than misreading it, but they can't convert it yet. When version 1 is approved, the change will be in one package, <code>pedigree-ga4gh</code>, and the Phenopackets Family will stay the same. Then <a href="#h-tool-upgrade">the upgrade</a> will rewrite the files the workbench writes now.</p>
 
 <h2>What was wrong with the older files</h2>
-<p>Before, studio2ga4gh and abusua2ga4gh each wrote GA4GH files their own way, and the phenopacket toolkit had a “dialect” for reading each. Neither way was correct:</p>
+<p>Previously, studio2ga4gh and abusua2ga4gh each wrote GA4GH files in their own way, and the phenopacket toolkit had a “dialect” for reading each of them. Neither way was correct:</p>
 <table>
 <tr><th>Tool</th><th>What it wrote</th><th>Why it was wrong</th></tr>
-<tr><td>studio2ga4gh 0.3, GA4GH Pedigree</td><td>people with <code>sex</code>, <code>deceased</code> and <code>affected</code> on them, and relationships with <code>individual</code> and <code>relative</code></td><td>the conceptual model written straight out as JSON: neither form of the standard looks like this, and no other software reads it</td></tr>
-<tr><td>studio2ga4gh 0.3, Phenopackets</td><td>Phenopackets without <code>metaData</code>, or without its schema version; conditions with an empty id</td><td>each is invalid Phenopackets version 2</td></tr>
-<tr><td>abusua2ga4gh 0.2</td><td>names and diseases inside <code>subject</code>; notes on relationships; no <code>metaData</code>; empty resource versions</td><td>Phenopackets have no such fields, and readers reject unknown fields; <code>metaData</code> is required</td></tr>
-<tr><td>abusua2ga4gh 0.2, KIN</td><td><code>KIN:039</code> for a sperm donor; <code>KIN:011</code> with another label; foster and social parents as adoptive parents (<code>KIN:022</code>)</td><td><code>KIN:039</code> is <i>hasGestationalCarrier</i>, and a sperm donor is <code>KIN:004</code>; KIN calls <code>KIN:011</code> <i>isPolyzygoticMultipleBirthSiblingOf</i>; KIN has <code>KIN:021</code> <i>isFosterParentOf</i> and <code>KIN:020</code> <i>isParentFigureOf</i></td></tr>
-<tr><td>abusua2ga4gh 0.2, carriers</td><td>the phenotype <code>HP:0032500</code> “Heterozygous carrier”</td><td><code>HP:0032500</code> is <i>Exacerbated by tobacco use</i>; the HPO has no carrier term, as being a carrier is not a phenotype</td></tr>
-<tr><td>phenopacket-toolkit 0.3</td><td>read both of the forms above</td><td>reading two incorrect forms kept them alive; it now reads the one form, and refuses the older ones with a message</td></tr>
+<tr><td>studio2ga4gh 0.3, GA4GH Pedigree</td><td>people with <code>sex</code>, <code>deceased</code> and <code>affected</code> on them, and relationships with <code>individual</code> and <code>relative</code></td><td>It's the conceptual model written straight out as JSON. Neither form of the standard looks like this, and no other software reads it.</td></tr>
+<tr><td>studio2ga4gh 0.3, Phenopackets</td><td>Phenopackets without <code>metaData</code>, or without its schema version; conditions with an empty id</td><td>Each of these is invalid in Phenopackets version 2.</td></tr>
+<tr><td>abusua2ga4gh 0.2</td><td>names and diseases inside <code>subject</code>; notes on relationships; no <code>metaData</code>; empty resource versions</td><td>Phenopackets have no such fields, and readers reject fields they don't recognise. <code>metaData</code> is also required.</td></tr>
+<tr><td>abusua2ga4gh 0.2, KIN</td><td><code>KIN:039</code> for a sperm donor; <code>KIN:011</code> with another label; foster and social parents as adoptive parents (<code>KIN:022</code>)</td><td><code>KIN:039</code> is <i>hasGestationalCarrier</i>, and a sperm donor is <code>KIN:004</code>. KIN calls <code>KIN:011</code> <i>isPolyzygoticMultipleBirthSiblingOf</i>. For foster and social parents, KIN has <code>KIN:021</code> <i>isFosterParentOf</i> and <code>KIN:020</code> <i>isParentFigureOf</i>.</td></tr>
+<tr><td>abusua2ga4gh 0.2, carriers</td><td>the phenotype <code>HP:0032500</code> “Heterozygous carrier”</td><td><code>HP:0032500</code> is <i>Exacerbated by tobacco use</i>. The HPO has no term for a carrier, because being a carrier isn't a phenotype.</td></tr>
+<tr><td>phenopacket-toolkit 0.3</td><td>read both of the forms above</td><td>Reading two incorrect forms kept them alive. The toolkit now reads only the standard form, and refuses the older ones with a message.</td></tr>
 </table>
-<p>Files in the older forms are recognised, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites them once, in the standard form.</p>
-<div class="callout info"><div class="co-t"><!--ICON:info-->Two things that are not errors</div><p>A Family may leave out <code>consanguinousParents</code> when it is false: proto3 JSON may leave out default values, and phenopacket-tools fills it in before checking. The workbench writes it always, because a check with the JSON schema alone asks for it. And a Phenopacket that uses no ontology terms – a relative with nothing recorded – needs no resources: what is required is a resource for every ontology whose terms are used. (The field is spelt <i>consanguinous</i>, as the schema spells it.)</p></div>
+<p>The tools recognise files in the older forms, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites them in the standard form. You only need to do this once.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->Two things that are not errors</div><p>A Family may leave out <code>consanguinousParents</code> when it's false. That's because proto3 JSON may leave out default values, and phenopacket-tools fills it in before checking. The workbench always writes it, though, because a check against the JSON schema alone asks for it. Also, a Phenopacket that uses no ontology terms, such as one for a relative with nothing recorded, needs no resources. A resource is only needed for each ontology whose terms are used. (The field is spelt <i>consanguinous</i>, as the schema spells it.)</p></div>
 
 <h2>Sources</h2>
 <ul>
-  <li>GA4GH, <a href="https://www.ga4gh.org/product/pedigree/" target="_blank" rel="noopener">Pedigree</a> (the product page: in development).</li>
-  <li>The GA4GH Pedigree Standard's <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">documentation</a>: the conceptual model, how to use it (the reduced form), the examples and KIN.</li>
-  <li>phenopacket-schema, <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">pull request 364, “Pedigree”</a> (opened 24 November 2022, closed without merging 26 September 2025).</li>
+  <li>GA4GH, <a href="https://www.ga4gh.org/product/pedigree/" target="_blank" rel="noopener">Pedigree</a> (the product page, which says it's in development).</li>
+  <li>The GA4GH Pedigree Standard's <a href="https://pedigree.readthedocs.io/" target="_blank" rel="noopener">documentation</a>: the conceptual model, how to use it (including the reduced form), the examples, and KIN.</li>
+  <li>phenopacket-schema, <a href="https://github.com/ga4gh/phenopacket-schema/pull/364" target="_blank" rel="noopener">pull request 364, “Pedigree”</a> (opened on 24 November 2022, and closed without being merged on 26 September 2025).</li>
   <li>The <a href="https://phenopacket-schema.readthedocs.io/" target="_blank" rel="noopener">Phenopackets version 2 schema</a>, and <a href="https://github.com/phenopackets/phenopacket-tools" target="_blank" rel="noopener">phenopacket-tools</a>.</li>
   <li>KIN, in <a href="https://github.com/ga4gh/pedigree_family_history_terminology" target="_blank" rel="noopener">ga4gh/<wbr>pedigree_<wbr>family_<wbr>history_<wbr>terminology</a>.</li>
-  <li>The draft of version 1: <a href="https://github.com/ga4gh/pedigree/pull/50" target="_blank" rel="noopener">ga4gh/pedigree pull request 50</a>, and for KIN <a href="https://github.com/ga4gh/pedigree_family_history_terminology/pull/55" target="_blank" rel="noopener">pull request 55</a> (neither merged).</li>
+  <li>The draft of version 1: <a href="https://github.com/ga4gh/pedigree/pull/50" target="_blank" rel="noopener">ga4gh/pedigree pull request 50</a>, and for KIN <a href="https://github.com/ga4gh/pedigree_family_history_terminology/pull/55" target="_blank" rel="noopener">pull request 55</a> (neither has been merged).</li>
   <li>The <a href="https://ga4gh.github.io/pedigree-fhir-ig/" target="_blank" rel="noopener">FHIR implementation guide</a> (draft 0.1.0).</li>
 </ul>
 <!--CITE: ga4gh-pedigree phenopackets phenopacket-tools pedigree-ga4gh-->

@@ -1,48 +1,48 @@
 <!-- id: h-tool-studio2ga4gh | title: Drawing → GA4GH Pedigree and Phenopackets | group: Tools | summary: studio2ga4gh: a drawing as the two GA4GH files | keys: studio2ga4gh convert drawing ga4gh pedigree phenopackets family export terms ids pedigree numbers kin relationships narrative -->
 <h1><!--ICON:convert-->Drawing → GA4GH Pedigree and Phenopackets</h1>
-<p class="lede">studio2ga4gh writes a Pedigree Studio drawing as a GA4GH Pedigree and a Phenopackets Family: the files for sharing a family's pedigree and findings in the GA4GH standard.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/okafor.studio.json" data-terms="/data/examples/example-terms.json">Open it with the Okafor family</button></div>
+<p class="lede">studio2ga4gh turns a Pedigree Studio drawing into a GA4GH Pedigree and a Phenopackets Family. These are the files you use to share a family's pedigree and findings in the GA4GH standard.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/okafor.studio.json" data-terms="/data/examples/example-terms.json">Try it with the Okafor family</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>The drawing</dt><dd>A Pedigree Studio file, or the drawing in the Studio tab.</dd>
-  <dt>Terms for its conditions</dt><dd>A terms file giving each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition with an id in the key itself, such as <i>Condition X [MONDO:0009061]</i>, needs no terms file; only an ontology's id counts, so <i>Hypertension (BP:160/95)</i> is just a name. A condition without a term is left out, because a GA4GH file has no place for a condition without one: <b>Match them to terms…</b> under the table opens the tool that finds them.</dd>
-  <dt>People are named by</dt><dd><b>pedigree numbers</b> such as II-3 (the default, and the safe choice); <b>the labels in the drawing</b>, which are often names; or <b>Pedigree Studio's own ids</b>. A label becomes an id as studio2ped makes it (<i>J. Mensah</i> becomes <code>J_Mensah</code>), so a person has the same id in both tools' files, and an id that would be empty, <code>0</code> or shared falls back to the pedigree number, with a note.</dd>
-  <dt>Family id</dt><dd>FAM gives FAM1, and FAM2 and so on when the drawing holds more than one family.</dd>
-  <dt>Files to write</dt><dd>Both files, or one of them.</dd>
-  <dt>Save in, Start of the file names</dt><dd>The files are <code><i>start</i>_ga4gh-pedigree.json</code> and <code><i>start</i>_phenopackets-family.json</code>, in <code>~/results</code> unless you choose another folder.</dd>
+  <dt>The drawing</dt><dd>Choose a Pedigree Studio file, or the drawing in the Studio tab.</dd>
+  <dt>Terms for its conditions</dt><dd>Choose a terms file that gives each condition in the colour key its ontology term (<a href="#h-terms">terms files</a>). Under it, a table shows the term each condition will get. A condition that already has an id in the key, such as <i>Condition X [MONDO:0009061]</i>, doesn't need a terms file. Only an ontology's id counts, so <i>Hypertension (BP:160/95)</i> is just a name. A condition without a term is left out, because a GA4GH file has no place for a condition without one. <b>Match them to terms…</b>, under the table, opens the tool that finds the missing terms.</dd>
+  <dt>People are named by</dt><dd>The default, and the safe choice, is <b>pedigree numbers</b> such as II-3. You can also choose <b>the labels in the drawing</b>, which are often names, or <b>Pedigree Studio's own ids</b>. A label becomes an id in the same way as in studio2ped (<i>J. Mensah</i> becomes <code>J_Mensah</code>, for example), so a person has the same id in both tools' files. If an id would be empty, <code>0</code> or the same as someone else's, the pedigree number is used instead, with a note.</dd>
+  <dt>Family id</dt><dd>The default, FAM, gives FAM1, then FAM2 and so on if the drawing holds more than one family.</dd>
+  <dt>Files to write</dt><dd>You can write both files, or just one of them.</dd>
+  <dt>Save in, Start of the file names</dt><dd>The files are called <code><i>start</i>_ga4gh-pedigree.json</code> and <code><i>start</i>_phenopackets-family.json</code>. They're saved in <code>~/results</code> unless you choose another folder.</dd>
 </dl>
 
 <h2>What goes into the files</h2>
 <table>
 <tr><th>In the drawing</th><th>In the GA4GH files</th></tr>
 <tr><td>square, circle, diamond</td><td>sex MALE, FEMALE, UNKNOWN_SEX</td></tr>
-<tr><td>the slash of the deceased</td><td>vital status DECEASED (otherwise ALIVE)</td></tr>
-<tr><td>the proband's arrow</td><td>the index patient; the Family's proband</td></tr>
+<tr><td>the slash through a deceased person's symbol</td><td>vital status DECEASED (otherwise ALIVE)</td></tr>
+<tr><td>the proband's arrow</td><td>the index patient, and the Family's proband</td></tr>
 <tr><td>fill, halves, quarters, shading</td><td>a disease (Mondo) or phenotypic feature (HPO) for each condition named in the key, once it has a term</td></tr>
 <tr><td>a child's line from a couple</td><td>isBiologicalMotherOf, isBiologicalFatherOf (isBiologicalParentOf when the parent's sex is unknown)</td></tr>
 <tr><td>a dashed line of descent</td><td>isAdoptiveParentOf</td></tr>
-<tr><td>D or S in a parent's symbol</td><td>isSpermDonorOf or isOvumDonorOf; isGestationalCarrierOf (not a biological parent)</td></tr>
+<tr><td>D or S in a parent's symbol</td><td>isSpermDonorOf or isOvumDonorOf for D, and isGestationalCarrierOf for S (not a biological parent)</td></tr>
 <tr><td>identical and non-identical twins</td><td>isMonozygoticMultipleBirthSiblingOf, isPolyzygoticMultipleBirthSiblingOf</td></tr>
 <tr><td>consanguineous, separated and childless couples</td><td>isConsanguineousPartnerOf, isSeparatedPartnerOf, isPartnerOf</td></tr>
 <tr><td>a pregnancy loss</td><td>a person who is DECEASED, noted in the narrative</td></tr>
-<tr><td>the <i>no children</i> and <i>infertility</i> bars</td><td>not people: noted in the narrative</td></tr>
-<tr><td>a carrier's dot, a presymptomatic line, P</td><td>noted in the narrative: there is no ontology term for them</td></tr>
-<tr><td>names and notes under the symbols</td><td>not written: Phenopackets have no field for a name, and such notes are often personal data</td></tr>
+<tr><td>the <i>no children</i> and <i>infertility</i> bars</td><td>not written as people, but noted in the narrative</td></tr>
+<tr><td>a carrier's dot, a presymptomatic line, P</td><td>noted in the narrative, because there's no ontology term for them</td></tr>
+<tr><td>names and notes under the symbols</td><td>not written, because Phenopackets have no field for a name, and such notes are often personal data</td></tr>
 </table>
-<p>Every Phenopacket has its <code>metaData</code>, with a resource for each ontology its terms come from and that ontology's release, taken from the terms file. <a href="#h-ga4gh">The GA4GH Pedigree</a> and <a href="#h-phenopackets">Phenopackets</a> describe the files in full.</p>
+<p>Every Phenopacket has its own <code>metaData</code>. This lists a resource for each ontology its terms come from, with that ontology's release, taken from the terms file. <a href="#h-ga4gh">The GA4GH Pedigree</a> and <a href="#h-phenopackets">Phenopackets</a> describe the files in full.</p>
 
 <h2>Under the result</h2>
-<p>The tool says what it wrote, and notes anything that did not go in as drawn: a condition without a term, a symbol that stands for several people (written as one), a carrier. Read the notes before you send the files.</p>
+<p>The tool tells you what it wrote. It also notes anything that didn't go in as drawn, such as a condition without a term, or a symbol that stands for several people (written as one person). Read the notes before you send the files.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>studio2ga4gh /data/examples/okafor.studio.json -t /data/examples/example-terms.json -d ~/results</code></pre>
 <table>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>-t FILE</code>, <code>--terms FILE</code></td><td>the terms file</td></tr>
-<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder (default: beside the drawing; made if it does not exist) and the start of the file names (default: the drawing's name)</td></tr>
+<tr><td><code>-d DIR</code>, <code>-o START</code></td><td>the folder, which is made if it doesn't exist, and the start of the file names. By default, the files go in the drawing's folder and start with the drawing's name.</td></tr>
 <tr><td><code>--ids numbers|drawing|studio</code></td><td>how people are named</td></tr>
-<tr><td><code>--family-id ID</code>, <code>--created-by TEXT</code></td><td>the family's id; who made the files, for <code>metaData.createdBy</code></td></tr>
+<tr><td><code>--family-id ID</code>, <code>--created-by TEXT</code></td><td>the family's id, and who made the files, for <code>metaData.createdBy</code></td></tr>
 <tr><td><code>--only pedigree|family</code></td><td>write one of the two files</td></tr>
 </table>
 

@@ -1,23 +1,23 @@
 <!-- id: h-tools | title: The Tools tab | group: Tools | index: yes | summary: Our Python packages, point and click | keys: tools tab gui point and click form run result convert python packages command same terminal python map tasks file page -->
 <h1><!--ICON:wrench-->The Tools tab</h1>
-<p class="lede">The Tools tab puts our Python packages behind forms. Choose a file, set the options, press <b>Run</b>: the tool runs its package's command, exactly as the terminal would, and shows what it wrote. Under every form is the same command for the terminal, and the same work in Python, so that nothing the tab does is hidden.</p>
+<p class="lede">The Tools tab gives you simple forms for our Python packages. Choose a file, set any options and press <b>Run</b>. The tool runs exactly the command you would type in the terminal, then shows you what it printed and the files it wrote. Under every form you'll find that command too, and the same job written in Python, so you can always see what the tab is doing.</p>
 
 <h2>Finding the tool you need</h2>
 <ul>
-  <li><b>The first page</b> has the map of the formats and the tools between them, and the common tasks with their tools in order. Click an arrow on the map to open that tool, or a box to list everything that can be done with that kind of file.</li>
-  <li><b>The list on the left</b> (<b>All tools</b> on a narrow screen) has every tool, in groups.</li>
-  <li><b>From a file</b>: <b>More…</b> beside a file a tool has written, the Files tab's buttons, and the Studio's <b>Convert or check…</b> all open the file's own page: what is in it, and the tools that read it.</li>
+  <li><b>The first page</b> has a map of the formats and the tools that go between them. It also lists the common tasks, each with its tools in the order you use them. Click an arrow on the map to open that tool, or click a box to list everything you can do with that kind of file.</li>
+  <li><b>The list on the left</b> (<b>All tools</b> on a narrow screen) has every tool, arranged in groups.</li>
+  <li><b>From a file</b>, you can open the file's own page, which shows what's in it and the tools that read it. Use <b>More…</b> next to a file that a tool has written, the buttons in the Files tab, or <b>Convert or check…</b> in the Studio.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-tool="start">Open the first page</button></div>
 
 <h2>A tool's page</h2>
 <ol>
-  <li><b>The fields.</b> Files are chosen from your files or the examples, from your computer (<b>From my computer…</b>), or, for a drawing, from the Studio tab as it is now (<b>The drawing in the Studio tab</b>, which saves it first). <b>Look at it</b> opens the chosen file. Names of the files it will write are filled in for you and can be changed; results go in <code>~/results</code> unless you say otherwise.</li>
-  <li><b>Run.</b> The first run of a visit starts Python in your browser (a few seconds; the first time, it downloads about 10 MB). If a file would be written over, you are asked first.</li>
-  <li><b>The result</b>: <i>Done</i> or the error, what the program printed, and the files it wrote, each with buttons to open it in the Studio, look at it, check it, take it to another tool, or download it.</li>
-  <li><b>The same in the terminal, and in Python</b>: the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
+  <li><b>The fields.</b> You can choose from your own files or the examples, or pick a file from your computer with <b>From my computer…</b>. For a drawing, you can also choose <b>The drawing in the Studio tab</b>, which uses the drawing that's open there and saves it first. <b>Look at it</b> opens the file you've chosen. The names of the files the tool will write are filled in for you, and you can change them. Results go in <code>~/results</code>, drawings in <code>~/pedigrees</code> and terms files in <code>~/terms</code>, unless you choose another folder.</li>
+  <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. If a file would be overwritten, you're asked first.</li>
+  <li><b>The result.</b> You'll see <i>Done</i>, or the error if something went wrong, then what the program printed and the files it wrote. Each file has buttons to open it in the Studio, look at it, check it, pass it to another tool or download it.</li>
+  <li><b>The same in the terminal, and in Python</b> shows the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
 </ol>
-<p><b>More about this tool</b>, under the title, says what the tool does and does not do, with a link to its page in this help. At the top right, the Python pill says whether Python is running; click it for the versions of the packages.</p>
+<p><b>More about this tool</b>, under the title, explains what the tool does and doesn't do, and links to its page in this help. At the top right, the Python pill shows whether Python is running. Click it to see the versions of the packages.</p>
 
 <h2>The tools</h2>
 <h3>Convert</h3>
@@ -54,4 +54,4 @@
   <li><a href="#h-tool-mpedtools">Summary and check, Take one condition out, Put PED files together, One file for each family, PED ⇄ MPED</a> (mpedtools)</li>
 </ul>
 
-<div class="callout info"><div class="co-t"><!--ICON:info-->What the tab does not do</div><p>Each tool runs one command of one package, as it is, and the tab adds no conversions of its own. The exception is Match conditions to terms, which has no command: it searches with the packages' Python and writes a terms file. A few commands have options that the forms leave out – <code>phenotk add</code>'s variants, for example – which <code>man</code> and <code>--help</code> describe in the terminal.</p></div>
+<div class="callout info"><div class="co-t"><!--ICON:info-->What the tab does not do</div><p>Each tool runs a package's own command, exactly as the package provides it, and the tab adds no conversions of its own. Match conditions to terms works differently, because it has no command. Instead, it searches using the packages' Python code and writes a terms file. A few commands have options that the forms leave out, such as the options for variants in <code>phenotk add</code>. In the terminal, <code>man</code> and <code>--help</code> describe them.</p></div>

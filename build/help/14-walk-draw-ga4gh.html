@@ -1,28 +1,28 @@
 <!-- id: h-walk-draw-ga4gh | title: Draw a GA4GH or Phenopackets file | group: Walkthroughs | summary: Upgrade it if it is old, draw it, check the key | keys: draw ga4gh pedigree phenopackets family phenopacket file sent received picture drawing ga4gh2studio upgrade older studio2ga4gh abusua2ga4gh -->
 <h1><!--ICON:pedigree-->Draw a GA4GH or Phenopackets file</h1>
-<p class="lede">A GA4GH Pedigree or a Phenopackets Family drawn in Pedigree Studio, with each condition in the colour key under its term. The drawing can be changed and converted back, and the terms come back with it.</p>
+<p class="lede">This walkthrough shows you how to draw a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio, with each condition in the colour key under its term. You can change the drawing and convert it back, and the terms come back with it.</p>
 
 <h2>1 · Add the file</h2>
-<p>Add it with <b>My files → Add files from my computer…</b>, or with <b>From my computer…</b> under the file box of the tool. The workbench tells GA4GH files apart by what is in them, whatever they are called. If it shows a file as plain JSON, it does not recognise it as a GA4GH file; <b>Upgrade a file from an older tool</b> may still be able to read it.</p>
+<p>Add it with <b>My files → Add files from my computer…</b>, or with <b>From my computer…</b> under the file box of the tool you use next. The workbench tells GA4GH files apart by what's in them, whatever they're called. If it shows a file as plain JSON, it hasn't recognised it as a GA4GH file, but <b>Upgrade a file from an older tool</b> may still be able to read it.</p>
 
 <h2>2 · If it was made by an older tool, upgrade it</h2>
-<p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 are not in the standard form, and the tools refuse them with a message that says so. <b>Upgrade a file from an older tool</b> rewrites such a file once, in the standard form, and lists what it changed and anything it could not do.</p>
+<p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 aren't in the standard form, and the tools refuse them with a message explaining this. <b>Upgrade a file from an older tool</b> rewrites such a file in the standard form. You only need to do this once for each file. It lists what it changed, and anything it couldn't do.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">Upgrade an older example</button></div>
-<p>The older files often name conditions without a term. The upgrade lists them; <b>Fill in missing terms</b> gives them their terms from a terms file (<a href="#h-walk-terms">how</a>). The drawing does not need them – a condition without a term is drawn with its name – but the GA4GH files do. A GA4GH Pedigree from studio2ga4gh 0.3 recorded only <i>whether</i> people were affected, not by what: draw from the Phenopackets file made with it instead, which has the conditions.</p>
-<p>To find out whether a file needs upgrading, look at its summary in the Tools tab (the <b>More…</b> button beside a file): it says <i>Older form</i> when it does.</p>
+<p>The older files often name conditions without a term. The upgrade lists them, and <b>Fill in missing terms</b> gives them their terms from a terms file (<a href="#h-walk-terms">here's how</a>). The drawing doesn't need the terms, because a condition without one is drawn with its name, but the GA4GH files do. A GA4GH Pedigree from studio2ga4gh 0.3 recorded only <i>whether</i> people were affected, not what they were affected by. Draw from the Phenopackets file made with it instead, because that has the conditions.</p>
+<p>To find out whether a file needs upgrading, open its summary in the Tools tab with the <b>More…</b> button next to the file. The summary says <i>Older form</i> if the file needs upgrading.</p>
 
 <h2>3 · Draw it</h2>
-<p><b>GA4GH or Phenopackets → drawing</b> lays the family out from its relationships and gives each condition a colour, named in the key with its term, such as <i>breast cancer [MONDO:0007254]</i>.</p>
+<p><b>GA4GH or Phenopackets → drawing</b> lays the family out from its relationships. It gives each condition a colour, and names it in the colour key with its term, such as <i>breast cancer [MONDO:0007254]</i>.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="ga4gh2studio" data-input="/data/examples/okafor_ga4gh-pedigree.json">Draw the Okafor GA4GH Pedigree</button></div>
-<p>Under the result, <b>Open the drawing in Studio</b> shows it, laid out afresh by Pedigree Studio's Tidy if the box is ticked.</p>
+<p>Under the result, <b>Open the drawing in Studio</b> shows it. If <i>Tidy the drawing when it opens</i> was ticked, Pedigree Studio's Tidy lays the drawing out again as it opens.</p>
 
 <h2>4 · Check the drawing</h2>
 <p>How much of the family comes back depends on the file:</p>
 <ul>
-  <li>From a <b>GA4GH Pedigree</b>: everyone, the couples (consanguineous and separated ones too), twins, adoptions, who has died, and the pregnancies and losses its narrative records.</li>
-  <li>From a <b>Phenopackets Family</b>: everyone in its pedigree, with their parents, sex and conditions. A Family's pedigree is a PED file in another form, so it has no twins and no adoptions: draw from the GA4GH Pedigree when you have one.</li>
+  <li>From a <b>GA4GH Pedigree</b>: everyone, the couples (including consanguineous and separated ones), twins, adoptions, who has died, and the pregnancies and losses that its narrative records.</li>
+  <li>From a <b>Phenopackets Family</b>: everyone in its pedigree, with their parents, sex and conditions. A Family's pedigree is a PED file in another form, so it has no twins and no adoptions. Draw from the GA4GH Pedigree when you have one.</li>
 </ul>
-<p>People are labelled with their ids, except ids that are pedigree numbers such as II-3, since Pedigree Studio numbers the generations itself. Pedigree Studio draws children from couples, so a child with only one parent in the file is given an <i>unknown parent</i> as the other.</p>
+<p>People are labelled with their ids, except where the ids are pedigree numbers such as II-3, because Pedigree Studio numbers the generations itself. Pedigree Studio draws children from couples, so if only one of a child's parents is in the file, the child is given an <i>unknown parent</i> as the other.</p>
 
 <h2>The same in the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/upgraded_phenopackets-family.json

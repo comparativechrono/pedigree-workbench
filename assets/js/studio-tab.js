@@ -47,10 +47,10 @@
         b.addEventListener('click', fn);
         return b;
       };
-      this.fileBtn = h('button.st-file', { type: 'button', title: 'The file this drawing is kept in – click for your other drawings' });
+      this.fileBtn = h('button.st-file', { type: 'button', title: 'The file this drawing is saved in. Click to see your other drawings.' });
       this.fileBtn.addEventListener('click', () => this.recentMenu(this.fileBtn));
       this.stateEl = h('span.st-state', { 'aria-live': 'polite' });
-      this.saveBtn = btn('save', 'Save', 'Save the drawing in its file among your files (Ctrl+S)', () => this.save());
+      this.saveBtn = btn('save', 'Save', 'Save the drawing to its file (Ctrl+S)', () => this.save());
       const bar = h(
         'div.st-bar',
         h('span.st-label', { html: MG.icon('pedigree') + '<span>Drawing</span>' }),
@@ -60,10 +60,10 @@
         btn('plus', 'New', 'Start a new drawing', () => this.newDrawing()),
         btn('openfolder', 'Open…', 'Open a drawing from your files or the examples', () => this.openDialog()),
         this.saveBtn,
-        btn('newfile', 'Save as…', 'Save the drawing as a new file among your files', () => this.saveAs()),
+        btn('newfile', 'Save as…', 'Save the drawing as a new file', () => this.saveAs()),
         h('span.st-sep'),
-        btn('wand', 'Tidy', 'Lay the whole pedigree out again (Pedigree Studio’s Tidy) – it can be undone', () => this.tidy()),
-        btn('convert', 'Convert or check…', 'Take this drawing to the Tools tab: GA4GH, Phenopackets and PED files, ontology terms', () => this.toTools(), '.primary'),
+        btn('wand', 'Tidy', 'Lay out the whole pedigree again with Pedigree Studio’s Tidy (you can undo it)', () => this.tidy()),
+        btn('convert', 'Convert or check…', 'Take this drawing to the Tools tab to make GA4GH, Phenopackets or PED files, or to give its conditions ontology terms', () => this.toTools(), '.primary'),
         btn('dots', '', 'More', (e) => this.moreMenu(e.currentTarget), '.icon-only')
       );
       this.frame = h('iframe.st-frame', { src: 'assets/studio/index.html?v=' + encodeURIComponent((MG.config.buildId || '') + (window.WB_STUDIO || '')), title: 'Pedigree Studio' });
@@ -82,7 +82,7 @@
       const win = this.frame.contentWindow;
       const api = win && win.pedwbStudio;
       if (!api) {
-        this.cover.innerHTML = '<span>Pedigree Studio could not start in this browser. Reload the page to try again.</span>';
+        this.cover.innerHTML = '<span>Pedigree Studio couldn’t start in this browser. Reload the page to try again.</span>';
         return;
       }
       this.api = api;
@@ -114,8 +114,8 @@
     /* ---------------- the state: which file, saved or not ---------------- */
     _label() {
       const p = this.path;
-      this.fileBtn.innerHTML = p ? `<span>${esc(this.fs.pretty(p))}</span>${MG.icon('chevD')}` : `<span class="muted">not saved in a file yet</span>${MG.icon('chevD')}`;
-      this.stateEl.textContent = !p ? '' : this.dirty ? 'changes not saved' : 'saved';
+      this.fileBtn.innerHTML = p ? `<span>${esc(this.fs.pretty(p))}</span>${MG.icon('chevD')}` : `<span class="muted">not saved yet</span>${MG.icon('chevD')}`;
+      this.stateEl.textContent = !p ? '' : this.dirty ? 'unsaved changes' : 'saved';
       this.stateEl.dataset.state = !p ? 'none' : this.dirty ? 'dirty' : 'saved';
       this.saveBtn.classList.toggle('attn', !!(p && this.dirty));
     }
@@ -144,7 +144,7 @@
       this._check();
       if (!this.dirty) return true;
       const where = this.path ? `<b>${esc(this.fs.pretty(this.path))}</b>` : 'a file';
-      return MG.confirmBox('Leave the drawing unsaved?', `<p>The drawing on show has changes that are not saved in ${where}. ${esc(what)} replaces it (Undo in the Studio brings it back).</p>`, 'Go on without saving', { cancel: 'Keep it' });
+      return MG.confirmBox('Leave the drawing unsaved?', `<p>The drawing you’re looking at has changes that aren’t saved in ${where}. ${esc(what)} will replace it, although Undo in the Studio brings it back.</p>`, 'Go on without saving', { cancel: 'Keep it' });
     }
 
     /* ---------------- opening ---------------- */
@@ -155,20 +155,20 @@
       try {
         doc = JSON.parse(await this.fs.readText(path));
       } catch (e) {
-        toast(`<b>${esc(this.fs.pretty(path))}</b> could not be read as a drawing: ${esc(e.message)}`, 'error', 8000);
+        toast(`<b>${esc(this.fs.pretty(path))}</b> couldn’t be read as a drawing: ${esc(e.message)}`, 'error', 8000);
         return false;
       }
       if (!isDrawing(doc)) {
         const k = MG.app.pedKind(path);
-        const hint = k === 'pedigree' || k === 'family' ? ' It is a GA4GH file: draw it with GA4GH or Phenopackets → drawing, in the Tools tab.' : k === 'ped' || k === 'mped' ? ' It is a PED file: draw it with PED or MPED → drawing, in the Tools tab.' : '';
-        toast(`<b>${esc(this.fs.pretty(path))}</b> is not a Pedigree Studio drawing.${hint}`, 'warn', 9000);
+        const hint = k === 'pedigree' || k === 'family' ? ' It’s a GA4GH file, so draw it with GA4GH or Phenopackets → drawing in the Tools tab.' : k === 'ped' || k === 'mped' ? ' It’s a PED file, so draw it with PED or MPED → drawing in the Tools tab.' : '';
+        toast(`<b>${esc(this.fs.pretty(path))}</b> isn’t a Pedigree Studio drawing.${hint}`, 'warn', 9000);
         return false;
       }
       if (path !== this.path && !(await this._mayDiscard('Opening ' + MG.path.basename(path)))) return false;
       try {
         this.api.load(doc, { message: 'Opened ' + MG.path.basename(path) });
       } catch (e) {
-        toast('Pedigree Studio could not show this drawing: ' + esc(e.message), 'error', 9000);
+        toast('Pedigree Studio couldn’t show this drawing: ' + esc(e.message), 'error', 9000);
         return false;
       }
       const readonly = !(path === this.home || path.startsWith(this.home + '/'));
@@ -181,7 +181,7 @@
       if (readonly) {
         this.dirty = false;
         this._label();
-        toast(`<b>${esc(MG.path.basename(path))}</b> is an example: change it as you like, and use <b>Save as…</b> to keep your version.`, null, 6000);
+        toast(`<b>${esc(MG.path.basename(path))}</b> is an example. Change it as much as you like, then use <b>Save as…</b> to keep your version.`, null, 6000);
       }
       MG.bus.emit('studio:open', { path });
       return true;
@@ -206,7 +206,7 @@
         return b;
       };
       body.appendChild(h('h4', 'Your drawings'));
-      body.appendChild(mine.length ? h('div.st-picks', mine.map(row)) : h('p.muted', 'None yet. Save the drawing on show with Save as…, or open an example and save your own copy.'));
+      body.appendChild(mine.length ? h('div.st-picks', mine.map(row)) : h('p.muted', 'None yet. Save the drawing you’re working on with Save as…, or open an example and save your own copy.'));
       body.appendChild(h('h4', 'Examples (read-only)'));
       body.appendChild(h('div.st-picks', ex.map(row)));
       const up = h('button.btn', { type: 'button', html: MG.icon('upload') + '<span>Open a drawing from my computer…</span>' });
@@ -250,7 +250,7 @@
       if (!this.api) return null;
       const dir = this.home + '/pedigrees';
       const stem = this.path ? MG.path.basename(this.path).replace(/\.studio\.json$|\.json$/i, '') : 'family';
-      let name = await MG.promptText('Save the drawing as', `A name for the file, in ${this.fs.pretty(dir)} (or a path of your own, such as ~/project/family.studio.json):`, stem + '.studio.json', 'Save');
+      let name = await MG.promptText('Save the drawing as', `A name for the file in ${this.fs.pretty(dir)}, or a path of your own such as ~/project/family.studio.json:`, stem + '.studio.json', 'Save');
       if (!name) return null;
       name = name.trim();
       if (!/\.json$/i.test(name)) name += '.studio.json';
@@ -268,7 +268,7 @@
         this._saving = true;
         this.fs.writeText(p, this._text());
       } catch (e) {
-        toast('Could not save: ' + esc(e.message), 'error');
+        toast('Couldn’t save: ' + esc(e.message), 'error');
         return null;
       } finally {
         this._saving = false;
@@ -298,7 +298,7 @@
       this._check();
       if (this.path && !this.dirty) return this.path;
       if (this.path) return this._writeTo(this.path);
-      toast('Save the drawing first: the tools work on files.', null, 3000);
+      toast('Save the drawing first, as the tools work on files.', null, 3000);
       return this.saveAs();
     }
     async newDrawing() {
@@ -328,7 +328,7 @@
             this.base = null;
             this._remember();
             this._check();
-            toast('The drawing’s file was deleted or moved: use Save as… to keep the drawing.', 'warn', 7000);
+            toast('The drawing’s file has been deleted or moved. Use Save as… to keep the drawing.', 'warn', 7000);
           }
         }, 50);
         return;
@@ -336,7 +336,7 @@
       if (what !== 'write') return;
       this._check();
       if (this.dirty) {
-        toast(`<b>${esc(this.fs.pretty(p))}</b> was changed elsewhere. The drawing on show has edits of its own, so it is kept: Save writes it over the new version.`, 'warn', 9000);
+        toast(`<b>${esc(this.fs.pretty(p))}</b> was changed somewhere else. The drawing you’re looking at has edits of its own, so it has been kept, and Save will write it over the new version.`, 'warn', 9000);
         return;
       }
       this.fs.readText(p).then((text) => {
@@ -347,7 +347,7 @@
           return;
         }
         if (!isDrawing(doc) || sig(doc) === this.base) return;
-        this.api.load(doc, { message: 'The file changed: this is the new version' });
+        this.api.load(doc, { message: 'The file changed, so this is the new version' });
         this.base = sig(this.api.data());
         this._remember();
         this._check();

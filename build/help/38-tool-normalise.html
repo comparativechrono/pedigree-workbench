@@ -1,18 +1,18 @@
 <!-- id: h-tool-normalise | title: Fill in missing terms | group: Tools | summary: phenotk normalise: give terms to findings that have only a name | keys: normalise normalize fill missing terms ids empty mapping terms file lookup ols local threshold log phenotk tidy -->
 <h1><!--ICON:tag-->Fill in missing terms</h1>
-<p class="lede">Gives an ontology id to every disease and phenotype in a GA4GH or Phenopackets file that has a name but no id, from a terms file or by looking the name up. It also writes the file in the standard form, with the ontology resources its terms need.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="normalise" data-mapping="/data/examples/example-terms.json">Open it with the examples' terms file</button></div>
+<p class="lede">This tool gives an ontology id to every disease and phenotype in a GA4GH or Phenopackets file that has a name but no id. It takes the id from a terms file, or looks the name up. It also writes the file in the standard form, with the ontology resources that its terms need.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="normalise" data-mapping="/data/examples/example-terms.json">Try it with the examples' terms file</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>The file</dt><dd>A GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
-  <dt>Terms file</dt><dd>Names and their terms (<a href="#h-terms">terms files</a>). The names are matched without regard to case, and the terms file's releases are recorded in the file's resources.</dd>
-  <dt>Look up names without a term</dt><dd><b>No</b> (the terms file only), or on <b>EBI's Ontology Lookup Service</b> (online), or in <b>copies of the ontologies</b> on this computer (choose <code>hp.obo</code> and <code>mondo.obo</code>).</dd>
-  <dt>Accept a looked-up match from</dt><dd>The lowest score, from 0.5 to 1, at which a term that is found is used. A term's own name scores 1 and one of its synonyms 0.98, whatever the case and punctuation, and any other name less, so the default, 0.98, takes only a term that the condition's name names. A name whose best match is less close is left without a term, and listed. A terms file's entries are always used.</dd>
-  <dt>Save as</dt><dd><code>~/results/<i>name</i>.normalised.json</code>, with a log of every decision beside it, <code>….normalised.log.json</code>.</dd>
+  <dt>The file</dt><dd>Choose a GA4GH Pedigree, or a Phenopackets Family, Cohort or Phenopacket. A file from an older tool must be upgraded first.</dd>
+  <dt>Terms file</dt><dd>Choose a file of names and their terms (<a href="#h-terms">terms files</a>). Capital letters don't matter when the names are matched. The releases in the terms file are recorded in the new file's resources.</dd>
+  <dt>Look up names without a term</dt><dd>Choose <b>No</b> to use only the terms file, or look names up on <b>EBI's Ontology Lookup Service</b>, which is online, or in <b>copies of the ontologies</b> on this computer. For the copies, choose <code>hp.obo</code> and <code>mondo.obo</code>.</dd>
+  <dt>Accept a looked-up match from</dt><dd>This is the lowest score, from 0.5 to 1, at which a term the tool finds is used. A term's own name scores 1 and one of its synonyms 0.98, ignoring capital letters and punctuation, and any other name scores less. So the default, 0.98, only accepts a term whose own name or synonym is the condition's name. Match conditions to terms shows the same scores out of 100. If a name's best match is less close than that, it's left without a term and listed. Entries in a terms file are always used.</dd>
+  <dt>Save as</dt><dd>The new file is saved as <code>~/results/<i>name</i>.normalised.json</code>. A log of every decision goes next to it, as <code>….normalised.log.json</code>.</dd>
 </dl>
-<p>Nothing is guessed: a name that neither the terms file nor a look-up gives a term keeps its empty id, and the summary lists it. You can lower the threshold to take close matches as well, but each of those is a guess, and the log asks for it to be checked: names spelt almost alike can mean opposite things, and <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>
-<p>A term goes where its kind belongs: older tools wrote every condition as a disease, so a “disease” that is given an HPO term (<i>Hearing loss from birth</i>, <code>HP:0000365</code>) moves to the phenotypic features, and a phenotype given a Mondo term moves to the diseases. The summary notes each move.</p>
+<p>By default, the tool doesn't guess. If neither the terms file nor a look-up finds a term for a name, its id stays empty and the summary lists it. You can lower the threshold to accept close matches as well, but each of those is a guess, and the log asks you to check it. Names that are spelt almost alike can mean opposite things. For example, <i>Maternal hypothyroidism</i> is not <i>Maternal hyperthyroidism</i>. Look at the log before you rely on a looked-up match.</p>
+<p>Each term goes where its kind belongs. Older tools wrote every condition as a disease, so a “disease” that's given an HPO term, such as <i>Hearing loss from birth</i> (<code>HP:0000365</code>), moves to the phenotypic features. In the same way, a phenotype that's given a Mondo term moves to the diseases. The summary notes each move.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/older.json
@@ -21,8 +21,8 @@ pedigree-ga4gh validate ~/results/older.normalised.json</code></pre>
 <table>
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>--mapping FILE</code></td><td>a terms file, or the log of an earlier run</td></tr>
-<tr><td><code>--no-online</code></td><td>the terms file only: no look-ups</td></tr>
-<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and the lowest score accepted (default 0.98: the term's own name or synonym)</td></tr>
+<tr><td><code>--no-online</code></td><td>use the terms file only, with no look-ups</td></tr>
+<tr><td><code>--backend ols|local</code>, <code>--hpo-file</code>, <code>--mondo-file</code>, <code>--threshold</code></td><td>where to look names up, and the lowest score to accept (by default 0.98, which means the term's own name or a synonym)</td></tr>
 <tr><td><code>--terms-only</code>, <code>--structure-only</code></td><td>only fill in terms, or only tidy the structure</td></tr>
 <tr><td><code>--log FILE</code>, <code>-o FILE</code>, <code>--in-place</code></td><td>where the log and the new file go</td></tr>
 </table>

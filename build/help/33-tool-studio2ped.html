@@ -1,28 +1,29 @@
 <!-- id: h-tool-studio2ped | title: Drawing → PED or MPED | group: Tools | summary: studio2ped: a drawing as a PED or MPED file | keys: studio2ped ped mped linkage export drawing affected status carrier column ids labels duplicate -->
 <h1><!--ICON:table-->Drawing → PED or MPED</h1>
-<p class="lede">studio2ped writes a drawing as a PED file, the table of a pedigree that linkage and association programs read – or, when the drawing shows several conditions or carriers, as an MPED file, which has a column for each.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/cf-cousins.studio.json">Open it with the cystic fibrosis cousins</button></div>
+<p class="lede">studio2ped turns a drawing into a PED file, the table of a pedigree that linkage and association programs read. If the drawing shows several conditions or carriers, it writes an MPED file instead, which has a column for each.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/cf-cousins.studio.json">Try it with the cystic fibrosis cousins</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>The drawing</dt><dd>A Pedigree Studio file, or the drawing in the Studio tab.</dd>
-  <dt>Save in, Start of the file name</dt><dd>The file is <code><i>start</i>.ped</code> or <code><i>start</i>.mped</code>, in <code>~/results</code> unless you choose another folder.</dd>
-  <dt>People are named by</dt><dd>Pedigree numbers (<code>II-3</code>), the labels the drawing shows, Pedigree Studio's own ids, or the text under the symbols, as version 0.1 did.</dd>
+  <dt>The drawing</dt><dd>Choose a Pedigree Studio file, or the drawing in the Studio tab.</dd>
+  <dt>Save in, Start of the file name</dt><dd>The file is called <code><i>start</i>.ped</code> or <code><i>start</i>.mped</code>. It's saved in <code>~/results</code> unless you choose another folder.</dd>
+  <dt>People are named by</dt><dd>Choose pedigree numbers (<code>II-3</code>), the labels the drawing shows, Pedigree Studio's own ids, or the text under the symbols, which is what version 0.1 used.</dd>
 </dl>
 
 <h2>What it writes</h2>
-<p>One line per person: family, person, father, mother, sex (1 male, 2 female, 0 unknown) and, for each condition, 1 unaffected, 2 affected, or 3 for a carrier in an MPED file. Each condition's column is named after it in the colour key (<i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>), without an ontology id written after it (<i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>). Only an ontology's id comes off: <i>Hypertension (BP:160/95)</i> keeps its brackets, as <code>Hypertension_BP16095</code>. <a href="#h-ped">PED and MPED files</a> has the details.</p>
-<p>The father and mother are the genetic parents, which is how linkage programs read them. A child joined to a couple by a dashed line (an adoption), and a child carried by a surrogate (a parent marked S), get 0 in place of those parents, with a note; the GA4GH Family's pedigree does the same. A donor (D) is a genetic parent, and is written as one.</p>
-<p>After writing, the tool checks the file with mpedtools and shows the result under it.</p>
+<p>The file has one line per person. Each line gives the family, the person, their father and mother, and their sex: 1 male, 2 female or 0 unknown. Then, for each condition, there's 1 for unaffected or 2 for affected, and in an MPED file 3 for a carrier.</p>
+<p>Each condition's column is named after the condition in the colour key, so <i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>. An ontology id written after the name is left out, so <i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>. Only an ontology's id is left out, though. <i>Hypertension (BP:160/95)</i> keeps what's in its brackets, as <code>Hypertension_BP16095</code>. <a href="#h-ped">The PED and MPED formats</a> has the details.</p>
+<p>The father and mother are the genetic parents, because that's how linkage programs read them. An adopted child, joined to a couple by a dashed line, gets 0 in place of those parents, with a note. So does a child carried by a surrogate (a parent marked S). The Phenopackets Family's pedigree does this too. A donor (D) is a genetic parent, and is written as one.</p>
+<p>After writing the file, the tool checks it with mpedtools and shows the result underneath.</p>
 
 <div class="callout"><div class="co-t"><!--ICON:info-->The ids</div>
-<p>People are named by their pedigree numbers, <code>II-3</code>, as in the GA4GH files. The other choices can give names: the text under a symbol (<code>Grace_78</code> for <i>Grace, 78</i>) often is one, and so may a label. Check those before the file leaves you. A label becomes an id with spaces turned into underscores and other punctuation dropped (<i>J. Mensah</i> becomes <code>J_Mensah</code>), as studio2ga4gh makes it, so a person has the same id in both tools' files. An id that two people would share, an empty one, or <code>0</code> (which a PED file reads as “no parent”) falls back to the person's pedigree number, and the tool says so.</p></div>
-<p>The <i>no children</i> and <i>infertility</i> bars, which Pedigree Studio stores as children of the couple, are not people, so they are left out; the notes say which couple had them. (Version 0.1 wrote them as children of unknown sex.)</p>
+<p>By default, people are named by their pedigree numbers, such as <code>II-3</code>, as in the GA4GH files. The other choices can give you names. The text under a symbol is often a name, and a label may be one too. For example, <i>Grace, 78</i> becomes <code>Grace_78</code>. Check these ids before you share the file. A label is made into an id by turning spaces into underscores and dropping other punctuation, so <i>J. Mensah</i> becomes <code>J_Mensah</code>. studio2ga4gh does the same, so a person has the same id in both tools' files. If two people would share an id, or an id would be empty or <code>0</code> (which a PED file reads as “no parent”), the person's pedigree number is used instead, and the tool tells you.</p></div>
+<p>Pedigree Studio stores the <i>no children</i> and <i>infertility</i> bars as children of the couple. They aren't people, so the tool leaves them out, and the notes say which couple had them. Version 0.1 wrote them as children of unknown sex.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>studio2ped /data/examples/cf-cousins.studio.json -d ~/results -o cf-cousins
 mpedtools validate ~/results/cf-cousins.mped</code></pre>
-<p>Without <code>-o</code>, the file is named after the drawing, without <code>.studio.json</code> (<code>cf-cousins.mped</code>). <code>--ids drawing</code>, <code>--ids studio</code> or <code>--ids text</code> choose the other ids.</p>
+<p>Without <code>-o</code>, the file is named after the drawing, leaving out <code>.studio.json</code>, for example <code>cf-cousins.mped</code>. To use one of the other kinds of id, add <code>--ids drawing</code>, <code>--ids studio</code> or <code>--ids text</code>.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>from studio2ped import convert_file

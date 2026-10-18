@@ -251,7 +251,7 @@
         const label = r === this.home ? 'My files  (~)' : 'Examples  (read-only)';
         if (row({ path: r, name: r, entry: e }, 0, label)) walk(r, 1);
       }
-      if (this.fs.list(this.home).length === 0 && this.expanded.has(this.home)) el.insertBefore(h('p.ed-hint', 'No files yet: upload some (↑ above), drag them here, or copy an example.'), el.children[1] || null);
+      if (this.fs.list(this.home).length === 0 && this.expanded.has(this.home)) el.insertBefore(h('p.ed-hint', 'You don’t have any files yet. Upload some with ↑ above, drag them here, or copy an example.'), el.children[1] || null);
       el.scrollTop = keep;
     }
     /** show a file or folder in the tree (open its folders, select it) */
@@ -338,7 +338,7 @@
           bytes += this.fs.size(e);
         }
         const u = await MG.project.usage();
-        const kept = MG.project.ok ? 'kept in this browser' : 'NOT kept (private window?)';
+        const kept = MG.project.ok ? 'kept in this browser' : 'NOT kept, perhaps because this is a private window';
         this.usageEl.innerHTML = `${MG.icon(MG.project.ok ? 'lock' : 'warning')}<span>${n} file${n === 1 ? '' : 's'}, ${MG.humanSize(bytes)}B · ${kept}${u && u.quota ? ` · room for about ${MG.humanSize(Math.max(0, u.quota - u.usage))}B more` : ''}</span>`;
         this.usageEl.classList.toggle('bad', !MG.project.ok);
       }, 300);
@@ -353,7 +353,7 @@
           this.fs.writeText(path, '');
           return this._openText(path, opts);
         }
-        toast('No such file: ' + esc(path), 'error');
+        toast('There’s no file at ' + esc(path), 'error');
         return;
       }
       if (e.kind === 'dir') return this.reveal(path);
@@ -368,13 +368,13 @@
       const size = this.fs.size(e);
       let truncated = false;
       if (size > 50e6) {
-        toast(`${esc(this.fs.pretty(path))} is ${MG.humanSize(size)}B – too large for the editor. Look at it in the Terminal (head, less, grep).`, 'warn', 7000);
+        toast(`${esc(this.fs.pretty(path))} is ${MG.humanSize(size)}B, which is too large for the editor. Look at it in the Terminal with head, less or grep.`, 'warn', 7000);
         return this.showView(path, { tooBig: true });
       }
       try {
         text = await this.fs.readText(path);
       } catch (err) {
-        if (!opts.quiet) toast('Could not read ' + esc(path), 'error');
+        if (!opts.quiet) toast('Couldn’t read ' + esc(path), 'error');
         return;
       }
       if (size > 400000) {
@@ -418,7 +418,7 @@
       this.cm.setOption('mode', modeFor(path));
       this.cm.setOption('indentUnit', /\.r$/i.test(path) ? 2 : 4);
       this.saveBtn.hidden = o.ro;
-      this.pathEl.innerHTML = esc(this.fs.pretty(path)) + (o.ro ? ' <span class="pill small">read-only' + (o.truncated ? ': the first 400 lines' : '') + '</span>' : '');
+      this.pathEl.innerHTML = esc(this.fs.pretty(path)) + (o.ro ? ' <span class="pill small">read-only' + (o.truncated ? ', showing the first 400 lines' : '') + '</span>' : '');
       this._acts(path);
       this._runBtnFor(path);
       this._renderTabs();
@@ -447,7 +447,7 @@
         A.appendChild(b);
       };
       if (!path) return;
-      if (!(path === this.home || path.startsWith(this.home + '/'))) add('copy', 'Copy to my files', 'Make your own copy of this file (in ~/examples), which you can change', () => this.copyToHome(path));
+      if (!(path === this.home || path.startsWith(this.home + '/'))) add('copy', 'Copy to my files', 'Make your own copy of this file in ~/examples, so you can change it', () => this.copyToHome(path));
       if (/\.ipynb$/i.test(path)) add('notebook', 'Open as a notebook', 'Open in the Notebook tab', () => MG.app.openFile(path));
       // a drawing → Studio; pedigree files → the Tools tab (saved first, so that what you see is what is used)
       for (const [icon, label, title, fn] of MG.app.fileActions ? MG.app.fileActions(path) : [])
@@ -520,8 +520,8 @@
       this.actsEl.innerHTML = '';
       this.pathEl.textContent = '';
       this.emptyEl.innerHTML = `<div class="ex-empty ed-welcome">${MG.icon('folder')}<h3>Your files</h3>
-        <p>Click a file on the left to open it. Text files open in the editor – PED files, GA4GH and Phenopackets JSON, terms files – and pictures, tables and PDFs are shown; notebooks open in the Notebook tab. A Pedigree Studio drawing has a button to open it in Studio, and pedigree files have buttons that take them to the Tools tab.</p>
-        <p>Add files from your computer with <b>↑ Upload</b> or by dragging them onto this tab. Right-click (or ⋯) a file for more.</p></div>`;
+        <p>Click a file on the left to open it. Text files, such as PED files, terms files and GA4GH or Phenopackets JSON, open in the editor. Pictures, tables and PDFs are shown here, and notebooks open in the Notebook tab. A Pedigree Studio drawing has a button to open it in Studio, and pedigree files have buttons that take them to the Tools tab.</p>
+        <p>Add files from your computer with <b>↑ Upload</b> or by dragging them onto this tab. Right-click a file, or use its ⋯ button, for more options.</p></div>`;
       const b = h('button.btn', { type: 'button', html: MG.icon('upload') + '<span>Upload files</span>' });
       b.addEventListener('click', () => this.upload(false));
       this.emptyEl.firstChild.appendChild(b);
@@ -574,7 +574,7 @@
       const text = o.doc.getValue();
       const old = this.fs.get(p);
       if (old && old.kind === 'dir') {
-        toast('Cannot save: ' + esc(p) + ' is a folder', 'error');
+        toast('Can’t save ' + esc(p) + ', because it’s a folder', 'error');
         return;
       }
       if (!this.fs.isDir(MG.path.dirname(p))) this.fs.mkdirp(MG.path.dirname(p));
@@ -607,7 +607,7 @@
       if (text === o.saved) return;
       if (o.dirty) {
         o.conflict = true;
-        if (this.current === p) toast(esc(p.split('/').pop()) + ' was changed by another tab (the terminal, a notebook …). Your unsaved edits are kept – saving will overwrite the new version.', 'warn', 7000);
+        if (this.current === p) toast(esc(p.split('/').pop()) + ' was changed in another tab, for example by the terminal or a notebook. Your unsaved edits are kept, but saving will overwrite the new version.', 'warn', 7000);
         return;
       }
       const cur = this.current === p ? this.cm.getCursor() : null;
@@ -618,7 +618,7 @@
       this._renderTabs();
     }
     _markGone() {
-      this.pathEl.innerHTML = esc(this.fs.pretty(this.current)) + ' <span class="pill small warn">deleted – Save to write it again</span>';
+      this.pathEl.innerHTML = esc(this.fs.pretty(this.current)) + ' <span class="pill small warn">deleted, but Save will write it again</span>';
       this._renderTabs();
     }
 
@@ -697,7 +697,7 @@
           const fr = h('iframe.ed-frame', { sandbox: '', title: path.split('/').pop() });
           fr.srcdoc = text;
           V.appendChild(fr);
-          V.appendChild(h('p.ed-note.muted', 'Shown without its scripts (for safety). To see it with everything, download it and open it in your browser.'));
+          V.appendChild(h('p.ed-note.muted', 'For safety, this page is shown without its scripts. To see it in full, download it and open it in your browser.'));
         } else if (k === 'table') {
           const text = await this.fs.readText(path);
           if (stale()) return;
@@ -712,7 +712,7 @@
           const text = await this.fs.readText(path);
           if (stale()) return;
           const view = alignmentView(text);
-          V.appendChild(view || h('p.muted', 'This file could not be read as an alignment (FASTA or Clustal).'));
+          V.appendChild(view || h('p.muted', 'This file couldn’t be read as an alignment in FASTA or Clustal format.'));
           V.appendChild(h('p.ed-note', textBtn()));
         } else if (k === 'tree') {
           const text = await this.fs.readText(path);
@@ -727,7 +727,7 @@
           let tips = [`ls -l ${shq(rel)}`];
           if (/\.zip$/i.test(n)) tips = [`unzip -l ${shq(rel)}`];
           else if (/\.(tar|tgz|tar\.gz)$/i.test(n)) tips = [`tar -tzf ${shq(rel)} | head`];
-          const box = h('div.ex-empty', h('h3', opts.tooBig ? 'A large file' : 'A compressed or binary file'), h('p', `${n} is ${opts.tooBig ? 'too large to show here' : 'not plain text, so it is not shown here'}. Look inside it with a program in the Terminal:`));
+          const box = h('div.ex-empty', h('h3', opts.tooBig ? 'A large file' : 'A compressed or binary file'), h('p', `${n} is ${opts.tooBig ? 'too large to show here' : 'not plain text, so it isn’t shown here'}. Look inside it with a program in the Terminal:`));
           tips.forEach((tip) => {
             const b = h('button.btn.small.ed-tip', { type: 'button' }, 'Run: ' + tip);
             b.addEventListener('click', async () => {
@@ -740,7 +740,7 @@
         }
       } catch (err) {
         if (stale()) return;
-        V.appendChild(h('p.muted', 'Could not show this file: ' + err.message));
+        V.appendChild(h('p.muted', 'Couldn’t show this file: ' + err.message));
       }
     }
 
@@ -768,7 +768,7 @@
         this.expanded.add(folder);
         this.renderTree();
       } catch (e) {
-        toast('Could not unpack it: ' + esc(e.message), 'error');
+        toast('Couldn’t unpack it: ' + esc(e.message), 'error');
       }
     }
     async _ask(title, label, value, ok) {
@@ -800,9 +800,9 @@
     async rename(p) {
       const name = await this._ask('Rename', 'New name for ' + MG.path.basename(p) + ':', MG.path.basename(p), 'Rename');
       if (!name || name === MG.path.basename(p)) return;
-      if (/[\/\\]/.test(name)) return toast('A name cannot contain / – to move a file, use mv in the Terminal.', 'warn');
+      if (/[\/\\]/.test(name)) return toast('A name can’t contain /. To move a file, use mv in the Terminal.', 'warn');
       const to = MG.path.dirname(p) + '/' + name;
-      if (this.fs.exists(to)) return toast(`There is already a ${esc(name)} here.`, 'warn');
+      if (this.fs.exists(to)) return toast(`There’s already a ${esc(name)} here.`, 'warn');
       const dirty = this.open.get(p);
       this.fs.rename(p, to);
       if (dirty) {
@@ -830,14 +830,14 @@
       if (this.fs.isDir(p)) {
         for (const [q, e] of Array.from(this.fs.entries)) if (q.startsWith(p + '/') && e.kind !== 'dir') this.fs.copy(q, dest + q.slice(p.length));
       } else this.fs.copy(p, dest);
-      toast(`Copied to <b>${esc(this.fs.pretty(dest))}</b> – your own copy, which you can change.`, 'ok');
+      toast(`Copied to <b>${esc(this.fs.pretty(dest))}</b>. It’s your own copy, so you can change it.`, 'ok');
       this.reveal(dest);
     }
     remove(p) {
       const e = this.fs.get(p);
       if (!e) return;
       const n = e.kind === 'dir' ? Array.from(this.fs.entries.keys()).filter((k) => k.startsWith(p + '/')).length : 0;
-      const m = MG.modal('Delete?', `<p>Delete <b>${esc(this.fs.pretty(p))}</b>${e.kind === 'dir' ? ` and everything in it (${n} item${n === 1 ? '' : 's'})` : ''}? This cannot be undone.</p><div class="prompt-actions"><button class="btn" data-x="no" type="button">Cancel</button><button class="btn danger" data-x="yes" type="button">Delete</button></div>`);
+      const m = MG.modal('Delete?', `<p>Delete <b>${esc(this.fs.pretty(p))}</b>${e.kind === 'dir' ? ` and everything in it (${n} item${n === 1 ? '' : 's'})` : ''}? You can’t undo this.</p><div class="prompt-actions"><button class="btn" data-x="no" type="button">Cancel</button><button class="btn danger" data-x="yes" type="button">Delete</button></div>`);
       m.box.querySelector('[data-x="no"]').addEventListener('click', () => m.close());
       m.box.querySelector('[data-x="yes"]').addEventListener('click', () => {
         m.close();
@@ -965,7 +965,7 @@
     fill();
     t.append(thead, tbody);
     const box = h('div.ed-tablebox', t);
-    const info = h('p.muted.small', lines.length > 1001 ? `The first 1,000 of ${(lines.length - 1).toLocaleString('en-GB')} rows · ${head.length} columns. Click a column name to sort. (In a notebook: pandas.read_csv / read.csv)` : `${(lines.length - 1).toLocaleString('en-GB')} rows · ${head.length} columns. Click a column name to sort.`);
+    const info = h('p.muted.small', lines.length > 1001 ? `The first 1,000 of ${(lines.length - 1).toLocaleString('en-GB')} rows · ${head.length} columns. Click a column name to sort. In a notebook, you can read the file with pandas.read_csv.` : `${(lines.length - 1).toLocaleString('en-GB')} rows · ${head.length} columns. Click a column name to sort.`);
     return h('div', info, box);
   }
 
@@ -986,7 +986,7 @@
   function fastaView(text, path) {
     const seqs = parseFasta(text);
     const box = h('div.ed-fasta');
-    if (!seqs.length) return h('p.muted', 'No sequences found (a FASTA file has lines that start with >).');
+    if (!seqs.length) return h('p.muted', 'No sequences were found. A FASTA file has lines that start with >.');
     const dna = seqs.every((s) => /^[ACGTUNRYSWKMBDHV\-*.]*$/i.test(s.seq));
     const total = seqs.reduce((n, s) => n + s.seq.replace(/[-.]/g, '').length, 0);
     box.appendChild(h('p', h('b', `${seqs.length.toLocaleString('en-GB')} ${dna ? 'DNA/RNA' : 'protein'} sequence${seqs.length === 1 ? '' : 's'}`), ` · ${total.toLocaleString('en-GB')} ${dna ? 'bases' : 'residues'} in all`));
@@ -1121,7 +1121,7 @@
     try {
       root = parseNewick(text.trim().split(';')[0]);
     } catch (e) {
-      return h('p.muted', 'This file could not be read as a tree (Newick format): ' + e.message);
+      return h('p.muted', 'This file couldn’t be read as a tree in Newick format: ' + e.message);
     }
     const leaves = [];
     const hasLen = (function any(n) {

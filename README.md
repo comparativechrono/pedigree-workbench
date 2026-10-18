@@ -54,9 +54,9 @@ The tools in the Tools tab:
 
 *Match conditions to terms* finds the HPO or Mondo term for each condition in
 a drawing's colour key, searching EBI's Ontology Lookup Service or copies of
-the ontologies in the browser, and keeps the choices in a terms file. It is the
-one place where anything leaves the computer: the words searched for go to EBI,
-when the user chooses that.
+the ontologies in the browser, and keeps the choices in a terms file. It and
+*Fill in missing terms* are the only places where anything leaves the
+computer: if the user chooses EBI's service, the words searched for go to EBI.
 
 ## The GA4GH files
 
@@ -157,11 +157,13 @@ does. The tests never contact EBI's Ontology Lookup Service.
 
 ## The packages' own repositories
 
-Each package the workbench changed has a pull request in its own repository
-making the same changes, so that `pip install` will give what the workbench
-runs once they are released. The copies in `python/` are those pull
-requests' code. **[docs/upstream.md](docs/upstream.md)** lists them with what
-each changes, and the order to release them in. They cover:
+Each package the workbench changed had a pull request in its own repository
+making the same changes. The pull requests were merged, and the packages were
+released on PyPI on 18 October 2026, so `pip install` gives exactly what the
+workbench runs. The copies in
+`python/` are taken from those releases' wheels.
+**[docs/upstream.md](docs/upstream.md)** lists the pull requests with what each
+changed, and how to release new versions. They cover:
 
 - pedigree-ga4gh, as a package of its own;
 - new versions of studio2ga4gh, ga4gh2studio and phenopacket-toolkit;

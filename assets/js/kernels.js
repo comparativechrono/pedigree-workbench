@@ -50,7 +50,7 @@
         if (name === 'stdout' && opts.capture) out += text;
         else if (opts.onOutput) opts.onOutput({ type: 'stream', name, text });
       };
-      const asText = (t) => (t instanceof Uint8Array ? `[${t.length.toLocaleString('en')} bytes of binary output: send it to a file with  > file]\n` : String(t));
+      const asText = (t) => (t instanceof Uint8Array ? `[${t.length.toLocaleString('en')} bytes of binary output, which you can send to a file with  > file]\n` : String(t));
       const io = {
         out: (t) => emit('stdout', asText(t)),
         err: (t) => emit('stderr', String(t)),
@@ -147,7 +147,7 @@
         } else if (m.type === 'fatal') {
           if (m.stage === 'init') {
             this.state = 'failed';
-            this._status('Python could not start: ' + m.message, true);
+            this._status('Python couldn’t start: ' + m.message, true);
             rejectReady(new Error(m.message));
             bus.emit('kernel:state', { lang: this.evLang, state: 'failed', message: m.message });
           } else {

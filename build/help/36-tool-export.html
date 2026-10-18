@@ -1,21 +1,21 @@
 <!-- id: h-tool-export | title: GA4GH → PED, table or YAML | group: Tools | summary: phenotk convert: a GA4GH file as PED, TSV, YAML or JSON Lines | keys: export ped tsv table spreadsheet yaml jsonl json lines phenotk convert affected unaffected unknown status -->
 <h1><!--ICON:table-->GA4GH → PED, table or YAML</h1>
-<p class="lede">Writes a GA4GH Pedigree, a Phenopackets Family, Cohort or Phenopacket in another format: a PED file for linkage programs, a table of people and their terms, YAML, or JSON Lines.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="export" data-input="/data/examples/okafor_phenopackets-family.json">Open it with the Okafor Family</button></div>
+<p class="lede">This tool writes a GA4GH Pedigree, or a Phenopackets Family, Cohort or Phenopacket, in another format. It can make a PED file for linkage programs, a table of people and their terms, YAML, or JSON Lines.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="export" data-input="/data/examples/okafor_phenopackets-family.json">Try it with the Okafor Family</button></div>
 
 <h2>The formats</h2>
 <dl>
-  <dt>A PED file</dt><dd>Six columns – family, person, father, mother, sex, affected status – with the file's ids, which are pedigree numbers (II-3) in files from studio2ga4gh. Made from a <b>Phenopackets Family</b>, the status is the one its pedigree records: 1 unaffected, 2 affected. Made from a <b>GA4GH Pedigree</b>, people with a condition are 2 and everyone else is 0, unknown, because a GA4GH Pedigree records the conditions people have, not that they were found to have none. In both, affected means having any of the file's conditions: for one condition of several, use the other route of <a href="#h-walk-ped">Make a PED file for a linkage program</a>.</dd>
-  <dt>A table (TSV)</dt><dd>A row for each person and term: the person's id, their role (proband or relative), whether the term is a disease or a phenotype, its id and label, and whether it was excluded (looked for and not found). It opens in a spreadsheet.</dd>
-  <dt>YAML</dt><dd>The same document, in YAML instead of JSON.</dd>
-  <dt>JSON Lines</dt><dd>One Phenopacket on each line, for programs that read many at a time.</dd>
+  <dt>A PED file</dt><dd>The six columns are family, person, father, mother, sex and affected status. It uses the file's ids. In files from studio2ga4gh, these are pedigree numbers such as II-3, unless you chose otherwise. If you make it from a <b>Phenopackets Family</b>, the status is the one its pedigree records: 1 for unaffected, 2 for affected. If you make it from a <b>GA4GH Pedigree</b>, people with a condition get 2 and everyone else gets 0, which means unknown. That's because a GA4GH Pedigree records the conditions people have, not that they were found to have none. Either way, affected means having any of the file's conditions. To make a PED file for one condition out of several, use the other route in <a href="#h-walk-ped">Make a PED file for a linkage program</a>.</dd>
+  <dt>A table (TSV)</dt><dd>The table has a row for each person and term. Each row gives the person's id and their role (proband or relative), and whether the term is a disease or a phenotype. It also gives the term's id and label, and whether it was excluded, which means it was looked for and not found. You can open it in a spreadsheet.</dd>
+  <dt>YAML</dt><dd>This is the same document, written in YAML instead of JSON.</dd>
+  <dt>JSON Lines</dt><dd>This puts one Phenopacket on each line, for programs that read many at a time.</dd>
 </dl>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk convert /data/examples/okafor_phenopackets-family.json --to ped -o ~/results/okafor.ped
 phenotk convert /data/examples/okafor_ga4gh-pedigree.json --to tsv -o ~/results/okafor.tsv
 column -t -s "$(printf '\t')" ~/results/okafor.tsv</code></pre>
-<p><code>--to</code> takes <code>ped</code>, <code>tsv</code>, <code>yaml</code>, <code>jsonl</code> and <code>json</code>, and <code>family</code> or <code>pedigree</code> for the other GA4GH form. <code>phenotk ped FILE</code> writes the PED file too.</p>
+<p><code>--to</code> takes <code>ped</code>, <code>tsv</code>, <code>yaml</code>, <code>jsonl</code> and <code>json</code>, as well as <code>family</code> or <code>pedigree</code> for the other GA4GH form. <code>phenotk ped FILE</code> also writes the PED file.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk

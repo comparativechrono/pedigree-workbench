@@ -82,8 +82,8 @@
     studio2ga4gh: ['Pedigree Studio drawing → GA4GH Pedigree and Phenopackets Family (JSON)', `studio2ga4gh ${EX}/okafor.studio.json -t ${EX}/example-terms.json -d ~/results -o okafor`],
     ga4gh2studio: ['GA4GH Pedigree or Phenopackets Family → Pedigree Studio drawing', `ga4gh2studio ${EX}/okafor_ga4gh-pedigree.json -o ~/pedigrees/okafor-back.studio.json`],
     mpedtools: ['PED and MPED files: info, validate, extract, merge, split, convert, add-phenotype, remove-phenotype', `mpedtools info ${EX}/okafor.mped\nmpedtools extract ${EX}/okafor.mped Breast_cancer -o ~/results/breast.ped`],
-    hponorm: ['match phenotype names in Phenopackets to HPO terms – it asks as it goes; here, give the answers in a file', `hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}})`],
-    mondonorm: ['match disease names in Phenopackets to Mondo terms – it asks as it goes; here, give the answers in a file', `mondonorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"breast cancer": {"id": "MONDO:0007254", "label": "breast cancer"}})`],
+    hponorm: ['match phenotype names in Phenopackets to HPO terms (it asks questions as it goes, so here give it the answers in a file)', `hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}})`],
+    mondonorm: ['match disease names in Phenopackets to Mondo terms (it asks questions as it goes, so here give it the answers in a file)', `mondonorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"breast cancer": {"id": "MONDO:0007254", "label": "breast cancer"}})`],
     phenotk: ['the phenopacket toolkit: validate, view, stats, normalise, filter, deidentify, convert, upgrade, sort, diff, split, merge, ped, add', `phenotk validate ${EX}/okafor_phenopackets-family.json\nphenotk view ${EX}/okafor_phenopackets-family.json\nphenotk convert ${EX}/okafor_ga4gh-pedigree.json --to family -o ~/results/family.json`],
     'pedigree-ga4gh': ['the one GA4GH implementation the other programs share: validate, upgrade, convert, kin', `pedigree-ga4gh validate ${EX}/okafor_ga4gh-pedigree.json\npedigree-ga4gh upgrade ${EX}/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/upgraded.json\npedigree-ga4gh kin | grep -i mother`]
   };
@@ -114,7 +114,7 @@
   };
 
   /* ------------------------------------------------------------------ curl, wget: the web, through the browser */
-  const CORS_NOTE = 'A web page can only download from servers that allow it (CORS). Those that do include EBI (ebi.ac.uk, the Ontology Lookup Service), raw.githubusercontent.com (the HPO: see  man curl) and Zenodo. For other files: download them with your browser, then add them with My files → Add files.';
+  const CORS_NOTE = 'A web page can only download from servers that allow it (CORS). Those that do include EBI (ebi.ac.uk, the Ontology Lookup Service), raw.githubusercontent.com (for the HPO, see  man curl) and Zenodo. Download other files with your browser, then add them with “Add files from my computer…” in My files.';
   function webErr(ctx, prog, url, e) {
     const msg = String((e && e.message) || e);
     if (/Failed to fetch|NetworkError|Load failed|CORS/i.test(msg)) {
@@ -695,7 +695,7 @@
     menu(anchor, T) {
       const n = this.entries(T).length;
       if (!n) {
-        MG.toast('Nothing to save yet: run some commands first.', 'warn');
+        MG.toast('Nothing to save yet. Run some commands first.', 'warn');
         return;
       }
       const name = `terminal-session-${this.stamp()}`;
@@ -710,7 +710,7 @@
         ['code', 'Download as a shell script (.sh)', () => MG.downloadText(this.toSh(T), name + '.sh', 'text/x-shellscript')],
         ['trash', 'Start a new session record (forget these commands)', () => {
           (T || MG.app.term).transcript = [];
-          MG.toast('The session record is empty now; the commands you run from now on are recorded.');
+          MG.toast('The session record is empty now. Commands you run from now on will be recorded.');
         }]
       ]);
     }
@@ -743,8 +743,8 @@
   /* ------------------------------------------------------------------ man pages of the workbench's own commands */
   const OWN_MAN = {
     python: 'python – Python (Pyodide) in your browser: the same Python as the notebooks, with the pedigree packages installed.\n\n  python script.py [ARGUMENTS]\n  python -c "import pedigree_ga4gh as pg; print(pg.__version__)"\n  python -m json.tool FILE.json           print a JSON file tidily\n  python -m studio2ped FILE.studio.json   (the same as  studio2ped FILE.studio.json)\n  python --version\n\nOther packages: pip install NAME (pure-Python ones, and those Pyodide has built – pandas, matplotlib …).\nFor Python line by line use the Notebook tab.',
-    pip: 'pip – installs Python packages for this visit of the page (micropip): pure-Python packages from PyPI, and those Pyodide has built.\n\n  pip install NAME …\n  pip list\n  pip show NAME\n\nThe pedigree packages are installed already, in the versions this workbench carries (help lists them; pip installs from PyPI, which may have older ones).',
-    studio: 'studio – open a Pedigree Studio drawing in the Studio tab.\n\n  studio ~/pedigrees/okafor.studio.json\n  studio --tidy ~/pedigrees/lynch.studio.json     lay it out afresh with Tidy (for drawings made by ped2studio or ga4gh2studio)\n\nThe Studio tab saves the drawing back to the same file with its Save button.',
+    pip: 'pip – installs Python packages for this visit of the page (micropip): pure-Python packages from PyPI, and those Pyodide has built.\n\n  pip install NAME …\n  pip list\n  pip show NAME\n\nThe pedigree packages are installed already, at the versions released on PyPI (help lists them).',
+    studio: 'studio – open a Pedigree Studio drawing in the Studio tab.\n\n  studio ~/pedigrees/okafor.studio.json\n  studio --tidy ~/pedigrees/lynch.studio.json     lay it out again with Pedigree Studio’s Tidy (for drawings made by ped2studio or ga4gh2studio)\n\nThe Studio tab saves the drawing back to the same file with its Save button.',
     curl: 'curl – download from the web (through the browser). Only servers that allow web pages to read them (CORS) can be reached, such as EBI and raw.githubusercontent.com.\n\n  curl -o ~/ontologies/hp.obo https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo\n  curl -s "https://www.ebi.ac.uk/ols4/api/search?q=hearing+loss&ontology=hp&rows=5"\n\nOptions: -o FILE, -O, -s, -S, -f, -L, -H HEADER, -X METHOD, -d DATA, --data-binary @FILE, -I, -w \'%{http_code}\', --compressed (ignored).',
     wget: 'wget – download from the web (through the browser); the same reach as curl.\n\n  wget -P ~/ontologies https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo\n\nOptions: -O FILE (- for the screen), -q, -P FOLDER, -nc.',
     unzip: 'unzip – unpack a .zip archive.\n\n  unzip data.zip                 into the folder you are in\n  unzip data.zip -d data         into a folder\n  unzip -l data.zip              list what is in it\n  unzip -o data.zip              overwrite without asking (the default here)',
@@ -775,20 +775,20 @@
     MG.shellUtil.ABSENT.splice(
       0,
       MG.shellUtil.ABSENT.length,
-      [/^(plink|plink2|merlin|linkdemo|superlink|madeline2|madeline|kinship2|pedtools|haploview|vcftools|bcftools|samtools|gatk)$/, 'is not installed in this terminal. This workbench is for pedigree files: help lists the pedigree programs. PED files made here (studio2ped) open in PLINK, Merlin and the like on your own computer.'],
-      [/^(awk|gawk|mawk|nawk|perl|ruby|node|java|julia|R|Rscript|jq)$/, 'is not installed in this terminal. For PED files, mpedtools does most jobs (mpedtools info, extract, convert); for JSON, python -m json.tool FILE prints it tidily, and phenotk view shows a GA4GH file as a table. Anything else: a line of Python, e.g.  python -c "import sys; [print(l.split()[1]) for l in open(sys.argv[1])]" family.ped'],
-      [/^(ipython|ipython3|jupyter)$/, 'is not a command here: use the Notebook tab for Python line by line.'],
-      [/^(conda|mamba|micromamba|virtualenv|pipenv|poetry|pyenv|uv)$/, 'is not needed here, so it is not part of the workbench: the pedigree packages are installed, and other Python packages install with  pip install NAME  (they last until the page is reloaded).'],
-      [/^(apt|apt-get|yum|dnf|brew|docker|singularity|apptainer|git|make|module|cmake|gcc|cc|g\+\+|snakemake|nextflow)$/, 'is not available in this terminal: programs cannot be installed or compiled in a web page. Python packages: pip install NAME.'],
-      [/^(ssh|scp|rsync|ping|ftp|sftp|nc|telnet)$/, 'is not available: a web page cannot open network connections of its own. Downloads from servers that allow it: curl or wget (see  man curl).'],
-      [/^(top|htop|ps|kill|free|lscpu|df|mount|su|chown|screen|tmux|nohup|watch|crontab|pkill|pgrep|uptime|stty|getconf|lsblk|dmesg|who|w|last|service|systemctl|chgrp|mknod)$/, 'is not available in this terminal: it is a web page, not a whole computer.'],
-      [/^(split|truncate|csplit|numfmt|cksum|sum|dd|tsort|fmt|pr|join|comm|fold|shuf|md5sum|cmp)$/, 'is not among the commands of this terminal. Type  help  to see what is here.'],
-      [/^(gzip|gunzip|zcat|bgzip|bzip2|bunzip2|xz|unxz|7z|pigz|rar|unrar)$/, 'is not installed in this terminal. For archives there are zip, unzip and tar (tar -xzf and tar -czf for .tar.gz).'],
-      [/^(iconv|recode|dos2unix|unix2dos)$/, "is not installed in this terminal. To take the carriage returns of a Windows file away:  sed -i 's/\\r$//' FILE   or   tr -d '\\r' < FILE > NEWFILE"],
-      [/^(mkfifo|flock)$/, 'is not available in this terminal: the commands here run one after the other, so there are no named pipes and nothing to lock.'],
-      [/^ln$/, 'is not available in this terminal: there are no links here. Copy the file instead:  cp FILE NEWNAME'],
-      [/^(alias|unalias)$/, 'is not available in this terminal. Write a function instead:  ll() { ls -l "$@"; }'],
-      [/^(cal|ncal|banner|figlet|cowsay|fortune|yes)$/, 'is not installed in this terminal. Type  help  to see what is here.']
+      [/^(plink|plink2|merlin|linkdemo|superlink|madeline2|madeline|kinship2|pedtools|haploview|vcftools|bcftools|samtools|gatk)$/, 'isn’t installed in this terminal, which is for pedigree files (type  help  to see its programs). The PED files you make here with studio2ped open in PLINK, Merlin and similar programs on your own computer.'],
+      [/^(awk|gawk|mawk|nawk|perl|ruby|node|java|julia|R|Rscript|jq)$/, 'isn’t installed in this terminal. For PED files, mpedtools does most jobs (mpedtools info, extract, convert). For JSON, python -m json.tool FILE prints a file neatly, and phenotk view shows a GA4GH file as a table. For anything else, a line of Python will do, for example  python -c "import sys; [print(l.split()[1]) for l in open(sys.argv[1])]" family.ped'],
+      [/^(ipython|ipython3|jupyter)$/, 'isn’t a command here. Use the Notebook tab to run Python a line at a time.'],
+      [/^(conda|mamba|micromamba|virtualenv|pipenv|poetry|pyenv|uv)$/, 'isn’t needed here, so the workbench doesn’t include it. The pedigree packages are already installed, and you can add other Python packages with  pip install NAME  (they last until you reload the page).'],
+      [/^(apt|apt-get|yum|dnf|brew|docker|singularity|apptainer|git|make|module|cmake|gcc|cc|g\+\+|snakemake|nextflow)$/, 'isn’t available in this terminal, because programs can’t be installed or compiled in a web page. You can still add Python packages with  pip install NAME.'],
+      [/^(ssh|scp|rsync|ping|ftp|sftp|nc|telnet)$/, 'isn’t available, because a web page can’t open network connections of its own. To download from servers that allow it, use curl or wget (see  man curl).'],
+      [/^(top|htop|ps|kill|free|lscpu|df|mount|su|chown|screen|tmux|nohup|watch|crontab|pkill|pgrep|uptime|stty|getconf|lsblk|dmesg|who|w|last|service|systemctl|chgrp|mknod)$/, 'isn’t available in this terminal, which runs in a web page rather than on a whole computer.'],
+      [/^(split|truncate|csplit|numfmt|cksum|sum|dd|tsort|fmt|pr|join|comm|fold|shuf|md5sum|cmp)$/, 'isn’t one of this terminal’s commands. Type  help  to see what’s here.'],
+      [/^(gzip|gunzip|zcat|bgzip|bzip2|bunzip2|xz|unxz|7z|pigz|rar|unrar)$/, 'isn’t installed in this terminal. For archives, use zip, unzip and tar (tar -xzf and tar -czf for .tar.gz).'],
+      [/^(iconv|recode|dos2unix|unix2dos)$/, "isn’t installed in this terminal. To remove the carriage returns from a Windows file, use  sed -i 's/\\r$//' FILE   or   tr -d '\\r' < FILE > NEWFILE"],
+      [/^(mkfifo|flock)$/, 'isn’t available in this terminal. Commands here run one after another, so there are no named pipes and nothing to lock.'],
+      [/^ln$/, 'isn’t available in this terminal, which has no links. Copy the file instead:  cp FILE NEWNAME'],
+      [/^(alias|unalias)$/, 'isn’t available in this terminal. Write a function instead:  ll() { ls -l "$@"; }'],
+      [/^(cal|ncal|banner|figlet|cowsay|fortune|yes)$/, 'isn’t installed in this terminal. Type  help  to see what’s here.']
     );
 
   /* ------------------------------------------------------------------ help */
@@ -800,7 +800,7 @@
       [
         'Commands in this terminal – every one runs here, in your browser.  (man NAME: examples; NAME --help: options)',
         '',
-        'The pedigree programs (Python packages: on your own computer they install with pip):',
+        'The pedigree programs (Python packages, which you can install with pip on your own computer):',
         ...Object.entries(PROGRAMS).map(([n, [what]]) => row(n + ver(n), what)),
         row('studio FILE', 'open a drawing in the Studio tab'),
         '',

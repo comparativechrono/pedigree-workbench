@@ -1,18 +1,18 @@
 <!-- id: h-studio-format | title: The Pedigree Studio file | group: Files and standards | summary: What a .studio.json drawing holds | keys: studio json format drawing session persons partnerships childlinks twinlinks legendlabels colour key fill quarters halves shading text numbering -->
 <h1><!--ICON:pedigree-->The Pedigree Studio file</h1>
-<p class="lede">A drawing is a JSON file, the same whether it is saved with the Studio tab's <b>Save</b> or with Pedigree Studio's own <b>File</b> menu. It describes the drawing – symbols, lines, positions, colours – rather than the family as data; the converters turn it into data.</p>
+<p class="lede">A drawing is a JSON file, and it's the same whether you save it with the Studio tab's <b>Save</b> or with Pedigree Studio's own <b>File</b> menu. It records what the drawing looks like, with its symbols, lines, positions and colours, rather than the family as data. The converters turn it into data.</p>
 
 <h2>What is in it</h2>
 <table>
 <tr><th>Field</th><th>What it holds</th></tr>
-<tr><td><code>persons</code></td><td>One entry per symbol: its <code>id</code>, <code>shape</code> (<code>male</code>, <code>female</code>, <code>unknown</code>, their adopted forms, <code>miscarriage</code> for a pregnancy loss, and the <code>no-offspring</code> and <code>infertile</code> bars), position, the <code>text</code> under it, <code>deceased</code>, <code>proband</code>, the mark inside it (<code>centerText</code>: <code>dot</code> for a carrier, <code>line</code> for presymptomatic, <code>D</code> a donor, <code>S</code> a surrogate, <code>P</code> a pregnancy, or a number of people), and how it is filled: <code>fillMode</code>, <code>fillColor</code>, <code>halves</code>, <code>quarters</code>, the shading pattern.</td></tr>
+<tr><td><code>persons</code></td><td>One entry per symbol: its <code>id</code>, <code>shape</code> (<code>male</code>, <code>female</code>, <code>unknown</code>, their adopted forms, <code>miscarriage</code> for a pregnancy loss, and the <code>no-offspring</code> and <code>infertile</code> bars), position, the <code>text</code> under it, <code>deceased</code>, <code>proband</code>, the mark inside it (<code>centerText</code>: <code>dot</code> for a carrier, <code>line</code> for a presymptomatic carrier, <code>D</code> for a donor, <code>S</code> for a surrogate, <code>P</code> for a pregnancy, or a number when the symbol stands for several people), and how it's filled: <code>fillMode</code>, <code>fillColor</code>, <code>halves</code>, <code>quarters</code> and the shading pattern.</td></tr>
 <tr><td><code>partnerships</code></td><td>The lines between partners: the two people, and the <code>type</code> (<code>normal</code>, <code>consanguineous</code>, <code>separated</code>, <code>consanguineous-separated</code>).</td></tr>
 <tr><td><code>childLinks</code></td><td>The lines from a couple to each child, <code>dashed</code> for adoption.</td></tr>
 <tr><td><code>twinLinks</code></td><td>Twins: the two children, and <code>identical</code> or <code>nonidentical</code>.</td></tr>
 <tr><td><code>legendLabels</code></td><td>The colour key: each colour (or pattern) and the condition's name. This is how the tools know which condition a fill means.</td></tr>
-<tr><td><code>labels</code>, <code>numberingMode</code>, …</td><td>Free text placed on the drawing, how generations are numbered, and settings of the layout.</td></tr>
+<tr><td><code>labels</code>, <code>numberingMode</code>, …</td><td>Free text placed on the drawing, how generations are numbered, and layout settings.</td></tr>
 </table>
-<p>From the Okafor family:</p>
+<p>Here's part of the Okafor drawing:</p>
 <pre class="code"><code>"persons": [
   {"id": "p-nnamdi", "shape": "male", "x": 512, "y": 160, "text": "Nnamdi\nd. 82", "deceased": true,
    "proband": false, "fillMode": "none", ...},
@@ -24,6 +24,6 @@
 "legendLabels": {"#2980b9": "Hearing loss from birth", "#c0392b": "Breast cancer"}</code></pre>
 
 <h2>Personal data in a drawing</h2>
-<p>The text under the symbols is whatever was typed there – often names, ages and dates of birth – and in a drawing made by another program even the ids may be names (<code>p-nnamdi</code> in the examples). Treat a drawing as you would the family's notes. The GA4GH files and the PED files from studio2ped leave the text out and name people by pedigree numbers, unless you ask studio2ped for the text as ids (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>).</p>
+<p>The text under the symbols is whatever was typed there, which is often names, ages and dates of birth. In a drawing made by another program, even the ids may be names, such as <code>p-nnamdi</code> in the examples. Treat a drawing as you would the family's notes. The GA4GH files, and the PED files from studio2ped, leave the text out and name people by pedigree numbers. But you can ask studio2ped to use the text as ids instead (<a href="#h-tool-studio2ped">Drawing → PED or MPED</a>).</p>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/okafor.studio.json">Look at the Okafor drawing as JSON</button></div>
 <!--CITE: pedigree-studio-->

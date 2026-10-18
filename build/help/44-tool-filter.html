@@ -1,23 +1,23 @@
 <!-- id: h-tool-filter | title: Keep some people or terms | group: Tools | summary: phenotk filter: a smaller file, with only the people or terms you choose | keys: filter subset select keep drop people terms proband affected sex ids observed excluded invert prune pedigree phenotk -->
 <h1><!--ICON:filter-->Keep some people or terms</h1>
-<p class="lede">Makes a smaller file from a GA4GH or Phenopackets file: only the proband, only the affected, one sex, or the people you name – or only some terms. Use it to share no more than is needed.</p>
-<div class="tryrow"><button class="do" type="button" data-tool="filter" data-input="/data/examples/okafor_ga4gh-pedigree.json">Open it with the Okafor GA4GH Pedigree</button></div>
+<p class="lede">This tool makes a smaller file from a GA4GH or Phenopackets file. It can keep only the proband, only the affected people, one sex or the people you name, or only some terms. Use it to share no more than is needed.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="filter" data-input="/data/examples/okafor_ga4gh-pedigree.json">Try it with the Okafor GA4GH Pedigree</button></div>
 
 <h2>The form</h2>
 <dl>
-  <dt>People, Sex, Only these people</dt><dd>Which people to keep: everyone, the proband, or the affected; either sex; and, if you list ids (one a line), only those.</dd>
-  <dt>Only these terms</dt><dd>Term ids (CURIEs), one a line: each person keeps only those of their terms.</dd>
-  <dt>Of the terms</dt><dd>Keep observed and excluded terms, or only those observed, or only those looked for and not found.</dd>
+  <dt>People, Sex, Only these people</dt><dd>Choose which people to keep: everyone, the proband or the affected people. You can also keep only one sex. If you list ids, one per line, only those people are kept.</dd>
+  <dt>Only these terms</dt><dd>List term ids (CURIEs), one per line. Each person then keeps only those of their terms that are on the list.</dd>
+  <dt>Of the terms</dt><dd>Keep both observed and excluded terms, only the observed ones, or only the ones that were looked for and not found.</dd>
   <dt>Reverse</dt><dd>Drop what matches, instead of keeping it.</dd>
-  <dt>Tidy the pedigree</dt><dd>For a Phenopackets Family: take the people left out out of its pedigree too, with every line to them, so that the file stays valid. The relatives in the pedigree who never had a Phenopacket stay. (In a GA4GH Pedigree, the relationships and index patients that name someone left out are always dropped.)</dd>
+  <dt>Tidy the pedigree</dt><dd>For a Phenopackets Family, this also removes from its pedigree the people who've been left out, with every line to them, so that the file stays valid. Relatives in the pedigree who never had a Phenopacket stay in it. In a GA4GH Pedigree, relationships and index patients that name someone who's been left out are always dropped.</dd>
 </dl>
-<p>The ids you list are written to a small file beside the result (<code>…-ids.txt</code>), which the command reads. To send one person's findings without the rest of the family, <a href="#h-tool-split">One file for each person</a> is the better tool: a Family always carries its pedigree.</p>
+<p>The ids you list are written to a small file next to the result (<code>…-ids.txt</code>), and the command reads them from there. To send one person's findings without the rest of the family, use <a href="#h-tool-split">One file for each person</a> instead, because a Family always carries its pedigree.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk filter /data/examples/okafor_ga4gh-pedigree.json --affected --prune-pedigree -o ~/results/okafor.affected.json
 phenotk filter /data/examples/okafor_ga4gh-pedigree.json --term HP:0000365 -o ~/results/okafor.hearing.json
 phenotk view ~/results/okafor.affected.json</code></pre>
-<p>Other options: <code>--proband-only</code>, <code>--sex FEMALE|MALE</code>, <code>--id-list FILE</code>, <code>--observed</code>, <code>--excluded</code>, <code>--invert</code>, and <code>--include-descendants</code> with a copy of the ontology (<code>--hpo-file</code>, <code>--mondo-file</code>) to keep the terms under a term as well.</p>
+<p>Other options are <code>--proband-only</code>, <code>--sex FEMALE|MALE</code>, <code>--id-list FILE</code>, <code>--observed</code>, <code>--excluded</code> and <code>--invert</code>. There's also <code>--include-descendants</code>, which uses a copy of the ontology (<code>--hpo-file</code>, <code>--mondo-file</code>) to keep the terms under a term as well.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk

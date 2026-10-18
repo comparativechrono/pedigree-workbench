@@ -119,13 +119,13 @@
   /** an .ipynb text → {lang, meta, cells, warning} */
   function parseIpynb(text) {
     const nb = JSON.parse(text);
-    if (!nb || !Array.isArray(nb.cells)) throw new Error('This file is not a Jupyter notebook (it has no cells).');
+    if (!nb || !Array.isArray(nb.cells)) throw new Error('This file isn’t a Jupyter notebook, because it has no cells.');
     const meta = nb.metadata || {};
     const ks = meta.kernelspec || {};
     const li = meta.language_info || {};
     const langName = String(ks.language || li.name || ks.name || 'python').toLowerCase();
     let lang = 'python', warning = '';
-    if (!/python/.test(langName)) warning = `This notebook was written for ${ks.display_name || langName}. The Pedigree workbench runs Python notebooks, so it is opened as a Python notebook: code in other languages will not run.`;
+    if (!/python/.test(langName)) warning = `This notebook was written for ${ks.display_name || langName}. The Pedigree workbench runs Python notebooks, so it has been opened as a Python notebook and code in other languages won’t run.`;
     const cells = nb.cells.map((c) => ({
       id: c.id || uid(),
       type: c.cell_type === 'markdown' ? 'markdown' : c.cell_type === 'raw' ? 'raw' : 'code',
@@ -314,7 +314,7 @@
       c.countEl.textContent = c.type === 'code' ? (c.count ? `[${c.count}]` : '[ ]') : '';
       if (md && c.rendered) {
         const src = c.cm.getValue();
-        c.mdView.innerHTML = src.trim() ? renderMarkdown(src) : '<p class="nb-md-empty">Empty text cell – double-click to write (Markdown: # heading, **bold**, - list).</p>';
+        c.mdView.innerHTML = src.trim() ? renderMarkdown(src) : '<p class="nb-md-empty">This text cell is empty. Double-click to write in it, using Markdown such as # heading, **bold** or - list.</p>';
         c.mdView.hidden = false;
         c.edBox.hidden = true;
       } else {
@@ -627,11 +627,11 @@
         this.written = F.get(this.path);
         this.dirty = false;
         this.app.saveState(this, 'saved');
-        if (user) toast(`Saved <b>${esc(F.pretty(this.path))}</b> (it is kept in this browser; ⬇ downloads it).`, 'ok', 2500);
+        if (user) toast(`Saved <b>${esc(F.pretty(this.path))}</b>. It’s kept in this browser, and you can download it with ⬇.`, 'ok', 2500);
         bus.emit('nb:saved', { path: this.path });
       } catch (e) {
         this.app.saveState(this, 'error');
-        toast('The notebook could not be saved: ' + esc(e.message), 'error');
+        toast('The notebook couldn’t be saved: ' + esc(e.message), 'error');
       }
     }
     refresh() {
@@ -727,8 +727,8 @@
       this.kernelEl = h('button.nb-kernel', { type: 'button', title: 'The language that runs this notebook – click for options' });
       this.kernelEl.addEventListener('click', (e) => this.kernelMenu(e.currentTarget));
       this.statusEl = h('span.nb-status');
-      this.runBtn = btn('play', 'Run', 'Run the selected cell and go to the next (Shift+Enter)', () => this.view && this.view.current && this.view.runCell(this.view.current, { advance: true }));
-      this.stopBtn = btn('stop', 'Stop', 'Stop the code that is running (this restarts the language: its variables are forgotten)', () => this.stop(), '.nb-stopbtn');
+      this.runBtn = btn('play', 'Run', 'Run the selected cell and go to the next one (Shift+Enter)', () => this.view && this.view.current && this.view.runCell(this.view.current, { advance: true }));
+      this.stopBtn = btn('stop', 'Stop', 'Stop the code that’s running. This restarts the language, so its variables are forgotten.', () => this.stop(), '.nb-stopbtn');
       this.stopBtn.hidden = true;
       const bar = h(
         'div.nb-bar',
@@ -746,9 +746,9 @@
         this.runBtn,
         btn('fastforward', 'Run all', 'Run every cell from the top', () => this.view && this.view.runAll()),
         this.stopBtn,
-        btn('reset', 'Restart', 'Restart the language: forget all variables (and stop anything still running)', () => this.restart()),
+        btn('reset', 'Restart', 'Restart the language, which forgets all variables and stops anything still running', () => this.restart()),
         h('span.grow'),
-        btn('list', '', 'Variables: what the notebook\'s language remembers now', () => this.showVars()),
+        btn('list', '', 'Show the variables that the notebook\'s language remembers now', () => this.showVars()),
         btn('download', 'Download', 'Download this notebook (.ipynb, script or web page)', (e) => this.downloadMenu(e.currentTarget)),
         btn('help', '', 'Help for notebooks', () => MG.app.showHelp && MG.app.showHelp('h-notebook'))
       );
@@ -795,7 +795,7 @@
         try {
           doc = parseIpynb(await this.fs.readText(path));
         } catch (e) {
-          toast(`<b>${esc(this.fs.pretty(path))}</b> could not be opened as a notebook: ${esc(e.message)}`, 'error', 8000);
+          toast(`<b>${esc(this.fs.pretty(path))}</b> couldn’t be opened as a notebook: ${esc(e.message)}`, 'error', 8000);
           return null;
         }
         v = new NotebookView(this, path, doc);
@@ -858,13 +858,13 @@
       try {
         parseIpynb(text);
       } catch (e) {
-        toast(`<b>${esc(file.name)}</b> is not a notebook this page can read.`, 'error');
+        toast(`<b>${esc(file.name)}</b> isn’t a notebook that this page can read.`, 'error');
         return null;
       }
       const stem = file.name.replace(/\.ipynb$/i, '').replace(/[\/\\]/g, '_');
       const path = this.freeName(this.dir, stem);
       this.fs.writeText(path, text);
-      toast(`Opened <b>${esc(file.name)}</b> – saved as ${esc(this.fs.pretty(path))}. Run its cells to recreate the results.`, 'ok', 6000);
+      toast(`Opened <b>${esc(file.name)}</b> and saved it as ${esc(this.fs.pretty(path))}. Run its cells to recreate the results.`, 'ok', 6000);
       return this.open(path);
     }
     openFromComputer() {
@@ -889,7 +889,7 @@
       const to = MG.path.dirname(v.path) + '/' + name;
       if (to === v.path) return;
       if (this.fs.exists(to)) {
-        toast(`There is already a file called <b>${esc(name)}</b> here.`, 'warn');
+        toast(`There’s already a file called <b>${esc(name)}</b> here.`, 'warn');
         this.titleEl.value = MG.path.basename(v.path);
         return;
       }
@@ -948,7 +948,7 @@
       const e = this.fs.get(v.path);
       if (!e || e === v.written) return;
       if (v.dirty) {
-        toast(`<b>${esc(this.fs.pretty(v.path))}</b> was changed elsewhere while you were editing it here. Your version is kept: rename this one (click its name) if you want both.`, 'warn', 9000);
+        toast(`<b>${esc(this.fs.pretty(v.path))}</b> was changed elsewhere while you were editing it here. Your version has been kept. If you want both, click this notebook’s name and rename it.`, 'warn', 9000);
         v.written = e;
         return;
       }
@@ -965,7 +965,7 @@
         v.destroy();
         this.view = null;
         await this.open(nv.path, { noStart: true });
-        toast('The notebook was changed in another tab of the workbench: this is the new version.', null, 4000);
+        toast('The notebook was changed in another tab of the workbench, so you’re now looking at the new version.', null, 4000);
       } else v.destroy();
     }
 
@@ -1005,7 +1005,7 @@
       items.push(['reset', `Restart ${K.label} (forget all variables)`, () => this.restart()]);
       items.push(['fastforward', `Restart ${K.label} and run all cells`, () => this.restart(true)]);
       items.push(['list', 'Variables', () => this.showVars()]);
-      items.push(['info', `About ${K.label} here`, () => MG.app.showHelp && MG.app.showHelp('h-notebook')]);
+      items.push(['info', `About ${K.label} in the workbench`, () => MG.app.showHelp && MG.app.showHelp('h-notebook')]);
       MG.popmenu(anchor, items);
     }
     _kernelPill() {
@@ -1023,7 +1023,7 @@
           text = `${label} · ${K.statusText || 'starting…'}`;
         } else if (K.state === 'failed') {
           dot = 'bad';
-          text = `${label} could not start`;
+          text = `${label} couldn’t start`;
         }
       }
       this.kernelEl.innerHTML = `<span class="nb-lang nb-lang-${v.lang}">${esc(label)}</span><span class="kdot ${dot}"></span><span class="nb-ktext">${esc(text)}</span>`;
@@ -1033,7 +1033,7 @@
       if (v !== this.view) return;
       this.saveEl.dataset.state = state;
       this.saveEl.textContent = state === 'saved' ? 'Saved' : state === 'unsaved' ? 'Editing…' : 'Not saved';
-      this.saveEl.title = state === 'saved' ? 'Saved among your files (kept in this browser)' : '';
+      this.saveEl.title = state === 'saved' ? 'Saved with your files, which are kept in this browser' : '';
     }
     status(html) {
       this.statusEl.innerHTML = html || '';
@@ -1075,7 +1075,7 @@
       const label = LANGS()[lang].label;
       const m = MG.modal(
         'Stop the running code?',
-        `<p>${esc(label)} in the browser can only be stopped by restarting it. Its variables are forgotten: run your cells again afterwards (Run all does that).</p><div class="prompt-actions"><button class="btn" data-x="no" type="button">Let it run</button><button class="btn primary" data-x="yes" type="button">Stop and restart ${esc(label)}</button></div>`
+        `<p>${esc(label)} in the browser can only be stopped by restarting it. Its variables will be forgotten, so run your cells again afterwards. Run all does that for you.</p><div class="prompt-actions"><button class="btn" data-x="no" type="button">Let it run</button><button class="btn primary" data-x="yes" type="button">Stop and restart ${esc(label)}</button></div>`
       );
       m.box.querySelector('[data-x="no"]').addEventListener('click', () => m.close());
       m.box.querySelector('[data-x="yes"]').addEventListener('click', () => {
@@ -1108,7 +1108,7 @@
       K.ensure().then(
         () => {
           if (runAll && v) v.runAll();
-          else toast(`${esc(K.label)} restarted – its variables are forgotten. Run your cells again from the top (Run all).`, null, 4000);
+          else toast(`${esc(K.label)} has restarted, so its variables are forgotten. Run your cells again from the top, which Run all does for you.`, null, 4000);
         },
         () => {}
       );
@@ -1125,8 +1125,8 @@
       }
       const rows = vars.length
         ? vars.filter((x) => x.desc !== '' || x.type).map((x) => `<tr><td><code>${esc(x.name)}</code></td><td>${esc(x.type)}</td><td>${esc(x.desc)}</td></tr>`).join('')
-        : `<tr><td colspan="3" class="muted">Nothing yet – run a cell that makes a variable (e.g. <code>${v.lang === 'r' ? 'df &lt;- read.csv(…)' : 'df = pd.read_csv(…)'}</code>).</td></tr>`;
-      MG.modal(`What ${esc(LANGS()[v.lang].label)} remembers`, `<p class="muted small">Variables made by the cells you have run since ${esc(LANGS()[v.lang].label)} started. They are shared by all your ${esc(LANGS()[v.lang].label)} notebooks.</p><div class="table-scroll"><table class="table small"><tr><th>Name</th><th>Type</th><th>Contents</th></tr>${rows}</table></div>`);
+        : `<tr><td colspan="3" class="muted">There’s nothing here yet. Run a cell that makes a variable, such as <code>${v.lang === 'r' ? 'df &lt;- read.csv(…)' : 'df = pd.read_csv(…)'}</code>.</td></tr>`;
+      MG.modal(`What ${esc(LANGS()[v.lang].label)} remembers`, `<p class="muted small">These are the variables made by the cells you’ve run since ${esc(LANGS()[v.lang].label)} started. They’re shared by all your ${esc(LANGS()[v.lang].label)} notebooks.</p><div class="table-scroll"><table class="table small"><tr><th>Name</th><th>Type</th><th>Contents</th></tr>${rows}</table></div>`);
     }
 
     /* ---------------- downloads ---------------- */
@@ -1135,7 +1135,7 @@
       if (!v) return;
       if (v.dirty) v.saveNow();
       MG.downloadText(JSON.stringify(v.toIpynb(), null, 1), MG.path.basename(v.path), 'application/x-ipynb+json');
-      toast('Downloaded the notebook. It opens in Jupyter, JupyterLab, VS Code or Google Colab. If it reads data files, download those too (Files tab) and keep them in the same folders.', null, 7000);
+      toast('Downloaded the notebook. It opens in Jupyter, JupyterLab, VS Code or Google Colab. If it reads data files, download those too from the Files tab, and keep them in the same folders.', null, 7000);
       bus.emit('nb:download', { path: v.path, format: 'ipynb' });
     }
     downloadScript() {

@@ -193,8 +193,9 @@ def cite_section(ids):
     if unknown:
         raise SystemExit(f'<!--CITE--> names programs that build/citations.json does not have: {unknown}')
     out = ['<h2 data-anchor="cite">References</h2>',
-           '<p>The papers to cite when you use ' + ('this program' if len(ids) == 1 else 'these programs') +
-           ' in your work – with the version you used (<a href="#h-versions">Versions</a>):</p>',
+           '<p>If you use ' + ('this program' if len(ids) == 1 else 'these programs') +
+           ' in your work, cite the papers below, and give the ' + ('version' if len(ids) == 1 else 'versions') +
+           ' you used (<a href="#h-versions">Versions, and how to cite</a>):</p>',
            '<dl class="cite-list">']
     for i in ids:
         p = progs[i]
@@ -257,8 +258,8 @@ def kin_retired():
 def versions_table():
     b = bundle()
     names = {'phenopacket_toolkit': 'phenopacket-toolkit (phenotk)', 'pedigree_ga4gh': 'pedigree-ga4gh',
-             'pedwb': 'pedwb (the workbench\'s own: the programs\' runner and the Tools tab\'s functions)'}
-    rows = ['<table>', '<tr><th>Package</th><th>Version here</th></tr>']
+             'pedwb': 'pedwb (the workbench\'s own runner, not on PyPI)'}
+    rows = ['<table>', '<tr><th>Package</th><th>Version</th></tr>']
     for k, v in b['packages'].items():
         rows.append(f'<tr><td>{html.escape(names.get(k, k))}</td><td>{html.escape(str(v))}</td></tr>')
     s = json.load(open(os.path.join(SITE, 'assets/studio/SOURCE.json'), encoding='utf-8'))

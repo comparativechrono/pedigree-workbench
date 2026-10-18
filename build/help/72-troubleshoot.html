@@ -1,44 +1,44 @@
 <!-- id: h-troubleshoot | title: When something goes wrong | group: Reference | summary: The common problems, and what to do | keys: troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug -->
 <h1><!--ICON:warning-->When something goes wrong</h1>
-<p class="lede">The common problems, and what to do about each.</p>
+<p class="lede">These are the common problems, and what to do about each one.</p>
 
 <dl>
-  <dt>Python does not start</dt>
-  <dd>Python is downloaded from cdn.jsdelivr.net the first time (about 10 MB). If the network blocks that site, or there is no connection, the tools, the notebook and the programs cannot run; the Studio and the Files tab still work. Try again on another network. After the first time, the browser usually keeps a copy.</dd>
+  <dt>Python doesn't start</dt>
+  <dd>The first time you use it, the workbench downloads Python (about 10 MB) from cdn.jsdelivr.net. If your network blocks that site, or you're offline, the tools, the notebook and the programs can't run, although the Studio and the Files tab still work. Try again on another network. After the first time, the browser usually keeps a copy.</dd>
 
   <dt>“This GA4GH Pedigree was written by studio2ga4gh 0.3 or earlier …”</dt>
-  <dd>The file is in an older form, which the tools no longer read. <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it, once.</dd>
+  <dd>The file is in an older form, which the tools no longer read. <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it, and you only need to do this once.</dd>
 
   <dt>A condition is missing from the GA4GH files</dt>
-  <dd>It has no ontology term, so it was left out (the tool said so under its result). Give it a term with <a href="#h-tool-terms">Match conditions to terms</a>, and convert again with the terms file. Check that the name in the terms file is the name in the colour key; case does not matter, spelling does.</dd>
+  <dd>It has no ontology term, so it was left out, and the tool mentioned this under its result. Give it a term with <a href="#h-tool-terms">Match conditions to terms</a>, then convert the drawing again with the terms file. Check that the name in the terms file is the same as the name in the colour key. Capital letters don't matter, but spelling does.</dd>
 
-  <dt>A colour is not counted as a condition</dt>
-  <dd>The colour key does not name it. Open the drawing in the Studio, click the key and type the condition's name beside that colour.</dd>
+  <dt>A colour isn't counted as a condition</dt>
+  <dd>The colour key doesn't name it. Open the drawing in the Studio tab, click the key, and type the condition's name next to that colour.</dd>
 
   <dt>“EBI's Ontology Lookup Service did not answer”</dt>
-  <dd>The service is down or slow, or the network blocks www.ebi.ac.uk. Try again later, or search copies of the ontologies on this computer instead (<i>2 · Search in</i>).</dd>
+  <dd>Either the service is down or slow, or your network blocks www.ebi.ac.uk. Try again later, or search copies of the ontologies on this computer instead (<i>2 · Search in</i>).</dd>
 
   <dt>The PED file has names as ids, or the same id twice</dt>
-  <dd>studio2ped uses the text under the symbols as ids. Change the labels in the drawing, or make the PED file through the GA4GH files, which use pedigree numbers (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
+  <dd>studio2ped names people by their pedigree numbers, unless you choose otherwise in <i>People are named by</i>. The drawing's labels, Pedigree Studio's own ids and the text under the symbols can all be names, so choose pedigree numbers instead. A PED file made by studio2ped 0.1 always used the text under the symbols, which can give names or the same id twice, so make it again (<a href="#h-walk-ped">Make a PED file for a linkage program</a>).</dd>
 
   <dt>The drawing a tool made looks untidy</dt>
-  <dd>Press <b>Tidy</b> in the Studio tab, or tick <i>Lay it out afresh with Pedigree Studio's Tidy</i> before running the tool.</dd>
+  <dd>Press <b>Tidy</b> in the Studio tab, or tick <i>Tidy the drawing when it opens</i> before you run the tool.</dd>
 
   <dt>The Studio tab shows the wrong drawing, or none</dt>
-  <dd>The bar above it says which file the drawing on show belongs to. <b>Open…</b> shows any of your drawings; the file button lists the latest.</dd>
+  <dd>The bar above the drawing shows which file it belongs to. <b>Open…</b> lets you open any of your drawings, and the file button lists the most recent ones.</dd>
 
   <dt>A tool waits for a long time</dt>
-  <dd>A notebook cell may be running: the tools share the notebook's Python, and wait for the cell to finish (stop it in the Notebook tab). The first search of a local copy of Mondo also takes a while: it reads the whole file.</dd>
+  <dd>A notebook cell may be running. The tools share the notebook's Python, so they wait for the cell to finish. You can stop the cell in the Notebook tab. The first search of a local copy of Mondo also takes a while, because it reads the whole file.</dd>
 
-  <dt>hponorm or mondonorm stops at once in the terminal</dt>
-  <dd>They ask questions that this terminal cannot answer. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms (<a href="#h-terminal">The Terminal</a>).</dd>
+  <dt>hponorm or mondonorm stops straight away in the terminal</dt>
+  <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
 
   <dt>My files have gone</dt>
-  <dd>Are you in the same browser, on the same computer, and not in a private window? The files are kept by the browser for this site only. A browser that clears site data when it closes deletes them too: download what you want to keep.</dd>
+  <dd>Are you using the same browser, on the same computer, and not a private window? The browser keeps the files for this site only. If your browser clears site data when it closes, it deletes them too, so download anything you want to keep.</dd>
 
   <dt>“The workbench is open in another tab or window too”</dt>
-  <dd>Both tabs keep files in the same place, and one can overwrite what the other saved. Close one of them.</dd>
+  <dd>Both tabs keep files in the same place, so one can overwrite what the other has saved. Close one of them.</dd>
 </dl>
 
 <h2>Reporting a fault</h2>
-<p>If a tool fails with Python's traceback (under the result: <i>Python's traceback</i>), or a file the workbench made does not pass its own check, that is a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>, with the traceback and, if you can, a file that shows it – an example, or a de-identified copy of yours. Never attach a family's real data.</p>
+<p>If a tool fails and shows <i>Python’s traceback (for reporting a fault)</i> under the result, or a file the workbench made doesn't pass its own check, that's a fault. Report it on the workbench's <a href="https://github.com/comparativechrono/pedigree-workbench/issues" target="_blank" rel="noopener">issues page</a>. Include the traceback and, if you can, a file that shows the problem, such as one of the examples, or a made-up file that does the same thing. Never attach a family's real data, even de-identified.</p>

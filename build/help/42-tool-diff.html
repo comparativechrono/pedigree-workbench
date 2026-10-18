@@ -1,26 +1,26 @@
 <!-- id: h-tool-diff | title: Compare two files | group: Tools | summary: phenotk diff: what differs between two GA4GH files | keys: diff compare difference changes versions two files phenotk strict order provenance -->
 <h1><!--ICON:convert-->Compare two files</h1>
-<p class="lede">Lists what differs between two GA4GH or Phenopackets files – people, terms, relationships – leaving out the order of things and when and by whom the files were made, which change every time a file is written.</p>
+<p class="lede">This tool lists what differs between two GA4GH or Phenopackets files, for example in their people, terms and relationships. It ignores the order of things. It also ignores when and by whom the files were made, because that changes every time a file is written.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="diff" data-input="/data/examples/okafor_phenopackets-family.json" data-input2="/data/examples/okafor-later_phenopackets-family.json">Compare the Okafor Family with a later version</button></div>
 <p>In the later version, the twins' hearing loss has been found to be sensorineural, so each has a second phenotype.</p>
 
 <h2>When to use it</h2>
 <ul>
-  <li>To see what a conversion changed: a file and the same file converted to the other form and back.</li>
-  <li>To see what is new in a second version of a family's file.</li>
+  <li>To see what a conversion changed, by comparing a file with the same file converted to the other form and back.</li>
+  <li>To see what's new in a second version of a family's file.</li>
   <li>To check that a de-identified or filtered file lost only what it should have.</li>
 </ul>
 
 <h2>Reading the result</h2>
-<p>A line for each difference, with its place in the files: <code>proband.phenotypicFeatures: length 1 != 2</code>, <code>pedigree.persons[3].affectedStatus: 'UNAFFECTED' != 'MISSING'</code> (the value in the first file, then in the second), <code>narrative: only in A</code>. Comparing two files of different kinds – a Family with a GA4GH Pedigree – lists nearly everything, since they are laid out differently: compare like with like. <b>Count differences of order and of provenance too</b> compares everything, as it is.</p>
-<p>The exit status is 0 when the files are the same and 1 when they differ, as for <code>diff</code>.</p>
+<p>You'll see a line for each difference, with its place in the files, such as <code>proband.phenotypicFeatures: length 1 != 2</code>, <code>pedigree.persons[3].affectedStatus: 'UNAFFECTED' != 'MISSING'</code> or <code>narrative: only in A</code>. Where a line gives two values, the one from the first file comes first. If you compare two different kinds of file, for example a Family with a GA4GH Pedigree, nearly everything is listed, because they're laid out differently. So compare like with like. If you tick <b>Count differences of order and of provenance too</b>, the tool compares everything exactly as it's written in the files.</p>
+<p>The exit status is 0 when the files are the same and 1 when they differ, as with <code>diff</code>.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk diff /data/examples/okafor_phenopackets-family.json /data/examples/okafor-later_phenopackets-family.json
 phenotk convert /data/examples/okafor_ga4gh-pedigree.json --to family -o ~/results/okafor-from-pedigree.json
 phenotk diff /data/examples/okafor_phenopackets-family.json ~/results/okafor-from-pedigree.json</code></pre>
-<p>The second comparison shows what converting the GA4GH Pedigree to a Family loses: who was found unaffected.</p>
-<p><code>--format json</code> writes the differences as JSON; <code>--strict</code> is the box above.</p>
+<p>The second comparison shows what a Family made from the GA4GH Pedigree lacks. It doesn't say who was found to be unaffected, because the GA4GH Pedigree never recorded that.</p>
+<p><code>--format json</code> writes the differences as JSON, and <code>--strict</code> is the same as ticking the box above.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk

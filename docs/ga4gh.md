@@ -177,8 +177,9 @@ would not change.
   which shared children do not say; all twins relative to the same twin; and
   no siblings, whom shared parents imply. Each relationship is given in one
   direction only, which the standard allows (“it does not matter which”).
-* Things the standard has no field for – a carrier, a pregnancy, a symbol that
-  stands for several people – go into the `narrative`, so they are not lost.
+* Some things the standard has no field for, such as a carrier or a pregnancy,
+  are noted in the `narrative`, so they are not lost. A symbol that stands for
+  several people is written as one person, and the converter says so.
 
 ### KIN
 
