@@ -377,14 +377,14 @@
       pkg: 'phenotk',
       what: 'Make a smaller file with only the proband, the affected people, one sex or the people you name, or with only some terms.',
       about:
-        'Filters on people keep or drop whole people. In a GA4GH Pedigree, the relationships of the people left out are always dropped too, and in a Family, “Tidy the pedigree” takes them out of its pedigree. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
+        'Filters on people keep or drop whole people. In a GA4GH Pedigree, the relationships of the people left out are always dropped too, and in a Family, “Tidy the pedigree” takes them out of its pedigree. Filters on terms keep only the terms you list, one CURIE per line, or drop them if you tick Reverse.',
       help: 'h-tool-filter',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
         { key: 'who', type: 'select', label: 'People', def: '', options: [['', 'everyone'], ['proband', 'the proband only'], ['affected', 'affected people only']] },
         { key: 'sex', type: 'select', label: 'Sex', def: '', options: [['', 'any'], ['FEMALE', 'female'], ['MALE', 'male']] },
-        { key: 'ids', type: 'textarea', label: 'Only these people (ids, one a line; optional)', def: '', placeholder: 'II-3\nIII-1' },
-        { key: 'terms', type: 'textarea', label: 'Only these terms (CURIEs, one a line; optional)', def: '', placeholder: 'MONDO:0007254\nHP:0000365' },
+        { key: 'ids', type: 'textarea', label: 'Only these people (ids, one per line; optional)', def: '', placeholder: 'II-3\nIII-1' },
+        { key: 'terms', type: 'textarea', label: 'Only these terms (CURIEs, one per line; optional)', def: '', placeholder: 'MONDO:0007254\nHP:0000365' },
         { key: 'observed', type: 'select', label: 'Of the terms', def: '', options: [['', 'keep observed and excluded'], ['observed', 'keep only those observed'], ['excluded', 'keep only those excluded']] },
         { key: 'invert', type: 'check', label: 'Reverse: drop what matches instead of keeping it', def: false },
         { key: 'prune', type: 'check', label: 'Tidy the pedigree: remove the people left out from a Family’s pedigree', def: true },
@@ -462,9 +462,9 @@
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
         { key: 'target', type: 'text', label: 'To', def: 'proband', help: 'proband, all, affected, unaffected, or one person’s id (II-3).' },
-        { key: 'phenotypes', type: 'textarea', label: 'Phenotypes (one a line)', def: '', placeholder: 'HP:0000365=Hearing impairment' },
+        { key: 'phenotypes', type: 'textarea', label: 'Phenotypes (one per line)', def: '', placeholder: 'HP:0000365=Hearing impairment' },
         { key: 'excluded', type: 'check', label: 'These phenotypes were looked for and not found (excluded)', def: false },
-        { key: 'diseases', type: 'textarea', label: 'Diseases (one a line)', def: '', placeholder: 'MONDO:0007254=breast cancer' },
+        { key: 'diseases', type: 'textarea', label: 'Diseases (one per line)', def: '', placeholder: 'MONDO:0007254=breast cancer' },
         { key: 'onset', type: 'text', label: 'Age at onset (optional)', def: '', placeholder: 'P45Y – 45 years' },
         { key: 'vital', type: 'select', label: 'Vital status', def: '', options: [['', 'leave as it is'], ['ALIVE', 'alive'], ['DECEASED', 'deceased'], ['UNKNOWN_STATUS', 'unknown']] },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}.json` }
@@ -752,7 +752,7 @@
       this.crumb.textContent = 'Tools';
       const M = this.main;
       M.appendChild(h('h2.tl-title', 'What would you like to do?'));
-      M.appendChild(h('p.tl-lead', 'Each tool runs one command from our Python packages on one of your files or an example. It also shows you that command, for the terminal and in Python, so you can do the same again there. Click an arrow on the map to open the tool for that step, or click a box to see what you can do with that kind of file.'));
+      M.appendChild(h('p.tl-lead', 'Each tool runs a command from one of our Python packages on one of your files or an example. It also shows you that command, and the same job in Python, so you can do it again in the terminal or a notebook. Click an arrow on the map to open the tool for that step, or click a box to see what you can do with that kind of file.'));
       const mapBox = h('div.tl-mapbox');
       M.appendChild(mapBox);
       const hint = h('p.tl-maphint', ' ');
