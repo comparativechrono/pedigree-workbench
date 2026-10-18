@@ -377,7 +377,7 @@
       pkg: 'phenotk',
       what: 'Make a smaller file with only the proband, the affected people, one sex or the people you name, or with only some terms.',
       about:
-        'Filters on people keep or drop whole people. With “Tidy the pedigree”, relationships to the people who have gone are dropped too. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
+        'Filters on people keep or drop whole people. In a GA4GH Pedigree, the relationships of the people who have gone are always dropped too, and in a Family, “Tidy the pedigree” takes them out of its pedigree. Filters on terms keep only the terms you list, one CURIE a line, or drop them if you tick Reverse.',
       help: 'h-tool-filter',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },
@@ -387,7 +387,7 @@
         { key: 'terms', type: 'textarea', label: 'Only these terms (CURIEs, one a line; optional)', def: '', placeholder: 'MONDO:0007254\nHP:0000365' },
         { key: 'observed', type: 'select', label: 'Of the terms', def: '', options: [['', 'keep observed and excluded'], ['observed', 'keep only those observed'], ['excluded', 'keep only those excluded']] },
         { key: 'invert', type: 'check', label: 'Reverse: drop what matches instead of keeping it', def: false },
-        { key: 'prune', type: 'check', label: 'Tidy the pedigree: drop relationships to people left out', def: true },
+        { key: 'prune', type: 'check', label: 'Tidy the pedigree: remove the people left out from a Family’s pedigree', def: true },
         { key: 'out', type: 'path', label: 'Save as', def: (v) => `~/results/${stemOf(v.input)}.filtered.json` }
       ],
       // (the command takes the people's ids in a file: it is written beside the result before the run)
@@ -457,7 +457,7 @@
       pkg: 'phenotk',
       what: 'Add diseases or phenotypes (with an age of onset), or a vital status, to the proband, to everyone, or to one person.',
       about:
-        'Write each term as its id, followed by = and its label if you like: <code>HP:0000365=Hearing impairment</code>. Phenotypes can be marked as looked for but not found (excluded). To add a gene variant or other details, use phenotk add in the terminal (see man phenotk).',
+        'Write each term as its id, followed by = and its label if you like: <code>HP:0000365=Hearing impairment</code>. Phenotypes can be marked as looked for and not found (excluded). To add a gene variant or other details, use phenotk add in the terminal (see man phenotk).',
       help: 'h-tool-add',
       fields: [
         { key: 'input', type: 'file', label: 'The file', kinds: GA4GH },

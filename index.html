@@ -318,7 +318,7 @@ studio --tidy ~/pedigrees/lynch.studio.json</code></pre>
 <p>Add it with <b>My files → Add files from my computer…</b>, or with <b>From my computer…</b> under the tool's file box. The workbench tells GA4GH files apart by what's in them, whatever they're called. If it shows a file as plain JSON, it hasn't recognised it as a GA4GH file, but <b>Upgrade a file from an older tool</b> may still be able to read it.</p>
 
 <h2>2 · If it was made by an older tool, upgrade it</h2>
-<p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 aren't in the standard form, and the tools refuse them with a message explaining this. <b>Upgrade a file from an older tool</b> rewrites such a file in the standard form, once and for all. It lists what it changed, and anything it couldn't do.</p>
+<p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 aren't in the standard form, and the tools refuse them with a message explaining this. <b>Upgrade a file from an older tool</b> rewrites such a file in the standard form. You only need to do this once for each file. It lists what it changed, and anything it couldn't do.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json">Upgrade an older example</button></div>
 <p>The older files often name conditions without a term. The upgrade lists them, and <b>Fill in missing terms</b> gives them their terms from a terms file (<a href="#h-walk-terms">here's how</a>). The drawing doesn't need the terms, because a condition without one is drawn with its name. The GA4GH files do need them, though. A GA4GH Pedigree from studio2ga4gh 0.3 recorded only <i>whether</i> people were affected, not what they were affected by. Draw from the Phenopackets file made with it instead, because that has the conditions.</p>
 <p>To find out whether a file needs upgrading, open its summary in the Tools tab with the <b>More…</b> button next to the file. The summary says <i>Older form</i> if the file needs upgrading.</p>
@@ -999,7 +999,7 @@ print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
 </article>
 <article class="help-page" id="h-tool-upgrade" data-title="Upgrade a file from an older tool" data-group="Tools" data-group-page="h-tools" data-keys="upgrade older legacy old file studio2ga4gh 0.3 abusua2ga4gh 0.2 fix repair convert standard form kin retired names metadata" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM4 20l10-10"/></svg>Upgrade a file from an older tool</h1>
-<p class="lede">Earlier versions of our tools, studio2ga4gh up to 0.3 and abusua2ga4gh up to 0.2, wrote GA4GH files that the standard doesn't accept. The upgrade rewrites a file like this in the standard form, once and for all, and lists every change it made and everything it couldn't do. It tidies up other non-standard files too.</p>
+<p class="lede">Earlier versions of our tools, studio2ga4gh up to 0.3 and abusua2ga4gh up to 0.2, wrote GA4GH files that the standard doesn't accept. The upgrade rewrites a file like this once, in the standard form, and lists every change it made and everything it couldn't do. It tidies up other non-standard files too.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Upgrade an older example</button></div>
 
 <h2>What it changes</h2>
@@ -1008,7 +1008,7 @@ print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
   <li><b>What the standard has no place for</b>. Names are removed, because Phenopackets have no field for a name, and names are personal data. Diseases inside <code>subject</code> are moved to the Phenopacket, and notes on relationships go into the narrative.</li>
   <li><b>metaData</b>. The upgrade adds it where it's missing, with <code>phenopacketSchemaVersion</code> and a resource for every ontology the terms use.</li>
   <li><b>KIN</b>. Retired codes are replaced by the current ones, and the two people are swapped where the new term runs the other way. Labels are corrected. If a relation's code and label disagree, the label decides. For example, abusua2ga4gh's <code>KIN:039</code> <i>isSpermDonorOf</i> becomes <code>KIN:004</code>.</li>
-  <li><b>Carriers</b>. The phenotypic feature <code>HP:0032500</code>, written for a carrier, is removed, because it means <i>Exacerbated by tobacco use</i>. In a GA4GH Pedigree, the narrative then says who is a carrier.</li>
+  <li><b>Carriers</b>. Where the phenotypic feature <code>HP:0032500</code> was written for a carrier, it's removed, because it means <i>Exacerbated by tobacco use</i>. In a GA4GH Pedigree, the narrative then says who is a carrier.</li>
   <li><b>Field names</b> in proto spelling are rewritten in camelCase, the way JSON spells them, so <code>index_patients</code> becomes <code>indexPatients</code>.</li>
 </ul>
 
@@ -1021,7 +1021,7 @@ print("valid" if pg.is_valid(findings) else "not valid")</code></pre>
   <li>The conditions in a GA4GH Pedigree from studio2ga4gh 0.3. That file records who was affected, but not by what, so convert the drawing again, or use the Phenopackets file that was made with it.</li>
 </ul>
 <p>The upgrade never guesses. A file that's already standard comes back unchanged, apart from its field names. Under the result, <b>Check the upgraded file</b> runs the check on the new file.</p>
-<p>A file that follows the draft of version 1 of the standard isn't an older file, but a newer one that hasn't been approved (see <a href="#h-ga4gh">The GA4GH Pedigree</a>). The upgrade tells you this and leaves the file alone.</p>
+<p>A file that follows the draft of version 1 of the standard isn't an older file. It's in a newer form, which hasn't been approved (see <a href="#h-ga4gh">The GA4GH Pedigree</a>). The upgrade tells you this and leaves the file alone.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json -o ~/results/abusua_phenopackets-family.json
@@ -1083,7 +1083,7 @@ print(render_stats(stats(doc)))</code></pre>
 </article>
 <article class="help-page" id="h-tool-diff" data-title="Compare two files" data-group="Tools" data-group-page="h-tools" data-keys="diff compare difference changes versions two files phenotk strict order provenance" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>Compare two files</h1>
-<p class="lede">This tool lists what differs between two GA4GH or Phenopackets files, for example in their people, terms and relationships. It ignores the order of things, and when and by whom the files were made, because these change every time a file is written.</p>
+<p class="lede">This tool lists what differs between two GA4GH or Phenopackets files, for example in their people, terms and relationships. It ignores the order of things. It also ignores when and by whom the files were made, because that changes every time a file is written.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="diff" data-input="/data/examples/okafor_phenopackets-family.json" data-input2="/data/examples/okafor-later_phenopackets-family.json">Compare the Okafor Family with a later version</button></div>
 <p>In the later version, the twins' hearing loss has been found to be sensorineural, so each has a second phenotype.</p>
 
@@ -1095,7 +1095,7 @@ print(render_stats(stats(doc)))</code></pre>
 </ul>
 
 <h2>Reading the result</h2>
-<p>You'll see a line for each difference, with its place in the files, such as <code>proband.phenotypicFeatures: length 1 != 2</code>, <code>pedigree.persons[3].affectedStatus: 'UNAFFECTED' != 'MISSING'</code> (the value in the first file, then in the second) or <code>narrative: only in A</code>. If you compare two different kinds of file, for example a Family with a GA4GH Pedigree, nearly everything is listed, because they're laid out differently. So compare like with like. If you tick <b>Count differences of order and of provenance too</b>, the tool compares everything exactly as it's written in the files.</p>
+<p>You'll see a line for each difference, with its place in the files, such as <code>proband.phenotypicFeatures: length 1 != 2</code>, <code>pedigree.persons[3].affectedStatus: 'UNAFFECTED' != 'MISSING'</code> or <code>narrative: only in A</code>. Where a line gives two values, the one from the first file comes first. If you compare two different kinds of file, for example a Family with a GA4GH Pedigree, nearly everything is listed, because they're laid out differently. So compare like with like. If you tick <b>Count differences of order and of provenance too</b>, the tool compares everything exactly as it's written in the files.</p>
 <p>The exit status is 0 when the files are the same and 1 when they differ, as with <code>diff</code>.</p>
 
 <h2>In the terminal</h2>
@@ -1137,7 +1137,7 @@ print(render_diff(diff(a, b)))</code></pre>
 <h2>What changes in the file</h2>
 <ul>
   <li>The ids change everywhere: in each Phenopacket and its subject, the relationships, the index patient, a Family's pedigree, biosamples, genomic interpretations and files.</li>
-  <li>The ids in a GA4GH Pedigree's narrative change too. For example, <i>proband IV-3</i> becomes <i>proband IND-0014</i>. The narrative is free text, so read it before you share the file. The tool reminds you to. If some of the ids are bare numbers, the tool can't tell them from other numbers in the text, so it leaves the narrative unchanged and warns you.</li>
+  <li>The ids in a GA4GH Pedigree's narrative change too. For example, <i>proband IV-3</i> becomes <i>proband IND-0014</i>. The narrative is free text, so read it before you share the file. The tool reminds you to do this. If some of the ids are bare numbers, the tool can't tell them from other numbers in the text, so it leaves the narrative unchanged and warns you.</li>
   <li>Nothing else changes. Terms, sexes, relationships and the shape of the family stay as they were.</li>
 </ul>
 <div class="callout warn"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>De-identified is not anonymous</div><p>De-identifying removes what the file says directly. But a family can still be recognised from what's left, such as a rare condition, a large or unusual family, people's ages or where it came from. Someone who knows the family is especially likely to recognise it. It's for you to judge whether a file can be shared, and with whom, under your institution's rules and the law on patient data.</p></div>
@@ -1216,7 +1216,7 @@ ptk.write(new, "/home/user/results/okafor.affected.json")</code></pre>
   <dt>Only the affected people</dt><dd>Tick this to make files only for the people who are affected. In a Phenopackets Family, they're the people its pedigree marks as affected. In a GA4GH Pedigree or a Cohort, they're the people with at least one disease or phenotype that is present rather than excluded.</dd>
   <dt>Save in the folder</dt><dd>By default, this is <code>~/results/<i>name</i>-people</code>. Each file is named after its person's id, such as <code>IV-3.json</code>.</dd>
 </dl>
-<p>Each Phenopacket is complete on its own, with its <code>metaData</code>. If a Phenopacket has none of its own, it's given the file's. A Phenopacket says nothing about relatives, so the family's structure stays behind. That's what you want when only one person's findings should be sent.</p>
+<p>Each Phenopacket is complete on its own, with its <code>metaData</code>. If a Phenopacket has none of its own, it gets a copy of the one in the file you split. A Phenopacket says nothing about relatives, so the family's structure stays behind. That's what you want when only one person's findings should be sent.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk split /data/examples/okafor_ga4gh-pedigree.json --out-dir ~/results/okafor-people --affected-only
@@ -1253,7 +1253,7 @@ for packet in split(doc, affected_only=True):
 
 <h2>Who ends up in it</h2>
 <ul>
-  <li><b>A Cohort</b> has every Phenopacket from every file. People are told apart by their ids, but pedigree numbers recur from family to family. So if another file has already used a person's id (IV-3, in two families), that person is renamed after their file's id, for example <code>FAM2-IV-3</code>. The tool tells you who it renamed. If you give each family its own id when you convert it (<i>Family id</i>, in Drawing → GA4GH), the new names show which family each person came from.</li>
+  <li><b>A Cohort</b> has every Phenopacket from every file. People are told apart by their ids, but pedigree numbers recur from family to family. So if a person's id has already been used in another file, as IV-3 might be in two families, that person is renamed after their file's id, for example <code>FAM2-IV-3</code>. The tool tells you who it renamed. Give each family its own id when you convert it (<i>Family id</i>, in Drawing → GA4GH), so that the new names show which family each person came from.</li>
   <li><b>A Family</b> is one family, so the same id means the same person. The first Phenopacket for each person is kept, and the tool tells you which were left out. The first person in the first file becomes the proband. The Family's pedigree comes from any Families among the files, and from the GA4GH Pedigrees' relationships. Anyone who is in neither is added as a founder, with no parents.</li>
 </ul>
 <p>The new file's <code>metaData</code> declares every ontology that the files declare, with its release.</p>
@@ -1282,13 +1282,13 @@ for note in notes:
 </article>
 <article class="help-page" id="h-tool-add" data-title="Add findings to people" data-group="Tools" data-group-page="h-tools" data-keys="add findings phenotype disease onset age excluded vital status deceased alive variant gene hgvs zygosity diagnosis interpretation phenotk annotate" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>Add findings to people</h1>
-<p class="lede">This tool adds diseases or phenotypes, or a vital status, to the proband, to everyone or to one person in a GA4GH or Phenopackets file. Diseases and phenotypes can have an age of onset, or be marked as looked for and not found. The drawing has no place for most of these, but the files do.</p>
+<p class="lede">This tool adds diseases or phenotypes, or a vital status, to the proband, to everyone or to one person in a GA4GH or Phenopackets file. Diseases and phenotypes can have an age of onset, and phenotypes can also be marked as looked for and not found. The drawing has no place for most of these, but the files do.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="add" data-input="/data/examples/okafor_phenopackets-family.json">Try it with the Okafor Family</button></div>
 
 <h2>The form</h2>
 <dl>
   <dt>To</dt><dd>Enter <code>proband</code>, <code>all</code>, <code>affected</code> or <code>unaffected</code> (as the Family's pedigree says), or one person's id, such as <code>IV-4</code>. You can only give findings to people who have a Phenopacket in the file.</dd>
-  <dt>Phenotypes, Diseases</dt><dd>Write one term per line, giving its id, then an equals sign and its label, for example <code>HP:0008527=Congenital sensorineural hearing impairment</code> or <code>MONDO:0007254=breast cancer</code>. You can find the terms with <a href="#h-tool-terms">Match conditions to terms</a>, or on the HPO and Mondo websites.</dd>
+  <dt>Phenotypes, Diseases</dt><dd>Write one term per line: its id, followed if you like by an equals sign and its label, for example <code>HP:0008527=Congenital sensorineural hearing impairment</code> or <code>MONDO:0007254=breast cancer</code>. You can find the terms with <a href="#h-tool-terms">Match conditions to terms</a>, or on the HPO and Mondo websites.</dd>
   <dt>These phenotypes were looked for and not found</dt><dd>This marks the phenotypes as <i>excluded</i>. Phenotypes that were looked for and not found are as useful to a diagnosis as those that were found.</dd>
   <dt>Age at onset</dt><dd>An ISO 8601 age, such as <code>P45Y</code> for 45 years or <code>P6M</code> for six months. It applies to every term you add.</dd>
   <dt>Vital status</dt><dd>Alive, deceased or unknown.</dd>
@@ -1298,7 +1298,7 @@ for note in notes:
 <h2>In the terminal, and more</h2>
 <pre class="code" data-run="term"><code>phenotk add /data/examples/okafor_phenopackets-family.json --target IV-4 --phenotype "HP:0008527=Congenital sensorineural hearing impairment" --onset P0D -o ~/results/okafor-added.json
 phenotk view ~/results/okafor-added.json</code></pre>
-<p>The command can add more than the form can. It can add a variant (<code>--variant --gene HGNC:1884=CFTR --hgvs … --zygosity heterozygous</code>), with <code>--diagnosis</code> naming the disease it explains. It can also add measurements, a cause of death, a date of birth or an age, and any field by its path (<code>--set</code>, <code>--merge</code>, <code>--append</code>). <code>man phenotk</code> and <code>phenotk add --help</code> list them.</p>
+<p>The command can add more than the form can. It can add a variant (<code>--variant --gene HGNC:1884=CFTR --hgvs … --zygosity heterozygous</code>), with <code>--diagnosis</code> naming the disease it explains. It can also add measurements, a cause of death, a date of birth or an age, and any field by its path (<code>--set</code>, <code>--merge</code>, <code>--append</code>). <code>man phenotk</code> and <code>phenotk add --help</code> list all the options.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import phenopacket_toolkit as ptk
@@ -1325,7 +1325,7 @@ ptk.write(new, "/home/user/results/okafor-added.json")</code></pre>
 <dl>
   <dt>Summary and check</dt><dd>This lists the families and the people (founders and the rest, by sex), and for each condition, how many people are affected, unaffected and carriers. Then it checks for people listed twice, parents who aren't in the file, parents of the wrong sex, and status codes other than 0, 1, 2 and 3.</dd>
   <dt>Take one condition out</dt><dd>This makes a plain PED file for one condition of an MPED file. Give the condition's column name, as the file's first line or the summary shows it. If you leave the name empty, you get a file for each condition. Carriers (3) become unaffected (1), because a plain PED file has no code for them.</dd>
-  <dt>Put PED files together</dt><dd>This puts PED files of the same people, with one condition each, into one MPED file. Name the conditions in the same order as the files, or each one is named after its file.</dd>
+  <dt>Put PED files together</dt><dd>This puts PED files of the same people, with one condition each, into one MPED file. You can name the conditions, in the same order as the files. If you don't, each one is named after its file.</dd>
   <dt>One file for each family</dt><dd>This splits a PED or MPED file of several families into a file for each family, named after the family's id.</dd>
   <dt>PED ⇄ MPED, and columns</dt><dd>This turns a PED file into an MPED file, or the other way round, keeping one condition. It can also add or remove a condition column. A new column starts with everyone at the value you choose.</dd>
 </dl>

@@ -1,6 +1,6 @@
 <!-- id: h-tool-upgrade | title: Upgrade a file from an older tool | group: Tools | summary: pedigree-ga4gh upgrade: rewrite an older or non-standard file in the standard form | keys: upgrade older legacy old file studio2ga4gh 0.3 abusua2ga4gh 0.2 fix repair convert standard form kin retired names metadata -->
 <h1><!--ICON:wand-->Upgrade a file from an older tool</h1>
-<p class="lede">Earlier versions of our tools, studio2ga4gh up to 0.3 and abusua2ga4gh up to 0.2, wrote GA4GH files that the standard doesn't accept. The upgrade rewrites a file like this in the standard form, once and for all, and lists every change it made and everything it couldn't do. It tidies up other non-standard files too.</p>
+<p class="lede">Earlier versions of our tools, studio2ga4gh up to 0.3 and abusua2ga4gh up to 0.2, wrote GA4GH files that the standard doesn't accept. The upgrade rewrites a file like this once, in the standard form, and lists every change it made and everything it couldn't do. It tidies up other non-standard files too.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="upgrade" data-input="/data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json">Upgrade an older example</button></div>
 
 <h2>What it changes</h2>
@@ -9,7 +9,7 @@
   <li><b>What the standard has no place for</b>. Names are removed, because Phenopackets have no field for a name, and names are personal data. Diseases inside <code>subject</code> are moved to the Phenopacket, and notes on relationships go into the narrative.</li>
   <li><b>metaData</b>. The upgrade adds it where it's missing, with <code>phenopacketSchemaVersion</code> and a resource for every ontology the terms use.</li>
   <li><b>KIN</b>. Retired codes are replaced by the current ones, and the two people are swapped where the new term runs the other way. Labels are corrected. If a relation's code and label disagree, the label decides. For example, abusua2ga4gh's <code>KIN:039</code> <i>isSpermDonorOf</i> becomes <code>KIN:004</code>.</li>
-  <li><b>Carriers</b>. The phenotypic feature <code>HP:0032500</code>, written for a carrier, is removed, because it means <i>Exacerbated by tobacco use</i>. In a GA4GH Pedigree, the narrative then says who is a carrier.</li>
+  <li><b>Carriers</b>. Where the phenotypic feature <code>HP:0032500</code> was written for a carrier, it's removed, because it means <i>Exacerbated by tobacco use</i>. In a GA4GH Pedigree, the narrative then says who is a carrier.</li>
   <li><b>Field names</b> in proto spelling are rewritten in camelCase, the way JSON spells them, so <code>index_patients</code> becomes <code>indexPatients</code>.</li>
 </ul>
 
@@ -22,7 +22,7 @@
   <li>The conditions in a GA4GH Pedigree from studio2ga4gh 0.3. That file records who was affected, but not by what, so convert the drawing again, or use the Phenopackets file that was made with it.</li>
 </ul>
 <p>The upgrade never guesses. A file that's already standard comes back unchanged, apart from its field names. Under the result, <b>Check the upgraded file</b> runs the check on the new file.</p>
-<p>A file that follows the draft of version 1 of the standard isn't an older file, but a newer one that hasn't been approved (see <a href="#h-ga4gh">The GA4GH Pedigree</a>). The upgrade tells you this and leaves the file alone.</p>
+<p>A file that follows the draft of version 1 of the standard isn't an older file. It's in a newer form, which hasn't been approved (see <a href="#h-ga4gh">The GA4GH Pedigree</a>). The upgrade tells you this and leaves the file alone.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>pedigree-ga4gh upgrade /data/examples/older/abusua2ga4gh-0.2_phenopackets-family.json -o ~/results/abusua_phenopackets-family.json

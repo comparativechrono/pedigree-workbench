@@ -9,7 +9,7 @@
   <dt>Only the affected people</dt><dd>Tick this to make files only for the people who are affected. In a Phenopackets Family, they're the people its pedigree marks as affected. In a GA4GH Pedigree or a Cohort, they're the people with at least one disease or phenotype that is present rather than excluded.</dd>
   <dt>Save in the folder</dt><dd>By default, this is <code>~/results/<i>name</i>-people</code>. Each file is named after its person's id, such as <code>IV-3.json</code>.</dd>
 </dl>
-<p>Each Phenopacket is complete on its own, with its <code>metaData</code>. If a Phenopacket has none of its own, it's given the file's. A Phenopacket says nothing about relatives, so the family's structure stays behind. That's what you want when only one person's findings should be sent.</p>
+<p>Each Phenopacket is complete on its own, with its <code>metaData</code>. If a Phenopacket has none of its own, it gets a copy of the one in the file you split. A Phenopacket says nothing about relatives, so the family's structure stays behind. That's what you want when only one person's findings should be sent.</p>
 
 <h2>In the terminal</h2>
 <pre class="code" data-run="term"><code>phenotk split /data/examples/okafor_ga4gh-pedigree.json --out-dir ~/results/okafor-people --affected-only
