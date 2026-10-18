@@ -28,7 +28,7 @@
     </a>
     <div class="spacer"></div>
     <span class="store-status" id="storeStatus" title="Your files and drawings are kept in this browser, on this computer"></span>
-    <button class="btn" id="userBtn" type="button" title="Your name in the workbench: the terminal shows it in place of user"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="user-name">user</span></button>
+    <button class="btn" id="userBtn" type="button" title="Put your name into the workbench, and the terminal will show it in place of user"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="user-name">user</span></button>
     <button class="btn" id="projectBtn" type="button" title="Download all your files, add files, or start afresh"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 9z"/><path d="M3 19l3.5-8H22l-3.5 8z"/></svg><span>My files</span></button>
     <button class="btn" id="fullBtn" type="button" title="Full screen (F11 also works)"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Full screen</span></button>
   </header>
@@ -38,7 +38,7 @@
       <div class="help-head">
         <button class="icon-btn help-home" type="button" title="Help: all topics" data-goto="h-home"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg></button>
         <div class="help-search"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="helpSearch" type="search" placeholder="Search the help (e.g. PED, KIN, de-identify)" autocomplete="off" aria-label="Search the help"></div>
-        <button class="icon-btn help-collapse" id="helpCollapse" type="button" title="Hide the help: the workbench fills the window (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M16 10l-2 2 2 2"/></svg></button>
+        <button class="icon-btn help-collapse" id="helpCollapse" type="button" title="Hide the help so the workbench fills the window (Ctrl+\)"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M16 10l-2 2 2 2"/></svg></button>
       </div>
       <div class="help-crumbs" id="helpCrumbs"></div>
       <div class="help-body" id="helpBody">
@@ -1386,7 +1386,7 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 
 <h2>Adding files</h2>
 <ul>
-  <li><b>My files → Add files from my computer…</b> or <b>Add a folder…</b>, at the top right. You can also drag files onto the Files tab.</li>
+  <li><b>My files → Add files from my computer…</b> or <b>Add a folder from my computer…</b>, at the top right. You can also drag files onto the Files tab.</li>
   <li>In a folder's menu: <b>Upload files here…</b>.</li>
   <li>In a tool, under a file box: <b>From my computer…</b>.</li>
   <li>In the Studio: <b>Open… → Open a drawing from my computer…</b>.</li>
@@ -2213,7 +2213,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
       </div>
     </aside>
 
-    <div class="splitter" role="separator" aria-orientation="vertical" title="Drag to resize · double-click to reset"></div>
+    <div class="splitter" role="separator" aria-orientation="vertical" title="Drag to resize, or double-click to reset"></div>
 
     <section class="bench" aria-label="Workbench">
       <div class="wb-tabs" role="tablist">
