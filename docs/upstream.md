@@ -368,7 +368,8 @@ the first line it meets on the way up. The picture was also enlarged ten times
 whatever its size, which misread pictures much smaller or larger than a few
 hundred pixels across, often without a warning: pull request #5 enlarges a
 picture so that its symbols are about 200 pixels across, and warns when
-someone has only one parent, is joined to no one, or when no one has parents.
+someone has only one parent or is joined to no one, when the people read
+fall into more than one family, or when no one has parents.
 
 Until PedGen and PedInterp are released, `pip install` gives their earlier
 versions, without the commands. Their versions come from their git tags,

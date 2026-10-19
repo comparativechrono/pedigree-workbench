@@ -39,7 +39,7 @@ def parser():
     p.add_argument('-d', '--output-dir', default='.', help='the folder to write FAMILY.ped in (default: here)')
     p.add_argument('--upscale', type=_factor, metavar='FACTOR',
                    help='how many times to enlarge the picture before reading it (by default, as many as make its '
-                        'symbols about 200 pixels across, which reads best; the table says what was used)')
+                        'symbols about 200 pixels across, which reads best; the factor is printed with the table)')
     p.add_argument('--labels', choices=('tesseract', 'none'), default='tesseract',
                    help='read the labels under the symbols with Tesseract (the default), or number the people by '
                         'generation instead: I-1, I-2, II-1 and so on')

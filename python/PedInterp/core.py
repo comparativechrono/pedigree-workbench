@@ -95,31 +95,45 @@ SYMBOL_PIXELS = 200
 #: pixels: about as many as the default of 10 used to make of a picture 1,000 pixels across
 MAX_PIXELS = 60_000_000
 
+def _upscale_needed(image_path):
+    '''
+    The factor that makes a picture's symbols SYMBOL_PIXELS across, before any limit: the symbols are found in a copy
+    of the picture 2,000 pixels across on its longer side (enlarged, or shrunk, which is quicker than measuring a large
+    picture whole), and their median size is measured. None if no symbols are found there. Also the picture's size.
+    '''
+    img = Image.open(image_path).convert('RGB').convert('L')
+    width, height = img.size
+    probe = 2000 / max(width, height)
+    small = np.array(img.resize((max(1, round(width*probe)), max(1, round(height*probe))), _resample_filter()))
+    del img
+    _, binary = cv2.threshold(small, 127, 255, cv2.THRESH_BINARY)
+    del small
+    #(symbols are looked for down to a tenth of the usual size, as a small pedigree on a large page may have small ones)
+    symbols, _ = detect_symbols(binary, binary.shape[0]*binary.shape[1], min_share= 0.00001)
+    sizes = [max(w, h) for (_, _, w, h), _, _ in symbols]
+    return (SYMBOL_PIXELS*probe/float(np.median(sizes)) if sizes else None), width, height
+
+def _limit_upscale(factor, width, height):
+    '''A factor kept between 0.25 and 20, and so that the enlarged picture has no more than MAX_PIXELS pixels, rounded
+    down to one decimal place (down, so as not to pass the limits)'''
+    factor = min(factor, 20, (MAX_PIXELS/(width*height))**0.5)
+    return max(0.25, math.floor(factor*10 + 1e-9)/10)
+
 def choose_upscale(image_path):
     '''
     How many times to enlarge a picture before reading it, so that its symbols are about SYMBOL_PIXELS across.
 
-    The symbols are found in a copy of the picture at least 2,000 pixels across, and their median size is measured.
-    If none are found there, the picture is enlarged to 5,000 pixels across, which suits most pictures of a whole
-    pedigree. The factor is kept between 0.25 and 20, and small enough that the enlarged picture has no more than
-    MAX_PIXELS pixels.
+    The symbols are found in a copy of the picture 2,000 pixels across on its longer side, and their median size is
+    measured. If none are found there, the picture is enlarged to 5,000 pixels across, which suits most pictures of a
+    whole pedigree. The factor is kept between 0.25 and 20, and small enough that the enlarged picture has no more
+    than MAX_PIXELS pixels.
 
     RETURN:
     -------
-    the factor (a number, rounded to one decimal place)
+    the factor (a number, rounded down to one decimal place)
     '''
-    img = Image.open(image_path).convert('RGB').convert('L')
-    width, height = img.size
-    probe = max(1.0, 2000 / max(width, height))
-    small = np.array(img.resize((round(width*probe), round(height*probe)), _resample_filter())) if probe > 1 else np.array(img)
-    del img
-    _, binary = cv2.threshold(small, 127, 255, cv2.THRESH_BINARY)
-    del small
-    symbols, _ = detect_symbols(binary, binary.shape[0]*binary.shape[1])
-    sizes = [max(w, h) for (_, _, w, h), _, _ in symbols]
-    factor = SYMBOL_PIXELS*probe/float(np.median(sizes)) if sizes else 5000/width
-    factor = min(factor, 20, (MAX_PIXELS/(width*height))**0.5)
-    return round(max(factor, 0.25), 1)
+    needed, width, height = _upscale_needed(image_path)
+    return _limit_upscale(needed if needed is not None else 5000/width, width, height)
 
 def linDist(coord1, coord2):
     x1, y1 = coord1
@@ -309,7 +323,7 @@ def open_with_disc(mask, radius):
     opened[mask == 0] = 0
     return opened
 
-def detect_symbols(gray_img, img_area):
+def detect_symbols(gray_img, img_area, min_share= 0.0001):
     '''
     Finds the pedigree's symbols: filled (affected) symbols from the dark parts of the image, with the lines
     removed first so that a line touching a symbol doesn't join it to the rest of the drawing, and
@@ -365,7 +379,7 @@ def detect_symbols(gray_img, img_area):
 
             x,y,w,h = cv2.boundingRect(approx)
             bounding_area = w*h
-            if bounding_area < 0.25*img_area and bounding_area > 0.0001*img_area and abs(w-h) < (min(w,h) * 0.25):
+            if bounding_area < 0.25*img_area and bounding_area > min_share*img_area and abs(w-h) < (min(w,h) * 0.25):
                 outline = outline_width(threshold_light, (x, y, w, h), line_width) if phenotype == 1 else 0
                 candidates.append({'box': (x, y, w, h), 'contours': [contour], 'phenotype': phenotype,
                                    'size': max(w, h), 'outer': max(w, h) + 2*outline})
@@ -712,6 +726,67 @@ def trackRelation(normalized_categorized_lines, IndvDataDict):
 
     return IndvDataDict, connection_lines
 
+def missed_lines(IndvDataDict, lines, row_of):
+    '''
+    What a line missed between the symbols looks like, in the people read, as sentences for warnings:
+    - someone with only one parent;
+    - someone below the top row with neither parents nor children, and no partners' line to them either (a partner
+      with no children is joined by one, though a PED file can't join them to anyone);
+    - people joined by parents and children into more than one family of two or more, as when the line up from
+      someone who has children is missed;
+    - no one with parents at all, though there are symbols in more than one row and lines between them.
+
+    PARAMETERS:
+    -----------
+    IndvDataDict: the people, with their PaternalID and MaternalID (0 if not found) and node_coords
+    lines: the lines found, {'horizontal': [...], 'vertical': [...]}
+    row_of: each person's row in the drawing, from 0 at the top
+    '''
+    found = []
+    for IndvID, person in IndvDataDict.items():
+        if bool(person['PaternalID']) != bool(person['MaternalID']):
+            found.append(f"{IndvID}: only {'a father' if person['PaternalID'] else 'a mother'} was found, so a line may "
+                         'have been missed')
+    parents = {p for person in IndvDataDict.values() for p in (person['PaternalID'], person['MaternalID']) if p}
+    anyone = bool(parents)
+    #partners: the people at the two ends of a horizontal line
+    threshold = float(np.median([person['node_coords'][3] for person in IndvDataDict.values()]))/2
+    partnered = set()
+    for line in lines['horizontal']:
+        ends = partners_at_ends(line, None, IndvDataDict, threshold)
+        if None not in ends:
+            partnered.update(ends)
+    alone = [IndvID for IndvID, person in IndvDataDict.items()
+             if row_of[IndvID] > 0 and not (person['PaternalID'] or person['MaternalID'])
+             and IndvID not in parents and IndvID not in partnered]
+    if alone and anyone:
+        found.append(f'{", ".join(alone)}: joined to no one, with neither parents, children nor a partner found, so a '
+                     'line may have been missed')
+    #the families that parents and children join people into, leaving out anyone on their own
+    family_of = {IndvID: IndvID for IndvID in IndvDataDict}
+    def root(IndvID):
+        while family_of[IndvID] != IndvID:
+            family_of[IndvID] = family_of[family_of[IndvID]]
+            IndvID = family_of[IndvID]
+        return IndvID
+    for IndvID, person in IndvDataDict.items():
+        for parent in (person['PaternalID'], person['MaternalID']):
+            if parent in family_of:
+                family_of[root(IndvID)] = root(parent)
+    sizes = {}
+    for IndvID in IndvDataDict:
+        sizes[root(IndvID)] = sizes.get(root(IndvID), 0) + 1
+    families = sorted((n for n in sizes.values() if n > 1), reverse=True)
+    if len(families) > 1:
+        found.append(f'The people read fall into {len(families)} families, not one (of {", ".join(map(str, families))} '
+                     'people), so a line joining them may have been missed')
+    rows = len(set(row_of.values()))
+    #(with no lines at all, pedigree_processing says so)
+    if rows > 1 and (lines['vertical'] or lines['horizontal']) and not anyone:
+        found.append(f"No one's parents were found, though the symbols are in {rows} rows, so the lines between them "
+                     'may not have been read')
+    return found
+
 def pedigree_processing(FamID,
                         raw_image_dir = '.',
                         export= False,
@@ -764,8 +839,19 @@ def pedigree_processing(FamID,
     #----------------------------------------
     if image_path is None:
         image_path = f'{raw_image_dir}/{FamID}.png'
+    needed = None
     if upscale_factor is None:
-        upscale_factor = choose_upscale(image_path)
+        needed, picture_width, picture_height = _upscale_needed(image_path)
+        upscale_factor = _limit_upscale(needed if needed is not None else 5000/picture_width, picture_width, picture_height)
+    if needed is not None and needed > 1.5*upscale_factor:
+        #(a limit kept the factor well short of what the symbols need: a picture too small, or one too large to enlarge so far)
+        if upscale_factor >= 20:
+            warnings.warn(f"The symbols in {image_path} are very small: the picture is enlarged 20 times, the most, but "
+                          f"they need {needed:.0f} times. A larger copy of the picture would read better")
+        else:
+            warnings.warn(f"The picture is too large to enlarge {needed:.1f} times, as its symbols need, so it is "
+                          f"enlarged {upscale_factor:g} times. If the pedigree is only part of the picture, cut the "
+                          f"picture down to it")
     gray_img = upscaled_gray_image(image_path, upscale_factor)
     img_height, img_width = gray_img.shape
     img_area = img_height * img_width
@@ -805,6 +891,9 @@ def pedigree_processing(FamID,
     #----------------------------------------
     symbols, line_width = detect_symbols(redacted_img, img_area)
     if not symbols:
+        if upscale_factor >= 20:
+            raise ValueError(f'No pedigree symbols were found in {image_path}, even enlarged {upscale_factor:g} times: '
+                             'the picture may be too small to read, and a larger copy of it would read better')
         raise ValueError(f'No pedigree symbols were found in {image_path}. If the pedigree is only a small part of '
                          'the picture, as on a page, cut the picture down to the pedigree')
 
@@ -896,28 +985,8 @@ def pedigree_processing(FamID,
 
     IndvIDsDict, connection_lines = trackRelation(lines, IndvIDsDict)
 
-    #what a line missed between the symbols looks like: someone with only one parent; someone below the top row with
-    #neither parents nor children, joined to no one (unless they are a partner with no children, whom a PED file
-    #can't join to anyone); or no one with parents at all, though there are symbols in more than one row
-    retry = f'The picture was enlarged {upscale_factor:g} times: try a little more or less'
-    for IndvID, person in IndvIDsDict.items():
-        if bool(person['PaternalID']) != bool(person['MaternalID']):
-            found = 'a father' if person['PaternalID'] else 'a mother'
-            warnings.warn(f'{IndvID}: only {found} was found, so a line may have been missed. {retry}')
-    row_of = {IDs[i]: places[i][0] for i in range(len(symbols))}
-    parents = {p for person in IndvIDsDict.values() for p in (person['PaternalID'], person['MaternalID']) if p}
-    anyone = any(person['PaternalID'] or person['MaternalID'] for person in IndvIDsDict.values())
-    alone = [IndvID for IndvID, person in IndvIDsDict.items()
-             if row_of[IndvID] > 0 and not (person['PaternalID'] or person['MaternalID']) and IndvID not in parents]
-    if alone and anyone:
-        warnings.warn(f'{", ".join(alone)}: joined to no one, with neither parents nor children found. Unless '
-                      f'{"that is" if len(alone) == 1 else "they are"} a partner with no children, a line may have '
-                      f'been missed. {retry}')
-    rows = len(set(row_of.values()))
-    #(with no lines at all, the warning above has said so)
-    if rows > 1 and (lines['vertical'] or lines['horizontal']) and not anyone:
-        warnings.warn(f"No one's parents were found, though the symbols are in {rows} rows, so the lines between them "
-                      f'may not have been read. {retry}')
+    for warning in missed_lines(IndvIDsDict, lines, {IDs[i]: places[i][0] for i in range(len(symbols))}):
+        warnings.warn(f'{warning}. The picture was enlarged {upscale_factor:g} times: try a little more or less')
 
     for line in connection_lines:
         x1, y1, x2, y2 = line

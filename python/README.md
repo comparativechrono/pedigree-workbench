@@ -32,8 +32,8 @@ In the second archive:
 | Package | Version | Where it comes from |
 |---|---|---|
 | `pednet` (PedNet) | **2.0.0** | on PyPI, released on 19 October 2026: pedigrees as graphs, the mode of inheritance, and the co-segregation of candidate variants |
-| `PedGen` | 0.1.4.dev10 | built from [pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), not released yet: the `pedgen` command, a table of genotypes for PedNet, and matplotlib imported only to draw (merged); a rare allele by default, cousins who marry, and a minimum number affected (#4) |
-| `PedInterp` | 0.1.8.dev11 | built from [pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), not released yet: the `pedinterp` command, and children drawn straight under their parents read correctly (merged); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5) |
+| `PedGen` | 0.1.4.dev11 | built from [pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), not released yet: the `pedgen` command, a table of genotypes for PedNet, and matplotlib imported only to draw (merged); a rare allele by default, cousins who marry, and a minimum number affected (#4) |
+| `PedInterp` | 0.1.8.dev12 | built from [pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), not released yet: the `pedinterp` command, and children drawn straight under their parents read correctly (merged); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5) |
 | `networkx` | 3.4.2 | its wheel from PyPI, in `vendor/`; the archive has it without its tests |
 
 `tools/vendor_wheels.py` copies the four from their wheels, and records each

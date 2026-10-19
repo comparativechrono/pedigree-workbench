@@ -110,7 +110,7 @@ async () => {
     };
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
-    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.7 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
+    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
     res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7' });
     const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
     check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with three next steps');

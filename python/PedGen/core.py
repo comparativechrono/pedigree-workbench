@@ -237,9 +237,8 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
             nonlocal family_df
 
             if mode == 'AD':
-                het, hom = 2*(1-alt_freq)*alt_freq, alt_freq**2
                 Genotype = random.choices(population= [1,2],
-                                          weights= (het, hom))[0] if het + hom > 0 else 1
+                                          weights= affected_founder_weights(alt_freq))[0]
             elif mode == 'AR':
                 Genotype= 2
 
@@ -469,6 +468,16 @@ def gen_genotype_export(ped_df, path, alt_freq=None, variant='causal'):
     with open(path, 'w', encoding= 'utf-8') as handle:
         handle.write('\t'.join(header) + '\n' + '\t'.join(row) + '\n')
     return path
+
+
+def affected_founder_weights(alt_freq):
+    '''
+    The chances that an affected founder of a dominant pedigree has one copy of the alternate allele or two: as
+    affected people in the population have them, 2pq to q squared, so almost always one for a rare allele. With no
+    allele in the population (or all of it), the founder has the one copy (or two).
+    '''
+    het, hom = 2*(1-alt_freq)*alt_freq, alt_freq**2
+    return (het, hom) if het + hom > 0 else (1, 0)
 
 
 def _random_source(seed):
