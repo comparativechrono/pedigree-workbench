@@ -229,6 +229,7 @@
     }
     moreMenu(anchor) {
       MG.popmenu(anchor, [
+        ['percent', 'Work out the risks in this family (Risk tab)', () => MG.app.riskOpen({ source: 'studio' })],
         ['download', 'Download the drawing (.studio.json)', () => this.download()],
         ['folder', 'Show the file in Files', () => (this.path ? MG.app.revealFile(this.path) : toast('Save the drawing first (Save as…).', 'warn'))],
         ['help', 'Help: the Studio tab', () => MG.app.showHelp('h-studio')],

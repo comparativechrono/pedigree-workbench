@@ -21,8 +21,8 @@
   /* ------------------------------------------------------------------
      the tabs of the workbench
      ------------------------------------------------------------------ */
-  const TAB_HELP = { studio: 'h-studio', tools: 'h-tools', editor: 'h-files', notebook: 'h-notebook', terminal: 'h-terminal' };
-  const TAB_NAME = { studio: 'Studio', tools: 'Tools', editor: 'Files', notebook: 'Notebook', terminal: 'Terminal' };
+  const TAB_HELP = { studio: 'h-studio', tools: 'h-tools', risk: 'h-risk', editor: 'h-files', notebook: 'h-notebook', terminal: 'h-terminal' };
+  const TAB_NAME = { studio: 'Studio', tools: 'Tools', risk: 'Risk', editor: 'Files', notebook: 'Notebook', terminal: 'Terminal' };
   MG.app.tabHelp = TAB_HELP;
   MG.app.tabName = TAB_NAME;
 

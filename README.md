@@ -37,13 +37,14 @@ first session, walkthroughs of the common jobs, a page for every tool, and
 pages on the file formats and standards. Its buttons do what they say – open
 an example in the Studio, open a tool with a file chosen, run a command in the
 terminal – and its map of the formats, from the lab's Software page, opens a
-tool when an arrow is clicked. On the right is the **workbench**, with five
+tool when an arrow is clicked. On the right is the **workbench**, with six
 tabs:
 
 | Tab | What it is for |
 |---|---|
 | **Studio** | Pedigree Studio itself, with a bar that keeps the drawing among the user's files: New, Open, Save, Save as, Tidy, and *Convert or check…*, which takes the drawing to the Tools tab. |
 | **Tools** | The packages behind forms, for people who would rather point and click: each tool runs one command of one package, exactly as the terminal would, and shows that command, and the same work in Python, so that it can be done again without the form. The first page is the map and the common tasks. |
+| **Risk** | Genetic risks from a whole pedigree: the chance that each person carries the family's variant or will be affected, and that a couple's child will be, under a single-gene model (dominant, recessive or X-linked, with penetrance, phenocopies and new mutations), with the Bayesian table behind each chance. The family comes from the drawing in the Studio, or from a drawing, PED, MPED, GA4GH Pedigree or Phenopackets Family file. Below, *By hand*: a couple's four children as chromosomes, and chances multiplied together, as in the pedigree practical. |
 | **Files** | The user's files and the examples: look at them, edit them, upload and download. |
 | **Notebook** | Python notebooks (Jupyter's `.ipynb`), with all the packages, starting with a welcome notebook that walks through them. |
 | **Terminal** | A bash-like shell with the packages' programs as commands (`studio2ga4gh`, `phenotk`, `mpedtools` …), text tools, `python` and `pip`. |
@@ -155,9 +156,12 @@ python3 serve.py          # then open http://localhost:8000/
   editor – comes from the lab's Bioinformatics workbench (`assets/js`,
   `assets/css`), with what this workbench does not need taken out. The Studio
   tab (`studio-tab.js`), the Tools tab (`tools.js`), the map (`schematic.js`),
-  the text tools of the terminal (`shell-text.js`) and the page's set-up
-  (`page-wb.js`) are its own. `pedwb` (`python/pedwb`) runs the programs for
-  the terminal and holds the small functions the Tools tab calls.
+  the Risk tab (`risk-tab.js`, with its sums in `risk-engine.js` and its
+  readers of drawings and PED files in `risk-read.js`), the text tools of the
+  terminal (`shell-text.js`) and the page's set-up (`page-wb.js`) are its own.
+  `pedwb` (`python/pedwb`) runs the programs for the terminal and holds the
+  small functions the Tools tab calls, and the Risk tab's reader of GA4GH
+  files (`pedwb.risk`).
 
 ## Tests
 
@@ -168,6 +172,9 @@ python3 tests/help_code.py            # every code box of the help, run as a rea
 node tests/equivalence/gen.js assets/js/tools.js > /tmp/cases.jsonl && \
   python3 tests/equivalence/run_equiv.py /tmp/cases.jsonl
                                       # each tool's command and its Python write the same files
+node tests/risk/textbook.js           # the Risk tab's sums on textbook examples, whose answers are known
+node tests/risk/brute.js              # ... and on hundreds of random pedigrees, against brute force
+python3 tests/risk/readers.py         # the Risk tab reads the examples as studio2ped, mpedtools and PedNet do
 python3 tests/browser_smoke.py        # the page in headless Chromium (needs Playwright)
 ```
 

@@ -38,6 +38,7 @@ GROUPS = [
     ('Walkthroughs', 'route'),
     ('Pedigree Studio', 'pedigree'),
     ('Tools', 'wrench'),
+    ('Genetic risk', 'percent'),
     ('Files and standards', 'tag'),
     ('Notebook and terminal', 'terminal'),
     ('Reference', 'info'),

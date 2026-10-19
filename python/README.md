@@ -1,9 +1,9 @@
 # The Python packages of the Pedigree workbench
 
 These are the packages that the workbench runs in the browser – in the Tools
-tab, the Notebook and the Terminal. `build_bundle.py` packs them into
-`assets/py/pedigree-tools.zip`, which the page unpacks into its Python
-(Pyodide) when Python starts. The same archive runs on any computer with
+tab, the Notebook and the Terminal, and in the Risk tab, to read GA4GH files.
+`build_bundle.py` packs them into `assets/py/pedigree-tools.zip`, which the
+page unpacks into its Python (Pyodide) when Python starts. The same archive runs on any computer with
 Python 3.9 or later: unzip it, put the folder on `PYTHONPATH`, and run
 `python -m pedwb PROGRAM …` (`PROGRAM` being any of the programs below).
 
@@ -25,7 +25,7 @@ NumPy, pandas, OpenCV and Pillow with pip.
 | `ga4gh2studio` | **0.4.0** | on PyPI (was 0.3.0); changed to read through `pedigree_ga4gh` |
 | `phenopacket_toolkit` (phenotk) | **0.4.0** | on PyPI (was 0.3.0); without its “dialects”, reading and writing through `pedigree_ga4gh`, with faults fixed, and accepting only exact matches by default when it looks terms up |
 | `pedigree_ga4gh` | **1.0.0** | on PyPI, new: the one GA4GH implementation the others share |
-| `pedwb` | 1.0.0 | new: runs the programs for the terminal (`python -m pedwb NAME …`), and holds the small functions the Tools tab calls (`pedwb.gui`) |
+| `pedwb` | 1.0.0 | new: runs the programs for the terminal (`python -m pedwb NAME …`), and holds the small functions the Tools tab calls (`pedwb.gui`) and the Risk tab's reader of GA4GH files (`pedwb.risk`) |
 
 In the second archive:
 

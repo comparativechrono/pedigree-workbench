@@ -29,7 +29,9 @@
     "tavtigian2018": {"authors": ["Tavtigian SV", "Greenblatt MS", "Harrison SM", "Nussbaum RL", "Prabhu SA", "Boucher KM", "Biesecker LG"], "short": "Tavtigian et al.", "year": 2018, "title": "Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework", "container": "Genetics in Medicine", "volume": "20", "issue": "9", "pages": "1054-1060", "doi": "10.1038/gim.2017.210"},
     "lauritzen2003": {"authors": ["Lauritzen SL", "Sheehan NA"], "year": 2003, "title": "Graphical models for genetic analyses", "container": "Statistical Science", "volume": "18", "issue": "4", "pages": "489-514", "doi": "10.1214/ss/1081443232"},
     "wright1922": {"authors": ["Wright S"], "year": 1922, "title": "Coefficients of inbreeding and relationship", "container": "The American Naturalist", "volume": "56", "issue": "645", "pages": "330-338", "doi": "10.1086/279872"},
-    "networkx2008": {"authors": ["Hagberg AA", "Schult DA", "Swart PJ"], "year": 2008, "title": "Exploring network structure, dynamics, and function using NetworkX", "container": "Proceedings of the 7th Python in Science Conference (SciPy2008)", "pages": "11\u201315", "url": "https://conference.scipy.org/proceedings/SciPy2008/paper_2/"}
+    "networkx2008": {"authors": ["Hagberg AA", "Schult DA", "Swart PJ"], "year": 2008, "title": "Exploring network structure, dynamics, and function using NetworkX", "container": "Proceedings of the 7th Python in Science Conference (SciPy2008)", "pages": "11\u201315", "url": "https://conference.scipy.org/proceedings/SciPy2008/paper_2/"},
+    "elston1971": {"authors": ["Elston RC", "Stewart J"], "year": 1971, "title": "A general model for the genetic analysis of pedigree data", "container": "Human Heredity", "volume": "21", "pages": "523-542", "doi": "10.1159/000152448"},
+    "young2007": {"authors": ["Young ID"], "year": 2007, "title": "Introduction to Risk Calculation in Genetic Counseling, 3rd edition", "container": "Oxford University Press, Oxford"}
   },
   "programs": {
     "phenopackets": {"name": "Phenopackets", "refs": ["phenopackets2022"]},
@@ -55,6 +57,8 @@
     "cosegregation": {"name": "Co-segregation, and its strength as evidence (PP1, BS4)", "refs": ["thompson2003", "jarvik2016", "richards2015", "tavtigian2018"]},
     "graphical-models": {"name": "Pedigrees as Bayesian networks", "refs": ["lauritzen2003"]},
     "kinship": {"name": "Kinship and inbreeding coefficients", "refs": ["wright1922"]},
-    "networkx": {"name": "NetworkX", "refs": ["networkx2008"]}
+    "networkx": {"name": "NetworkX", "refs": ["networkx2008"]},
+    "risk-calculation": {"name": "Risk calculation in genetic counselling, with Bayesian tables", "refs": ["young2007"]},
+    "peeling": {"name": "The likelihood of a pedigree, worked out one person at a time (peeling)", "refs": ["elston1971"]}
   }
 }

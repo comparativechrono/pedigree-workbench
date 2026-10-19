@@ -43,6 +43,8 @@
       .replace(/^$/, 'family') || 'family';
   const joinPath = (dir, name) => expand(dir).replace(/\/+$/, '') + '/' + name;
   const GA4GH = ['pedigree', 'family', 'cohort', 'phenopacket'];
+  // (the kinds of file the Risk tab reads)
+  const RISK_KINDS = ['studio', 'ped', 'mped', 'pedigree', 'family'];
   const KIND = () => MG.app.kindNames || {};
   const icon = (n) => MG.icon(n);
 
@@ -1047,7 +1049,7 @@
         .join('');
       const m = MG.modal(
         'Python for the tools',
-        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python.</p>
+        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python, and so does the Risk tab, to read GA4GH files.</p>
          <table class="table small"><tr><th>Package</th><th>Version</th></tr>${rows}</table>
          <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
          <div class="prompt-actions"><button class="btn" data-x="start" type="button">${K.state === 'ready' ? 'Restart Python' : 'Start Python now'}</button></div>`
@@ -1120,6 +1122,11 @@
         b.addEventListener('click', () => MG.app.showWorkbench('studio'));
         list.prepend(b);
       }
+      if (RISK_KINDS.includes(kind)) {
+        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Work out genetic risks'), h('small', 'The chance that each person carries the family’s variant, and that a couple’s child will be affected, in the Risk tab.'));
+        b.addEventListener('click', () => (kind === 'studio' ? MG.app.riskOpen({ source: 'studio' }) : MG.app.showWorkbench('risk')));
+        list.appendChild(b);
+      }
       panel.appendChild(list);
       panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -1152,6 +1159,11 @@
         b.addEventListener('click', () => this.choose(t.id, t.id === 'terms' ? { drawing: path } : { [mainField(t).key]: path }));
         list.appendChild(b);
       });
+      if (RISK_KINDS.includes(kind)) {
+        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Work out genetic risks'), h('small', 'The chance that each person carries the family’s variant, and that a couple’s child will be affected, in the Risk tab.'));
+        b.addEventListener('click', () => MG.app.riskOpen({ source: path }));
+        list.appendChild(b);
+      }
       if (!tools.length) list.appendChild(h('p.muted', 'None of the tools reads this kind of file, but you can open it in the Files tab to look at it.'));
       panel.appendChild(list);
       // what is in it: a picture's size, from the browser; anything else, from Python
@@ -1586,6 +1598,7 @@
     if (kind === 'studio') add('pedigree', 'Open in Studio', () => MG.app.studioOpen(p));
     add('eye', 'Look at it', () => MG.app.editFile(p));
     if (GA4GH.includes(kind)) add('badgeCheck', 'Check', () => MG.app.useTool('validate', { input: p }));
+    if (RISK_KINDS.includes(kind)) add('percent', 'Risks', () => MG.app.riskOpen({ source: p }));
     if (kind !== 'other') add('convert', 'More…', () => MG.app.toolsFor(p));
     add('download', 'Download', () => downloadFile(p));
     chip.appendChild(acts);
