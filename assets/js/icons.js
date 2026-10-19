@@ -135,6 +135,8 @@
     convert: '<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>',
     route: '<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 6H15a3.5 3.5 0 0 1 0 7H9a3.5 3.5 0 0 0 0 7h7.5"/>',
     badgeCheck: '<path d="M12 3l2.4 1.8 3 .2.9 2.8 2.2 2-.9 2.8.9 2.8-2.2 2-.9 2.8-3 .2L12 21l-2.4-1.8-3-.2-.9-2.8-2.2-2 .9-2.8-.9-2.8 2.2-2 .9-2.8 3-.2z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+    // (the Risk tab)
+    percent: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.6"/><circle cx="17" cy="17" r="2.6"/>',
   };
   window.MG = window.MG || {};
   window.MG.icon = function (name, cls) {

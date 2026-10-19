@@ -10,28 +10,28 @@
   "pedgen": {
     "package": "PedGen",
     "folder": "PedGen",
-    "version": "0.1.4.dev12+g7dc59b541",
-    "wheel": "pedgen-0.1.4.dev12+g7dc59b541-py3-none-any.whl",
-    "sha256": "f93ef233973bd1937c7798ab442f0c7c73e91353918a914add96d694b1a0a78c",
-    "from": "https://github.com/comparativechrono/pedigree-generator",
-    "files_sha256": "29716633d4adc5c95df4e45cdf72cab6a792182c7067700532748a657dcdb24f"
+    "version": "0.1.4.dev13+g93a642d20",
+    "wheel": "pedgen-0.1.4.dev13+g93a642d20-py3-none-any.whl",
+    "sha256": "d5c7f7e27a428c7be52f87ba2a0aea7986183fa83b68accdebc9d5b40f023f31",
+    "from": "https://github.com/comparativechrono/pedigree-generator/pull/5",
+    "files_sha256": "78e5cbf5c842774cfbbd27dd27623aa63b9502e3951bb0048bdf577e36e0a263"
   },
   "pedinterp": {
     "package": "PedInterp",
     "folder": "PedInterp",
-    "version": "0.1.8.dev15+g38f31c77c",
-    "wheel": "pedinterp-0.1.8.dev15+g38f31c77c-py3-none-any.whl",
-    "sha256": "6c41cd4de3285ec73afd222b8ded191559da43f80e283e8fd08ca1c3eabadc98",
-    "from": "https://github.com/comparativechrono/pedigree-interpreter",
-    "files_sha256": "e0c938ea91188ebb1e8b37a6102c0c46ade0b5b7a0fe11f124f7ba5ae858b161"
+    "version": "0.1.8.dev17+g60fa22be7",
+    "wheel": "pedinterp-0.1.8.dev17+g60fa22be7-py3-none-any.whl",
+    "sha256": "32aeb9dc3613842ed7134008f3110efa8273aa42aef1eddf22da33cc9de197b6",
+    "from": "https://github.com/comparativechrono/pedigree-interpreter/pull/7",
+    "files_sha256": "a5aa0bed466e1a4d6d0510b1b30e1403c5b2227089dee20f3008b80a7702c372"
   },
   "pednet": {
     "package": "pednet",
     "folder": "pednet",
-    "version": "2.0.0",
-    "wheel": "pednet-2.0.0-py3-none-any.whl",
-    "sha256": "fcea6b5218cdd47a13d62f47008737aedf5ee0ae289d9205d8106fe64b22d519",
-    "from": "https://pypi.org/project/PedNet/",
-    "files_sha256": "593936fd50adc5e9ebc27a36b120e829c776f316d87fe683926a544cd9da075f"
+    "version": "2.1.0",
+    "wheel": "pednet-2.1.0-py3-none-any.whl",
+    "sha256": "b1017cac5257d51b5bd3c2ed4e929a3827514c7a02598a9f4d7b40bfabad835e",
+    "from": "https://github.com/comparativechrono/PedNet/pull/6",
+    "files_sha256": "a973c35c68bd6fe6ad546ba6400ae35a4a3fa062996c47e0db2598599e505023"
   }
 }

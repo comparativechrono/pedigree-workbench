@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="assets/css/pipe.css">
 <link rel="stylesheet" href="assets/css/wb.css">
 <link rel="stylesheet" href="assets/css/pedwb.css">
+<link rel="stylesheet" href="assets/css/risk.css">
 </head>
 <body data-page="workbench" data-title="Pedigree workbench">
 <div class="app">
@@ -53,6 +54,7 @@
         <button class="wb-tab rail-btn" type="button" id="helpRail" title="Show the help (Ctrl+\)" hidden><!--ICON:sidebarOpen--><span>Help</span></button>
         <button class="wb-tab on" type="button" role="tab" data-wb="studio" title="Pedigree Studio: draw a family"><!--ICON:pedigree--><span class="lbl">Studio</span><span class="dot"></span></button>
         <button class="wb-tab" type="button" role="tab" data-wb="tools" title="Tools: convert, match terms, check – point and click"><!--ICON:wrench--><span class="lbl">Tools</span><span class="dot"></span></button>
+        <button class="wb-tab" type="button" role="tab" data-wb="risk" title="Risk: the chance that someone carries a family’s variant, or that a child will be affected"><!--ICON:percent--><span class="lbl">Risk</span><span class="dot"></span></button>
         <button class="wb-tab" type="button" role="tab" data-wb="editor" title="Files"><!--ICON:folder--><span class="lbl">Files</span><span class="dot"></span></button>
         <button class="wb-tab" type="button" role="tab" data-wb="notebook" title="Notebook: Python, with the pedigree packages"><!--ICON:notebook--><span class="lbl">Notebook</span><span class="dot"></span></button>
         <button class="wb-tab" type="button" role="tab" data-wb="terminal" title="Terminal: the pedigree programs as commands"><!--ICON:terminal--><span class="lbl">Terminal</span><span class="dot"></span></button>
@@ -60,6 +62,7 @@
       <div class="wb-body">
         <div class="wb-pane" data-wb="studio"><div id="studioRoot" class="pw-root"></div></div>
         <div class="wb-pane" data-wb="tools" hidden><div id="toolsRoot" class="pw-root"></div></div>
+        <div class="wb-pane" data-wb="risk" hidden><div id="riskRoot" class="pw-root"></div></div>
         <div class="wb-pane" data-wb="editor" hidden><div id="edRoot"></div></div>
         <div class="wb-pane" data-wb="notebook" hidden><div id="nbRoot"></div></div>
         <div class="wb-pane" data-wb="terminal" hidden><div id="termRoot"></div></div>
@@ -101,6 +104,9 @@
 <script src="assets/js/studio-tab.js"></script>
 <script src="assets/js/schematic.js"></script>
 <script src="assets/js/tools.js"></script>
+<script src="assets/js/risk-engine.js"></script>
+<script src="assets/js/risk-read.js"></script>
+<script src="assets/js/risk-tab.js"></script>
 <script src="assets/js/page-wb.js"></script>
 <script src="assets/js/workbench.js"></script>
 </body>

@@ -43,6 +43,8 @@
       .replace(/^$/, 'family') || 'family';
   const joinPath = (dir, name) => expand(dir).replace(/\/+$/, '') + '/' + name;
   const GA4GH = ['pedigree', 'family', 'cohort', 'phenopacket'];
+  // (the kinds of file the Risk tab reads)
+  const RISK_KINDS = ['studio', 'ped', 'mped', 'pedigree', 'family'];
   const KIND = () => MG.app.kindNames || {};
   const icon = (n) => MG.icon(n);
 
@@ -102,7 +104,35 @@
   /** the enlargement given for Picture → PED file, or '' to leave it to PedInterp */
   const upscaleOf = (v) => String(v.upscale == null ? '' : v.upscale).trim();
   /** the families of a PED file, in Python, for PedNet's tools */
-  const readFamilies = (v) => `families = pednet.read_ped(${pyq(v.input)}${v.family ? `, ${pyq(v.family)}` : ''})   # {family id: pedigree}`;
+  /** a GA4GH Pedigree or Phenopackets Family, which PedNet reads as well as PED files */
+  const isGA4GHFile = (p) => ['pedigree', 'family'].includes(MG.app.pedKind(p || ''));
+  const readFamilies = (v) => {
+    if (!isGA4GHFile(v.input)) return `families = pednet.read_ped(${pyq(v.input)}${v.family ? `, ${pyq(v.family)}` : ''})   # {family id: pedigree}`;
+    const opts = [v.family ? `family=${pyq(v.family)}` : '', (v.condition || '').trim() ? `condition=${pyq(v.condition.trim())}` : '', v.unrecorded ? `unrecorded=${pyq(v.unrecorded)}` : ''].filter(Boolean);
+    return `families = pednet.read_ga4gh(${pyq(v.input)}${opts.map((o) => ', ' + o).join('')})   # {family id: pedigree}`;
+  };
+  /** PedNet's options for a GA4GH file: the condition, and what people with no record of it are taken to be */
+  const ga4ghArgs = (v) => (isGA4GHFile(v.input) ? [...optArgs((v.condition || '').trim(), '--condition', (v.condition || '').trim()), ...optArgs(v.unrecorded, '--unrecorded', v.unrecorded)] : []);
+  const GA4GH_FIELDS = [
+    { key: 'condition', type: 'text', label: 'Condition (optional)', def: '', placeholder: 'any of the file’s conditions', show: (v) => isGA4GHFile(v.input), help: 'For a GA4GH file that names several conditions, the one that makes someone affected, by its ontology id or its name, such as HP:0000365 or Hearing impairment. Without one, anyone with any of them is affected, and a Phenopackets Family’s own record of who is affected is used.' },
+    { key: 'unrecorded', type: 'select', label: 'People with no record of the condition', def: '', options: [['', 'as the file suggests'], ['unaffected', 'unaffected'], ['unknown', 'not known']], show: (v) => isGA4GHFile(v.input), help: 'A GA4GH Pedigree records who has a condition, but only sometimes who doesn’t. As the file suggests: unaffected if no one in it is recorded as not having it, as in the files studio2ga4gh writes, and not known if anyone is, as in those PedGen and PedInterp write.' }
+  ];
+  /** a GA4GH file's condition, for PedGen and PedInterp: an ontology term and its name, or both left empty */
+  const CONDITION_FIELDS = [
+    { key: 'condId', type: 'text', label: 'The condition’s ontology term (optional)', def: '', placeholder: 'e.g. MONDO:0007739', show: (v) => v.ga4gh, help: 'Without one, the GA4GH Pedigree names the condition MONDO:0000001, disease.' },
+    { key: 'condLabel', type: 'text', label: 'Its name', def: '', placeholder: 'e.g. Huntington disease', show: (v) => v.ga4gh && (v.condId || '').trim() }
+  ];
+  const conditionOf = (v) => (v.ga4gh && (v.condId || '').trim() ? [v.condId.trim(), (v.condLabel || '').trim()] : null);
+  const checkCondition = (v) => {
+    const c = conditionOf(v);
+    if (!c) return '';
+    if (!/^[A-Za-z][\w.-]*:\S+$/.test(c[0])) return 'Give the condition’s ontology term as a prefix and a number, such as MONDO:0007739 or HP:0000365.';
+    return c[1] ? '' : 'Give the condition’s name too, such as Huntington disease.';
+  };
+  const conditionPy = (v) => {
+    const c = conditionOf(v);
+    return c ? `, condition=(${pyq(c[0])}, ${pyq(c[1])})` : '';
+  };
   /** the file of ids for phenotk filter --id-list ('' when no ids are given) */
   const idFile = (v) => ((v.ids || '').trim() && v.out ? joinPath(dirOf(v.out), stemOf(v.out) + '-ids.txt') : '');
 
@@ -269,20 +299,23 @@
         { key: 'input', type: 'file', label: 'The picture', kinds: ['image'] },
         { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the PED file too.' },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
-        { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across, which reads best, and says how much under the table. Give a number to enlarge it more or less.' }
+        { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across, which reads best, and says how much under the table. Give a number to enlarge it more or less.' },
+        { key: 'ga4gh', type: 'check', label: 'Write a GA4GH Pedigree too', def: false, help: 'FAMILY_ga4gh-pedigree.json, which the GA4GH tools read: ga4gh2studio, phenopacket-toolkit and PedNet, and the Risk tab. The affected have the condition, and the unaffected have it marked as looked for and not found.' },
+        ...CONDITION_FIELDS
       ],
-      check: (v) => oneWord('family id', v.family) || (upscaleOf(v) && !(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0, or leave it empty.' : ''),
-      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(upscaleOf(v), '--upscale', num(v.upscale))],
-      outputs: (v) => [joinPath(v.outdir, v.family + '.ped')],
+      check: (v) => oneWord('family id', v.family) || (upscaleOf(v) && !(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0, or leave it empty.' : '') || checkCondition(v),
+      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(upscaleOf(v), '--upscale', num(v.upscale)), ...optArgs(v.ga4gh, '--ga4gh'), ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])],
+      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json')].filter(Boolean),
       // (what it prints is the table it read, which is better kept whole than wrapped)
       stdoutIsResult: true,
       python: (v) =>
-        ['from PedInterp import pedigree_processing, PED_export', '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`].join('\n'),
+        [`from PedInterp import pedigree_processing, PED_export${v.ga4gh ? ', GA4GH_export' : ''}`, '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`, ...(v.ga4gh ? [`print("wrote", GA4GH_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}${conditionPy(v)}))`] : [])].join('\n'),
       next: (res, v) => {
         const ped = joinPath(v.outdir, v.family + '.ped');
         return [
           ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
-          ['network', 'Look at it with PedNet', () => MG.app.useTool('pednet-graph', { input: ped })]
+          ['network', 'Look at it with PedNet', () => MG.app.useTool('pednet-graph', { input: ped })],
+          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? joinPath(v.outdir, v.family + '_ga4gh-pedigree.json') : ped })]
         ];
       }
     },
@@ -677,10 +710,11 @@
       pkg: 'PedNet',
       what: 'See how a family is put together: its loops, how closely its people are related, who is inbred, which affected people are closest, and network measures of the pedigree.',
       about:
-        'PedNet treats a pedigree as a directed graph, with an edge from each parent to each child. It finds the loops (a marriage between relatives makes one), works out the kinship coefficient of every pair of people and the inbreeding coefficient of each person, and names the relationships of the affected people who are related, the closest first. It also gives network measures of the pedigree, and of the pattern of affected people in it. The kinship coefficients can be saved as a table, and the graph as GraphML, for network tools such as Gephi or Cytoscape. In an MPED file, the first condition is taken as who is affected.',
+        'PedNet treats a pedigree as a directed graph, with an edge from each parent to each child. It finds the loops (a marriage between relatives makes one), works out the kinship coefficient of every pair of people and the inbreeding coefficient of each person, and names the relationships of the affected people who are related, the closest first. It also gives network measures of the pedigree, and of the pattern of affected people in it. The kinship coefficients can be saved as a table, and the graph as GraphML, for network tools such as Gephi or Cytoscape. In an MPED file, the first condition is taken as who is affected. PedNet reads GA4GH Pedigrees and Phenopackets Families too, such as those that studio2ga4gh, PedGen and PedInterp write.',
       help: 'h-tool-pednet',
       fields: [
-        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
+        { key: 'input', type: 'file', label: 'The PED or GA4GH file', kinds: ['ped', 'mped', 'pedigree', 'family'] },
+        ...GA4GH_FIELDS,
         { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file', help: 'The kinship table and the graph need one family, if the file holds more than one.' },
         { key: 'kinship', type: 'check', label: 'Save everyone’s kinship coefficients as a table', def: false },
         { key: 'xlinked', type: 'check', label: 'For the X chromosome', def: false, show: (v) => v.kinship },
@@ -689,7 +723,7 @@
         { key: 'mating', type: 'check', label: 'The mating graph, with a node for each couple', def: false, show: (v) => v.graphml },
         { key: 'gout', type: 'path', label: 'Save the graph as', def: (v) => `~/results/${stemOf(v.input)}${v.family ? '-' + v.family : ''}${v.mating ? '-mating' : ''}.graphml`, show: (v) => v.graphml }
       ],
-      argv: (v) => ['pednet', 'graph', v.input, ...optArgs(v.family, '--family', v.family), ...(v.kinship ? ['--kinship', v.kinout, ...optArgs(v.xlinked, '--x')] : []), ...(v.graphml ? ['--graphml', v.gout, ...optArgs(v.mating, '--mating')] : [])],
+      argv: (v) => ['pednet', 'graph', v.input, ...ga4ghArgs(v), ...optArgs(v.family, '--family', v.family), ...(v.kinship ? ['--kinship', v.kinout, ...optArgs(v.xlinked, '--x')] : []), ...(v.graphml ? ['--graphml', v.gout, ...optArgs(v.mating, '--mating')] : [])],
       outputs: (v) => [v.kinship && v.kinout, v.graphml && v.gout].filter(Boolean),
       stdoutIsResult: true,
       python: (v) =>
@@ -739,7 +773,8 @@
         'The default method is exact. PedNet treats the pedigree as a Bayesian network of genotypes, works out the likelihood of who is affected under each mode, summed over everyone’s genotypes and averaged over a range of penetrances, and turns the likelihoods into probabilities. The other two methods are classifiers that learnt from simulated families: one reads the pattern of affected people in the graph, and the other is the original PedNet’s classifier of network measures, which tells dominant from recessive by a vote. With the first two methods, a mode is called only when its probability reaches the threshold. Otherwise the answer is “uncertain”, with the probabilities.',
       help: 'h-tool-pednet',
       fields: [
-        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
+        { key: 'input', type: 'file', label: 'The PED or GA4GH file', kinds: ['ped', 'mped', 'pedigree', 'family'] },
+        ...GA4GH_FIELDS,
         { key: 'method', type: 'select', label: 'Method', def: 'likelihood', options: [['likelihood', 'exact likelihoods'], ['patterns', 'the pattern of affected people (a classifier)'], ['metrics', 'network measures (the original PedNet: dominant or recessive)']] },
         { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file' },
         { key: 'together', type: 'check', label: 'The families have the same condition: give one answer for them all', def: false, show: (v) => v.method === 'likelihood' && !v.family },
@@ -757,7 +792,7 @@
       },
       argv: (v) => {
         const lik = v.method === 'likelihood';
-        return ['pednet', 'mode', v.input, ...optArgs(!lik, '--method', v.method), ...optArgs(v.family, '--family', v.family), ...optArgs(lik && v.together, '--together'), ...optArgs(lik && v.proband, '--proband', v.proband), ...optArgs(lik && penList(v.penetrance) !== PENETRANCE, '--penetrance', penList(v.penetrance)), ...optArgs(lik && Number(v.phenocopy) !== 0.001, '--phenocopy', num(v.phenocopy)), ...optArgs(v.method !== 'metrics' && Number(v.threshold) !== 0.8, '--threshold', num(v.threshold))];
+        return ['pednet', 'mode', v.input, ...ga4ghArgs(v), ...optArgs(!lik, '--method', v.method), ...optArgs(v.family, '--family', v.family), ...optArgs(lik && v.together, '--together'), ...optArgs(lik && v.proband, '--proband', v.proband), ...optArgs(lik && penList(v.penetrance) !== PENETRANCE, '--penetrance', penList(v.penetrance)), ...optArgs(lik && Number(v.phenocopy) !== 0.001, '--phenocopy', num(v.phenocopy)), ...optArgs(v.method !== 'metrics' && Number(v.threshold) !== 0.8, '--threshold', num(v.threshold))];
       },
       stdoutIsResult: true,
       python: (v) => {
@@ -782,8 +817,9 @@
         'For each variant, PedNet works out the likelihood of everyone’s genotypes and of who is affected if the variant causes the condition, and if it doesn’t. The ratio of the two is a Bayes factor, and its strength is given as evidence for co-segregation (PP1) or against it (BS4) under the ACMG/AMP guidelines. The variants are ranked by their odds of being the cause, which also take account of whether a variant’s chromosome suits the family’s mode of inheritance. Pairs of variants in one gene that an affected person carries both of are scored too, as compound heterozygotes under the recessive modes. The variants come from a VCF file, whose samples must be named with the PED file’s ids, or from a table with a column for each person, like the one Simulate a family writes. If the PED file holds several families, they are taken to have the same condition, and each variant is ranked by its evidence across the families in which an affected person carries it.',
       help: 'h-tool-pednet',
       fields: [
-        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'], pair: 'variants' },
+        { key: 'input', type: 'file', label: 'The PED or GA4GH file', kinds: ['ped', 'mped', 'pedigree', 'family'], pair: 'variants' },
         { key: 'variants', type: 'file', label: 'The variants (VCF, or a table of genotypes)', kinds: ['vcf', 'variants'], pair: 'input', primary: true },
+        ...GA4GH_FIELDS,
         { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file' },
         { key: 'modes', type: 'select', label: 'Modes of inheritance', def: ALL_MODES, options: [[ALL_MODES, 'all four, weighed up'], ['AD', 'autosomal dominant'], ['AR', 'autosomal recessive'], ['XLR', 'X-linked recessive'], ['XLD', 'X-linked dominant'], ['AD,AR', 'autosomal: dominant or recessive']] },
         { key: 'maxfreq', type: 'text', label: 'Leave out variants commoner than (optional)', def: '', placeholder: 'an allele frequency, e.g. 0.01' },
@@ -794,7 +830,7 @@
       check: (v) => ((v.maxfreq || '').trim() && !(Number(v.maxfreq) >= 0 && Number(v.maxfreq) <= 1) ? 'Give the frequency as a number between 0 and 1.' : !/^\d+$/.test(String(v.top == null ? '' : v.top).trim()) ? 'Give how many to show as a whole number (0 for all).' : ''),
       argv: (v) => {
         const vcf = MG.app.pedKind(v.variants || '') === 'vcf';
-        return ['pednet', 'rank', v.input, v.variants, ...optArgs(v.family, '--family', v.family), ...optArgs(v.modes !== ALL_MODES, '--modes', v.modes), ...optArgs((v.maxfreq || '').trim(), '--max-frequency', num(v.maxfreq)), ...optArgs(vcf && v.passed, '--passed-only'), ...optArgs(Number(v.top) !== 20, '--top', String(Math.round(Number(v.top) || 0))), ...optArgs(v.out, '--out', v.out)];
+        return ['pednet', 'rank', v.input, v.variants, ...ga4ghArgs(v), ...optArgs(v.family, '--family', v.family), ...optArgs(v.modes !== ALL_MODES, '--modes', v.modes), ...optArgs((v.maxfreq || '').trim(), '--max-frequency', num(v.maxfreq)), ...optArgs(vcf && v.passed, '--passed-only'), ...optArgs(Number(v.top) !== 20, '--top', String(Math.round(Number(v.top) || 0))), ...optArgs(v.out, '--out', v.out)];
       },
       outputs: (v) => [v.out].filter(Boolean),
       stdoutIsResult: true,
@@ -853,6 +889,8 @@
         { key: 'minAffected', type: 'number', label: 'At least this many affected', def: (v) => (v.mode === 'AR' ? 2 : 1), min: 1, max: 20, step: 1, help: 'PedGen makes families until one has as many, as families come to notice through their affected members.' },
         { key: 'clean', type: 'check', label: 'Partners never carry the allele', def: false, help: 'Their parents and grandparents, if they’re added, still can. A frequency of 0 keeps the allele to the founder’s descendants.' },
         { key: 'genotypes', type: 'check', label: 'Save everyone’s genotypes too, to rank as a candidate variant', def: true },
+        { key: 'ga4gh', type: 'check', label: 'Write a GA4GH Pedigree too', def: false, help: 'FAMILY_ga4gh-pedigree.json, which the GA4GH tools read: ga4gh2studio, phenopacket-toolkit and PedNet, and the Risk tab. The affected have the condition, and the unaffected have it marked as looked for and not found.' },
+        ...CONDITION_FIELDS,
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' }
       ],
       check: (v) => {
@@ -863,7 +901,7 @@
         if ((v.seed || '').trim() && !/^-?\d+$/.test(v.seed.trim())) return 'The seed must be a whole number.';
         if (![v.partners, v.ancestors, v.freq, v.cousins].every(share)) return 'Give the chances and the frequency as numbers between 0 and 1.';
         if (!whole(v.minAffected, 1, 20)) return 'Give how many must be affected as a whole number from 1 to 20.';
-        return oneWord('family id', v.family);
+        return oneWord('family id', v.family) || checkCondition(v);
       },
       argv: (v) => [
         'pedgen', '-m', v.mode, '-g', num(v.generations), '-c', num(v.children), '-f', v.family, '-d', v.outdir,
@@ -874,26 +912,31 @@
         ...optArgs(v.clean, '--unaffected-partners'),
         ...optArgs(Number(v.cousins) > 0, '--cousins', num(v.cousins)),
         ...optArgs(Number(v.minAffected) > 1, '--min-affected', num(v.minAffected)),
-        ...optArgs(v.genotypes, '--genotypes', joinPath(v.outdir, v.family + '-genotypes.tsv'))
+        ...optArgs(v.genotypes, '--genotypes', joinPath(v.outdir, v.family + '-genotypes.tsv')),
+        ...optArgs(v.ga4gh, '--ga4gh'),
+        ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])
       ],
-      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.genotypes && joinPath(v.outdir, v.family + '-genotypes.tsv')].filter(Boolean),
+      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.genotypes && joinPath(v.outdir, v.family + '-genotypes.tsv'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json')].filter(Boolean),
       python: (v) =>
         [
-          `from PedGen import pedigree_generator, gen_PED_export${v.genotypes ? ', gen_genotype_export' : ''}`,
+          `from PedGen import pedigree_generator, gen_PED_export${v.genotypes ? ', gen_genotype_export' : ''}${v.ga4gh ? ', gen_GA4GH_export' : ''}`,
           '',
           `df = pedigree_generator(max_children=${num(v.children)}, FamilyID=${pyq(v.family)}, mode=${pyq(v.mode)}, generation_count=${num(v.generations)},`,
           `                        SpouseLikelihood=${num(v.partners)}, AffectedSpouse=${v.clean ? 'False' : 'True'}, BackpropLikelihood=${num(v.ancestors)},`,
           `                        alt_freq=${num(v.freq)}, seed=${/^-?\d+$/.test((v.seed || '').trim()) ? BigInt(v.seed.trim()).toString() : 'None'}${Number(v.cousins) > 0 ? `, CousinLikelihood=${num(v.cousins)}` : ''}${Number(v.minAffected) > 1 ? `, min_affected=${num(v.minAffected)}` : ''})`,
           'print(len(df), "people,", (df["Phenotype"] == 2).sum(), "affected")',
           `print("wrote", gen_PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`,
-          ...(v.genotypes ? [`print("wrote", gen_genotype_export(df, ${pyq(joinPath(v.outdir, v.family + '-genotypes.tsv'))}, alt_freq=${num(v.freq)}))`] : [])
+          ...(v.genotypes ? [`print("wrote", gen_genotype_export(df, ${pyq(joinPath(v.outdir, v.family + '-genotypes.tsv'))}, alt_freq=${num(v.freq)}))`] : []),
+          ...(v.ga4gh ? [`print("wrote", gen_GA4GH_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}${conditionPy(v)}))`] : [])
         ].join('\n'),
       next: (res, v) => {
         const ped = joinPath(v.outdir, v.family + '.ped');
         return [
           ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
           ['network', 'Its mode of inheritance', () => MG.app.useTool('pednet-mode', { input: ped })],
-          ...(v.genotypes ? [['dna', 'Rank its variant', () => MG.app.useTool('pednet-rank', { input: ped, variants: joinPath(v.outdir, v.family + '-genotypes.tsv') })]] : [])
+          ...(v.genotypes ? [['dna', 'Rank its variant', () => MG.app.useTool('pednet-rank', { input: ped, variants: joinPath(v.outdir, v.family + '-genotypes.tsv') })]] : []),
+          // (the Risk tab, with the simulation's model: its mode and allele, full penetrance)
+          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? joinPath(v.outdir, v.family + '_ga4gh-pedigree.json') : ped, mode: v.mode, allele: Number(v.freq), penetrance: 100, phenocopy: 0, mutation: 0 })]
         ];
       }
     }
@@ -1047,9 +1090,9 @@
         .join('');
       const m = MG.modal(
         'Python for the tools',
-        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python.</p>
+        `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python, and so does the Risk tab, to read GA4GH files.</p>
          <table class="table small"><tr><th>Package</th><th>Version</th></tr>${rows}</table>
-         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
+         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedNet 2.1.0, PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
          <div class="prompt-actions"><button class="btn" data-x="start" type="button">${K.state === 'ready' ? 'Restart Python' : 'Start Python now'}</button></div>`
       );
       m.box.querySelector('[data-x="start"]').addEventListener('click', () => {
@@ -1120,6 +1163,11 @@
         b.addEventListener('click', () => MG.app.showWorkbench('studio'));
         list.prepend(b);
       }
+      if (RISK_KINDS.includes(kind)) {
+        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Work out genetic risks'), h('small', 'The chance that each person carries the family’s variant, and that a couple’s child will be affected, in the Risk tab.'));
+        b.addEventListener('click', () => (kind === 'studio' ? MG.app.riskOpen({ source: 'studio' }) : MG.app.showWorkbench('risk')));
+        list.appendChild(b);
+      }
       panel.appendChild(list);
       panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -1152,6 +1200,11 @@
         b.addEventListener('click', () => this.choose(t.id, t.id === 'terms' ? { drawing: path } : { [mainField(t).key]: path }));
         list.appendChild(b);
       });
+      if (RISK_KINDS.includes(kind)) {
+        const b = h('button.tl-choice', { type: 'button' }, h('b', 'Work out genetic risks'), h('small', 'The chance that each person carries the family’s variant, and that a couple’s child will be affected, in the Risk tab.'));
+        b.addEventListener('click', () => MG.app.riskOpen({ source: path }));
+        list.appendChild(b);
+      }
       if (!tools.length) list.appendChild(h('p.muted', 'None of the tools reads this kind of file, but you can open it in the Files tab to look at it.'));
       panel.appendChild(list);
       // what is in it: a picture's size, from the browser; anything else, from Python
@@ -1586,6 +1639,7 @@
     if (kind === 'studio') add('pedigree', 'Open in Studio', () => MG.app.studioOpen(p));
     add('eye', 'Look at it', () => MG.app.editFile(p));
     if (GA4GH.includes(kind)) add('badgeCheck', 'Check', () => MG.app.useTool('validate', { input: p }));
+    if (RISK_KINDS.includes(kind)) add('percent', 'Risks', () => MG.app.riskOpen({ source: p }));
     if (kind !== 'other') add('convert', 'More…', () => MG.app.toolsFor(p));
     add('download', 'Download', () => downloadFile(p));
     chip.appendChild(acts);

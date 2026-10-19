@@ -114,6 +114,10 @@
     tools: (pane) => {
       MG.app.tools = new MG.ToolsTab(pane.querySelector('#toolsRoot'), { fs: MG.app.fs });
     },
+    risk: (pane) => {
+      MG.app.risk = new MG.RiskTab(pane.querySelector('#riskRoot'), { fs: MG.app.fs });
+      return MG.app.risk.ready;
+    },
     terminal: () => {},
     notebook: () => openFirstNotebook(),
     editor: (pane) => {
@@ -124,6 +128,7 @@
   MG.page.shown = {
     studio: (pane, opts) => MG.app.studio && MG.app.studio.shown(opts),
     tools: (pane, opts) => MG.app.tools && MG.app.tools.shown(opts),
+    risk: (pane, opts) => MG.app.risk && !(opts && opts.resize) && MG.app.risk.shown(),
     notebook: () => MG.app.nbApp && MG.app.nbApp.shown(),
     terminal: (pane, opts) => {
       if (MG.app.term && !(opts && opts.resize) && !window.matchMedia('(max-width: 900px)').matches) MG.app.term.focus();
@@ -201,13 +206,16 @@
   MG.app.fileActions = (path) => {
     const k = MG.app.pedKind(path);
     const tool = (id) => () => MG.app.useTool(id, { input: path });
+    const risk = ['percent', 'Risks', 'The chance that each person carries the family’s variant, and that a couple’s child will be affected (Risk tab)', () => MG.app.riskOpen({ source: path })];
     const out = [];
     if (k === 'studio') {
       out.push(['pedigree', 'Open in Studio', 'Open this drawing in the Studio tab', () => MG.app.studioOpen(path)]);
+      out.push(risk);
       out.push(['convert', 'Convert…', 'Make GA4GH, Phenopackets or PED files from this drawing (Tools tab)', () => MG.app.toolsFor(path)]);
     } else if (k === 'pedigree' || k === 'family') {
       out.push(['pedigree', 'Draw in Studio', 'Draw this family in Pedigree Studio (ga4gh2studio)', tool('ga4gh2studio')]);
       out.push(['badgeCheck', 'Check', 'Check this file against the GA4GH and Phenopackets standards (Tools tab)', tool('validate')]);
+      out.push(risk);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'cohort' || k === 'phenopacket') {
       out.push(['badgeCheck', 'Check', 'Check this file against the Phenopackets standard (Tools tab)', tool('validate')]);
@@ -216,6 +224,7 @@
       out.push(['pedigree', 'Draw in Studio', 'Draw this PED file in Pedigree Studio (ped2studio)', tool('ped2studio')]);
       out.push(['table', 'Summary', 'See what’s in this file and whether it’s valid (mpedtools)', tool('mped-info')]);
       out.push(['network', 'Analyse', 'The family as a graph: its loops, kinship and closest affected relatives (PedNet)', tool('pednet-graph')]);
+      out.push(risk);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'image') {
       out.push(['table', 'Read it into a PED file', 'Read the pedigree in this picture, and write it as a PED file (PedInterp)', tool('pedinterp')]);

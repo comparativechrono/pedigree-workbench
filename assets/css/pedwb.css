@@ -41,7 +41,7 @@
   .st-sep { display: none; }
 }
 
-/* ---------------- the tab bar: five tabs keep their names until the bench is narrow ---------------- */
+/* ---------------- the tab bar: the six tabs keep their names until the bench is narrow ---------------- */
 @container bench (max-width: 1020px) {
   .wb-tab:not(.on) .lbl { display: inline; }
 }

@@ -1,6 +1,6 @@
-<!-- id: h-tool-pedinterp | title: Picture → PED file | group: Tools | summary: PedInterp: a pedigree read from a picture of one | keys: pedinterp picture image png jpeg jpg scan paper photo screenshot read ocr tesseract symbols lines numbering numbered ped convert -->
+<!-- id: h-tool-pedinterp | title: Picture → PED file | group: Tools | summary: PedInterp: a pedigree read from a picture of one | keys: pedinterp picture image png jpeg jpg scan paper photo screenshot read ocr tesseract symbols lines numbering numbered ped convert ga4gh condition -->
 <h1><!--ICON:image-->Picture → PED file</h1>
-<p class="lede">PedInterp reads a picture of a pedigree, such as one in a paper, a clinic letter or a scan, and writes it as a PED file. It finds the symbols and the lines between them, and so who is male or female, who is affected, and who are partners, parents and children.</p>
+<p class="lede">PedInterp reads a picture of a pedigree, such as one in a paper, a clinic letter or a scan, and writes it as a PED file, and as a GA4GH Pedigree if you ask. It finds the symbols and the lines between them, and so who is male or female, who is affected, and who are partners, parents and children.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="pedinterp" data-input="/data/examples/lynch.png">Try it with the picture of the Lynch family</button> <button class="do" type="button" data-edit="/data/examples/lynch.png">Look at the picture</button></div>
 
 <h2>The form</h2>
@@ -9,6 +9,7 @@
   <dt>Family id</dt><dd>The family's id in the PED file, which also names the file. It starts as the picture's name.</dd>
   <dt>Save in</dt><dd>The folder for the PED file: <code>~/results</code>, unless you choose another.</dd>
   <dt>Enlarge the picture by</dt><dd>Leave it empty, as it is, and PedInterp chooses: it finds the symbols in a copy of the picture 2,000 pixels across, and enlarges the picture so that they are about 200 pixels across, which reads best. A line under the table says how much it enlarged it: 5.6 times for the Lynch family's picture, which is about 1,000 pixels across, and more for a smaller picture, less for a larger one or a scan. There is some room either side: the Lynch picture reads correctly at anything from 4 to 12 times, but not at 3 or 15. If PedInterp warns that a line may have been missed, give a number a little larger or smaller than the one it chose: smaller, if the lines are very thick. It warns, too, if the picture is too small to enlarge enough, or a page too large, which reads better cut down to the pedigree.</dd>
+  <dt>Write a GA4GH Pedigree too</dt><dd>The family as a GA4GH Pedigree, <code>FAMILY_ga4gh-pedigree.json</code>, beside the PED file, which ga4gh2studio, the phenopacket toolkit, PedNet and the Risk tab read. Give the condition as an ontology term and its name, such as <code>MONDO:0007254</code> and <i>breast cancer</i>, or leave them empty for <code>MONDO:0000001</code>, <i>disease</i>. The affected people have the condition, and the unaffected have it marked as looked for and not found. The file notes which picture the family was read from, and how much it was enlarged.</dd>
 </dl>
 
 <h2>What it reads</h2>
@@ -26,6 +27,7 @@ diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) 
 <tr><td><code>-f</code>, <code>--family ID</code></td><td>the family id, which names the PED file (default: the picture's name)</td></tr>
 <tr><td><code>-d</code>, <code>--output-dir FOLDER</code></td><td>where to write the PED file (default: the folder you're in)</td></tr>
 <tr><td><code>--upscale FACTOR</code></td><td>how many times to enlarge the picture (by default, as many as its symbols need: the table says how many)</td></tr>
+<tr><td><code>--ga4gh</code>, <code>--condition ID LABEL</code></td><td>also write the family as a GA4GH Pedigree, <code>FAMILY_ga4gh-pedigree.json</code>, with the condition as an ontology term and its name (default: <code>MONDO:0000001 disease</code>)</td></tr>
 <tr><td><code>--labels tesseract|none</code></td><td>read the labels with Tesseract, or number the people. Here the people are numbered either way, but with <code>none</code> there's no warning that Tesseract isn't there.</td></tr>
 <tr><td><code>-q</code>, <code>--quiet</code></td><td>don't print the table</td></tr>
 </table>

@@ -1,8 +1,16 @@
-<!-- id: h-tool-pednet | title: PedNet: the graph, the mode of inheritance and the variants | group: Tools | summary: The pedigree as a graph; the mode of inheritance; candidate variants ranked by co-segregation | keys: pednet graph network dag directed acyclic loop loops consanguinity kinship inbreeding coefficient relationship centrality graphml gephi cytoscape mode inheritance dominant recessive x-linked likelihood bayesian network classifier variants vcf rank cosegregation co-segregation bayes factor pp1 bs4 acmg amp compound heterozygote check -->
+<!-- id: h-tool-pednet | title: PedNet: the graph, the mode of inheritance and the variants | group: Tools | summary: The pedigree as a graph; the mode of inheritance; candidate variants ranked by co-segregation | keys: pednet graph network dag directed acyclic loop loops consanguinity kinship inbreeding coefficient relationship centrality graphml gephi cytoscape mode inheritance dominant recessive x-linked likelihood bayesian network classifier variants vcf rank cosegregation co-segregation bayes factor pp1 bs4 acmg amp compound heterozygote check ga4gh pedigree phenopackets family condition unrecorded -->
 <h1><!--ICON:network-->PedNet: the graph, the mode of inheritance and the variants</h1>
 <p class="lede">PedNet analyses a pedigree as a graph: a directed acyclic graph, with a node for each person and an edge from each parent to each child. Its three tools in the Tools tab show how a family is put together, weigh up how likely each mode of inheritance is, and rank candidate variants by how well each co-segregates with the condition.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="pednet-graph" data-input="/data/examples/okafor.mped">The Okafor family as a graph</button> <button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/lynch.ped">The Lynch family's mode of inheritance</button></div>
-<p>All three read a PED file. From an MPED file, they take the first condition, and a carrier (3) counts as unknown. A drawing has to be made into a PED file first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>.</p>
+<p>All three read a PED file, a GA4GH Pedigree or a Phenopackets Family. From an MPED file, they take the first condition, and a carrier (3) counts as unknown. A drawing has to be made into one of these first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a> or <a href="#h-tool-studio2ga4gh">Drawing → GA4GH Pedigree and Phenopackets</a>.</p>
+
+<h2>GA4GH files</h2>
+<p>PedNet reads a GA4GH Pedigree or a Phenopackets Family with pedigree-ga4gh, as the other tools do, so it finds the same parents: a sperm or egg donor counts as a parent, and an adoptive parent doesn't. A GA4GH Pedigree says who is affected through each person's conditions. Two more fields appear in the form when you choose a GA4GH file:</p>
+<dl>
+  <dt>Condition</dt><dd>For a file that names several conditions, the one that makes someone affected, by its ontology id or its name, such as <code>HP:0000365</code> or <code>Hearing impairment</code>. Without one, anyone with any of the file's conditions is affected, and from a Phenopackets Family, the Family's own record of who is affected is used. The result says which.</dd>
+  <dt>People with no record of the condition</dt><dd>A GA4GH Pedigree records who has a condition, but only sometimes who doesn't. Unless you choose, PedNet takes the people with no record of it as unaffected if no one in the file is recorded as not having it, as in the files studio2ga4gh writes from drawings, and as not known if anyone is, as in the files PedGen and PedInterp write, which record both.</dd>
+</dl>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/okafor_ga4gh-pedigree.json">The Okafor family's GA4GH Pedigree</button></div>
 
 <h2>The pedigree as a graph</h2>
 <p>For each family in the file, this lists:</p>
@@ -41,8 +49,9 @@ pednet graph /data/examples/pednet/consanguineous.ped --kinship ~/results/fam3-k
 pednet mode /data/examples/lynch.ped
 pednet mode /data/examples/okafor.mped --method patterns
 pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vcf --out ~/results/dominant-ranked.tsv
-pednet check /data/examples/cf-cousins.mped</code></pre>
-<p><code>pednet check</code> says what PedNet makes of a PED file: its families, the children of related parents, and anything odd, such as someone whose sex isn't recorded. <code>man pednet</code> gives examples and PedNet's four commands, and <code>pednet graph --help</code>, <code>pednet mode --help</code>, <code>pednet rank --help</code> and <code>pednet check --help</code> list the options of each.</p>
+pednet check /data/examples/cf-cousins.mped
+pednet mode /data/examples/okafor_ga4gh-pedigree.json --condition HP:0000365</code></pre>
+<p><code>pednet check</code> says what PedNet makes of a PED file: its families, the children of related parents, and anything odd, such as someone whose sex isn't recorded. <code>man pednet</code> gives examples and PedNet's four commands, and <code>pednet graph --help</code>, <code>pednet mode --help</code>, <code>pednet rank --help</code> and <code>pednet check --help</code> list the options of each. For a GA4GH file, <code>--condition</code> chooses the condition and <code>--unrecorded unaffected</code> or <code>--unrecorded unknown</code> says what to take the people with no record of it to be.</p>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import pednet
@@ -56,7 +65,11 @@ print(pednet.infer_mode(okafor))
 family = pednet.read_ped("/data/examples/pednet/dominant.ped")["FAM1"]
 variants = pednet.read_vcf("/data/examples/pednet/dominant.vcf", samples=family.ids)
 for s in pednet.rank_variants(family, variants)[:3]:
-    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)</code></pre>
+    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)
+
+# a GA4GH Pedigree: the same family, as studio2ga4gh wrote it
+okafor = pednet.read_ga4gh("/data/examples/okafor_ga4gh-pedigree.json", condition="HP:0000365")["FAM1"]
+print(okafor.affected(), okafor.notes)</code></pre>
 <p>How PedNet's methods work, and how well they do on simulated families, is in <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">PedNet's README</a>.</p>
 <div class="callout info"><div class="co-t"><!--ICON:info-->The first time</div><p>PedNet needs NumPy, which Python downloads with PedNet the first time one of its tools or commands runs, or a notebook imports it. That is about 4 MB, and your browser keeps it for next time.</p></div>
 <!--CITE: pednet cosegregation graphical-models kinship networkx-->

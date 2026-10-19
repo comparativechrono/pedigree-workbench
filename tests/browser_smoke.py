@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Open the workbench in headless Chromium and do what a first session does: open an example in the Studio, convert
-it in the Tools tab, check the result, run commands in the terminal, run the welcome notebook, and use the help. Then
+it in the Tools tab, check the result, run commands in the terminal, run the welcome notebook, and use the help, and
+work out the risks in example families in the Risk tab, from the help's buttons. Then
 PedNet, PedGen and PedInterp, which Python loads when they are first used: their commands in the terminal, their tools
 in the Tools tab, and the notebook that walks through them. Then, on a desktop, a later visit (the page loaded again):
 what the first visit made is still there, and Python loads the three packages again, the first download of their
@@ -101,6 +102,36 @@ async () => {
     await wait(() => document.querySelector('.tl-title') && /Take one condition out/.test(document.querySelector('.tl-title').textContent), 20000);
     check(true, 'Help: a walkthrough button opens its tool');
 
+    // the Risk tab: from the walkthrough, the pregnancy of the cousins in the cystic fibrosis family; a test result; a
+    // GA4GH Pedigree, read in Python; and a sum by hand, from the help
+    MG.app.showHelp('h-walk-risk');
+    await sleep(200);
+    document.querySelector('#h-walk-risk button[data-risk][data-person="V-1"]').click();
+    await wait(() => MG.app.risk && document.querySelector('#riskRoot .rk-all'), 20000);
+    await sleep(300);
+    const rk = document.querySelector('#riskRoot');
+    const rkLines = (n) => Array.from(rk.querySelectorAll(`.rk-answers > section:nth-of-type(${n}) .rk-line`)).map((l) => l.innerText.replace(/\s+/g, ' ').trim()).join(' | ');
+    const rkTest = async (label, value) => {
+      const s = Array.from(rk.querySelectorAll('.rk-all tbody tr')).find((tr) => tr.querySelector('th b').textContent === label).querySelector('select');
+      s.value = value;
+      s.dispatchEvent(new Event('change'));
+      await sleep(200);
+    };
+    check(/Will be affected about 1 in 12 \(8\.4%\)/.test(rkLines(1)) && /Affected about 1 in 12 \(8\.4%\)/.test(rkLines(2)), 'Risk: the pregnancy in the cystic fibrosis family, about 1 in 12, for it and for its parents\' child');
+    await rkTest('III-2', 'none');
+    check(/Will be affected 1 in 12 \(8\.3%\)/.test(rkLines(1)), 'Risk: with Lisa\'s mother tested and found not to carry it, exactly 1 in 12');
+    await rkTest('III-2', '');
+    await MG.app.riskOpen({ source: '/data/examples/okafor_ga4gh-pedigree.json', person: 'IV-1' });
+    await wait(() => /Hearing impairment/.test(rk.querySelector('#rk-condition').selectedOptions[0].textContent) && rk.querySelector('.rk-all'), 120000);
+    check(/Is a carrier \(one copy\) 2\/3/.test(rkLines(1)), 'Risk: a GA4GH Pedigree, read in Python: the twins\' sister a carrier with a chance of 2/3');
+    MG.app.showHelp('h-risk');
+    await sleep(200);
+    document.querySelector('#h-risk button[data-inherit="calc ar 2/3 1/25"]').click();
+    await wait(() => rk.querySelector('.calc-res'), 10000);
+    check(/1\/150/.test(rk.querySelector('.calc-res').innerText), 'Risk: by hand, 2/3 × 1/25 × 1/4 = 1/150');
+    const tabs = document.querySelector('.wb-tabs');
+    check(tabs.scrollWidth <= tabs.clientWidth + 1, 'Risk: the six tabs fit across the page');
+
     // PedNet, PedGen and PedInterp: loaded the first time they are used, with what they need
     await MG.app.showWorkbench('terminal');
     let said = await run('pednet mode /data/examples/lynch.ped');
@@ -117,9 +148,18 @@ async () => {
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
     check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
-    res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7' });
+    res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' });
     const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
-    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with three next steps');
+    const simulated = '/home/user/results/FAM1_ga4gh-pedigree.json';
+    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 4 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with four next steps');
+    check(MG.app.fs.exists(simulated) && /MONDO:0009061/.test(await MG.app.fs.readText(simulated)), 'Tools: Simulate a family writes a GA4GH Pedigree too, with the condition given');
+    // its risks, from the next step, with the simulation's mode of inheritance
+    Array.from(res.querySelectorAll('.tl-next button')).find((b) => /risks/.test(b.textContent)).click();
+    await wait(() => MG.app.risk && MG.app.risk.st.source === simulated && document.querySelector('#riskRoot .rk-all'), 120000);
+    await sleep(300);
+    check(/cystic fibrosis/.test(document.querySelector('#rk-condition').selectedOptions[0].textContent) && MG.app.risk.st.mode === 'AR', 'Risk: the simulated family\'s GA4GH Pedigree, from Simulate a family, as autosomal recessive');
+    res = await tool('pednet-mode', { input: simulated });
+    check(res.querySelector('.tl-done.ok') && /Family FAM1/.test(res.innerText), 'Tools: Mode of inheritance reads the simulated family\'s GA4GH Pedigree');
     await MG.app.useTool('pednet-rank', { input: '/home/user/results/FAM1.ped' });
     await sleep(400);
     const variants = Array.from(document.querySelectorAll('.tl-field')).find((f) => f.dataset.key === 'variants').querySelector('select').value;

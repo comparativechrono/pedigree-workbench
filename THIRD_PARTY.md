@@ -9,15 +9,15 @@ when copying or redistributing its files.
 
 | Component | Version | Licence | Where | Origin |
 |---|---|---|---|---|
-| Pedigree Studio (Timothy J Hearn) | commit `9e6b524` of 17 October 2026 | MIT | `assets/studio/index.html` | [comparativechrono/PedigreeStudio](https://github.com/comparativechrono/PedigreeStudio); two small changes, recorded in `assets/studio/SOURCE.json` and made by `build/update_studio.py`: the name it keeps its drawing under in the browser, and loading `bridge.js` |
+| Pedigree Studio (Timothy J Hearn) | commit `81dbf79` of 19 October 2026 | MIT | `assets/studio/index.html` | [comparativechrono/PedigreeStudio](https://github.com/comparativechrono/PedigreeStudio), from [PedigreeStudio#5](https://github.com/comparativechrono/PedigreeStudio/pull/5), in which long entries in the key widen it or wrap; two small changes, recorded in `assets/studio/SOURCE.json` and made by `build/update_studio.py`: the name it keeps its drawing under in the browser, and loading `bridge.js` |
 | mpedtools (Tim Hearn) | 0.1.0 | MIT | `python/`, packed into `assets/py/pedigree-tools.zip` | its release on PyPI, unchanged |
 | studio2ped, ped2studio, hponorm, mondonorm (Tim Hearn) | 0.2.0, 0.2.2, 1.1.0, 1.1.0 | MIT | the same | the pull requests for their next releases: see `docs/upstream.md` |
 | studio2ga4gh, ga4gh2studio, phenopacket-toolkit (Tim Hearn) | 0.4.0 | MIT | the same | changed from their 0.3.0 releases, in the pull requests for 0.4.0: see `docs/upstream.md` |
 | pedigree-ga4gh (Tim Hearn) | 1.0.0 | MIT | the same | written for the workbench, now [its own repository](https://github.com/comparativechrono/pedigree-ga4gh) |
 | pedwb | 1.0.0 | MIT | the same | written for the workbench |
-| PedNet (Tim Hearn and Nick Taylor) | 2.0.0 | MIT | `python/pednet` (with its `LICENSE`), packed into `assets/py/pedigree-analysis.zip` | its wheel on PyPI |
-| PedGen (Nick Taylor, with changes by Tim Hearn) | 0.1.4.dev12 | MIT | `python/PedGen` (with its `LICENSE`), the same archive | built from `main` on [GitHub](https://github.com/comparativechrono/pedigree-generator), not yet released |
-| PedInterp (Nick Taylor, with changes by Tim Hearn) | 0.1.8.dev15 | MIT | `python/PedInterp` (with its `LICENSE`), the same archive | built from [pedigree-interpreter#6](https://github.com/comparativechrono/pedigree-interpreter/pull/6), not yet released |
+| PedNet (Tim Hearn and Nick Taylor) | 2.1.0 | MIT | `python/pednet` (with its `LICENSE`), packed into `assets/py/pedigree-analysis.zip` | built from [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6), which reads GA4GH files, not yet released (2.0.0 is on PyPI) |
+| PedGen (Nick Taylor, with changes by Tim Hearn) | 0.1.4.dev13 | MIT | `python/PedGen` (with its `LICENSE`), the same archive | built from [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5), which writes GA4GH Pedigrees, not yet released |
+| PedInterp (Nick Taylor, with changes by Tim Hearn) | 0.1.8.dev17 | MIT | `python/PedInterp` (with its `LICENSE`), the same archive | built from [pedigree-interpreter#7](https://github.com/comparativechrono/pedigree-interpreter/pull/7), which writes GA4GH Pedigrees, not yet released |
 | networkx | 3.4.2 | BSD 3-clause | its wheel in `python/vendor`, and in the same archive without its tests, with its `LICENSE.txt` | [PyPI](https://pypi.org/project/networkx/3.4.2/); `python/vendor/SOURCES.json` records the wheel's SHA-256 |
 | Mondo, nine terms (ids, names, definitions, synonyms) | release 2026-10-06 | CC BY 4.0 | `python/mondonorm/data/mondo-sample.obo`, mondonorm's offline sample | [Mondo](https://mondo.monarchinitiative.org) |
 | HPO ids and names, a small hand-built sample | – | the HPO's own terms of use | `python/hponorm/data/hpo-sample.obo`, hponorm's offline sample | [the HPO](https://hpo.jax.org) |
