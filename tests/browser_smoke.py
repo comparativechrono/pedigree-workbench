@@ -116,9 +116,10 @@ async () => {
     };
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
-    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped');
+    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
     res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7' });
-    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3, 'Tools: Simulate a family writes the PED file and the genotypes, with three next steps');
+    const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
+    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with three next steps');
     await MG.app.useTool('pednet-rank', { input: '/home/user/results/FAM1.ped' });
     await sleep(400);
     const variants = Array.from(document.querySelectorAll('.tl-field')).find((f) => f.dataset.key === 'variants').querySelector('select').value;
@@ -152,11 +153,12 @@ async () => {
     // what the first visit made, the empty folders among it, was kept in the browser
     const fs = MG.app.fs;
     check(['notebooks/pedigree-tools.ipynb', 'notebooks/pedigree-analysis.ipynb', 'pedigrees', 'terms', 'results'].every((p) => fs.exists('/home/user/' + p)), 'Later visit: the starter notebooks and the home folders are still there');
-    // the picture's size, in the Files tab and for Picture → PED file
-    await MG.app.useTool('pedinterp', { input: '/data/examples/lynch.png' });
-    const upscale = () => Array.from(document.querySelectorAll('.tl-field')).find((f) => f.dataset.key === 'upscale').querySelector('input').value;
-    await wait(() => upscale() === '5', 20000).catch(() => null);
-    check(upscale() === '5' && /--upscale 5/.test(document.querySelector('.tl-same').textContent), 'Tools: Picture → PED file enlarges the 1,056-pixel picture 5 times');
+    // the size of a picture, on its page in the Tools tab
+    await MG.app.showWorkbench('tools');
+    await wait(() => MG.app.tools, 20000);
+    MG.app.tools.go({ page: 'file', path: '/data/examples/lynch.png' });
+    await wait(() => document.querySelector('.tl-summary'), 20000);
+    check(/1,056 × 540 pixels/.test(document.querySelector('.tl-summary').innerText), 'Tools: a picture\'s page gives its size');
     // PedNet, the archive's first download failing: said in words, and the next try loads it
     await MG.app.showWorkbench('terminal');
     const T = MG.app.term;

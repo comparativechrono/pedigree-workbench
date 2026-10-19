@@ -8,7 +8,7 @@
   <dt>The picture</dt><dd>A PNG or JPEG file, or a GIF, BMP, TIFF or WebP picture. <b>From my computer…</b> adds one of your own, in <code>~/pictures</code>.</dd>
   <dt>Family id</dt><dd>The family's id in the PED file, which also names the file. It starts as the picture's name.</dd>
   <dt>Save in</dt><dd>The folder for the PED file: <code>~/results</code>, unless you choose another.</dd>
-  <dt>Enlarge the picture by</dt><dd>PedInterp enlarges the picture before it reads it, and reads it best when the enlarged picture is about 5,000 pixels across. So when you choose a picture, the form works the number out from its size: 5 for a picture 1,000 pixels across, such as the Lynch family's, 10 for one 500 pixels across, and 15 for one 350 pixels across. There is some room either side: the picture of the Lynch family reads correctly at anything from 4 to 12, but not at 3 or 15. Too little or too much enlargement doesn't always bring a warning, so check the parents in the table. In the terminal and in Python, the default is 10, whatever the picture's size.</dd>
+  <dt>Enlarge the picture by</dt><dd>Leave it empty, as it is, and PedInterp chooses: it finds the symbols in a copy of the picture 2,000 pixels across, and enlarges the picture so that they are about 200 pixels across, which reads best. A line under the table says how much it enlarged it: 5.6 times for the Lynch family's picture, which is about 1,000 pixels across, and more for a smaller picture, less for a larger one or a scan. There is some room either side: the Lynch picture reads correctly at anything from 4 to 12 times, but not at 3 or 15. If PedInterp warns that a line may have been missed, give a number a little larger or smaller than the one it chose. It warns, too, if the picture is too small to enlarge enough, or a page too large, which reads better cut down to the pedigree.</dd>
 </dl>
 
 <h2>What it reads</h2>
@@ -25,7 +25,7 @@ diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) 
 <tr><th>Option</th><th></th></tr>
 <tr><td><code>-f</code>, <code>--family ID</code></td><td>the family id, which names the PED file (default: the picture's name)</td></tr>
 <tr><td><code>-d</code>, <code>--output-dir FOLDER</code></td><td>where to write the PED file (default: the folder you're in)</td></tr>
-<tr><td><code>--upscale FACTOR</code></td><td>how many times to enlarge the picture (default: 10)</td></tr>
+<tr><td><code>--upscale FACTOR</code></td><td>how many times to enlarge the picture (by default, as many as its symbols need: the table says how many)</td></tr>
 <tr><td><code>--labels tesseract|none</code></td><td>read the labels with Tesseract, or number the people. Here the people are numbered either way, but with <code>none</code> there's no warning that Tesseract isn't there.</td></tr>
 <tr><td><code>-q</code>, <code>--quiet</code></td><td>don't print the table</td></tr>
 </table>

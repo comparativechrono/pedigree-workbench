@@ -79,6 +79,8 @@ const CASES = [
   ['pednet-mode', { input: TWO, together: true }],
   ['pednet-mode', { input: TWO, together: true, family: 'FAMB', proband: '3' }],
   ['pedgen', { mode: 'AD', seed: '123456789012345678901', family: 'BIG' }],
+  // a dominant condition with cousins who marry, and at least three people affected
+  ['pedgen', { mode: 'AD', generations: 4, seed: '5', cousins: 0.5, minAffected: 3, family: 'SIM3' }],
   // the kinship table is for one family: with two, and none given, both stop
   ['pednet-graph', { input: TWO, kinship: true }, { fails: true }]
 ];

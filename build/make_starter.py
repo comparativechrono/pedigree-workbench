@@ -173,23 +173,28 @@ for s in pednet.rank_variants(family, variants):
     ("md", """## Simulating families with PedGen
 
 PedGen makes up a family by Mendelian inheritance from an affected founder, as a table, and with a seed it makes the
-same family each time. PedNet reads the table as it is."""),
+same family each time. The allele is rare unless you say otherwise (0.001), as a rare disease's is. PedNet reads the
+table as it is."""),
     ("code", """from PedGen import pedigree_generator, gen_PED_export
 
 sim = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AD", generation_count=4, seed=4)
 print(len(sim), "people,", (sim["Phenotype"] == 2).sum(), "affected")
 print(pednet.infer_mode(pednet.pedigree_from_rows(sim)))
 print("wrote", gen_PED_export(sim, "/home/user/results"))"""),
-    ("md", """PedNet takes a condition to be rare: for autosomal recessive inheritance, it gives the allele a frequency of 1 in
-1,000. The partners
-who marry into a family that PedGen simulates carry the allele at the frequency you give, 0.1 unless you say
-otherwise, so about one in five of them is a carrier. In a recessive family that PedGen makes, the affected children
-of carriers who married in are very unlikely under PedNet's model, and it may favour another mode. Given PedGen's
-frequency, it favours autosomal recessive inheritance more often, as it does for this family, though by no means
-always."""),
-    ("code", """rec = pednet.pedigree_from_rows(pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_count=4, seed=34))
-print("a rare allele:", pednet.infer_mode(rec).call)
-print("PedGen's frequency:", pednet.infer_mode(rec, allele_frequency={"AR": 0.1}).call)"""),
+    ("md", """With a rare allele, a recessive condition seldom turns up again in a family, as people who marry in almost never
+carry it, unless relatives marry. So without cousins marrying, the founder is usually the only one affected, and one
+affected person can't show how a condition is inherited. `CousinLikelihood` lets cousins marry (1 is whenever one has
+no partner yet), and `min_affected` makes families until one has as many affected people, as families come to notice
+through their affected members. Here, cousins' children are affected, in a loop of the pedigree, and PedNet favours
+autosomal recessive inheritance."""),
+    ("code", """alone = pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_count=4, seed=12)
+print("without cousins:", (alone["Phenotype"] == 2).sum(), "affected")
+
+rec = pednet.pedigree_from_rows(pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_count=4,
+                                                   CousinLikelihood=1.0, min_affected=2, seed=12))
+for loop in pednet.loops(rec):
+    print("a loop, from", loop.kind + ":", ", ".join(loop.people))
+print(pednet.infer_mode(rec))"""),
     ("md", """## Reading a picture with PedInterp
 
 PedInterp reads a pedigree from a picture of one, drawn in black on white. The labels can't be read in a browser,
