@@ -6,7 +6,10 @@
 <p>All of them except pedwb, the workbench's own runner, are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
 <pre class="code"><code>pip install pedigree-ga4gh studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenopacket-toolkit</code></pre>
 <p>If you installed them before October 2026, add <code>--upgrade</code> to that command. The earlier releases of studio2ga4gh, ga4gh2studio and phenopacket-toolkit write or read the older forms that the workbench now upgrades.</p>
-<p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code> and <code>pedigree-ga4gh</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
+<p>PedNet is on PyPI too, at the same version as here, and needs NumPy and networkx, which pip installs with it. The commands for PedGen and PedInterp, and the change that lets PedInterp read children drawn under their parents, aren't released yet, so install those two from GitHub for now. PedInterp needs OpenCV, and to read the labels under the symbols, the Tesseract program (its README says how to install it).</p>
+<pre class="code"><code>pip install PedNet
+pip install "git+https://github.com/comparativechrono/pedigree-generator" "git+https://github.com/comparativechrono/pedigree-interpreter"</code></pre>
+<p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code>, <code>pedigree-ga4gh</code>, <code>pednet</code>, <code>pedgen</code> and <code>pedinterp</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
 
 <h2>The workbench's own copies</h2>
 <p>You can also download the exact copies of the packages that the workbench uses, in one archive. This is handy on a computer that can't reach PyPI, and it includes the workbench's own runner, <code>pedwb</code>.</p>
@@ -15,6 +18,8 @@
 export PYTHONPATH="$PWD/pedigree-tools"
 python -m pedwb studio2ga4gh okafor.studio.json -t example-terms.json -d results
 python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code></pre>
+<p>PedNet, PedGen and PedInterp, with networkx, are in a second archive, which needs NumPy, pandas, OpenCV and Pillow (<code>pip install numpy pandas opencv-python pillow</code>). Unzip it into the same folder.</p>
+<div class="tryrow"><a class="do" href="assets/py/pedigree-analysis.zip" download="pedigree-analysis.zip">Download PedNet, PedGen and PedInterp (.zip, about 1 MB)</a></div>
 <p><code>python -m pedwb PROGRAM …</code> runs any of the programs, just as the terminal here does. Most of them also run as <code>python -m studio2ga4gh …</code>, <code>python -m phenopacket_toolkit …</code> and so on. In Python, put the folder on <code>PYTHONPATH</code> (or in <code>sys.path</code>) and import the packages as usual.</p>
 
 <h2>What else they use</h2>

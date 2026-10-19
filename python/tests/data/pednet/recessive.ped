@@ -1,0 +1,7 @@
+# Two affected children of unaffected parents, with two unaffected brothers
+FAM2	F	0	0	1	1
+FAM2	M	0	0	2	1
+FAM2	C1	F	M	2	2
+FAM2	C2	F	M	1	2
+FAM2	C3	F	M	1	1
+FAM2	C4	F	M	1	1

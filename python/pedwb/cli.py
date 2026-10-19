@@ -31,6 +31,9 @@ PROGRAMS: Dict[str, str] = {
     "mondonorm": "mondonorm.cli:main",
     "phenotk": "phenopacket_toolkit.cli.main:main",
     "pedigree-ga4gh": "pedigree_ga4gh.cli:main",
+    "pednet": "pednet.cli:main",
+    "pedgen": "PedGen.cli:main",
+    "pedinterp": "PedInterp.cli:main",
 }
 
 # what each program is for, in a few words (for help and man in the terminal)
@@ -44,7 +47,22 @@ ABOUT: Dict[str, str] = {
     "mondonorm": "match disease names in Phenopackets to Mondo terms (asks as it goes)",
     "phenotk": "the phenopacket toolkit: validate, view, normalise, filter, de-identify, convert ...",
     "pedigree-ga4gh": "the GA4GH implementation the others share: validate, upgrade, convert",
+    "pednet": "the pedigree as a graph: loops, kinship, the mode of inheritance, variants ranked by co-segregation",
+    "pedgen": "simulate a family with a dominant or recessive condition, as a PED file",
+    "pedinterp": "a picture of a pedigree -> PED file",
 }
+
+# The programs whose packages are in the workbench's second archive (assets/py/pedigree-analysis.zip, with networkx),
+# and the packages of Pyodide's that each needs. In the browser, the page loads them the first time one of these
+# programs runs, or a notebook imports its package (MODULES), rather than every time Python starts: OpenCV alone is
+# a download of about 11 MB. On a computer of your own, they are installed with pip.
+NEEDS: Dict[str, List[str]] = {
+    "pednet": ["numpy"],
+    "pedgen": ["numpy", "pandas"],
+    "pedinterp": ["numpy", "pandas", "opencv-python", "pillow"],
+}
+# the packages of the second archive, and the program of each
+MODULES: Dict[str, str] = {"pednet": "pednet", "PedGen": "pedgen", "PedInterp": "pedinterp"}
 
 # the programs that ask questions with input()
 _ASKS = {"hponorm", "mondonorm"}

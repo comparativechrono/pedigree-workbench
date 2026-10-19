@@ -13,7 +13,7 @@
 <h2>A tool's page</h2>
 <ol>
   <li><b>The fields.</b> You can choose from your own files or the examples, or pick a file from your computer with <b>From my computer…</b>. For a drawing, you can also choose <b>The drawing in the Studio tab</b>, which uses the drawing that's open there and saves it first. <b>Look at it</b> opens the file you've chosen. The names of the files the tool will write are filled in for you, and you can change them. Results go in <code>~/results</code>, drawings in <code>~/pedigrees</code> and terms files in <code>~/terms</code>, unless you choose another folder.</li>
-  <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. If a file would be overwritten, you're asked first.</li>
+  <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. The tools of PedNet, PedGen and PedInterp need more, which Python downloads the first time one of them runs, and says so under the form: about 4 MB for PedNet's, and about 21 MB in all. If a file would be overwritten, you're asked first.</li>
   <li><b>The result.</b> You'll see <i>Done</i>, or the error if something went wrong, then what the program printed and the files it wrote. Each file has buttons to open it in the Studio, look at it, check it, pass it to another tool or download it.</li>
   <li><b>The same in the terminal, and in Python</b> shows the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
 </ol>
@@ -28,6 +28,7 @@
   <li><a href="#h-tool-ped2studio">PED or MPED → drawing</a> (ped2studio)</li>
   <li><a href="#h-tool-ga4gh-convert">GA4GH Pedigree ⇄ Phenopackets Family</a> (phenotk)</li>
   <li><a href="#h-tool-export">GA4GH → PED, table or YAML</a> (phenotk)</li>
+  <li><a href="#h-tool-pedinterp">Picture → PED file</a> (PedInterp)</li>
 </ul>
 <h3>Ontology terms</h3>
 <ul>
@@ -52,6 +53,11 @@
 <h3>PED and MPED files</h3>
 <ul>
   <li><a href="#h-tool-mpedtools">Summary and check, Take one condition out, Put PED files together, One file for each family, PED ⇄ MPED</a> (mpedtools)</li>
+</ul>
+<h3>Analyse and simulate</h3>
+<ul>
+  <li><a href="#h-tool-pednet">The pedigree as a graph, Mode of inheritance, Rank candidate variants</a> (PedNet)</li>
+  <li><a href="#h-tool-pedgen">Simulate a family</a> (PedGen)</li>
 </ul>
 
 <div class="callout info"><div class="co-t"><!--ICON:info-->What the tab does not do</div><p>Each tool runs a package's own command, exactly as the package provides it, and the tab adds no conversions of its own. Match conditions to terms works differently, because it has no command. Instead, it searches using the packages' Python code and writes a terms file. A few commands have options that the forms leave out, such as the options for variants in <code>phenotk add</code>. In the terminal, <code>man</code> and <code>--help</code> describe them.</p></div>

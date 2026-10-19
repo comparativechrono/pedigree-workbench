@@ -175,7 +175,12 @@
             resolve,
             reject,
             fs: ctx.fs,
-            onTermOut: (chunks) => chunks.forEach((c) => out(c.text, c.stream, c.color))
+            onTermOut: (chunks) => chunks.forEach((c) => out(c.text, c.stream, c.color)),
+            // (what Python is loading for the command: PedNet and NumPy, say, the first time pednet runs)
+            onStatus: (text) => {
+              ctx.io.note(text);
+              if (ctx.term && ctx.term.statusEl) ctx.term.statusEl.innerHTML = `<span class="spinner small"></span> ${MG.esc(text.replace(/ \(.*$/, '…'))}`;
+            }
           });
           K.worker.postMessage({ type, id, argv, cwd: ctx.fs.cwd, user: MG.user.login() });
         });

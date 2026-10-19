@@ -19,7 +19,17 @@
     "hponorm": {"authors": ["Hearn TJ"], "title": "hponorm [software]", "url": "https://github.com/comparativechrono/hponorm"},
     "mondonorm": {"authors": ["Hearn TJ"], "title": "mondonorm [software]", "url": "https://github.com/comparativechrono/mondonorm"},
     "phenopackettoolkit": {"authors": ["Hearn TJ"], "title": "phenopacket-toolkit [software]", "url": "https://pypi.org/project/phenopacket-toolkit/"},
-    "pedigreega4gh": {"authors": ["Hearn TJ"], "title": "pedigree-ga4gh [software]", "url": "https://github.com/comparativechrono/pedigree-ga4gh"}
+    "pedigreega4gh": {"authors": ["Hearn TJ"], "title": "pedigree-ga4gh [software]", "url": "https://github.com/comparativechrono/pedigree-ga4gh"},
+    "pednet": {"authors": ["Hearn TJ", "Taylor N"], "title": "PedNet [software]", "url": "https://github.com/comparativechrono/PedNet"},
+    "pedgen": {"authors": ["Taylor N"], "title": "PedGen [software]", "url": "https://github.com/comparativechrono/pedigree-generator"},
+    "pedinterp": {"authors": ["Taylor N"], "title": "PedInterp [software]", "url": "https://github.com/comparativechrono/pedigree-interpreter"},
+    "thompson2003": {"authors": ["Thompson D", "Easton DF", "Goldgar DE"], "year": 2003, "title": "A full-likelihood method for the evaluation of causality of sequence variants from family data", "container": "American Journal of Human Genetics", "volume": "73", "issue": "3", "pages": "652-655", "doi": "10.1086/378100"},
+    "jarvik2016": {"authors": ["Jarvik GP", "Browning BL"], "year": 2016, "title": "Consideration of cosegregation in the pathogenicity classification of genomic variants", "container": "American Journal of Human Genetics", "volume": "98", "issue": "6", "pages": "1077-1081", "doi": "10.1016/j.ajhg.2016.04.003"},
+    "richards2015": {"authors": ["Richards S", "Aziz N", "Bale S", "Bick D", "Das S", "Gastier-Foster J", "Grody WW"], "short": "Richards et al.", "year": 2015, "title": "Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the American College of Medical Genetics and Genomics and the Association for Molecular Pathology", "container": "Genetics in Medicine", "volume": "17", "issue": "5", "pages": "405-424", "doi": "10.1038/gim.2015.30"},
+    "tavtigian2018": {"authors": ["Tavtigian SV", "Greenblatt MS", "Harrison SM", "Nussbaum RL", "Prabhu SA", "Boucher KM", "Biesecker LG"], "short": "Tavtigian et al.", "year": 2018, "title": "Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework", "container": "Genetics in Medicine", "volume": "20", "issue": "9", "pages": "1054-1060", "doi": "10.1038/gim.2017.210"},
+    "lauritzen2003": {"authors": ["Lauritzen SL", "Sheehan NA"], "year": 2003, "title": "Graphical models for genetic analyses", "container": "Statistical Science", "volume": "18", "issue": "4", "pages": "489-514", "doi": "10.1214/ss/1081443232"},
+    "wright1922": {"authors": ["Wright S"], "year": 1922, "title": "Coefficients of inbreeding and relationship", "container": "The American Naturalist", "volume": "56", "issue": "645", "pages": "330-338", "doi": "10.1086/279872"},
+    "networkx2008": {"authors": ["Hagberg AA", "Schult DA", "Swart PJ"], "year": 2008, "title": "Exploring network structure, dynamics, and function using NetworkX", "container": "Proceedings of the 7th Python in Science Conference (SciPy2008)", "pages": "11\u201315", "url": "https://conference.scipy.org/proceedings/SciPy2008/paper_2/"}
   },
   "programs": {
     "phenopackets": {"name": "Phenopackets", "refs": ["phenopackets2022"]},
@@ -38,6 +48,13 @@
     "hponorm": {"name": "hponorm", "refs": ["hponorm"]},
     "mondonorm": {"name": "mondonorm", "refs": ["mondonorm"]},
     "phenotk": {"name": "phenopacket-toolkit (phenotk)", "refs": ["phenopackettoolkit"]},
-    "pedigree-ga4gh": {"name": "pedigree-ga4gh", "refs": ["pedigreega4gh"]}
+    "pedigree-ga4gh": {"name": "pedigree-ga4gh", "refs": ["pedigreega4gh"]},
+    "pednet": {"name": "PedNet", "refs": ["pednet"]},
+    "pedgen": {"name": "PedGen", "refs": ["pedgen"]},
+    "pedinterp": {"name": "PedInterp", "refs": ["pedinterp"]},
+    "cosegregation": {"name": "Co-segregation, and its strength as evidence (PP1, BS4)", "refs": ["thompson2003", "jarvik2016", "richards2015", "tavtigian2018"]},
+    "graphical-models": {"name": "Pedigrees as Bayesian networks", "refs": ["lauritzen2003"]},
+    "kinship": {"name": "Kinship and inbreeding coefficients", "refs": ["wright1922"]},
+    "networkx": {"name": "NetworkX", "refs": ["networkx2008"]}
   }
 }

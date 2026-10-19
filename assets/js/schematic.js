@@ -25,6 +25,7 @@
 
   // the formats: their titles, and where each layout puts them: x, y (centre), w (width)
   const FORMATS = {
+    image: { title: 'Picture of a pedigree', sub: 'PNG or JPEG' },
     terms: { title: 'Ontology terms', sub: 'HPO and Mondo · a terms file' },
     ped: { title: 'PED or MPED file', sub: 'for linkage programs' },
     studio: { title: 'Pedigree Studio drawing', sub: '.studio.json', main: true },
@@ -32,8 +33,8 @@
     family: { title: 'Phenopackets Family', sub: 'Phenopackets v2' }
   };
   const PLACES = {
-    wide: { terms: [380, 44, 230], ped: [112, 222, 180], studio: [380, 222, 214], pedigree: [650, 124, 176], family: [650, 318, 176] },
-    tall: { terms: [330, 36, 230], ped: [78, 190, 150], studio: [330, 190, 230], pedigree: [135, 400, 190], family: [390, 400, 190] }
+    wide: { image: [112, 44, 180], terms: [380, 44, 230], ped: [112, 222, 180], studio: [380, 222, 214], pedigree: [650, 124, 176], family: [650, 318, 176] },
+    tall: { image: [100, 36, 150], terms: [330, 36, 230], ped: [78, 190, 150], studio: [330, 190, 230], pedigree: [135, 400, 190], family: [390, 400, 190] }
   };
   const VIEWBOX = { wide: '0 0 900 440', tall: '0 0 500 545' };
   // the routes, the same in both layouts and in this order (ROUTE_ENDS below goes by it):
@@ -51,7 +52,8 @@
     ['validate', 'phenotk', 'phenotk\ncheck · view\nfilter\nde-identify', 'M738 116 C796 136 796 306 738 326', 806, 196, 'start', true],
     ['export', 'phenotk', 'phenotk: GA4GH → PED', 'M580 344 C470 430 230 430 126 250', 350, 404, 'middle', true],
     ['terms', 'hponorm', 'match terms', 'M380 196 L380 70', 372, 136, 'end', true, true],
-    ['normalise', 'phenotk', '', 'M496 44 C580 44 630 70 644 98', 0, 0, 'start', true, true]
+    ['normalise', 'phenotk', '', 'M496 44 C580 44 630 70 644 98', 0, 0, 'start', true, true],
+    ['pedinterp', 'PedInterp', 'pedinterp', 'M184 70 L184 194', 192, 136, 'start', true]
   ];
   const TALL = [
     ['studio2ped', 'studio2ped', 'studio2ped', 'M213 180 C195 166 175 166 156 180', 184, 152, 'middle', true],
@@ -65,7 +67,8 @@
     ['validate', 'phenotk', 'phenotk: check · view · filter · de-identify', 'M120 428 C120 515 405 515 405 428', 262, 532, 'middle', true],
     ['export', 'phenotk', 'phenotk: GA4GH → PED', 'M40 396 C10 340 12 262 50 220', 36, 294, 'start', true],
     ['terms', 'hponorm', 'match terms', 'M330 162 L330 66', 322, 118, 'end', true, true],
-    ['normalise', 'phenotk', '', 'M447 36 C490 40 494 220 470 370', 0, 0, 'start', true, true]
+    ['normalise', 'phenotk', '', 'M447 36 C490 40 494 220 470 370', 0, 0, 'start', true, true],
+    ['pedinterp', 'PedInterp', 'pedinterp', 'M132 62 L132 162', 138, 116, 'start', true]
   ];
   const ROUTES = { wide: WIDE, tall: TALL };
   /** the layout for a width: tall below 720 pixels, where the wide one's writing would be too small */
@@ -108,7 +111,7 @@
     const svg = el('svg', { viewBox: VIEWBOX[layout], role: 'img', 'aria-labelledby': uid + 't' }, container);
     const title = el('title', { id: uid + 't' }, svg);
     title.textContent =
-      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. The drawing’s conditions are matched to HPO and Mondo terms. phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them.';
+      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. The drawing’s conditions are matched to HPO and Mondo terms. phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them. pedinterp reads a picture of a pedigree into a PED file.';
     const defs = el('defs', {}, svg);
     const mk = (id, cls) => {
       const m = el('marker', { id, viewBox: '0 0 10 10', refX: 8.5, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
@@ -223,7 +226,8 @@
     ['pedigree', 'family', 'cohort', 'phenopacket'],
     ['family', 'pedigree', 'ped'],
     ['studio', 'terms'],
-    ['terms', 'pedigree', 'family']
+    ['terms', 'pedigree', 'family'],
+    ['image', 'ped']
   ];
 
   /** the maps in help pages (<div class="pw-map"></div>), drawn the first time their page is shown */

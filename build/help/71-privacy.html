@@ -14,6 +14,7 @@
 <table>
 <tr><th>When</th><th>From</th><th>What is sent</th></tr>
 <tr><td>Python first starts</td><td>cdn.jsdelivr.net (Pyodide)</td><td>nothing of yours, because it's an ordinary download</td></tr>
+<tr><td>PedNet, PedGen or PedInterp first runs</td><td>cdn.jsdelivr.net (NumPy, pandas, OpenCV, Pillow)</td><td>nothing of yours: the same kind of download. The pictures PedInterp reads stay here.</td></tr>
 <tr><td>Match conditions to terms, or Fill in missing terms, with EBI's service</td><td>www.ebi.ac.uk (the Ontology Lookup Service)</td><td>the words you search for, or the ids you type, but not the drawing or anything else in the file</td></tr>
 <tr><td>Downloading the HPO in Match conditions to terms</td><td>raw.githubusercontent.com</td><td>an ordinary download</td></tr>
 <tr><td><code>curl</code>, <code>wget</code>, <code>pip install</code> in the terminal or a notebook</td><td>wherever you point them</td><td>whatever you send</td></tr>

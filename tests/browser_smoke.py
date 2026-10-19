@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Open the workbench in headless Chromium and do what a first session does: open an example in the Studio, convert
-it in the Tools tab, check the result, run commands in the terminal, run the welcome notebook, and use the help.
+it in the Tools tab, check the result, run commands in the terminal, run the welcome notebook, and use the help. Then
+PedNet, PedGen and PedInterp, which Python loads when they are first used: their commands in the terminal, their tools
+in the Tools tab, and the notebook that walks through them.
 
 It needs Playwright and its Chromium (pip install playwright; playwright install chromium). It serves the site
 itself. Only Pyodide is fetched from the web (cdn.jsdelivr.net, through Python, so that a proxy in the environment is
@@ -89,6 +91,41 @@ async () => {
     Array.from(document.querySelectorAll('#h-walk-ped button.do')).find((b) => /Take one condition out/.test(b.textContent)).click();
     await wait(() => document.querySelector('.tl-title') && /Take one condition out/.test(document.querySelector('.tl-title').textContent), 20000);
     check(true, 'Help: a walkthrough button opens its tool');
+
+    // PedNet, PedGen and PedInterp: loaded the first time they are used, with what they need
+    await MG.app.showWorkbench('terminal');
+    let said = await run('pednet mode /data/examples/lynch.ped');
+    check(/Loading PedNet, with NumPy/.test(said) && /Family FAM1: autosomal dominant/.test(said), 'Terminal: pednet loads, with NumPy, and calls the Lynch family dominant');
+    said = await run('pednet graph /data/examples/okafor.mped | grep -c loop');
+    check(/^\s*1\s*$/m.test(said) && !/Loading/.test(said), 'Terminal: pednet again, piped to grep, with nothing more to load');
+    const tool = async (id, values, ms = 300000) => {
+      await MG.app.useTool(id, values);
+      await sleep(400);
+      document.querySelector('.tl-run').click();
+      await wait(() => document.querySelector('.tl-done'), ms);
+      return document.querySelector('.tl-result');
+    };
+    let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
+    const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
+    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped');
+    res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7' });
+    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3, 'Tools: Simulate a family writes the PED file and the genotypes, with three next steps');
+    await MG.app.useTool('pednet-rank', { input: '/home/user/results/FAM1.ped' });
+    await sleep(400);
+    const variants = Array.from(document.querySelectorAll('.tl-field')).find((f) => f.dataset.key === 'variants').querySelector('select').value;
+    check(variants === '/home/user/results/FAM1-genotypes.tsv', 'Tools: Rank candidate variants finds the genotypes that go with the PED file');
+    res = await tool('pednet-rank', { input: '/home/user/results/FAM1.ped', variants: '/home/user/results/FAM1-genotypes.tsv' });
+    check(res.querySelector('.tl-done.ok') && /causal/.test(res.innerText) && MG.app.fs.exists('/home/user/results/FAM1-ranked.tsv'), 'Tools: Rank candidate variants ranks the simulated variant, and saves the scores');
+    res = await tool('pednet-graph', { input: '/data/examples/pednet/consanguineous.ped', kinship: true });
+    check(res.querySelector('.tl-done.ok') && /a loop, from consanguinity/.test(res.innerText) && MG.app.fs.exists('/home/user/results/consanguineous-kinship.tsv'), 'Tools: The pedigree as a graph finds the loop, and saves the kinship table');
+    // the notebook that walks through them
+    await MG.app.showWorkbench('notebook');
+    await MG.app.nbApp.open('/home/user/notebooks/pedigree-analysis.ipynb');
+    await sleep(500);
+    const v2 = MG.app.nbApp.view;
+    await v2.runAll();
+    const errs2 = v2.cells.filter((c) => c.type === 'code' && /Traceback|Error|couldn’t/.test(c.el.innerText)).length;
+    check(errs2 === 0 && /the same as lynch.ped: True/.test(v2.el ? v2.el.innerText : document.body.innerText), 'Notebook: the analysis notebook runs without errors');
   } catch (e) {
     out.push('FAIL  ' + (e && e.stack || e));
   }

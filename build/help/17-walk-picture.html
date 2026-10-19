@@ -1,0 +1,28 @@
+<!-- id: h-walk-picture | title: Turn a picture of a pedigree into a PED file and a drawing | group: Walkthroughs | summary: Read it with PedInterp, check it, and draw it in the Studio | keys: picture image png jpeg scan paper photo screenshot read pedinterp ped drawing studio ped2studio walkthrough -->
+<h1><!--ICON:image-->Turn a picture of a pedigree into a PED file and a drawing</h1>
+<p class="lede">A pedigree in a paper, a clinic letter or an old scan is only a picture. PedInterp reads one into a PED file, which the other tools can use. ped2studio then draws the PED file in Pedigree Studio, where you can check it against the picture and add what a PED file can't hold. The example is a picture of the Lynch family, drawn as pedigrees are drawn in papers.</p>
+
+<h2>1 · Add the picture</h2>
+<p>Add your picture with <b>From my computer…</b> under the file box of the tool in the next step, or with <b>My files → Add files from my computer…</b> at the top right. A PNG file is best. A scan or a screenshot reads better than a photograph of a page, because the drawing needs to be black on white, sharp, and square to the edges.</p>
+<div class="tryrow"><button class="do" type="button" data-edit="/data/examples/lynch.png">Look at the picture of the Lynch family</button></div>
+
+<h2>2 · Read it</h2>
+<p><b>Picture → PED file</b> finds the symbols and the lines, works out who is whose parent, and writes the PED file. The people are numbered by generation, from the top, and from the left in each generation: I-1, I-2, II-1 and so on. The first time, Python downloads what PedInterp needs, about 21 MB, which takes a little while.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedinterp" data-input="/data/examples/lynch.png">Read the picture of the Lynch family</button></div>
+
+<h2>3 · Check it</h2>
+<p>The table under the result has a row for each person, with their parents (0 when they aren't in the picture), their sex (1 male, 2 female, 0 unknown), and whether they're affected (2) or not (1). Compare it with the picture. If someone is missing or has the wrong parents, <a href="#h-troubleshoot">When something goes wrong</a> says what to try.</p>
+<p>The Lynch family's PED file in the examples was made from the drawing that the picture shows, so here the two files can be compared as well: the commands at the foot of this page do it.</p>
+
+<h2>4 · Draw it</h2>
+<p>Under the result, <b>Draw it (PED → drawing)</b> opens <b>PED or MPED → drawing</b> with the new PED file. Run it, then open the drawing in the Studio, where Pedigree Studio's Tidy lays it out.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="~/results/lynch.ped">Draw the PED file</button></div>
+<p>In the Studio, add what the picture shows but a PED file can't hold: who has died, twins, the proband, and the condition's name in the colour key. Then save the drawing. From there you can convert it to the GA4GH files, or look at the family with PedNet (<a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants</a>).</p>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>pedinterp /data/examples/lynch.png --labels none -q -d ~/results
+diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) &amp;&amp; echo "the same people, parents, sexes and status"
+ped2studio ~/results/lynch.ped ~/pedigrees/lynch-from-picture.studio.json
+studio --tidy ~/pedigrees/lynch-from-picture.studio.json</code></pre>
+<p><code>cut -f2-</code> leaves out the family's id, which the two files give differently.</p>
+<!--CITE: pedinterp ped2studio pedigree-studio-->

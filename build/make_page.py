@@ -258,10 +258,18 @@ def kin_retired():
 def versions_table():
     b = bundle()
     names = {'phenopacket_toolkit': 'phenopacket-toolkit (phenotk)', 'pedigree_ga4gh': 'pedigree-ga4gh',
-             'pedwb': 'pedwb (the workbench\'s own runner, not on PyPI)'}
+             'pedwb': 'pedwb (the workbench\'s own runner, not on PyPI)', 'pednet': 'PedNet',
+             'networkx': 'networkx (which PedNet and PedGen use)'}
     rows = ['<table>', '<tr><th>Package</th><th>Version</th></tr>']
     for k, v in b['packages'].items():
         rows.append(f'<tr><td>{html.escape(names.get(k, k))}</td><td>{html.escape(str(v))}</td></tr>')
+    # the second archive's, which Python loads when they are first used. A development version built from GitHub
+    # (0.1.4.dev5+g4ab719d58) is given with the commit it was built from
+    for k, v in (b.get('analysis') or {}).get('packages', {}).items():
+        m = re.match(r'^(.*?\.dev\d+)\+g([0-9a-f]{7})', str(v))
+        shown = (f'{html.escape(m.group(1))}, a development version built from GitHub (commit '
+                 f'<code>{html.escape(m.group(2))}</code>), not on PyPI yet' if m else html.escape(str(v)))
+        rows.append(f'<tr><td>{html.escape(names.get(k, k))} <small>(loaded when first used)</small></td><td>{shown}</td></tr>')
     s = json.load(open(os.path.join(SITE, 'assets/studio/SOURCE.json'), encoding='utf-8'))
     rows.append(f'<tr><td>Pedigree Studio</td><td>commit <code>{html.escape(s.get("commit", "")[:7])}</code> of '
                 f'{html.escape(s.get("committed", "")[:10])}</td></tr>')

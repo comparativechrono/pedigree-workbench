@@ -1,0 +1,34 @@
+{
+  "networkx": {
+    "package": "networkx",
+    "folder": "vendor",
+    "version": "3.4.2",
+    "wheel": "networkx-3.4.2-py3-none-any.whl",
+    "sha256": "df5d4365b724cf81b8c6a7312509d0c22386097011ad1abe274afd5e9d3bbc5f",
+    "from": "https://pypi.org/project/networkx/"
+  },
+  "pedgen": {
+    "package": "PedGen",
+    "folder": "PedGen",
+    "version": "0.1.4.dev6+ge298027e2",
+    "wheel": "pedgen-0.1.4.dev6+ge298027e2-py3-none-any.whl",
+    "sha256": "fe9de25abcd24e59bc897c93d644c93d2fce76fdf6ec7b96b7c0710debf26223",
+    "from": "https://github.com/comparativechrono/pedigree-generator"
+  },
+  "pedinterp": {
+    "package": "PedInterp",
+    "folder": "PedInterp",
+    "version": "0.1.8.dev8+g7e28b706f",
+    "wheel": "pedinterp-0.1.8.dev8+g7e28b706f-py3-none-any.whl",
+    "sha256": "171423f47eec494b198d359eecd6aec47788c2148af4cc5e21feed3221810dca",
+    "from": "https://github.com/comparativechrono/pedigree-interpreter"
+  },
+  "pednet": {
+    "package": "pednet",
+    "folder": "pednet",
+    "version": "2.0.0",
+    "wheel": "pednet-2.0.0-py3-none-any.whl",
+    "sha256": "fcea6b5218cdd47a13d62f47008737aedf5ee0ae289d9205d8106fe64b22d519",
+    "from": "https://pypi.org/project/PedNet/"
+  }
+}

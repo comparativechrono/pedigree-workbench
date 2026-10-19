@@ -179,6 +179,7 @@
             background: this.opts.background,
             files: this.opts.files,
             bundle: this.opts.bundle || null,
+            analysis: this.opts.analysis || null,
             home: HOME(),
             user: MG.user.login()
           },
@@ -260,9 +261,12 @@
      the registry
      ------------------------------------------------------------------ */
   const made = {};
-  /** the archive of the pedigree packages (python/build_bundle.py writes it, and its checksum into the page) */
-  const bundleUrl = () => {
-    const b = window.WB_BUNDLE || {};
+  /** the archives of the pedigree packages (python/build_bundle.py writes them, and their checksums into the page):
+      the one Python unpacks when it starts, and the second (PedNet, PedGen, PedInterp), which it loads when first used */
+  const bundleUrl = (which) => {
+    const all = window.WB_BUNDLE || {};
+    const b = which ? all[which] : all;
+    if (which && !(b && b.archive)) return null;
     return abs('assets/py/' + (b.archive || 'pedigree-tools.zip')) + '?v=' + encodeURIComponent((b.sha256 || CFG.buildId || '1').slice(0, 16));
   };
   const kernels = {
@@ -278,7 +282,8 @@
           preload: CFG.pythonPreload || [],
           background: CFG.pythonBackground || [],
           files: examples().map((f) => ({ path: f.path, url: f.url, mtime: f.mtime, readonly: true })),
-          bundle: bundleUrl()
+          bundle: bundleUrl(),
+          analysis: bundleUrl('analysis')
         });
       return made.python;
     },

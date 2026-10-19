@@ -7,13 +7,14 @@ files they write: they must be the same, apart from the time they were made.
 """
 import contextlib, io, json, os, shutil, sys, tempfile, traceback
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, REPO + '/python')
+# (networkx, which PedNet needs, is kept as its wheel: Python imports it from there)
+sys.path[:0] = [REPO + '/python'] + [os.path.join(REPO, 'python', 'vendor', f) for f in sorted(os.listdir(REPO + '/python/vendor')) if f.endswith('.whl')]
 from pedwb import cli
 CASES = sys.argv[1] if len(sys.argv) > 1 else 'cases.jsonl'
 TMP = tempfile.mkdtemp(prefix='equiv-')
 HA, HB = os.path.join(TMP, 'homeA'), os.path.join(TMP, 'homeB')
 for d in (HA, HB):
-    for sub in ('results', 'pedigrees', 'terms'):
+    for sub in ('results', 'pedigrees', 'terms', 'pictures'):
         os.makedirs(os.path.join(d, sub))
 EX = REPO + '/data/examples'
 def sub(s, home):

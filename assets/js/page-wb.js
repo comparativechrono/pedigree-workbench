@@ -29,6 +29,19 @@
   /* the folders of a new user's home */
   const FOLDERS = ['pedigrees', 'results', 'terms', 'notebooks'];
 
+  /** a notebook to start from (data/starter) → ~/notebooks; false if it couldn't be fetched (offline) */
+  async function addStarter(fs, rel) {
+    try {
+      const r = await fetch(abs('data/starter/' + rel.split('/').pop()));
+      if (!r.ok) return false;
+      fs.mkdirp(MG.path.dirname(HOME + '/' + rel));
+      fs.writeText(HOME + '/' + rel, await r.text());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function setupFs() {
     const fs = new MG.VFS(HOME);
     fs.mkdirp('/data/examples');
@@ -39,21 +52,19 @@
     for (const [p, e] of fs.entries) if (e.kind === 'dir' && (p === '/data' || p.startsWith('/data/'))) e.protected = true;
     await MG.project.restore(fs, [HOME]);
     fs.cwd = HOME;
-    // the first visit: folders, and notebooks to start from (a file that is there already is left alone)
-    if (!store.get('seeded', false)) {
-      FOLDERS.forEach((d) => fs.mkdirp(HOME + '/' + d));
-      for (const s of STARTERS) {
-        const path = HOME + '/' + s.p;
-        if (fs.exists(path)) continue;
-        try {
-          const r = await fetch(abs('data/starter/' + s.p.split('/').pop()));
-          if (r.ok) fs.writeText(path, await r.text());
-        } catch (e) {
-          /* offline: no starter */
-        }
-      }
-      store.set('seeded', true);
+    // the first visit: folders, and notebooks to start from (a file that is there already is left alone). A notebook
+    // added to the workbench since someone's first visit is given to them once, on their next visit; one they have
+    // had before is never put back, in case they deleted it
+    const first = !store.get('seeded', false);
+    const given = store.get('starters', first ? [] : ['notebooks/pedigree-tools.ipynb']);
+    if (first) FOLDERS.forEach((d) => fs.mkdirp(HOME + '/' + d));
+    for (const s of STARTERS) {
+      if (given.includes(s.p)) continue;
+      if (!fs.exists(HOME + '/' + s.p) && !(await addStarter(fs, s.p))) continue;
+      given.push(s.p);
     }
+    store.set('starters', given);
+    store.set('seeded', true);
     MG.project.watch(fs);
     return fs;
   }
@@ -66,7 +77,7 @@
       hostname: CFG.hostname || 'pedigrees',
       env: {},
       welcome:
-        `A Linux terminal (bash) in your browser, with the pedigree programs studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools, hponorm, mondonorm, phenotk and pedigree-ga4gh. Your files are in ~ (${HOME}), and the examples, which can’t be changed, are in /data/examples. Type  help  to see what’s here, or  man NAME  to read about a command.` +
+        `A Linux terminal (bash) in your browser, with the pedigree programs studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools, hponorm, mondonorm, phenotk, pedigree-ga4gh, pednet, pedgen and pedinterp. Your files are in ~ (${HOME}), and the examples, which can’t be changed, are in /data/examples. Type  help  to see what’s here, or  man NAME  to read about a command.` +
         (MG.user.name() === MG.user.DEFAULT ? ' To see your name in place of user, click “user” at the top of the page.' : '')
     });
     MG.app.nbApp = new MG.NotebookApp(document.getElementById('nbRoot'), { fs, dir: HOME + '/notebooks' });
@@ -132,6 +143,9 @@
     mped: 'MPED file',
     terms: 'terms file',
     obo: 'ontology (OBO)',
+    image: 'picture',
+    vcf: 'VCF file',
+    variants: 'table of genotypes',
     notebook: 'notebook',
     json: 'JSON file',
     other: 'file'
@@ -147,10 +161,20 @@
     if (/^\s*\{\s*"[^"]+"\s*:\s*("[A-Za-z][\w.-]*:[^"\s]+"|\{\s*"id"\s*:)/.test(head) || /"resolved"\s*:/.test(head)) return 'terms';
     return 'json';
   }
-  /** → studio | pedigree | family | cohort | phenopacket | ped | mped | terms | obo | notebook | json | other */
+  /** a table with a column for each person's genotypes, as PedNet reads candidate variants (PedGen writes them) */
+  const isGenotypeTable = (path, n) => {
+    if (/(^|[\/_.-])genotypes?\.(tsv|csv)$/.test(n)) return true;
+    const e = MG.app.fs && MG.app.fs.get(path);
+    return !!(e && e.kind === 'text' && /^\s*variant[\t,]/i.test(e.text.slice(0, 200)));
+  };
+  /** → studio | pedigree | family | cohort | phenopacket | ped | mped | terms | obo | image | vcf | variants | notebook |
+      json | other */
   MG.app.pedKind = (path) => {
     const n = path.toLowerCase();
     if (n.endsWith('.ipynb')) return 'notebook';
+    if (/\.(png|jpe?g|gif|bmp|tiff?|webp)$/.test(n)) return 'image';
+    if (/\.vcf(\.b?gz)?$/.test(n)) return 'vcf';
+    if (/\.(tsv|csv|txt)$/.test(n) && isGenotypeTable(path, n)) return 'variants';
     if (n.endsWith('.studio.json')) return 'studio';
     if (/_ga4gh-pedigree\.json$|\.pedigree\.json$/.test(n)) return 'pedigree';
     if (/_phenopackets-family\.json$|\.family\.json$/.test(n)) return 'family';
@@ -183,7 +207,12 @@
     } else if (k === 'ped' || k === 'mped') {
       out.push(['pedigree', 'Draw in Studio', 'Draw this PED file in Pedigree Studio (ped2studio)', tool('ped2studio')]);
       out.push(['table', 'Summary', 'See what’s in this file and whether it’s valid (mpedtools)', tool('mped-info')]);
+      out.push(['network', 'Analyse', 'The family as a graph: its loops, kinship and closest affected relatives (PedNet)', tool('pednet-graph')]);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
+    } else if (k === 'image') {
+      out.push(['table', 'Read it into a PED file', 'Read the pedigree in this picture, and write it as a PED file (PedInterp)', tool('pedinterp')]);
+    } else if (k === 'vcf' || k === 'variants') {
+      out.push(['dna', 'Rank the variants', 'Rank these candidate variants by how well each co-segregates with the condition (PedNet)', () => MG.app.useTool('pednet-rank', { variants: path })]);
     } else if (k === 'terms') {
       out.push(['tag', 'Use in Match conditions to terms', 'Open the tool Match conditions to terms with this terms file', () => MG.app.useTool('terms', { terms: path })]);
     } else if (k === 'obo') {
@@ -275,6 +304,8 @@
     // (a terms file: for Drawing → GA4GH and Match conditions to terms, and for Fill in missing terms)
     if (btn && btn.dataset.terms) values.terms = btn.dataset.terms.replace(/^~(?=\/|$)/, HOME);
     if (btn && btn.dataset.mapping) values.mapping = btn.dataset.mapping.replace(/^~(?=\/|$)/, HOME);
+    // (the variants to rank, for Rank candidate variants)
+    if (btn && btn.dataset.variants) values.variants = btn.dataset.variants.replace(/^~(?=\/|$)/, HOME);
     return MG.app.useTool(id, values);
   };
   MG.actions.newNb = async () => {
@@ -284,6 +315,9 @@
   MG.actions.openNb = async (path) => {
     await MG.app.showWorkbench('notebook');
     const p = path.startsWith('~/') ? HOME + path.slice(1) : path;
+    // (a notebook to start from that isn't there, deleted or never given: a fresh copy)
+    const starter = STARTERS.find((s) => HOME + '/' + s.p === p);
+    if (!MG.app.fs.exists(p) && starter) await addStarter(MG.app.fs, starter.p);
     if (!MG.app.fs.exists(p)) throw new Error(`There is no notebook ${path} (was it renamed or deleted?)`);
     await MG.app.nbApp.open(p);
   };
@@ -292,6 +326,7 @@
   MG.page.beforeReset = async () => {
     store.remove('nbOpen');
     store.remove('seeded');
+    store.remove('starters');
     store.remove('termHistory');
     store.remove('studioFile');
     try {

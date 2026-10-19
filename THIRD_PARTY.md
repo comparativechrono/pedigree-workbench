@@ -15,6 +15,10 @@ when copying or redistributing its files.
 | studio2ga4gh, ga4gh2studio, phenopacket-toolkit (Tim Hearn) | 0.4.0 | MIT | the same | changed from their 0.3.0 releases, in the pull requests for 0.4.0: see `docs/upstream.md` |
 | pedigree-ga4gh (Tim Hearn) | 1.0.0 | MIT | the same | written for the workbench, now [its own repository](https://github.com/comparativechrono/pedigree-ga4gh) |
 | pedwb | 1.0.0 | MIT | the same | written for the workbench |
+| PedNet (Tim Hearn and Nick Taylor) | 2.0.0 | MIT | `python/pednet` (with its `LICENSE`), packed into `assets/py/pedigree-analysis.zip` | its wheel on PyPI |
+| PedGen (Nick Taylor, with changes by Tim Hearn) | 0.1.4.dev6 | MIT | `python/PedGen` (with its `LICENSE`), the same archive | built from the `main` branch of [comparativechrono/pedigree-generator](https://github.com/comparativechrono/pedigree-generator), not yet released |
+| PedInterp (Nick Taylor, with changes by Tim Hearn) | 0.1.8.dev8 | MIT | `python/PedInterp` (with its `LICENSE`), the same archive | built from [pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4), not yet released |
+| networkx | 3.4.2 | BSD 3-clause | its wheel in `python/vendor`, and in the same archive without its tests, with its `LICENSE.txt` | [PyPI](https://pypi.org/project/networkx/3.4.2/); `python/vendor/SOURCES.json` records the wheel's SHA-256 |
 | Mondo, nine terms (ids, names, definitions, synonyms) | release 2026-10-06 | CC BY 4.0 | `python/mondonorm/data/mondo-sample.obo`, mondonorm's offline sample | [Mondo](https://mondo.monarchinitiative.org) |
 | HPO ids and names, a small hand-built sample | – | the HPO's own terms of use | `python/hponorm/data/hpo-sample.obo`, hponorm's offline sample | [the HPO](https://hpo.jax.org) |
 | KIN, the Kinship Ontology (GA4GH Pedigree Standard): its codes, labels and definitions | `kin.owl`, commit `71616ea` of 16 September 2024 | Apache License 2.0 | `python/pedigree_ga4gh/kin.py`; licence in `python/pedigree_ga4gh/LICENSE-KIN.txt` | [ga4gh/pedigree_family_history_terminology](https://github.com/ga4gh/pedigree_family_history_terminology) (formerly GA4GH-Pedigree-Standard/family_history_terminology) |
@@ -40,6 +44,7 @@ is given two ways: its `LICENSE` file is the GNU GPL 3, and its `pom.xml` the
 | Component | Version | Licence | From |
 |---|---|---|---|
 | Pyodide (CPython for the browser), with micropip and PyYAML | 0.29.5 | Mozilla Public License 2.0 (CPython: PSF licence; PyYAML: MIT; micropip: MPL 2.0) | cdn.jsdelivr.net, when Python first starts |
+| NumPy, pandas (with python-dateutil, pytz and six), OpenCV (opencv-python) and Pillow, as Pyodide builds them | 2.2.5, 2.3.3 (2.9.0.post0, 2025.2, 1.17.0), 4.11.0.86, 11.3.0 | NumPy and pandas: BSD 3-clause; python-dateutil: Apache 2.0 or BSD 3-clause; pytz and six: MIT; OpenCV: Apache 2.0; Pillow: MIT-CMU | cdn.jsdelivr.net, when PedNet, PedGen or PedInterp is first used: NumPy for all three, pandas for PedGen and PedInterp, OpenCV and Pillow for PedInterp |
 | The HPO (`hp.obo`) | the latest release | the HPO's own terms of use (see the HPO's web site) | raw.githubusercontent.com, only when a user asks for it in *Match conditions to terms*; it is kept among that user's files, not in the site |
 
 EBI's Ontology Lookup Service is used, when a user chooses it, to search the
@@ -50,4 +55,5 @@ HPO and the Mondo Disease Ontology; nothing of it is included.
 The example families (`data/examples/`) are fictional: four come from the
 Hearn lab's pedigree practical, and one was drawn for the tests. The files
 made from them are written by the packages themselves (see
-`data/examples/README.md`).
+`data/examples/README.md`). `data/examples/pednet/` holds PedNet's own
+example families, from its repository (MIT), which are fictional too.

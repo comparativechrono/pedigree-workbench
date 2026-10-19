@@ -8,7 +8,7 @@ const MG = {
   h: () => ({}), esc: (s) => s, toast() {}, store: { get: (k, d) => d, set() {} }, bus: { on() {}, emit() {} },
   path: { dirname: (p) => p.replace(/\/[^/]*$/, '') || '/' },
   icon: () => '', kernels: {}, config: {},
-  app: { HOME, kindNames: {}, pedKind: (p) => (/\.studio\.json$/.test(p) ? 'studio' : /_ga4gh-pedigree\.json$/.test(p) ? 'pedigree' : /_phenopackets-family\.json$/.test(p) ? 'family' : /\.mped$/.test(p) ? 'mped' : /\.ped$/.test(p) ? 'ped' : 'json') }
+  app: { HOME, kindNames: {}, pedKind: (p) => (/\.studio\.json$/.test(p) ? 'studio' : /_ga4gh-pedigree\.json$/.test(p) ? 'pedigree' : /_phenopackets-family\.json$/.test(p) ? 'family' : /\.mped$/.test(p) ? 'mped' : /\.ped$/.test(p) ? 'ped' : /\.png$/.test(p) ? 'image' : /\.vcf$/.test(p) ? 'vcf' : /genotypes\.tsv$/.test(p) ? 'variants' : 'json') }
 };
 global.window = { MG, matchMedia: () => ({ matches: false }) };
 require(path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'assets', 'js', 'tools.js')));
@@ -54,7 +54,22 @@ const CASES = [
   ['mped-convert', { input: EX + 'okafor.mped', action: 'to-ped', column: 'Breast_cancer' }],
   ['mped-convert', { input: EX + 'lynch.ped', action: 'to-mped' }],
   ['mped-convert', { input: EX + 'lynch.ped', action: 'add', column: 'Pancreatic', value: '1', out: '~/results/lynch-plus.mped' }],
-  ['mped-convert', { input: EX + 'okafor.mped', action: 'remove', column: 'Hearing_loss_from_birth', out: '~/results/okafor-less.mped' }]
+  ['mped-convert', { input: EX + 'okafor.mped', action: 'remove', column: 'Hearing_loss_from_birth', out: '~/results/okafor-less.mped' }],
+  ['pedinterp', { input: EX + 'lynch.png' }],
+  ['pedinterp', { input: EX + 'lynch.png', family: 'LYN', upscale: 4, outdir: '~/results/pictures' }],
+  ['pednet-graph', { input: EX + 'lynch.ped' }],
+  ['pednet-graph', { input: EX + 'pednet/consanguineous.ped', kinship: true, graphml: true }],
+  ['pednet-graph', { input: EX + 'cf-cousins.mped', family: 'FAM1', kinship: true, xlinked: true, graphml: true, mating: true }],
+  ['pednet-mode', { input: EX + 'lynch.ped' }],
+  ['pednet-mode', { input: EX + 'lynch.ped', penetrance: '0.9', phenocopy: 0.01, proband: 'III-3', threshold: 0.9 }],
+  ['pednet-mode', { input: EX + 'cf-cousins.mped', method: 'patterns' }],
+  ['pednet-mode', { input: EX + 'okafor.mped', method: 'metrics' }],
+  ['pednet-rank', { input: EX + 'pednet/dominant.ped', variants: EX + 'pednet/dominant.vcf' }],
+  ['pednet-rank', { input: EX + 'pednet/recessive.ped', variants: EX + 'pednet/recessive.vcf', modes: 'AR', top: 3, maxfreq: '0.005', passed: true, out: '~/results/recessive-ar.tsv' }],
+  ['pedgen', { mode: 'AR', generations: 4, seed: '7' }],
+  ['pedgen', { mode: 'AD', seed: '3', partners: 0.5, ancestors: 0.1, freq: 0.05, clean: true, genotypes: false, family: 'SIM2' }],
+  ['pednet-rank', { input: R + 'FAM1.ped', variants: R + 'FAM1-genotypes.tsv', out: '' }],
+  ['pednet-rank', { input: R + 'FAM1.ped', variants: R + 'FAM1-genotypes.tsv', modes: 'AR' }]
 ];
 const expand = (p) => String(p).replace(/^~(?=\/|$)/, HOME);
 for (const [id, given] of CASES) {

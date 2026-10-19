@@ -343,7 +343,57 @@ What was wrong before 1.1:
   web page cannot fetch (plain http, and a redirect to a host without CORS).
   The workbench downloads `hp.obo` from raw.githubusercontent.com instead.
 
-## 10. The lab web site
+## 10. PedNet, PedGen and PedInterp
+
+These three came later, from Nick Taylor's repositories, now the lab's
+(comparativechrono/PedNet, pedigree-generator and pedigree-interpreter). The
+workbench carries them in a second archive (`assets/py/pedigree-analysis.zip`),
+which the page loads, with NumPy, pandas, OpenCV and Pillow from Pyodide, only
+when one of them is first used. `python/vendor/SOURCES.json` records the wheel
+each copy came from.
+
+| Package | On PyPI | The workbench's copy |
+|---|---|---|
+| PedNet | **2.0.0**, released on 19 October 2026 | its wheel from PyPI |
+| PedGen | 0.1.3 (Nick Taylor's) | built from `main`, after [pedigree-generator#2](https://github.com/comparativechrono/pedigree-generator/pull/2) was merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4), which adds to [#3](https://github.com/comparativechrono/pedigree-interpreter/pull/3) (merged): the `pedinterp` command (#3), and children drawn straight under their parents read correctly (#4). Once #4 is merged, build it again from `main` |
+
+PedInterp's fix came from the workbench's example picture of the Lynch family:
+drawn where Pedigree Studio draws it, with each child under a parent and the
+generations close together, it gave several children their grandparents.
+Hough's line detector joins lines across gaps of up to a tenth of the
+picture's width, and the blank left where a symbol is taken out is such a gap.
+Pull request #4 cuts lines where they cross a symbol, and follows a line to
+the first line it meets on the way up.
+
+Until PedGen and PedInterp are released, `pip install` gives their earlier
+versions, without the commands. Their versions come from their git tags,
+through hatch-vcs, and unlike PedNet they have no workflow that publishes a
+release to PyPI yet. Once Tim Hearn is an owner of the two projects on PyPI,
+a `release.yml` like PedNet's, with PyPI's trusted publishing, would let a
+GitHub release publish them; until then, an owner uploads them. Then copy the
+released wheels into the workbench:
+
+```bash
+pip download --no-deps --only-binary=:all: PedGen==VERSION PedInterp==VERSION -d wheels
+python3 python/tools/vendor_wheels.py wheels/*.whl
+python3 python/build_bundle.py && python3 build/make_page.py
+```
+
+One thing to know when using them together: PedGen's partners carry the
+condition's allele at 0.1 unless told otherwise, so about one in five is a
+carrier, while PedNet takes a condition to be rare (an allele frequency of
+1 in 1,000 for a recessive one). PedNet therefore often calls a recessive
+family that PedGen simulated something else, or uncertain. In 60 simulated
+recessive families of four generations, the 19 with two or more affected
+people were called uncertain (12), X-linked recessive (4) or autosomal
+dominant (3), never autosomal recessive; given PedGen's frequency
+(`allele_frequency={"AR": 0.1}`), PedNet called four of them autosomal
+recessive, two X-linked recessive, and the rest uncertain. `pednet mode` and
+`pednet rank` have no option for the frequency yet, and PedGen's default is
+far from a rare disease's: either would be worth changing.
+
+## 11. The lab web site
 
 Before this, the Software page on comparativechrono.org listed seven of the
 packages.
