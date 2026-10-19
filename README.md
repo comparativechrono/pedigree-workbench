@@ -15,8 +15,8 @@ them are three packages for analysing pedigrees: **PedNet**, which analyses a
 family as a graph and weighs up its mode of inheritance and how well candidate
 variants co-segregate with its condition; **PedGen**, which simulates
 families; and **PedInterp**, which reads a pedigree from a picture of one.
-They need NumPy, pandas and OpenCV, so the page loads them only when one of
-them is first used.
+They need NumPy, pandas, OpenCV and Pillow, so the page loads them only when
+one of them is first used.
 
 ## Contents
 

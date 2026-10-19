@@ -799,12 +799,16 @@
 
   /* ------------------------------------------------------------------ help */
   B.help = (ctx) => {
-    const row = (name, text) => '  ' + name.padEnd(17) + text;
-    // (the versions of pednet, pedgen and pedinterp, which Python loads when they first run, are the archive's)
+    // (the versions of pednet, pedgen and pedinterp, which Python loads when they first run, are the archive's; the
+    // others' are known once Python has started)
+    const started = (MG.py && MG.py.versions && MG.py.versions.packages) || {};
     const later = (window.WB_BUNDLE && window.WB_BUNDLE.analysis && window.WB_BUNDLE.analysis.packages) || {};
-    const v = Object.assign({}, (MG.py && MG.py.versions && MG.py.versions.packages) || {}, { pednet: later.pednet, pedgen: later.PedGen, pedinterp: later.PedInterp });
+    const v = Object.assign({}, started, { pednet: later.pednet, pedgen: later.PedGen, pedinterp: later.PedInterp });
     // (a version built from GitHub, such as 0.1.4.dev5+g4ab719d58, without the commit)
     const ver = (n) => (v[n === 'phenotk' ? 'phenopacket-toolkit' : n] ? ' ' + String(v[n === 'phenotk' ? 'phenopacket-toolkit' : n]).replace(/\+.*$/, '') : '');
+    // (wide enough for the longest name and version, such as pedinterp 0.1.8.dev8)
+    const width = Math.max(17, ...Object.keys(PROGRAMS).map((n) => (n + ver(n)).length + 2));
+    const row = (name, text) => '  ' + name.padEnd(width) + text;
     ctx.out(
       [
         'Commands in this terminal – every one runs here, in your browser.  (man NAME: examples; NAME --help: options)',
@@ -829,7 +833,7 @@
         'The shell is bash: | && || ; > >> < 2> 2>&1, quotes, $VAR, $( ), $(( )), globs, if/for/while/case, functions,',
         '  [[ ]], here-documents, <( ), xargs, printf, read. Scripts: bash script.sh. Not there: background jobs (&), sudo, apt.',
         'Keys: ↑/↓ earlier commands · Tab completes · Ctrl+C stops · Ctrl+L clears.  Full guide: the Help pane (Terminal).',
-        v && Object.keys(v).length ? '' : '(The versions show once Python has started: run any of the programs.)',
+        Object.keys(started).length ? '' : '(The other programs’ versions show once Python has started: run any of them.)',
         ''
       ].join('\n')
     );

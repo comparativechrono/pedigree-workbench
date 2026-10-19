@@ -177,15 +177,65 @@ KIND_NAMES = {
     "obo": "ontology file (OBO)",
     "json": "JSON file",
     "text": "text file",
+    "vcf": "VCF file",
+    "variants": "table of genotypes",
+    "image": "picture",
 }
+
+_PICTURE = re.compile(r"\.(png|jpe?g|gif|bmp|tiff?|webp)$", re.I)
+_VCF = re.compile(r"\.vcf(\.b?gz)?$", re.I)
+# the columns of a table of genotypes that aren't people, as PedNet reads it (pednet.read_genotype_table)
+_NOT_PEOPLE = {"variant", "id", "chrom", "chr", "chromosome", "pos", "position", "ref", "alt", "af",
+               "allele_frequency", "gene", "symbol"}
+
+
+def _vcf_summary(path: str) -> Dict[str, Any]:
+    """the number of variants and samples in a VCF file, plain or gzipped, and its chromosomes"""
+    import gzip
+    opener = gzip.open if re.search(r"\.b?gz$", path, re.I) else open
+    samples, variants, chromosomes = 0, 0, []
+    with opener(path, "rt", encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            if line.startswith("##"):
+                continue
+            if line.startswith("#"):
+                samples = max(0, len(line.rstrip("\r\n").split("\t")) - 9)
+            elif line.strip():
+                variants += 1
+                chrom = line.split("\t", 1)[0]
+                if chrom not in chromosomes and len(chromosomes) < 30:
+                    chromosomes.append(chrom)
+    return {"kind": "vcf", "variants": variants, "samples": samples, "chromosomes": chromosomes}
+
+
+def _genotype_table_summary(path: str, text: str) -> Optional[Dict[str, Any]]:
+    """a table of genotypes, as PedGen writes one for PedNet: a row for each variant and a column for each person"""
+    lines = [l for l in text.splitlines() if l.strip()]
+    if not lines:
+        return None
+    sep = "," if path.lower().endswith(".csv") else "\t"
+    header = [c.strip().lower() for c in lines[0].split(sep)]
+    if header[0] != "variant" and not re.search(r"genotypes\.(tsv|csv)$", path, re.I):
+        return None
+    return {"kind": "variants", "variants": len(lines) - 1, "people": len([c for c in header if c not in _NOT_PEOPLE])}
 
 
 def inspect(path: str) -> Dict[str, Any]:
     """What a file is, with a short summary of what is in it."""
     from pedigree_ga4gh.kindred import detect
     path = os.path.expanduser(path)
-    text = _read_text(path)
     out: Dict[str, Any] = {"path": path}
+    if _PICTURE.search(path):
+        out.update(kind="image", name=KIND_NAMES["image"])
+        return out
+    if _VCF.search(path):
+        try:
+            out.update(_vcf_summary(path))
+        except (OSError, EOFError, ValueError) as e:
+            out.update(kind="vcf", error=str(e))
+        out["name"] = KIND_NAMES["vcf"]
+        return out
+    text = _read_text(path)
     doc = None
     stripped = text.lstrip()
     if stripped.startswith("{") or stripped.startswith("["):
@@ -214,9 +264,12 @@ def inspect(path: str) -> Dict[str, Any]:
                 out["kind"] = "json"
     else:
         obo = _obo_summary(text)
+        table = None if obo else _genotype_table_summary(path, text)
         if obo:
             out["kind"] = "obo"
             out.update(obo)
+        elif table:
+            out.update(table)
         else:
             try:
                 ped = _ped_summary(text)

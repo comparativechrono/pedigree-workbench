@@ -29,16 +29,22 @@
   /* the folders of a new user's home */
   const FOLDERS = ['pedigrees', 'results', 'terms', 'notebooks'];
 
-  /** a notebook to start from (data/starter) → ~/notebooks; false if it couldn't be fetched (offline) */
+  /** a notebook to start from (data/starter) → ~/notebooks; false if it couldn't be fetched (offline, or a
+      connection that stalls, which mustn't hold up the page for long) */
   async function addStarter(fs, rel) {
+    const stop = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = stop && setTimeout(() => stop.abort(), 15000);
     try {
-      const r = await fetch(abs('data/starter/' + rel.split('/').pop()));
+      const r = await fetch(abs('data/starter/' + rel.split('/').pop()), stop ? { signal: stop.signal } : {});
       if (!r.ok) return false;
+      const text = await r.text();
       fs.mkdirp(MG.path.dirname(HOME + '/' + rel));
-      fs.writeText(HOME + '/' + rel, await r.text());
+      fs.writeText(HOME + '/' + rel, text);
       return true;
     } catch (e) {
       return false;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -52,11 +58,14 @@
     for (const [p, e] of fs.entries) if (e.kind === 'dir' && (p === '/data' || p.startsWith('/data/'))) e.protected = true;
     await MG.project.restore(fs, [HOME]);
     fs.cwd = HOME;
+    // keep every change from here on, the first visit's folders and notebooks among them
+    MG.project.watch(fs);
     // the first visit: folders, and notebooks to start from (a file that is there already is left alone). A notebook
-    // added to the workbench since someone's first visit is given to them once, on their next visit; one they have
-    // had before is never put back, in case they deleted it
+    // added to the workbench since someone's last visit is given to them once; one they have had before is never put
+    // back, in case they deleted it. (Until October 2026 the notebooks weren't kept in the browser unless they were
+    // changed, so anyone who came before then is given them once more.)
     const first = !store.get('seeded', false);
-    const given = store.get('starters', first ? [] : ['notebooks/pedigree-tools.ipynb']);
+    const given = store.get('starters', []);
     if (first) FOLDERS.forEach((d) => fs.mkdirp(HOME + '/' + d));
     for (const s of STARTERS) {
       if (given.includes(s.p)) continue;
@@ -65,7 +74,6 @@
     }
     store.set('starters', given);
     store.set('seeded', true);
-    MG.project.watch(fs);
     return fs;
   }
 

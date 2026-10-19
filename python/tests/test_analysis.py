@@ -4,6 +4,7 @@ They need NumPy (all three), pandas (PedGen and PedInterp) and OpenCV and Pillow
 from Pyodide; here they must be installed (pip install numpy pandas opencv-python-headless pillow). A test whose
 packages aren't there is skipped, and says what it needs. networkx is imported from its wheel in vendor/.
 """
+import ast
 import contextlib
 import hashlib
 import importlib.util
@@ -25,7 +26,10 @@ for _f in sorted(os.listdir(os.path.join(PY, "vendor"))):
     if _f.endswith(".whl") and os.path.join(PY, "vendor", _f) not in sys.path:
         sys.path.append(os.path.join(PY, "vendor", _f))
 
-from pedwb import cli  # noqa: E402
+from pedwb import cli, gui  # noqa: E402
+
+sys.path.insert(0, os.path.join(PY, "tools"))
+from vendor_wheels import tree_digest  # noqa: E402
 
 
 def needs(*modules):
@@ -59,15 +63,40 @@ def test_programs_and_what_they_need():
         assert cli.PROGRAMS[prog].split(".")[0] == module
 
 
+def test_needs_cover_the_imports():
+    # what a package imports as it is imported (at the top of its modules) must be loaded with it: one of the packages
+    # of Pyodide's that pedwb.cli.NEEDS names for its program, networkx (in the archive), or the standard library
+    if not hasattr(sys, "stdlib_module_names"):
+        raise unittest.SkipTest("needs Python 3.10 or later")
+    pyodide = {"numpy": "numpy", "pandas": "pandas", "cv2": "opencv-python", "PIL": "pillow"}
+    for module, prog in cli.MODULES.items():
+        for dirpath, _, files in os.walk(os.path.join(PY, module)):
+            for name in (f for f in files if f.endswith(".py")):
+                tree = ast.parse(open(os.path.join(dirpath, name), encoding="utf-8").read())
+                for node in tree.body:
+                    if isinstance(node, ast.Import):
+                        tops = [a.name.split(".")[0] for a in node.names]
+                    elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                        tops = [node.module.split(".")[0]]
+                    else:
+                        continue
+                    for top in tops:
+                        if top in sys.stdlib_module_names or top in (module, "networkx", "__future__"):
+                            continue
+                        assert pyodide.get(top) in cli.NEEDS[prog], f"{module}/{name} imports {top}, which NEEDS doesn't load for {prog}"
+
+
 def test_copies_are_the_wheels():
-    # the copies here are the wheels SOURCES.json names: each file of the package is the wheel's
+    # the copies here are the wheels SOURCES.json names: networkx is its wheel, and each of the others is the files
+    # that vendor_wheels.py copied from its wheel, unchanged since (their digest is recorded)
     for project, record in SOURCES.items():
         if record["folder"] == "vendor":
             path = os.path.join(PY, "vendor", record["wheel"])
             assert hashlib.sha256(open(path, "rb").read()).hexdigest() == record["sha256"], project
             continue
-        assert os.path.isdir(os.path.join(PY, record["folder"])), project
         assert os.path.exists(os.path.join(PY, record["folder"], "LICENSE")), project
+        assert tree_digest(os.path.join(PY, record["folder"])) == record["files_sha256"], \
+            f"python/{record['folder']} isn't what vendor_wheels.py copied from {record['wheel']}"
     versions = {"pednet": "pednet/__init__.py", "pedgen": "PedGen/_version.py", "pedinterp": "PedInterp/_version.py"}
     for project, path in versions.items():
         text = open(os.path.join(PY, path), encoding="utf-8").read()
@@ -162,3 +191,17 @@ def test_pednet_reads_what_pedgen_and_pedinterp_make():
     read = pednet.pedigree_from_rows(pedigree_processing("LYNCH", image_path=os.path.join(EXAMPLES, "lynch.png"),
                                                          ocr=None))
     assert pednet.infer_mode(read).call == "AD"
+
+
+def test_what_the_tools_tab_says_a_file_is():
+    # (pedwb.gui.inspect, for a file's page in the Tools tab: no NumPy needed)
+    vcf = gui.inspect(os.path.join(EXAMPLES, "pednet", "dominant.vcf"))
+    assert (vcf["kind"], vcf["variants"], vcf["samples"]) == ("vcf", 6, 12) and "X" in vcf["chromosomes"]
+    assert gui.inspect(os.path.join(EXAMPLES, "lynch.png"))["kind"] == "image"
+    with tempfile.TemporaryDirectory() as tmp:
+        table = os.path.join(tmp, "FAM1-genotypes.tsv")
+        with open(table, "w", encoding="utf-8") as fh:
+            fh.write("variant\tchrom\tpos\tref\talt\taf\t1\t2\t3\ncausal\t1\t1000\tA\tG\t0.1\t1\t0\t2\n")
+        info = gui.inspect(table)
+        assert (info["kind"], info["variants"], info["people"]) == ("variants", 1, 3)
+    assert gui.inspect(os.path.join(EXAMPLES, "lynch.ped"))["kind"] == "ped"

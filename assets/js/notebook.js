@@ -508,7 +508,11 @@
       let res = null;
       const handlers = {
         onOutput: (o) => this._append(c, o),
-        onStatus: (t) => this.app.status(`<span class="spinner small"></span> ${esc(t)}`)
+        // (what Python is loading for the cell – PedNet and NumPy, say, the first time – and '' once it has)
+        onStatus: (t) => {
+          this.app.loading = t || '';
+          this.app.status(t ? `<span class="spinner small"></span> ${esc(t)}` : '');
+        }
       };
       try {
         if (BASH.test(code)) {
@@ -1063,9 +1067,13 @@
         this._timer = setInterval(() => {
           const s = Math.round((performance.now() - t0) / 1000);
           if (waiting()) this.status(`<span class="spinner small"></span> starting ${esc(LANGS()[view.lang].label)}… ${s} s`);
+          else if (this.loading) this.status(`<span class="spinner small"></span> ${esc(this.loading)}`);
           else if (s >= 2) this.status(`<span class="spinner small"></span> running… ${s} s`);
         }, 500);
-      } else this.status(secs > 3 ? `last cell: ${secs.toFixed(1)} s` : '');
+      } else {
+        this.loading = '';
+        this.status(secs > 3 ? `last cell: ${secs.toFixed(1)} s` : '');
+      }
       this._kernelPill();
     }
     stop() {

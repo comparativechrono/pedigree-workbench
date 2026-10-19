@@ -15,6 +15,10 @@ require(path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'assets
 const TOOLS = Object.fromEntries(MG.pedTools.map((t) => [t.id, t]));
 const EX = '/data/examples/';
 const R = HOME + '/results/';
+// two small families in one PED file, written for the cases that need one (see FILES)
+const TWO = R + 'two-families.ped';
+const FILES = { [TWO]: ['FAMA\t1\t0\t0\t1\t2', 'FAMA\t2\t0\t0\t2\t1', 'FAMA\t3\t1\t2\t1\t2', 'FAMA\t4\t1\t2\t2\t1', 'FAMB\t1\t0\t0\t1\t1', 'FAMB\t2\t0\t0\t2\t2', 'FAMB\t3\t1\t2\t2\t2', 'FAMB\t4\t1\t2\t1\t1', ''].join('\n') };
+// [tool, values, {fails: the command and the Python must both stop with an error}]
 const CASES = [
   ['studio2ga4gh', { input: EX + 'okafor.studio.json', terms: EX + 'example-terms.json' }],
   ['studio2ga4gh', { input: EX + 'lynch.studio.json', terms: EX + 'example-terms.json', ids: 'drawing', only: 'family', family: 'LYN', prefix: 'lynch-drawing' }],
@@ -69,10 +73,17 @@ const CASES = [
   ['pedgen', { mode: 'AR', generations: 4, seed: '7' }],
   ['pedgen', { mode: 'AD', seed: '3', partners: 0.5, ancestors: 0.1, freq: 0.05, clean: true, genotypes: false, family: 'SIM2' }],
   ['pednet-rank', { input: R + 'FAM1.ped', variants: R + 'FAM1-genotypes.tsv', out: '' }],
-  ['pednet-rank', { input: R + 'FAM1.ped', variants: R + 'FAM1-genotypes.tsv', modes: 'AR' }]
+  ['pednet-rank', { input: R + 'FAM1.ped', variants: R + 'FAM1-genotypes.tsv', modes: 'AR' }],
+  // penetrances separated by spaces; families taken together; a seed too large for a JavaScript number
+  ['pednet-mode', { input: EX + 'lynch.ped', penetrance: '0.6 0.8  0.95' }],
+  ['pednet-mode', { input: TWO, together: true }],
+  ['pednet-mode', { input: TWO, together: true, family: 'FAMB', proband: '3' }],
+  ['pedgen', { mode: 'AD', seed: '123456789012345678901', family: 'BIG' }],
+  // the kinship table is for one family: with two, and none given, both stop
+  ['pednet-graph', { input: TWO, kinship: true }, { fails: true }]
 ];
 const expand = (p) => String(p).replace(/^~(?=\/|$)/, HOME);
-for (const [id, given] of CASES) {
+for (const [id, given, how = {}] of CASES) {
   const t = TOOLS[id];
   const v = {};
   for (const f of t.fields) v[f.key] = given[f.key] != null ? given[f.key] : f.type === 'files' ? [] : f.type === 'file' ? '' : typeof f.def === 'function' ? undefined : f.def;
@@ -84,5 +95,9 @@ for (const [id, given] of CASES) {
   }
   let argv = t.argv(v);
   if (!Array.isArray(argv[0])) argv = [argv];
-  console.log(JSON.stringify({ id, argv, python: t.python ? t.python(v) : '', outputs: t.outputs ? t.outputs(v) : [], idfile: id === 'filter' && v.ids ? { path: argv[0][argv[0].indexOf('--id-list') + 1], text: v.ids.split('\n').join('\n') + '\n' } : null }));
+  // (the form's check must pass, as it does before the tool can run)
+  const problem = t.check ? t.check(v) : '';
+  if (problem) throw new Error(`${id}: the form would refuse ${JSON.stringify(given)}: ${problem}`);
+  const files = Object.entries(FILES).filter(([p]) => JSON.stringify(given).includes(p)).map(([path, text]) => ({ path, text }));
+  console.log(JSON.stringify({ id, argv, python: t.python ? t.python(v) : '', outputs: t.outputs ? t.outputs(v) : [], files, fails: !!how.fails, idfile: id === 'filter' && v.ids ? { path: argv[0][argv[0].indexOf('--id-list') + 1], text: v.ids.split('\n').join('\n') + '\n' } : null }));
 }

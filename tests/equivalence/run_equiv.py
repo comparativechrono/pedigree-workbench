@@ -1,6 +1,8 @@
 """The Tools tab shows, under each tool, the same work as a command and as Python. For each case that gen.js prints,
 run the command (as the Tools tab and the terminal do) in one home folder and the Python in another, and compare the
-files they write: they must be the same, apart from the time they were made.
+files they write: they must be the same, apart from the time they were made. Both must succeed (the command with exit
+status 0, or 1 for the tools whose 1 is an answer), unless the case says that both must fail. For the tools whose
+result is what they print, the two must print the same.
 
     node tests/equivalence/gen.js assets/js/tools.js > cases.jsonl
     python3 tests/equivalence/run_equiv.py cases.jsonl
@@ -40,9 +42,18 @@ def norm(rel, data):
             return o
         return json.dumps(walk(doc), sort_keys=True)
     return data
+# the exit status 1 of these is an answer (the files differ; the MPED file has something to note), not a failure
+ANSWER_CODES = {'diff', 'mped-info'}
+# what these print is their result, and the Python prints the same as the command
+SAME_OUTPUT = {'pednet-mode'}
 ok = bad = 0
 for line in open(CASES):
     c = json.loads(line)
+    for f in c.get('files') or []:
+        for h in (HA, HB):
+            p = sub(f['path'], h)
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            open(p, 'w').write(f['text'])
     before = {h: snapshot(h) for h in (HA, HB)}
     if c.get('idfile'):
         for h in (HA, HB):
@@ -54,14 +65,15 @@ for line in open(CASES):
             os.makedirs(os.path.dirname(sub(o, h)), exist_ok=True)
     # the command
     codes = []
-    err_a = io.StringIO()
-    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err_a):
+    out_a, err_a = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out_a), contextlib.redirect_stderr(err_a):
         for argv in c['argv']:
             codes.append(cli.run([sub(a, HA) for a in argv]))
     # the Python
     err_b = ''
+    out_b = io.StringIO()
     try:
-        with contextlib.redirect_stdout(io.StringIO()):
+        with contextlib.redirect_stdout(out_b):
             exec(compile(sub(c['python'], HB), '<py>', 'exec'), {'__name__': '__main__'})
     except Exception:
         err_b = traceback.format_exc()
@@ -73,15 +85,25 @@ for line in open(CASES):
         new_b = {k: v for k, v in new_b.items() if not k.endswith('-ids.txt')}
     same_names = set(new_a) == set(new_b)
     diffs = [k for k in new_a if k in new_b and norm(k, new_a[k]) != norm(k, new_b[k])]
-    status = 'ok' if same_names and not diffs and not err_b and all(x in (0, 1) for x in codes) else 'DIFF'
+    allowed = (0, 1) if c['id'] in ANSWER_CODES else (0,)
+    printed = c['id'] not in SAME_OUTPUT or sub(out_a.getvalue(), HA).rstrip() == sub(out_b.getvalue(), HB).rstrip()
+    if c.get('fails'):
+        good = any(x != 0 for x in codes) and bool(err_b) and not new_a and not new_b
+    else:
+        good = same_names and not diffs and not err_b and all(x in allowed for x in codes) and printed
+    status = 'ok' if good else 'DIFF'
+    if not printed:
+        print('   printed differently:\n   command: %r\n   Python:  %r' % (out_a.getvalue()[:300], out_b.getvalue()[:300]))
     if status == 'ok':
         ok += 1
     else:
         bad += 1
     print(f"{status:4} {c['id']:14} codes={codes} files A={sorted(new_a)} B={sorted(new_b) if not same_names else '='} {('diffs=' + str(diffs)) if diffs else ''}")
-    if err_b:
+    if err_b and (status != 'ok' or not c.get('fails')):
         print('   python error:', err_b.strip().splitlines()[-1])
-    if any(x not in (0, 1) for x in codes) or (codes and codes[0] == 1 and c['id'] not in ('diff', 'mped-info')):
+    if c.get('fails') and status == 'ok':
+        print('   (both stopped, as they should:', err_b.strip().splitlines()[-1][:120] + ')')
+    if not c.get('fails') and any(x not in allowed for x in codes):
         print('   command stderr:', err_a.getvalue().strip()[-400:])
 print(f'\n{ok} the same, {bad} different')
 shutil.rmtree(TMP, ignore_errors=True)

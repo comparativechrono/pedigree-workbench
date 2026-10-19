@@ -383,13 +383,15 @@ python3 python/build_bundle.py && python3 build/make_page.py
 One thing to know when using them together: PedGen's partners carry the
 condition's allele at 0.1 unless told otherwise, so about one in five is a
 carrier, while PedNet takes a condition to be rare (an allele frequency of
-1 in 1,000 for a recessive one). PedNet therefore often calls a recessive
+1 in 1,000 for an autosomal recessive one). PedNet therefore often calls a recessive
 family that PedGen simulated something else, or uncertain. In 60 simulated
-recessive families of four generations, the 19 with two or more affected
+recessive families of four generations (seeds 1 to 60, at most three
+children a couple), the 19 with two or more affected
 people were called uncertain (12), X-linked recessive (4) or autosomal
 dominant (3), never autosomal recessive; given PedGen's frequency
 (`allele_frequency={"AR": 0.1}`), PedNet called four of them autosomal
-recessive, two X-linked recessive, and the rest uncertain. `pednet mode` and
+recessive, two X-linked recessive, and the rest uncertain, and put autosomal
+recessive first in 11 of the 19 (without it, in 2). `pednet mode` and
 `pednet rank` have no option for the frequency yet, and PedGen's default is
 far from a rare disease's: either would be worth changing.
 

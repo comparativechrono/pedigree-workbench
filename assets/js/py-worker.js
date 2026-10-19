@@ -288,13 +288,25 @@ async function ensureAnalysis(names, id) {
   post({ type: 'status', id, text: `Loading ${what} into Python (the first time, this downloads about ${Math.max(1, Math.round(mb))} MB, which your browser then keeps)…` });
   if (missing.length) {
     const failed = [];
-    await pyodide.loadPackage(missing, { messageCallback: () => {}, errorCallback: (msg) => failed.push(String(msg)) });
+    try {
+      await pyodide.loadPackage(missing, { messageCallback: () => {}, errorCallback: (msg) => failed.push(String(msg)) });
+    } catch (e) {
+      failed.push(String((e && e.message) || e));
+    }
     const still = missing.filter((x) => !isLoaded(x));
-    if (still.length) throw new Error(`${listed(still.map((x) => SHOWN[x] || x))} couldn’t be downloaded – check the internet connection, and try again.` + (failed.length ? ` (${failed[0].slice(0, 200)})` : ''));
+    // (Pyodide's first message is a heading – "The following error occurred while loading numpy:" – and the error
+    // itself comes after it)
+    const why = failed.filter((x) => !/following error occurred/i.test(x)).pop() || '';
+    if (still.length) throw new Error(`${listed(still.map((x) => SHOWN[x] || x))} couldn’t be downloaded – check the internet connection, and try again.` + (why ? ` (${why.trim().slice(0, 200)})` : ''));
   }
   if (!analysisUnpacked) {
     analysisUnpacked = (async () => {
-      const r = await fetch(analysisUrl);
+      let r;
+      try {
+        r = await fetch(analysisUrl);
+      } catch (e) {
+        throw new Error('PedNet, PedGen and PedInterp couldn’t be downloaded – check the internet connection, and try again.');
+      }
       if (!r.ok) throw new Error('PedNet, PedGen and PedInterp couldn’t be loaded (' + analysisUrl.split('?')[0] + ': HTTP ' + r.status + ')');
       pyodide.unpackArchive(await r.arrayBuffer(), 'zip', { extractDir: ANALYSIS_DIR });
       await pyodide.runPythonAsync(`import sys, importlib\nif '${ANALYSIS_DIR}' not in sys.path: sys.path.insert(1, '${ANALYSIS_DIR}')\nimportlib.invalidate_caches()`);
@@ -304,6 +316,7 @@ async function ensureAnalysis(names, id) {
     analysisUnpacked.catch(() => (analysisUnpacked = null));
   }
   await analysisUnpacked;
+  post({ type: 'status', id, text: '' });
 }
 
 /** the top-level packages that code imports ([] if it can't be read) */
@@ -669,8 +682,10 @@ def _hints(e, code):
                 hints.append("The Phenopackets Python library (phenopackets, built on protobuf) is not part of the workbench. Read and write the files as JSON, or with phenopacket_toolkit and pedigree_ga4gh, which are here:  import pedigree_ga4gh as pg")
             elif mod in ('pysam', 'tensorflow', 'torch'):
                 hints.append(f"{mod} cannot run in a web browser.")
+            elif mod in ('pednet', 'PedGen', 'PedInterp'):
+                hints.append(f"{mod} comes with the workbench, and is loaded when a cell imports it, or runs one of its commands: put  import {mod}  in the cell, and run it again.")
             elif mod:
-                hints.append(f"Packages that are part of Pyodide load by themselves when imported. {mod} is not one of them: try  %pip install {mod}  (it works for pure-Python packages), then run this cell again.")
+                hints.append(f"Packages that are part of Pyodide load by themselves when a cell imports them, so if {mod} is one, put  import {mod}  in the cell (a package can import another one only once it is loaded). If it isn't, try  %pip install {mod}  (it works for pure-Python packages). Then run the cell again.")
         elif name == 'FileNotFoundError':
             hints.append(f"The notebook runs in {os.getcwd()}; relative paths start there. Your files are in {os.path.expanduser('~')} (~), the example pedigrees in /data/examples. Check the name in the Files tab.")
         elif name == 'UnboundLocalError':
@@ -939,6 +954,13 @@ async def _wb_magic(name, args):
         if not a:
             print('Usage: %run script.py', file=sys.stderr)
             return
+        # (PedNet, PedGen and PedInterp, if the script imports them, are loaded the first time, as for python script.py)
+        needs = _wb_needs(['python'] + a)
+        if needs:
+            problem = str(await wb_ensure(json.dumps(needs)))
+            if problem:
+                print(problem, file=sys.stderr)
+                return
         old = sys.argv[:]
         sys.argv[:] = a
         try:
@@ -1446,17 +1468,23 @@ async function loadImports(code, id) {
       else if (id != null && id === termId) self.term_emit(text, 'err', 'red');
     }
   }
+  let said = false;
   try {
     await pyodide.loadPackagesFromImports(code, {
       messageCallback: (msg) => {
         const mm = /Loading (.+)/.exec(msg);
-        if (mm) post({ type: 'status', text: 'Loading ' + mm[1].slice(0, 80) + '…', id });
+        if (mm) {
+          said = true;
+          post({ type: 'status', text: 'Loading ' + mm[1].slice(0, 80) + '…', id });
+        }
       },
       errorCallback: () => {}
     });
   } catch (e) {
     /* a missing package is reported by Python itself when the import runs */
   }
+  // (loaded: the status line goes back to saying that the code is running)
+  if (said) post({ type: 'status', text: '', id });
 }
 
 function doneWithChanges(msg) {
@@ -1487,7 +1515,7 @@ async function run(m) {
   resetOutput();
   const t0 = performance.now();
   // packages of the imports in the cell (and of  %pip install  lines, which micropip does itself)
-  await loadImports(m.code.replace(/^\s*[!%].*$/gm, ''), m.id);
+  await loadImports(m.code.replace(/^\s*(?:[A-Za-z_][\w.]*\s*=\s*)?[!%](?!=).*$/gm, ''), m.id);
   const runner = pyodide.globals.get('_nb_run');
   let ok = false;
   try {

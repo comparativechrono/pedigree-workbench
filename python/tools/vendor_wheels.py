@@ -13,7 +13,8 @@ has networkx too, but it loads it with matplotlib, which PedNet doesn't need and
 to the first use of PedNet.
 
 What was copied, and from which wheel (its name and SHA-256), is recorded in python/vendor/SOURCES.json, which
-python/build_bundle.py reads for the versions.
+python/build_bundle.py reads for the versions. So is a SHA-256 of the files copied (files_sha256: see tree_digest),
+which the tests check, so that a copy changed by hand doesn't go unnoticed.
 """
 import hashlib
 import json
@@ -42,6 +43,24 @@ def wheel_name(path):
     if not m:
         raise SystemExit(f'{path}: not the name of a wheel')
     return m.group(1).lower().replace('_', '-'), m.group(2)
+
+
+def tree_digest(folder):
+    """A SHA-256 of a folder's files: of each one's path in the folder and its own SHA-256, in order of path.
+    Python's caches (__pycache__) are left out."""
+    files = []
+    for dirpath, dirnames, filenames in os.walk(folder):
+        dirnames[:] = [d for d in dirnames if d != '__pycache__']
+        for name in filenames:
+            if name.endswith('.pyc'):
+                continue
+            full = os.path.join(dirpath, name)
+            with open(full, 'rb') as fh:
+                files.append((os.path.relpath(full, folder).replace(os.sep, '/'), hashlib.sha256(fh.read()).hexdigest()))
+    digest = hashlib.sha256()
+    for rel, sha in sorted(files):
+        digest.update(f'{rel}\0{sha}\n'.encode('utf-8'))
+    return digest.hexdigest()
 
 
 def copy(path):
@@ -79,6 +98,7 @@ def copy(path):
             with open(out, 'wb') as fh:
                 fh.write(z.read(name))
             files += 1
+    record['files_sha256'] = tree_digest(dest)
     print(f'{folder}: {files} files from {os.path.basename(path)}')
     return project, record
 

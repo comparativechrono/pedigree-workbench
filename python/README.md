@@ -34,7 +34,7 @@ In the second archive:
 | `pednet` (PedNet) | **2.0.0** | on PyPI, released on 19 October 2026: pedigrees as graphs, the mode of inheritance, and the co-segregation of candidate variants |
 | `PedGen` | 0.1.4.dev6 | built from pedigree-generator's `main`, with [#2](https://github.com/comparativechrono/pedigree-generator/pull/2) merged, not released yet: the `pedgen` command, a table of genotypes for PedNet, and matplotlib imported only to draw |
 | `PedInterp` | 0.1.8.dev8 | built from [pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4), on top of [#3](https://github.com/comparativechrono/pedigree-interpreter/pull/3), which is merged; not released yet: the `pedinterp` command (#3), and children drawn straight under their parents read correctly (#4) |
-| `networkx` | 3.4.2 | its wheel from PyPI, in `vendor/`, without its tests |
+| `networkx` | 3.4.2 | its wheel from PyPI, in `vendor/`; the archive has it without its tests |
 
 `tools/vendor_wheels.py` copies the four from their wheels, and records each
 wheel's name and SHA-256 in `vendor/SOURCES.json`. When PedGen and PedInterp
@@ -43,11 +43,12 @@ Tim Hearn and Nick Taylor, and PedGen and PedInterp by Nick Taylor, under the
 MIT licence (each package's `LICENSE`); networkx is under the 3-clause BSD
 licence (in its wheel, and in the archive as `networkx/LICENSE.txt`).
 
-The versions in bold were released on PyPI on 18 October 2026, from the pull
-requests listed in `docs/upstream.md`. The copies here are taken from those
+The versions in bold in the first table were released on PyPI on 18 October
+2026, from the pull requests listed in `docs/upstream.md`, and PedNet 2.0.0 on
+19 October. The copies here are taken from those
 releases' wheels, so they are exactly what `pip install` gives.
 
-The packages are by Tim Hearn, under the MIT licence (`LICENSE`).
+The other packages are by Tim Hearn, under the MIT licence (`LICENSE`).
 `pedigree_ga4gh/kin.py` holds the terms of KIN, the Kinship Ontology of the
 GA4GH Pedigree Standard, under the Apache License 2.0
 (`pedigree_ga4gh/LICENSE-KIN.txt`).

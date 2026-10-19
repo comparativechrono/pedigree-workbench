@@ -116,13 +116,14 @@ ANALYSIS = [
 
 This notebook works with three more packages: **PedNet**, which analyses a pedigree as a graph and weighs up the mode
 of inheritance and candidate variants; **PedGen**, which simulates families; and **PedInterp**, which reads a picture
-of a pedigree. They need NumPy, and PedGen and PedInterp need pandas too, and PedInterp OpenCV, so the workbench loads
-them only when they are first used. The first cell that imports one of them takes longer, because it downloads it,
+of a pedigree. They need NumPy, and PedGen and PedInterp need pandas too, and PedInterp OpenCV and Pillow, so the workbench
+loads them only when they are first used. The first cell that imports one of them takes longer, because it downloads it,
 with what it needs: about 4 MB for PedNet, and about 21 MB in all once PedGen and PedInterp are loaded too. Your
 browser keeps them for next time.
 
 Run the cells in order from the top: click a cell and press **Shift+Enter**. The same work is in the **Tools** tab,
-under *Analyse and simulate*, and in the terminal, as the commands `pednet`, `pedgen` and `pedinterp`."""),
+under *Analyse and simulate* (with *Picture → PED file* under *Convert*), and in the terminal, as the commands
+`pednet`, `pedgen` and `pedinterp`."""),
     ("md", """## A family as a graph
 
 PedNet reads a PED file into a pedigree for each family. A pedigree is a directed acyclic graph, with an edge from
@@ -161,12 +162,14 @@ print(pednet.infer_mode(okafor))"""),
 
 `rank_variants` scores each candidate variant by how well it co-segregates with the condition. The score is a Bayes
 factor, and its strength is given as evidence for co-segregation (PP1) or against it (BS4), under the ACMG/AMP
-guidelines. These are PedNet's own examples: a family with a dominant condition, and six variants found by
-sequencing some of them."""),
+guidelines. The variants are ranked by their odds of being the cause, which also take account of whether a
+variant's chromosome suits the family's mode of inheritance. These are PedNet's own examples: a family with a
+dominant condition, and six variants found by sequencing some of them. The family's condition is almost certainly
+autosomal, so var5, on the X chromosome, ranks below two variants whose Bayes factors are lower."""),
     ("code", """family = pednet.read_ped("/data/examples/pednet/dominant.ped")["FAM1"]
 variants = pednet.read_vcf("/data/examples/pednet/dominant.vcf", samples=family.ids)
 for s in pednet.rank_variants(family, variants):
-    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence, s.best_mode, s.notes)"""),
+    print(s.rank, s.id, "log10 odds", round(s.log10_odds, 2), "log10 BF", round(s.log10_bf, 2), s.evidence, s.best_mode, s.notes)"""),
     ("md", """## Simulating families with PedGen
 
 PedGen makes up a family by Mendelian inheritance from an affected founder, as a table, and with a seed it makes the
@@ -177,11 +180,13 @@ sim = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AD", generation_
 print(len(sim), "people,", (sim["Phenotype"] == 2).sum(), "affected")
 print(pednet.infer_mode(pednet.pedigree_from_rows(sim)))
 print("wrote", gen_PED_export(sim, "/home/user/results"))"""),
-    ("md", """PedNet takes a condition to be rare: its recessive model gives the allele a frequency of 1 in 1,000. The partners
+    ("md", """PedNet takes a condition to be rare: for autosomal recessive inheritance, it gives the allele a frequency of 1 in
+1,000. The partners
 who marry into a family that PedGen simulates carry the allele at the frequency you give, 0.1 unless you say
 otherwise, so about one in five of them is a carrier. In a recessive family that PedGen makes, the affected children
 of carriers who married in are very unlikely under PedNet's model, and it may favour another mode. Given PedGen's
-frequency, it weighs the family up as PedGen made it."""),
+frequency, it favours autosomal recessive inheritance more often, as it does for this family, though by no means
+always."""),
     ("code", """rec = pednet.pedigree_from_rows(pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_count=4, seed=34))
 print("a rare allele:", pednet.infer_mode(rec).call)
 print("PedGen's frequency:", pednet.infer_mode(rec, allele_frequency={"AR": 0.1}).call)"""),
@@ -190,7 +195,7 @@ print("PedGen's frequency:", pednet.infer_mode(rec, allele_frequency={"AR": 0.1}
 PedInterp reads a pedigree from a picture of one, drawn in black on white. The labels can't be read in a browser,
 which has no Tesseract, so the people are numbered by generation instead (I-1, I-2, II-1 …), as Pedigree Studio
 numbers them. The picture of the Lynch family was drawn where the Studio draws it, so the numbers are the ones in the
-Lynch PED file, and the two tables are the same."""),
+Lynch PED file, and the two tables are the same, apart from the family's id."""),
     ("code", """import pandas as pd
 from PedInterp import pedigree_processing
 
