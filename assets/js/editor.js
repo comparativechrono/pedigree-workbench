@@ -520,7 +520,7 @@
       this.actsEl.innerHTML = '';
       this.pathEl.textContent = '';
       this.emptyEl.innerHTML = `<div class="ex-empty ed-welcome">${MG.icon('folder')}<h3>Your files</h3>
-        <p>Click a file on the left to open it. Text files, such as PED files, terms files and GA4GH or Phenopackets JSON, open in the editor. Pictures, tables and PDFs are shown here, and notebooks open in the Notebook tab. A Pedigree Studio drawing has a button to open it in Studio, and pedigree files have buttons that take them to the Tools tab.</p>
+        <p>Click a file in the list to open it. Text files, such as PED files, terms files and GA4GH or Phenopackets JSON, open in the editor. Pictures, tables and PDFs are shown here, and notebooks open in the Notebook tab. A Pedigree Studio drawing has a button to open it in Studio, and pedigree files have buttons that take them to the Tools tab.</p>
         <p>Add files from your computer with <b>↑ Upload</b> or by dragging them onto this tab. Right-click a file, or use its ⋯ button, for more options.</p></div>`;
       const b = h('button.btn', { type: 'button', html: MG.icon('upload') + '<span>Upload files</span>' });
       b.addEventListener('click', () => this.upload(false));

@@ -82,6 +82,12 @@ async () => {
     await view.runAll();
     const errs = view.cells.filter((c) => c.type === 'code' && /Traceback/.test(c.el.innerText)).length;
     check(errs === 0 && view.cells.filter((c) => c.type === 'code').every((c) => /\[\d+\]/.test(c.countEl.textContent)), 'Notebook: the welcome notebook runs without errors');
+    // the Files tab: a file open in it fits the screen, on a phone too
+    for (const f of ['/data/examples/okafor_phenopackets-family.json', '/data/examples/lynch.png']) {
+      await MG.app.editFile(f);
+      await sleep(800);
+    }
+    check(document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1, 'Files: an open file fits the width of the screen');
     // the help: the map, a button, the KIN table
     MG.app.showHelp('h-home');
     await sleep(300);

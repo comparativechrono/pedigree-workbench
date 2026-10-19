@@ -281,6 +281,21 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .ed-row:hover .ed-more, .ed-row:focus-within .ed-more, .ed-row.on .ed-more { opacity: 1; }
 .ed-more:hover { background: #dfe6ee; color: var(--ink); }
 .ed-more .ic { width: 14px; height: 14px; }
+/* the bar over an open file: in a narrow window, the file's name takes a line of its own, wrapping if it must, and the
+   buttons go below it, rather than widening the page */
+@media (max-width: 900px) {
+  .ed-bar { flex-wrap: wrap; row-gap: 4px; }
+  .ed-bar .grow { display: none; }
+  .ed-path { flex: 1 1 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  .ed-tab-l { white-space: nowrap; }   /* (the open files' tabs scroll sideways instead) */
+}
+/* on a phone, the folder tree goes above the open file, which then has the whole width, rather than beside it, where
+   it left the file a third of the screen */
+@media (max-width: 600px) {
+  .ed { flex-direction: column; }
+  .ed-side { width: auto; max-height: 38%; border-right: 0; border-bottom: 1px solid var(--line); }
+  .ed-main { flex: 1; }
+}
 .ed-hint { font-size: 0.78rem; color: var(--muted); padding: 2px 14px 6px 30px; margin: 0; }
 .ed-usage { flex: none; border-top: 1px solid var(--line); padding: 6px 10px; font-size: 0.72rem; color: var(--muted); display: flex; gap: 6px; align-items: flex-start; line-height: 1.35; }
 .ed-usage .ic { width: 13px; height: 13px; flex: none; margin-top: 1px; }
