@@ -15,7 +15,7 @@
                 deceased, proband, index }]
        status: { conditionKey: 'affected', 'unaffected' or 'carrier' };
        someone with no status for a condition has no record of it
-     conditions: [{ key, label, colour, pattern, unnamed }]
+     conditions: [{ key, label, id, colour, pattern, unnamed }]
      unrecorded: what to take people with no record of a condition to
        be: 'unknown', or 'auto' (unaffected, unless anyone is recorded
        as unaffected: see PedNet's reading of GA4GH files); and
@@ -92,18 +92,22 @@
   const isHalf = (coverage) => coverage === 'half-left' || coverage === 'half-right';
 
   /** the conditions of a drawing: the entries of its key, in the key's order, and then any colour or shading in
-      use that the key doesn't name (each a condition of its own, named by how it is drawn) */
+      use that the key doesn't name (each a condition of its own, named by how it is drawn). An entry may end with
+      its ontology term in brackets, as studio2ga4gh reads it: Breast cancer [MONDO:0007254] is named Breast cancer,
+      with the id MONDO:0007254 */
   function conditionsOf(persons, legend) {
     const out = [], seen = new Set();
     for (const [key, raw] of Object.entries(legend || {})) {
-      const label = String(raw || '').trim();
-      if (!label) continue;
+      const text = String(raw || '').trim();
+      if (!text) continue;
+      const m = /^(.*?)\s*\[([A-Za-z][\w.-]*:[^\]\s]+)\]$/.exec(text);
+      const label = m && m[1] ? m[1] : text, id = m ? m[2] : null;
       if (key.startsWith('shading:')) {
         const parts = key.split(':');
-        out.push({ key, label, pattern: parts[1] || 'stripes', coverage: parts[2] || 'full' });
+        out.push({ key, label, id, pattern: parts[1] || 'stripes', coverage: parts[2] || 'full' });
       } else {
         if (WHITE.has(lc(key))) continue;
-        out.push({ key: lc(key), label, colour: key });
+        out.push({ key: lc(key), label, id, colour: key });
       }
       seen.add(key.startsWith('shading:') ? key : lc(key));
     }

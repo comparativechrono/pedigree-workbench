@@ -3,7 +3,9 @@
     pednet graph FAMILY.ped                the pedigree as a graph: its structure, loops, kinship and patterns
     pednet mode FAMILY.ped                 the mode of inheritance
     pednet rank FAMILY.ped VARIANTS.vcf    candidate variants ranked by co-segregation
-    pednet check FAMILY.ped                what PedNet makes of a PED file
+    pednet check FAMILY.ped                what PedNet makes of a pedigree file
+
+Each reads a PED file, or a GA4GH Pedigree or Phenopackets Family (FAMILY_ga4gh-pedigree.json).
 """
 import argparse
 import csv
@@ -17,7 +19,8 @@ from .features import classify_by_metrics, classify_by_patterns, network_metrics
 from .genotypes import read_genotype_table, read_vcf, vcf_samples
 from .inheritance import DEFAULT_PENETRANCE, DEFAULT_PHENOCOPY, infer_mode, infer_shared_mode
 from .models import MODES
-from .pedigree import PedigreeError, read_ped
+from .ga4gh import UNRECORDED
+from .pedigree import PedigreeError, read_pedigree
 from .segregation import DEFAULT_ERROR_RATE, MIN_VARIANT_FREQUENCY, rank_variants, rank_variants_across
 
 
@@ -29,17 +32,26 @@ def _floats(text: str) -> List[float]:
 
 
 def _families(args):
-    families = read_ped(args.ped, args.family)
+    families = read_pedigree(args.ped, args.family, args.condition, args.unrecorded)
     if not families:
         raise PedigreeError(f'There are no people in {args.ped}')
     if getattr(args, 'proband', None) and len(families) > 1:
-        raise PedigreeError('--proband needs --family, since the PED file has more than one family')
+        raise PedigreeError('--proband needs --family, since the file has more than one family')
     return families
 
 
+def _ga4gh(parser):
+    parser.add_argument('--condition', help='for a GA4GH file that names several conditions, the one that makes '
+                                            'someone affected, by its ontology ID or its label (by default any)')
+    parser.add_argument('--unrecorded', choices=UNRECORDED,
+                        help='for a GA4GH file, what to take people with no record of the condition to be (by '
+                             'default unaffected, unless the file marks some people as not having it)')
+
+
 def _common(parser):
-    parser.add_argument('ped', help='the PED file')
+    parser.add_argument('ped', help='the PED file, or a GA4GH Pedigree or Phenopackets Family (.json)')
     parser.add_argument('--family', help='only this family (by default every family in the file)')
+    _ga4gh(parser)
     parser.add_argument('--proband', help='the person through whom the family was found (by default each affected '
                                           'person in turn)')
     parser.add_argument('--modes', default=','.join(MODES),
@@ -114,7 +126,7 @@ def _mode_by_graph(args, families) -> int:
 def _graph(args) -> int:
     families = _families(args)
     if (args.kinship or args.graphml) and len(families) > 1:
-        raise PedigreeError('--kinship and --graphml need --family, since the PED file has more than one family')
+        raise PedigreeError('--kinship and --graphml need --family, since the file has more than one family')
     for name, pedigree in families.items():
         graph = pedgraph.pedigree_graph(pedigree)
         couples = {(p.father, p.mother) for p in pedigree.people if p.father is not None}
@@ -205,11 +217,11 @@ def _note_strangers(names, people):
     """Say which genotyped samples are in no family, and stop if none of them is in one"""
     missing = sorted(set(names) - set(people))
     if missing and len(missing) == len(set(names)):
-        raise PedigreeError('None of the genotyped samples is in the PED file: their names must be the IDs of the '
-                            f'PED file ({", ".join(missing[:3])}{"..." if len(missing) > 3 else ""})')
+        raise PedigreeError('None of the genotyped samples is in the pedigree: their names must be the IDs of the '
+                            f'people in it ({", ".join(missing[:3])}{"..." if len(missing) > 3 else ""})')
     if missing:
         print(f'note: {_count(len(missing), "genotyped sample")} {"is" if len(missing) == 1 else "are"} in no family '
-              f'of the PED file and {"is" if len(missing) == 1 else "are"} left out '
+              f'of the pedigree file and {"is" if len(missing) == 1 else "are"} left out '
               f'({", ".join(missing[:5])}{"..." if len(missing) > 5 else ""})', file=sys.stderr)
 
 
@@ -305,8 +317,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub = parser.add_subparsers(dest='command', required=True)
 
     graph = sub.add_parser('graph', help='the pedigree as a graph: its structure, loops, kinship and patterns')
-    graph.add_argument('ped', help='the PED file')
+    graph.add_argument('ped', help='the PED file, or a GA4GH Pedigree or Phenopackets Family (.json)')
     graph.add_argument('--family', help='only this family')
+    _ga4gh(graph)
     graph.add_argument('--pairs', type=int, default=10, help='how many pairs of affected relatives to list (default 10)')
     graph.add_argument('--kinship', help='write the kinship coefficients of everyone to this file, separated by tabs')
     graph.add_argument('--x', action='store_true', help='with --kinship, the coefficients for the X chromosome')
@@ -330,7 +343,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     rank = sub.add_parser('rank', help='candidate variants ranked by co-segregation with the condition',
                           description='Ranks candidate variants by how well they co-segregate with the condition. '
-                          'With several families in the PED file (and no --family), the families are taken to have '
+                          'With several families in the file (and no --family), the families are taken to have '
                           'the same condition, with one mode of inheritance, and each candidate is ranked by its '
                           'evidence over the families in which an affected person carries it: the sum of their log10 '
                           'Bayes factors when the mode is given (--modes AD, say), and otherwise more than the sum if '
@@ -353,9 +366,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     rank.add_argument('--out', help='write every candidate\'s scores to this file, separated by tabs')
     rank.set_defaults(run=_rank)
 
-    check = sub.add_parser('check', help='what PedNet makes of a PED file')
-    check.add_argument('ped', help='the PED file')
+    check = sub.add_parser('check', help='what PedNet makes of a pedigree file')
+    check.add_argument('ped', help='the PED file, or a GA4GH Pedigree or Phenopackets Family (.json)')
     check.add_argument('--family', help='only this family')
+    _ga4gh(check)
     check.set_defaults(run=_check)
 
     args = parser.parse_args(argv)

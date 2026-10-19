@@ -2,7 +2,8 @@
 
 A PED file has one person per line, in six columns: family, person, father, mother, sex
 (1 male, 2 female, 0 unknown) and phenotype (2 affected, 1 unaffected, 0 or -9 unknown).
-A father or mother of 0 means that parent isn't in the file.
+A father or mother of 0 means that parent isn't in the file. read_pedigree reads a GA4GH
+Pedigree or Phenopackets Family too (see ga4gh.py).
 """
 import io
 import numbers
@@ -343,6 +344,34 @@ def read_ped(source, family: Optional[str] = None) -> Dict[str, Pedigree]:
     if family is not None and family not in rows:
         raise PedigreeError(f'There is no family {family} in the PED file')
     return {fam: Pedigree(people, fam) for fam, people in rows.items()}
+
+
+def read_pedigree(source, family: Optional[str] = None, condition: Optional[str] = None,
+                  unrecorded: Optional[str] = None) -> Dict[str, Pedigree]:
+    """
+    Reads a pedigree file of either kind into a pedigree for each family, keyed by family ID: a PED file, as read_ped
+    does, or a GA4GH Pedigree or Phenopackets Family, as ga4gh.read_ga4gh does. A file is taken as JSON if its text
+    starts with {. source is a path, an open file, the text itself, or a GA4GH document already parsed.
+
+    condition and unrecorded are for GA4GH files, which can name several conditions and need not record everyone's
+    (see read_ga4gh); a PED file has one phenotype, so they are refused for one.
+    """
+    if isinstance(source, dict):
+        text = None
+    elif hasattr(source, 'read'):
+        text = source.read()
+    elif isinstance(source, str) and ('\n' in source or source.lstrip().startswith('{')):
+        text = source
+    else:
+        with open(source, encoding='utf-8-sig') as handle:
+            text = handle.read()
+    if text is None or text.lstrip().startswith('{'):
+        from .ga4gh import read_ga4gh
+        return read_ga4gh(source if text is None else text, family, condition, unrecorded)
+    if condition is not None or unrecorded is not None:
+        raise PedigreeError('A condition, and what to take people with no record of it to be, are for GA4GH files: '
+                            'a PED file has one phenotype for each person')
+    return read_ped(text if '\n' in text else text + '\n', family)
 
 
 def pedigree_from_rows(rows, family: str = '') -> Pedigree:

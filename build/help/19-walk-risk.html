@@ -23,8 +23,5 @@
 
 <h2>4 · Your own family</h2>
 <p>Draw the family in the Studio tab, with the condition in the colour key, then choose <b>⋯</b> (More) → <b>Work out the risks in this family</b>. Or choose a drawing, a PED file or a GA4GH file under <b>From</b>, or use <b>Risks</b> next to a file in the Files tab. The Risk tab reads the drawing in the Studio tab again each time you come back to it, so you can go back and forth between the two: mark someone as affected or as a carrier in the Studio, then see how the chances change.</p>
-<p><b>Save as a table</b> writes everyone's chances to <code>~/results</code>. In a notebook, you can read the table with pandas:</p>
-<pre class="code" data-run="py"><code>import pandas as pd
-risks = pd.read_csv("/home/user/results/cf-cousins_risks.tsv", sep="\t")
-risks[["label", "text", "status", "one_copy", "affected"]]</code></pre>
+<p><b>Save as a table</b> writes everyone's chances to <code>~/results</code>, as a TSV file with a row for each person. In a notebook, pandas reads it: <code>pd.read_csv("/home/user/results/cf-cousins_risks.tsv", sep="\t")</code>.</p>
 <p><a href="#h-risk">The Risk tab</a> describes everything on the tab, and <a href="#h-risk-how">How the chances are worked out</a> explains the sums.</p>

@@ -148,9 +148,18 @@ async () => {
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
     check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
-    res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7' });
+    res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' });
     const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
-    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 3 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with three next steps');
+    const simulated = '/home/user/results/FAM1_ga4gh-pedigree.json';
+    check(res.querySelector('.tl-done.ok') && MG.app.fs.exists('/home/user/results/FAM1-genotypes.tsv') && Array.from(res.querySelectorAll('.tl-next button')).length === 4 && affected >= 2, 'Tools: Simulate a family makes a recessive family with cousins who marry and two people affected, with four next steps');
+    check(MG.app.fs.exists(simulated) && /MONDO:0009061/.test(await MG.app.fs.readText(simulated)), 'Tools: Simulate a family writes a GA4GH Pedigree too, with the condition given');
+    // its risks, from the next step, with the simulation's mode of inheritance
+    Array.from(res.querySelectorAll('.tl-next button')).find((b) => /risks/.test(b.textContent)).click();
+    await wait(() => MG.app.risk && MG.app.risk.st.source === simulated && document.querySelector('#riskRoot .rk-all'), 120000);
+    await sleep(300);
+    check(/cystic fibrosis/.test(document.querySelector('#rk-condition').selectedOptions[0].textContent) && MG.app.risk.st.mode === 'AR', 'Risk: the simulated family\'s GA4GH Pedigree, from Simulate a family, as autosomal recessive');
+    res = await tool('pednet-mode', { input: simulated });
+    check(res.querySelector('.tl-done.ok') && /Family FAM1/.test(res.innerText), 'Tools: Mode of inheritance reads the simulated family\'s GA4GH Pedigree');
     await MG.app.useTool('pednet-rank', { input: '/home/user/results/FAM1.ped' });
     await sleep(400);
     const variants = Array.from(document.querySelectorAll('.tl-field')).find((f) => f.dataset.key === 'variants').querySelector('select').value;

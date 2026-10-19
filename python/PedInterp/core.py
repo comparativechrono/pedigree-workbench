@@ -1,5 +1,6 @@
 import cv2
 import math
+import os
 import sys
 import warnings
 import numpy as np
@@ -29,6 +30,77 @@ def PED_export(PED_df, output_dir = '.'):
                   sep = '\t',
                   header= False,
                   index= False)
+    return path
+
+#: the condition that a GA4GH Pedigree from PedInterp records when none is given: Mondo's most general term, as a
+#: picture doesn't say what the condition is
+GA4GH_CONDITION = ('MONDO:0000001', 'disease')
+
+def ga4gh_condition(condition=None):
+    '''
+    A condition for a GA4GH Pedigree, as (id, label): an ontology term that a GA4GH file can name, such as
+    ('MONDO:0007739', 'Huntington disease') or ('HP:0000365', 'Hearing impairment'), with its id tidied. None gives
+    GA4GH_CONDITION. Raises ValueError, saying what is wrong, for anything else.
+    '''
+    from pedigree_ga4gh import ontology
+    if condition is None:
+        return GA4GH_CONDITION
+    if isinstance(condition, str) or len(condition) != 2:
+        raise ValueError(f"the condition must be an ontology term and its label, such as "
+                         f"('MONDO:0007739', 'Huntington disease'), not {condition!r}")
+    cid, label = ontology.tidy_curie(str(condition[0])), str(condition[1]).strip()
+    if not ontology.is_curie(cid) or not ontology.can_declare(ontology.prefix_of(cid)):
+        raise ValueError(f'{cid!r} is not an ontology term that a GA4GH file can name: give one such as '
+                         f'MONDO:0007739 (Mondo), HP:0000365 (the HPO), OMIM:143100 or ORPHA:399')
+    if not label:
+        raise ValueError(f'the condition {cid} needs a label, its name in its ontology')
+    return cid, label
+
+def _id(value):
+    '''An id as text: 3, not 3.0'''
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    return str(value)
+
+def GA4GH_export(PED_df, output_dir = '.', condition = None):
+    '''
+    Writes a PED file-formatted dataframe as a GA4GH Pedigree, output_dir/<FamilyID>_ga4gh-pedigree.json, and returns
+    the file's path. It is the form that studio2ga4gh writes and the lab's other GA4GH tools read (ga4gh2studio,
+    phenopacket-toolkit, PedNet): each person is a Phenopacket, and each parent is joined to their children by a
+    relationship (KIN:028 for a father, KIN:027 for a mother). It needs pedigree-ga4gh, which pip installs with
+    PedInterp.
+
+    A GA4GH Pedigree records who is affected only through their conditions, so condition is the one the pedigree is
+    about, as an ontology term (id, label): see ga4gh_condition. Affected people have it, unaffected people have it
+    marked as excluded (looked for, and not found), and anyone whose phenotype is unknown has nothing, so that the
+    PED file's phenotypes can be read back from the GA4GH file.
+    '''
+    from pedigree_ga4gh import DISEASE, PHENOTYPE, Kindred, Member, Relation, Term, dumps, kin, ontology, to_ga4gh_pedigree
+    from . import __version__
+    cid, label = ga4gh_condition(condition)
+    kind = PHENOTYPE if ontology.prefix_of(cid) == 'HP' else DISEASE
+    FamID = _id(PED_df['FamilyID'].iloc[0])
+    members, relations = [], []
+    for row in PED_df.itertuples(index= False):
+        person, phenotype = _id(row.IndividualID), int(row.Phenotype)
+        terms = [Term(label, cid, kind= kind, excluded= phenotype == 1)] if phenotype in (1, 2) else []
+        members.append(Member(person, sex= {1: 'MALE', 2: 'FEMALE'}.get(int(row.Sex), 'UNKNOWN_SEX'), terms= terms))
+        for parent, code in ((row.PaternalID, kin.BIOLOGICAL_FATHER), (row.MaternalID, kin.BIOLOGICAL_MOTHER)):
+            if _id(parent) not in ('0', ''):
+                relations.append(Relation(_id(parent), code, person))
+    narrative = f'Read with PedInterp {__version__}'
+    if PED_df.attrs.get('image'):
+        narrative += f' from {PED_df.attrs["image"]}'
+    if PED_df.attrs.get('upscale_factor'):
+        narrative += f', enlarged {PED_df.attrs["upscale_factor"]:g} times'
+    affected = int((PED_df['Phenotype'] == 2).sum())
+    narrative += f'. {len(members)} people, {affected} affected with {label} ({cid}).'
+    doc, _ = to_ga4gh_pedigree(Kindred(FamID, members= members, relations= relations, narrative= narrative),
+                               created_by= f'PedInterp {__version__}')
+    makedirs(output_dir, exist_ok= True)
+    path = f'{output_dir}/{FamID}_ga4gh-pedigree.json'
+    with open(path, 'w', encoding= 'utf-8') as fh:
+        fh.write(dumps(doc))
     return path
 
 #-----------------------------
@@ -1013,6 +1085,7 @@ def pedigree_processing(FamID,
     PedFileDF['FamilyID'] = [FamID]*len(PedFileDF)
     PedFileDF = PedFileDF.reindex(columns= ['FamilyID', 'IndividualID']+PedFileDataFields)
     PedFileDF.attrs['upscale_factor'] = upscale_factor
+    PedFileDF.attrs['image'] = os.path.basename(str(image_path))
 
     if export:
         PED_export(PedFileDF, output_dir= output_dir)

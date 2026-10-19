@@ -1,6 +1,6 @@
-<!-- id: h-tool-pedgen | title: Simulate a family | group: Tools | summary: PedGen: a made-up family with a dominant or recessive condition | keys: pedgen simulate simulation simulated generate made up random family pedigree mendelian dominant recessive seed genotypes allele frequency rare cousins consanguinity consanguineous loop pseudodominance ascertainment teaching test -->
+<!-- id: h-tool-pedgen | title: Simulate a family | group: Tools | summary: PedGen: a made-up family with a dominant or recessive condition | keys: pedgen simulate simulation simulated generate made up random family pedigree mendelian dominant recessive seed genotypes allele frequency rare cousins consanguinity consanguineous loop pseudodominance ascertainment teaching test ga4gh condition risk -->
 <h1><!--ICON:sparkle-->Simulate a family</h1>
-<p class="lede">PedGen makes up a family with an autosomal dominant or recessive condition, by Mendelian inheritance from an affected founder, and writes it as a PED file. Use it for teaching, or to try PedNet on families whose mode of inheritance you know.</p>
+<p class="lede">PedGen makes up a family with an autosomal dominant or recessive condition, by Mendelian inheritance from an affected founder, and writes it as a PED file, and as a GA4GH Pedigree if you ask. Use it for teaching, or to try PedNet or the Risk tab on families whose mode of inheritance you know.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="pedgen">Simulate a family</button></div>
 
 <h2>How it works</h2>
@@ -19,14 +19,17 @@
   <dt>Chance that someone marries a cousin</dt><dd>1 for a recessive condition and 0 for a dominant one, unless you change it: the chance that someone in the family who has a partner marries a cousin rather than someone from outside the family, when a cousin has no partner yet. A marriage between cousins makes a loop in the pedigree, which <a href="#h-tool-pednet">The pedigree as a graph</a> shows.</dd>
   <dt>At least this many affected</dt><dd>2 for a recessive condition and 1 for a dominant one, unless you change it. PedGen makes families until one has as many affected people, as families come to notice through their affected members. If none of 1,000 has them, it stops and says what to change.</dd>
   <dt>Save everyone's genotypes too</dt><dd>A table, <code>FAM1-genotypes.tsv</code>, of the number of copies of the allele that each person has, as a variant called <code>causal</code>, for Rank candidate variants.</dd>
+  <dt>Write a GA4GH Pedigree too</dt><dd>The family as a GA4GH Pedigree, <code>FAM1_ga4gh-pedigree.json</code>, which ga4gh2studio, the phenopacket toolkit, PedNet and the Risk tab read. Give the condition as an ontology term and its name, such as <code>MONDO:0007739</code> and <i>Huntington disease</i>, or leave them empty for <code>MONDO:0000001</code>, <i>disease</i>. The affected people have the condition, and the unaffected have it marked as looked for and not found, so that the file records both.</dd>
 </dl>
+<p>Under the result, <b>Work out its risks</b> opens the family in the <a href="#h-risk">Risk tab</a>, with the simulation's mode of inheritance and allele frequency and with full penetrance, as PedGen's model has.</p>
 
 <h2>What PedNet makes of it</h2>
 <p>PedNet takes a condition to be rare too: for autosomal recessive inheritance, it gives the allele a frequency of 1 in 1,000, as PedGen does. Of 30 recessive families of four generations made as the form makes them, PedNet called 16 autosomal recessive, and put that mode first in 25. Of 30 of five generations, it called 21 autosomal recessive. In a family where an affected person marries a carrier, half their children can be affected, which looks dominant (pseudodominance), and then PedNet may favour autosomal dominant inheritance. Dominant families are clearer, but in one family PedNet often can't tell autosomal from X-linked dominant inheritance unless a father passes the condition to a son.</p>
 
 <h2>In the terminal</h2>
-<pre class="code" data-run="term"><code>pedgen --mode AD --generations 4 --seed 4 -d ~/results --genotypes ~/results/FAM1-genotypes.tsv
+<pre class="code" data-run="term"><code>pedgen --mode AD --generations 4 --seed 4 -d ~/results --genotypes ~/results/FAM1-genotypes.tsv --ga4gh --condition MONDO:0007739 "Huntington disease"
 pednet mode ~/results/FAM1.ped
+pednet mode ~/results/FAM1_ga4gh-pedigree.json
 pednet rank ~/results/FAM1.ped ~/results/FAM1-genotypes.tsv
 pedgen --mode AR --generations 4 --cousins 1 --min-affected 2 --seed 12 --family FAM2 -d ~/results
 pednet graph ~/results/FAM2.ped
@@ -43,11 +46,12 @@ ped2studio ~/results/FAM2.ped ~/pedigrees/simulated.studio.json</code></pre>
 <tr><td><code>--cousins CHANCE</code></td><td>the chance that someone marries a cousin, when one has no partner yet (0)</td></tr>
 <tr><td><code>--min-affected N</code></td><td>make families until one has at least N people affected (1)</td></tr>
 <tr><td><code>--genotypes FILE</code></td><td>also write everyone's genotypes, as a table</td></tr>
+<tr><td><code>--ga4gh</code>, <code>--condition ID LABEL</code></td><td>also write the family as a GA4GH Pedigree, <code>FAMILY_ga4gh-pedigree.json</code>, with the condition as an ontology term and its name (default: <code>MONDO:0000001 disease</code>)</td></tr>
 </table>
 
 <h2>In Python</h2>
 <pre class="code" data-run="py"><code>import pednet
-from PedGen import pedigree_generator, gen_PED_export
+from PedGen import pedigree_generator, gen_PED_export, gen_GA4GH_export
 
 # a rare recessive condition, which turns up again where cousins marry
 df = pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_count=4,
@@ -55,7 +59,8 @@ df = pedigree_generator(max_children=3, FamilyID="SIM2", mode="AR", generation_c
 pedigree = pednet.pedigree_from_rows(df)
 print(len(df), "people;", len(pednet.loops(pedigree)), "loop, where cousins married")
 print(pednet.infer_mode(pedigree))
-print("wrote", gen_PED_export(df, "/home/user/results"))</code></pre>
+print("wrote", gen_PED_export(df, "/home/user/results"))
+print("wrote", gen_GA4GH_export(df, "/home/user/results", condition=("MONDO:0009061", "cystic fibrosis")))</code></pre>
 <p>PedGen's <code>plot_pedigree_tree</code> draws a family with matplotlib. In a notebook, put <code>import matplotlib.pyplot as plt</code> in the same cell, so that Python loads matplotlib before PedGen needs it. Pedigree Studio draws a family better, though: draw the PED file with <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</p>
 <div class="callout info"><div class="co-t"><!--ICON:info-->The first time</div><p>PedGen needs NumPy and pandas, which Python downloads the first time you use it. That is about 9 MB, or less if PedNet has already run, and your browser keeps them for next time.</p></div>
 <!--CITE: pedgen-->

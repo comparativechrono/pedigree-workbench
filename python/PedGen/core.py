@@ -427,6 +427,8 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
             family_df.reset_index(inplace= True)
 
             if int((family_df['Phenotype'] == 2).sum()) >= min_affected:
+                # (how the pedigree was made, which gen_GA4GH_export records)
+                family_df.attrs.update(mode=mode, generations=generation_count, allele_frequency=alt_freq, seed=seed)
                 return family_df
 
         raise ValueError(f'none of {MAX_TRIES:,} pedigrees had {min_affected} affected people: give a higher allele '
@@ -446,6 +448,83 @@ def gen_PED_export(ped_df, output_dir='.'):
                   index= False,
                   sep= '\t',
                   )
+    return path
+
+
+#: the condition that a GA4GH Pedigree from PedGen records when none is given: Mondo's most general term, as PedGen
+#: simulates no particular disease
+GA4GH_CONDITION = ('MONDO:0000001', 'disease')
+_MODE_NAMES = {'AD': 'autosomal dominant', 'AR': 'autosomal recessive'}
+
+
+def ga4gh_condition(condition=None):
+    '''
+    A condition for a GA4GH Pedigree, as (id, label): an ontology term that a GA4GH file can name, such as
+    ('MONDO:0007739', 'Huntington disease') or ('HP:0000365', 'Hearing impairment'), with its id tidied. None gives
+    GA4GH_CONDITION. Raises ValueError, saying what is wrong, for anything else.
+    '''
+    from pedigree_ga4gh import ontology
+    if condition is None:
+        return GA4GH_CONDITION
+    if isinstance(condition, str) or len(condition) != 2:
+        raise ValueError(f"the condition must be an ontology term and its label, such as "
+                         f"('MONDO:0007739', 'Huntington disease'), not {condition!r}")
+    cid, label = ontology.tidy_curie(str(condition[0])), str(condition[1]).strip()
+    if not ontology.is_curie(cid) or not ontology.can_declare(ontology.prefix_of(cid)):
+        raise ValueError(f'{cid!r} is not an ontology term that a GA4GH file can name: give one such as '
+                         f'MONDO:0007739 (Mondo), HP:0000365 (the HPO), OMIM:143100 or ORPHA:399')
+    if not label:
+        raise ValueError(f'the condition {cid} needs a label, its name in its ontology')
+    return cid, label
+
+
+def _id(value):
+    '''An id as text: 3, not 3.0'''
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    return str(value)
+
+
+def gen_GA4GH_export(ped_df, output_dir='.', condition=None):
+    '''
+    Writes the pedigree as a GA4GH Pedigree, '<FamilyID>_ga4gh-pedigree.json' in output_dir, and returns the file's
+    path. It is the form that studio2ga4gh writes and the lab's other GA4GH tools read (ga4gh2studio,
+    phenopacket-toolkit, PedNet): each person is a Phenopacket, and each parent is joined to their children by a
+    relationship (KIN:028 for a father, KIN:027 for a mother).
+
+    A GA4GH Pedigree records who is affected only through their conditions, so condition is the one this pedigree is
+    about, as an ontology term (id, label): see ga4gh_condition. Affected people have it, unaffected people have it
+    marked as excluded (looked for, and not found), and anyone whose phenotype is unknown has nothing, so that the
+    PED file's phenotypes can be read back from the GA4GH file.
+    '''
+    from pedigree_ga4gh import DISEASE, PHENOTYPE, Kindred, Member, Relation, Term, dumps, kin, ontology, to_ga4gh_pedigree
+    from . import __version__
+    cid, label = ga4gh_condition(condition)
+    kind = PHENOTYPE if ontology.prefix_of(cid) == 'HP' else DISEASE
+    family_id = _id(ped_df['FamilyID'].iloc[0])
+    members, relations = [], []
+    for row in ped_df.itertuples(index=False):
+        person, phenotype = _id(row.IndividualID), int(row.Phenotype)
+        terms = [Term(label, cid, kind=kind, excluded=phenotype == 1)] if phenotype in (1, 2) else []
+        members.append(Member(person, sex={1: 'MALE', 2: 'FEMALE'}.get(int(row.Sex), 'UNKNOWN_SEX'), terms=terms))
+        for parent, code in ((row.PaternalID, kin.BIOLOGICAL_FATHER), (row.MaternalID, kin.BIOLOGICAL_MOTHER)):
+            if _id(parent) not in ('0', ''):
+                relations.append(Relation(_id(parent), code, person))
+    made = ped_df.attrs
+    narrative = f'Simulated with PedGen {__version__}'
+    if made.get('mode'):
+        narrative += (f': {_MODE_NAMES.get(made["mode"], made["mode"])} inheritance over {made["generations"]} '
+                      f'generations, allele frequency {made["allele_frequency"]:g}')
+        if made.get('seed') is not None:
+            narrative += f', seed {made["seed"]}'
+    affected = int((ped_df['Phenotype'] == 2).sum())
+    narrative += f'. {len(members)} people, {affected} affected with {label} ({cid}).'
+    doc, _ = to_ga4gh_pedigree(Kindred(family_id, members=members, relations=relations, narrative=narrative),
+                               created_by=f'PedGen {__version__}')
+    os.makedirs(output_dir, exist_ok= True)
+    path = os.path.join(output_dir, f'{family_id}_ga4gh-pedigree.json')
+    with open(path, 'w', encoding='utf-8') as fh:
+        fh.write(dumps(doc))
     return path
 
 

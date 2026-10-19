@@ -354,9 +354,27 @@ each copy came from.
 
 | Package | On PyPI | The workbench's copy |
 |---|---|---|
-| PedNet | **2.0.0**, released on 19 October 2026 | its wheel from PyPI |
-| PedGen | 0.1.3 (Nick Taylor's) | built from `main`, with #2, #3 and #4 merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; and (#4) a rare allele by default, cousins who marry, and a minimum number affected |
-| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#6](https://github.com/comparativechrono/pedigree-interpreter/pull/6), on top of #3, #4 and #5 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); and (#6) the symbols measured as the reading finds them |
+| PedNet | **2.0.0**, released on 19 October 2026 | 2.1.0, built from [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6): GA4GH Pedigrees and Phenopackets Families read as well as PED files, with `--condition` and `--unrecorded` |
+| PedGen | 0.1.3 (Nick Taylor's) | built from [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5), on top of `main`, with #2, #3 and #4 merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; a rare allele by default, cousins who marry, and a minimum number affected (#4); and (#5) a GA4GH Pedigree written with `--ga4gh` |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#7](https://github.com/comparativechrono/pedigree-interpreter/pull/7), on top of #3 to #6 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); the symbols measured as the reading finds them (#6); and (#7) a GA4GH Pedigree written with `--ga4gh` |
+
+The three pull requests of October 2026, #5 of PedGen, #7 of PedInterp and #6
+of PedNet, connect these packages to the GA4GH tools. PedGen and PedInterp
+write a family as a GA4GH Pedigree as well as a PED file, with the condition
+given as an ontology term (`--condition MONDO:0007739 "Huntington disease"`;
+without one, MONDO:0000001, *disease*): the affected have the condition, and
+the unaffected have it marked as excluded, so that the file records both.
+PedNet reads GA4GH Pedigrees and Phenopackets Families, through
+pedigree-ga4gh, so that it finds the parents as the other tools do.
+`--condition` chooses which of a file's conditions makes someone affected,
+and `--unrecorded` what to take the people with no record of it to be: by
+default, unaffected if no one is marked as not having it (as in the files
+studio2ga4gh writes from drawings), and not known if anyone is (as in
+PedGen's and PedInterp's). The Tools tab offers these options, and the Risk
+tab reads GA4GH files in the same way. All three now need pedigree-ga4gh, and
+Python 3.9 or later. Once PedNet 2.1.0 is on PyPI, copy its wheel from there:
+`pip download --no-deps --only-binary=:all: PedNet==2.1.0 -d wheels`, then
+`python3 python/tools/vendor_wheels.py wheels/*.whl`.
 
 PedInterp's fix came from the workbench's example picture of the Lynch family:
 drawn where Pedigree Studio draws it, with each child under a parent and the

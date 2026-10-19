@@ -838,7 +838,8 @@
       if (this.st.source === 'studio') this.load();
     }
     /** show a family: {source: 'studio' or a path, person (an id or a label), couple ('A+B', ids or labels), condition
-        (a key or a label), mode, freq (a preset: 'carrier:25'), penetrance, phenocopy (%) and mutation (in 100,000)} */
+        (a key or a label), mode, freq (a preset: 'carrier:25') or allele (an allele frequency), penetrance, phenocopy
+        (%) and mutation (in 100,000)} */
     async open(spec = {}) {
       const st = this.st;
       const src = spec.source || st.source;
@@ -847,6 +848,12 @@
       if (spec.freq && spec.freq !== 'custom' && PRESETS.some(([v]) => v === spec.freq)) {
         const [as, num] = spec.freq.split(':');
         Object.assign(st, { freq: spec.freq, freqAs: as, freqN: Number(num) });
+      }
+      if (spec.allele != null && Number(spec.allele) > 0 && Number(spec.allele) < 1) {
+        // an allele frequency (a simulated family's): one of the choices, if it is one
+        const n = Number((1 / Number(spec.allele)).toPrecision(6));
+        const preset = PRESETS.find(([v]) => v === `allele:${n}`);
+        Object.assign(st, { freq: preset ? preset[0] : 'custom', freqAs: 'allele', freqN: n });
       }
       if (spec.penetrance != null && Number(spec.penetrance) >= 1 && Number(spec.penetrance) <= 100) st.penetrance = Number(spec.penetrance);
       if (spec.phenocopy != null) st.phenocopy = Number(spec.phenocopy) || 0;

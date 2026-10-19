@@ -82,7 +82,17 @@ const CASES = [
   // a dominant condition with cousins who marry, and at least three people affected
   ['pedgen', { mode: 'AD', generations: 4, seed: '5', cousins: 0.5, minAffected: 3, family: 'SIM3' }],
   // the kinship table is for one family: with two, and none given, both stop
-  ['pednet-graph', { input: TWO, kinship: true }, { fails: true }]
+  ['pednet-graph', { input: TWO, kinship: true }, { fails: true }],
+  // GA4GH Pedigrees: PedGen and PedInterp write them, with a condition or without, and PedNet reads them, and
+  // Phenopackets Families, with a condition chosen and what to take the people with no record of it to be
+  ['pedgen', { mode: 'AR', generations: 4, seed: '7', family: 'SIMG', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' }],
+  ['pedgen', { mode: 'AD', seed: '3', family: 'SIMG2', genotypes: false, ga4gh: true }],
+  ['pedinterp', { input: EX + 'lynch.png', family: 'LYNG', ga4gh: true, condId: 'MONDO:0007254', condLabel: 'breast cancer' }],
+  ['pednet-graph', { input: EX + 'okafor_ga4gh-pedigree.json' }],
+  ['pednet-mode', { input: EX + 'okafor_ga4gh-pedigree.json', condition: 'HP:0000365' }],
+  ['pednet-mode', { input: EX + 'okafor_phenopackets-family.json', condition: 'Hearing impairment', unrecorded: 'unknown' }],
+  ['pednet-mode', { input: R + 'SIMG_ga4gh-pedigree.json' }],
+  ['pednet-rank', { input: R + 'SIMG_ga4gh-pedigree.json', variants: R + 'SIMG-genotypes.tsv' }]
 ];
 const expand = (p) => String(p).replace(/^~(?=\/|$)/, HOME);
 for (const [id, given, how = {}] of CASES) {
