@@ -355,8 +355,8 @@ each copy came from.
 | Package | On PyPI | The workbench's copy |
 |---|---|---|
 | PedNet | **2.0.0**, released on 19 October 2026 | its wheel from PyPI |
-| PedGen | 0.1.3 (Nick Taylor's) | built from [pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), on top of #2 and #3 (merged): the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; and (#4) a rare allele by default, cousins who marry, and a minimum number affected. Once #4 is merged, build it again from `main` |
-| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), on top of #3 and #4 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); and (#5) the enlargement chosen to suit the symbols, and warnings when lines were missed. Once #5 is merged, build it again from `main` |
+| PedGen | 0.1.3 (Nick Taylor's) | built from `main`, with #2, #3 and #4 merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; and (#4) a rare allele by default, cousins who marry, and a minimum number affected |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#6](https://github.com/comparativechrono/pedigree-interpreter/pull/6), on top of #3, #4 and #5 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); and (#6) the symbols measured as the reading finds them |
 
 PedInterp's fix came from the workbench's example picture of the Lynch family:
 drawn where Pedigree Studio draws it, with each child under a parent and the
@@ -369,7 +369,13 @@ whatever its size, which misread pictures much smaller or larger than a few
 hundred pixels across, often without a warning: pull request #5 enlarges a
 picture so that its symbols are about 200 pixels across, and warns when
 someone has only one parent or is joined to no one, when the people read
-fall into more than one family, or when no one has parents.
+fall into more than one family, or when no one has parents. #5 looked for
+the symbols down to a tenth of the usual size, so as to find the small ones
+of a pedigree on a large page, but then the holes in the letters of the
+labels were measured as symbols when the lines were thinner than the
+strokes of the text, and such a picture was enlarged about three times as
+much as it needed. Pull request #6 looks for the symbols as the reading
+does, and only if none are found, down to a tenth of the usual size.
 
 Until PedGen and PedInterp are released, `pip install` gives their earlier
 versions, without the commands. Their versions come from their git tags,
