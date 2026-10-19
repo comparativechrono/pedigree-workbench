@@ -44,7 +44,7 @@
       <div class="help-body" id="helpBody">
 <article class="help-page" id="h-home" data-title="Help" data-group="Start here" data-group-page="h-home" data-keys="help index topics contents start" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>The Pedigree workbench</h1>
-<p class="lede">Draw a family in Pedigree Studio, then turn the drawing into the files that other people and other programs need. Linkage programs read PED files, and the GA4GH Pedigree and Phenopackets files let you share a family's pedigree and findings in the international standard. The tools that do this are our Python packages, which run here in your browser. You can use them by pointing and clicking in the Tools tab, by typing commands in the Terminal tab, or by writing code in the Notebook tab.</p>
+<p class="lede">Draw a family in Pedigree Studio, then turn the drawing into the files that other people and other programs need. Linkage programs read PED files, and the GA4GH Pedigree and Phenopackets files let you share a family's pedigree and findings in the international standard. The tools that do this are our Python packages, which run here in your browser. Others analyse a family as a graph and weigh up how its condition is inherited and which variants co-segregate with it (PedNet), simulate families (PedGen), and read a pedigree from a picture (PedInterp). You can use them all by pointing and clicking in the Tools tab, by typing commands in the Terminal tab, or by writing code in the Notebook tab.</p>
 <div class="help-start">
   <button type="button" data-goto="h-start"><b><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 4l13 8-13 8z"/></svg>A first session</b><span>ten minutes: draw, convert, check</span></button>
   <button type="button" data-bench="studio"><b><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Studio</b><span>draw a pedigree</span></button>
@@ -66,6 +66,8 @@
 <li><a href="#h-walk-draw-ga4gh">Draw a GA4GH or Phenopackets file<small>Upgrade it if it is old, draw it, check the key</small></a></li>
 <li><a href="#h-walk-check">Check a GA4GH file, or update an old one<small>What the check reports, and how to fix each kind of problem</small></a></li>
 <li><a href="#h-walk-terms">Give the conditions ontology terms<small>Match a drawing&#x27;s conditions, or fill in the terms a GA4GH file lacks</small></a></li>
+<li><a href="#h-walk-picture">Turn a picture of a pedigree into a PED file and a drawing<small>Read it with PedInterp, check it, and draw it in the Studio</small></a></li>
+<li><a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants<small>PedNet: a family&#x27;s loops and kinship, its mode of inheritance, and the variants that co-segregate with its condition</small></a></li>
 </ul></section>
 <section><h2><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Pedigree Studio</h2><ul>
 <li><a href="#h-studio">The Studio tab<small>Pedigree Studio in the workbench: drawing, opening and saving</small></a></li>
@@ -77,6 +79,7 @@
 <li><a href="#h-tool-ped2studio">PED or MPED → drawing<small>ped2studio: a PED file drawn in Pedigree Studio</small></a></li>
 <li><a href="#h-tool-ga4gh-convert">GA4GH Pedigree ⇄ Phenopackets Family<small>phenotk convert: one GA4GH form into the other</small></a></li>
 <li><a href="#h-tool-export">GA4GH → PED, table or YAML<small>phenotk convert: a GA4GH file as PED, TSV, YAML or JSON Lines</small></a></li>
+<li><a href="#h-tool-pedinterp">Picture → PED file<small>PedInterp: a pedigree read from a picture of one</small></a></li>
 <li><a href="#h-tool-terms">Match conditions to terms<small>hponorm and mondonorm: find the HPO or Mondo term for each condition in a drawing</small></a></li>
 <li><a href="#h-tool-normalise">Fill in missing terms<small>phenotk normalise: give terms to findings that have only a name</small></a></li>
 <li><a href="#h-tool-validate">Check against the standard<small>pedigree-ga4gh validate: whether a GA4GH file is correct, and how to fix it</small></a></li>
@@ -89,6 +92,8 @@
 <li><a href="#h-tool-merge">Put files together<small>phenotk merge: Phenopackets and Families into one Cohort or Family</small></a></li>
 <li><a href="#h-tool-add">Add findings to people<small>phenotk add: diseases, phenotypes, onset or vital status for chosen people</small></a></li>
 <li><a href="#h-tool-mpedtools">PED and MPED files<small>mpedtools: summary and check, one condition out, merge, split, PED ⇄ MPED</small></a></li>
+<li><a href="#h-tool-pednet">PedNet: the graph, the mode of inheritance and the variants<small>The pedigree as a graph; the mode of inheritance; candidate variants ranked by co-segregation</small></a></li>
+<li><a href="#h-tool-pedgen">Simulate a family<small>PedGen: a made-up family with a dominant or recessive condition</small></a></li>
 </ul></section>
 <section><h2><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.4"/></svg>Files and standards</h2><ul>
 <li><a href="#h-files">Your files<small>The Files tab, the examples, uploading, downloading, and where files are kept</small></a></li>
@@ -154,7 +159,7 @@
 <table>
 <tr><th>Tab</th><th>What it is for</th></tr>
 <tr><td><b>Studio</b></td><td>Pedigree Studio: draw a family, open and save drawings among your files. <a href="#h-studio">The Studio tab</a></td></tr>
-<tr><td><b>Tools</b></td><td>Our Python packages, with forms for conversions, ontology terms, checks, de-identification and PED files. <a href="#h-tools">The Tools tab</a></td></tr>
+<tr><td><b>Tools</b></td><td>Our Python packages, with forms for conversions, ontology terms, checks, de-identification and PED files, and for analysing and simulating families. <a href="#h-tools">The Tools tab</a></td></tr>
 <tr><td><b>Files</b></td><td>Your files and the examples: look at them, edit them, upload and download. <a href="#h-files">Your files</a></td></tr>
 <tr><td><b>Notebook</b></td><td>Python notebooks with the packages, for working in code. <a href="#h-notebook">The Notebook</a></td></tr>
 <tr><td><b>Terminal</b></td><td>The packages' commands in a Linux shell. <a href="#h-terminal">The Terminal</a></td></tr>
@@ -192,6 +197,8 @@
 <li><a href="#h-walk-draw-ga4gh">Draw a GA4GH or Phenopackets file<small>Upgrade it if it is old, draw it, check the key</small></a></li>
 <li><a href="#h-walk-check">Check a GA4GH file, or update an old one<small>What the check reports, and how to fix each kind of problem</small></a></li>
 <li><a href="#h-walk-terms">Give the conditions ontology terms<small>Match a drawing&#x27;s conditions, or fill in the terms a GA4GH file lacks</small></a></li>
+<li><a href="#h-walk-picture">Turn a picture of a pedigree into a PED file and a drawing<small>Read it with PedInterp, check it, and draw it in the Studio</small></a></li>
+<li><a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants<small>PedNet: a family&#x27;s loops and kinship, its mode of inheritance, and the variants that co-segregate with its condition</small></a></li>
 </ul>
 <p>You'll also find these jobs on the first page of the Tools tab, under <b>Common tasks</b>. There, each job links to its tools in the order you need them.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="start">Open the Tools tab's first page</button></div>
@@ -438,6 +445,90 @@ index = MondoIndex.load("/home/user/ontologies/mondo.obo", allow_download=False)
 for c in index.search("breast cancer", limit=5):
     print(c.id, c.label, c.score)</code></pre>
 </article>
+<article class="help-page" id="h-walk-picture" data-title="Turn a picture of a pedigree into a PED file and a drawing" data-group="Walkthroughs" data-group-page="h-walks" data-keys="picture image png jpeg scan paper photo screenshot read pedinterp ped drawing studio ped2studio walkthrough" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>Turn a picture of a pedigree into a PED file and a drawing</h1>
+<p class="lede">A pedigree in a paper, a clinic letter or an old scan is only a picture. PedInterp reads one into a PED file, which the other tools can use. ped2studio then draws the PED file in Pedigree Studio, where you can check it against the picture and add what a PED file can't hold. The example is a picture of the Lynch family, drawn as pedigrees are drawn in papers.</p>
+
+<h2>1 · Add the picture</h2>
+<p>Add your picture with <b>From my computer…</b> under the file box of the tool in the next step, or with <b>My files → Add files from my computer…</b> at the top right. A PNG file is best. A scan or a screenshot reads better than a photograph of a page, because the drawing needs to be black on white, sharp, and square to the edges.</p>
+<div class="tryrow"><button class="do" type="button" data-edit="/data/examples/lynch.png">Look at the picture of the Lynch family</button></div>
+
+<h2>2 · Read it</h2>
+<p><b>Picture → PED file</b> finds the symbols and the lines, works out who is whose parent, and writes the PED file. The people are numbered by generation, from the top, and from the left in each generation: I-1, I-2, II-1 and so on. The first time, Python downloads what PedInterp needs, about 21 MB, which takes a little while.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedinterp" data-input="/data/examples/lynch.png">Read the picture of the Lynch family</button></div>
+
+<h2>3 · Check it</h2>
+<p>The table under the result has a row for each person, with their parents (0 when they aren't in the picture), their sex (1 male, 2 female, 0 unknown), and whether they're affected (2) or not (1). Compare it with the picture. If someone is missing or has the wrong parents, <a href="#h-troubleshoot">When something goes wrong</a> says what to try.</p>
+<p>The Lynch family's PED file in the examples was made from the drawing that the picture shows, so here the two files can be compared as well: the commands at the foot of this page do it.</p>
+
+<h2>4 · Draw it</h2>
+<p>Under the result, <b>Draw it (PED → drawing)</b> opens <b>PED or MPED → drawing</b> with the new PED file. Run it, then open the drawing in the Studio, where Pedigree Studio's Tidy lays it out.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="ped2studio" data-input="~/results/lynch.ped">Draw the PED file</button></div>
+<p>In the Studio, add what the picture shows but a PED file can't hold, such as who has died (in the Lynch picture, I-1, I-2, II-2 and III-2), twins and the proband, and name the condition in the colour key. Then save the drawing. From there you can convert it to the GA4GH files, or look at the family with PedNet (<a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants</a>).</p>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>pedinterp /data/examples/lynch.png --labels none -q -d ~/results
+diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) &amp;&amp; echo "the same people, parents, sexes and status"
+ped2studio ~/results/lynch.ped ~/pedigrees/lynch-from-picture.studio.json
+studio --tidy ~/pedigrees/lynch-from-picture.studio.json</code></pre>
+<p><code>cut -f2-</code> leaves out the family's id, which the two files give differently.</p>
+<h2 data-anchor="cite">References</h2>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>PedInterp</dt>
+<dd>Taylor N. PedInterp [software]. <a href="https://github.com/comparativechrono/pedigree-interpreter" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-interpreter</a></dd>
+<dt>ped2studio</dt>
+<dd>Hearn TJ. ped2studio [software]. <a href="https://github.com/comparativechrono/ped2studio" target="_blank" rel="noopener">github.com/comparativechrono/ped2studio</a></dd>
+<dt>Pedigree Studio</dt>
+<dd>Hearn TJ. Pedigree Studio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a></dd>
+</dl>
+</article>
+<article class="help-page" id="h-walk-pednet" data-title="Weigh up the mode of inheritance, and rank candidate variants" data-group="Walkthroughs" data-group-page="h-walks" data-keys="pednet mode inheritance dominant recessive x-linked variants vcf rank cosegregation co-segregation pp1 bs4 acmg kinship inbreeding loop consanguinity walkthrough" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="7.5" r="2.6"/><circle cx="9.5" cy="18" r="2.6"/><circle cx="19" cy="18.5" r="1.8"/><path d="M8.5 6.4l7 .8M7 8.4l1.7 7.1M16.4 9.6l-5.3 6.3M12 18.1l5.2.3"/></svg>Weigh up the mode of inheritance, and rank candidate variants</h1>
+<p class="lede">From a family's PED file, PedNet shows how the family is put together, weighs up how its condition is inherited, and ranks the variants found by sequencing some of its members by how well each co-segregates with the condition. This walkthrough uses three of the example families: the Okafor family, whose twin boys with hearing loss are the sons of first cousins; the Lynch family, with bowel cancer over three generations; and one of PedNet's own families, with six candidate variants.</p>
+<p>The tools read PED files. To use one of your drawings, make it into a PED file first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>.</p>
+
+<h2>1 · The family as a graph</h2>
+<p><b>The pedigree as a graph</b> lists the family's loops, who is inbred, and how closely the affected people are related. In the Okafor family, the twins' parents, III-2 and III-3, are first cousins: III-2's father and III-3's mother, II-2 and II-3, are brother and sister, so the marriage closes a loop through them. All five of the couple's children have an inbreeding coefficient of 1/16.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-graph" data-input="/data/examples/okafor.mped">The Okafor family as a graph</button></div>
+<p>From an MPED file, PedNet takes the first condition: for the Okafor family, hearing loss from birth.</p>
+
+<h2>2 · The mode of inheritance</h2>
+<p><b>Mode of inheritance</b> gives the probability of each mode. In the Lynch family, there is cancer in three generations in a row: in I-1, in his sons II-2 and II-3, and in II-2's daughters III-2 and III-3. Autosomal dominant inheritance has a probability of 0.97.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/lynch.ped">The Lynch family</button> <button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/okafor.mped">The Okafor family</button></div>
+<p>In the Okafor family, two affected brothers whose parents are cousins make a recessive condition almost certain, at 0.98, but they can't show whether it is autosomal or X-linked. The answer is <i>uncertain</i>, with autosomal recessive at 0.69 and X-linked recessive at 0.29. That is all one family can say. If other families have the same condition, put them in one PED file, and tick <i>The families have the same condition</i>.</p>
+
+<h2>3 · Rank the candidate variants</h2>
+<p><b>Rank candidate variants</b> needs the PED file and the variants: a VCF file whose samples are named with the PED file's ids, or a table of genotypes. PedNet's example family has a dominant condition, and six variants found in some of its members.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-rank" data-input="/data/examples/pednet/dominant.ped" data-variants="/data/examples/pednet/dominant.vcf">Rank the variants</button></div>
+<p>var1, which all six of the affected people carry and none of the three unaffected people who were tested, comes first, with a log10 Bayes factor of 2.05: strong evidence for co-segregation (PP1_Strong). Each of the others is strong evidence against causing the condition (BS4_Strong). The variants are ranked by their odds of being the cause, which take account of whether a variant's chromosome suits the family's mode of inheritance as well as of its Bayes factor. This family's condition is almost certainly autosomal, so var5, on the X chromosome, comes fourth, below var2 and var4, though its Bayes factor is higher than theirs.</p>
+<p>PedNet also notes genotypes that break Mendel's laws. Only III-1 carries var6, though neither of his parents does, which a new mutation in III-1 would explain. var5 breaks them three times: II-3 and III-2 don't carry it, though their fathers do, and a father passes his X chromosome to every daughter; and III-1 carries it, though his mother doesn't. A new mutation in III-1 would explain only the last of these.</p>
+<p>The tool saves every score in a table, <code>~/results/dominant-ranked.tsv</code>, which you can open in the Files tab or a spreadsheet.</p>
+<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>What the evidence means</div><p>Co-segregation is one line of evidence among many under the ACMG/AMP guidelines, and PP1 applies only to a gene that is known to cause the condition. The Bayes factor assumes that the PED file is right and that the genotypes were called correctly, apart from a small error rate. A variant that co-segregates may only be close to the one that causes the condition. Weigh it with the rest of the evidence.</p></div>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>pednet graph /data/examples/okafor.mped
+pednet mode /data/examples/lynch.ped
+pednet mode /data/examples/okafor.mped
+pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vcf --out ~/results/dominant-ranked.tsv</code></pre>
+<p>The notebook <code>~/notebooks/pedigree-analysis.ipynb</code> does the same in Python, and goes on to simulated families and pictures.</p>
+<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-analysis.ipynb">Open the analysis notebook</button></div>
+<h2 data-anchor="cite">References</h2>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>PedNet</dt>
+<dd>Hearn TJ, Taylor N. PedNet [software]. <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">github.com/comparativechrono/PedNet</a></dd>
+<dt>Co-segregation, and its strength as evidence (PP1, BS4)</dt>
+<dd>Thompson D, Easton DF, Goldgar DE (2003) A full-likelihood method for the evaluation of causality of sequence variants from family data. <i>American Journal of Human Genetics</i> 73(3): 652–655. <a href="https://doi.org/10.1086/378100" target="_blank" rel="noopener">doi:10.1086/378100</a></dd>
+<dd>Jarvik GP, Browning BL (2016) Consideration of cosegregation in the pathogenicity classification of genomic variants. <i>American Journal of Human Genetics</i> 98(6): 1077–1081. <a href="https://doi.org/10.1016/j.ajhg.2016.04.003" target="_blank" rel="noopener">doi:10.1016/j.ajhg.2016.04.003</a></dd>
+<dd>Richards S, Aziz N, Bale S, Bick D, Das S, Gastier-Foster J, et al. (2015) Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the American College of Medical Genetics and Genomics and the Association for Molecular Pathology. <i>Genetics in Medicine</i> 17(5): 405–424. <a href="https://doi.org/10.1038/gim.2015.30" target="_blank" rel="noopener">doi:10.1038/gim.2015.30</a></dd>
+<dd>Tavtigian SV, Greenblatt MS, Harrison SM, Nussbaum RL, Prabhu SA, Boucher KM, et al. (2018) Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework. <i>Genetics in Medicine</i> 20(9): 1054–1060. <a href="https://doi.org/10.1038/gim.2017.210" target="_blank" rel="noopener">doi:10.1038/gim.2017.210</a></dd>
+<dt>Pedigrees as Bayesian networks</dt>
+<dd>Lauritzen SL, Sheehan NA (2003) Graphical models for genetic analyses. <i>Statistical Science</i> 18(4): 489–514. <a href="https://doi.org/10.1214/ss/1081443232" target="_blank" rel="noopener">doi:10.1214/ss/1081443232</a></dd>
+<dt>Kinship and inbreeding coefficients</dt>
+<dd>Wright S (1922) Coefficients of inbreeding and relationship. <i>The American Naturalist</i> 56(645): 330–338. <a href="https://doi.org/10.1086/279872" target="_blank" rel="noopener">doi:10.1086/279872</a></dd>
+</dl>
+</article>
 <article class="help-page" id="h-studio" data-title="The Studio tab" data-group="Pedigree Studio" data-group-page="h-studio" data-keys="studio pedigree studio draw drawing open save save as new tidy layout convert check file bar symbols key colour legend proband carrier twins consanguineous adoption export png svg picture" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>The Studio tab</h1>
 <p class="lede">The Studio tab is Pedigree Studio, our program for drawing pedigrees in the standard nomenclature, running inside the workbench. The bar above it connects the Studio to your files. It shows which file the drawing you're working on belongs to, saves the drawing there and takes it to the Tools tab.</p>
@@ -509,7 +600,7 @@ for c in index.search("breast cancer", limit=5):
 <h2>A tool's page</h2>
 <ol>
   <li><b>The fields.</b> You can choose from your own files or the examples, or pick a file from your computer with <b>From my computer…</b>. For a drawing, you can also choose <b>The drawing in the Studio tab</b>, which uses the drawing that's open there and saves it first. <b>Look at it</b> opens the file you've chosen. The names of the files the tool will write are filled in for you, and you can change them. Results go in <code>~/results</code>, drawings in <code>~/pedigrees</code> and terms files in <code>~/terms</code>, unless you choose another folder.</li>
-  <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. If a file would be overwritten, you're asked first.</li>
+  <li><b>Run.</b> The first time you run a tool on each visit, Python starts in your browser, which takes a few seconds. The very first time, it also downloads about 10 MB. The tools of PedNet, PedGen and PedInterp need more, which Python downloads the first time one of them runs, and says so under the form: about 4 MB for PedNet's, and about 21 MB in all. If a file would be overwritten, you're asked first.</li>
   <li><b>The result.</b> You'll see <i>Done</i>, or the error if something went wrong, then what the program printed and the files it wrote. Each file has buttons to open it in the Studio, look at it, check it, pass it to another tool or download it.</li>
   <li><b>The same in the terminal, and in Python</b> shows the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
 </ol>
@@ -524,6 +615,7 @@ for c in index.search("breast cancer", limit=5):
   <li><a href="#h-tool-ped2studio">PED or MPED → drawing</a> (ped2studio)</li>
   <li><a href="#h-tool-ga4gh-convert">GA4GH Pedigree ⇄ Phenopackets Family</a> (phenotk)</li>
   <li><a href="#h-tool-export">GA4GH → PED, table or YAML</a> (phenotk)</li>
+  <li><a href="#h-tool-pedinterp">Picture → PED file</a> (PedInterp)</li>
 </ul>
 <h3>Ontology terms</h3>
 <ul>
@@ -548,6 +640,11 @@ for c in index.search("breast cancer", limit=5):
 <h3>PED and MPED files</h3>
 <ul>
   <li><a href="#h-tool-mpedtools">Summary and check, Take one condition out, Put PED files together, One file for each family, PED ⇄ MPED</a> (mpedtools)</li>
+</ul>
+<h3>Analyse and simulate</h3>
+<ul>
+  <li><a href="#h-tool-pednet">The pedigree as a graph, Mode of inheritance, Rank candidate variants</a> (PedNet)</li>
+  <li><a href="#h-tool-pedgen">Simulate a family</a> (PedGen)</li>
 </ul>
 
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>What the tab does not do</div><p>Each tool runs a package's own command, exactly as the package provides it, and the tab adds no conversions of its own. Match conditions to terms works differently, because it has no command. Instead, it searches using the packages' Python code and writes a terms file. A few commands have options that the forms leave out, such as the options for variants in <code>phenotk add</code>. In the terminal, <code>man</code> and <code>--help</code> describe them.</p></div>
@@ -838,6 +935,53 @@ print(to_format(doc, "tsv"))</code></pre>
 <dl class="cite-list">
 <dt>phenopacket-toolkit (phenotk)</dt>
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
+</dl>
+</article>
+<article class="help-page" id="h-tool-pedinterp" data-title="Picture → PED file" data-group="Tools" data-group-page="h-tools" data-keys="pedinterp picture image png jpeg jpg scan paper photo screenshot read ocr tesseract symbols lines numbering numbered ped convert" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>Picture → PED file</h1>
+<p class="lede">PedInterp reads a picture of a pedigree, such as one in a paper, a clinic letter or a scan, and writes it as a PED file. It finds the symbols and the lines between them, and so who is male or female, who is affected, and who are partners, parents and children.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedinterp" data-input="/data/examples/lynch.png">Try it with the picture of the Lynch family</button> <button class="do" type="button" data-edit="/data/examples/lynch.png">Look at the picture</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>The picture</dt><dd>A PNG or JPEG file, or a GIF, BMP, TIFF or WebP picture. <b>From my computer…</b> adds one of your own, in <code>~/pictures</code>.</dd>
+  <dt>Family id</dt><dd>The family's id in the PED file, which also names the file. It starts as the picture's name.</dd>
+  <dt>Save in</dt><dd>The folder for the PED file: <code>~/results</code>, unless you choose another.</dd>
+  <dt>Enlarge the picture by</dt><dd>PedInterp enlarges the picture before it reads it, and reads it best when the enlarged picture is about 5,000 pixels across. So when you choose a picture, the form works the number out from its size: 5 for a picture 1,000 pixels across, such as the Lynch family's, 10 for one 500 pixels across, and 15 for one 350 pixels across. There is some room either side: the picture of the Lynch family reads correctly at anything from 4 to 12, but not at 3 or 15. Too little or too much enlargement doesn't always bring a warning, so check the parents in the table. In the terminal and in Python, the default is 10, whatever the picture's size.</dd>
+</dl>
+
+<h2>What it reads</h2>
+<p>PedInterp reads pedigrees drawn in the usual way, in black on white: squares, circles and diamonds, filled in for the people who are affected, with each generation in a row of its own. It follows the lines between partners, down from partners to their children, and over a family of brothers and sisters. A slash through a symbol, for someone who has died, doesn't usually stop it reading the symbol, though a slash at an odd angle can make it mistake the person's sex. The father is the male partner and the mother the female one, whichever side each is drawn on.</p>
+<p>Some things aren't read yet: symbols that are half filled or shaded (as they often are for carriers), lines that slope (as they do for twins), and dashed lines. A PED file has no place for deaths, twins or adoptions anyway. So compare the PED file with the picture before you use it. The quickest way is to draw it, with <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</p>
+
+<h2>Who is who</h2>
+<p>On a computer of your own, PedInterp reads the labels under the symbols with the Tesseract program. A browser can't run Tesseract, so here the people are numbered by generation instead: from the top, and from the left in each generation, I-1, I-2, II-1 and so on. Pedigree Studio numbers people in the same way. The picture of the Lynch family was drawn where the Studio draws the family, so its numbers are the same as those in the Lynch PED file, and the PED file that PedInterp writes is the same as that one, apart from the family's id.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedinterp /data/examples/lynch.png --labels none -d ~/results
+diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) &amp;&amp; echo "the same people, parents, sexes and status"</code></pre>
+<table>
+<tr><th>Option</th><th></th></tr>
+<tr><td><code>-f</code>, <code>--family ID</code></td><td>the family id, which names the PED file (default: the picture's name)</td></tr>
+<tr><td><code>-d</code>, <code>--output-dir FOLDER</code></td><td>where to write the PED file (default: the folder you're in)</td></tr>
+<tr><td><code>--upscale FACTOR</code></td><td>how many times to enlarge the picture (default: 10)</td></tr>
+<tr><td><code>--labels tesseract|none</code></td><td>read the labels with Tesseract, or number the people. Here the people are numbered either way, but with <code>none</code> there's no warning that Tesseract isn't there.</td></tr>
+<tr><td><code>-q</code>, <code>--quiet</code></td><td>don't print the table</td></tr>
+</table>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>from PedInterp import pedigree_processing, PED_export
+
+df = pedigree_processing("LYNCH", image_path="/data/examples/lynch.png", ocr=None)
+print(df.to_string(index=False))
+print("wrote", PED_export(df, "/home/user/results"))</code></pre>
+<p><code>ocr=None</code> numbers the people. <code>ocr</code> can also be a function that reads the labels with other OCR, such as tesseract.js in a web page: <a href="https://github.com/comparativechrono/pedigree-interpreter#reading-the-labels-with-other-ocr" target="_blank" rel="noopener">PedInterp's README</a> explains how.</p>
+<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>The first time</div><p>PedInterp needs NumPy, pandas, OpenCV and Pillow, which Python downloads the first time you use it. That is about 21 MB, or less if PedNet or PedGen has already run, and your browser keeps them for next time.</p></div>
+<h2 data-anchor="cite">References</h2>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>PedInterp</dt>
+<dd>Taylor N. PedInterp [software]. <a href="https://github.com/comparativechrono/pedigree-interpreter" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-interpreter</a></dd>
 </dl>
 </article>
 <article class="help-page" id="h-tool-terms" data-title="Match conditions to terms" data-group="Tools" data-group-page="h-tools" data-keys="match terms hpo mondo ontology ols ebi lookup service local obo hp.obo mondo.obo suggest search terms file key colour key hponorm mondonorm" hidden>
@@ -1363,6 +1507,141 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <dd>Hearn TJ. mpedtools [software]. <a href="https://github.com/comparativechrono/mpedtools" target="_blank" rel="noopener">github.com/comparativechrono/mpedtools</a></dd>
 </dl>
 </article>
+<article class="help-page" id="h-tool-pednet" data-title="PedNet: the graph, the mode of inheritance and the variants" data-group="Tools" data-group-page="h-tools" data-keys="pednet graph network dag directed acyclic loop loops consanguinity kinship inbreeding coefficient relationship centrality graphml gephi cytoscape mode inheritance dominant recessive x-linked likelihood bayesian network classifier variants vcf rank cosegregation co-segregation bayes factor pp1 bs4 acmg amp compound heterozygote check" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="7.5" r="2.6"/><circle cx="9.5" cy="18" r="2.6"/><circle cx="19" cy="18.5" r="1.8"/><path d="M8.5 6.4l7 .8M7 8.4l1.7 7.1M16.4 9.6l-5.3 6.3M12 18.1l5.2.3"/></svg>PedNet: the graph, the mode of inheritance and the variants</h1>
+<p class="lede">PedNet analyses a pedigree as a graph: a directed acyclic graph, with a node for each person and an edge from each parent to each child. Its three tools in the Tools tab show how a family is put together, weigh up how likely each mode of inheritance is, and rank candidate variants by how well each co-segregates with the condition.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-graph" data-input="/data/examples/okafor.mped">The Okafor family as a graph</button> <button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/lynch.ped">The Lynch family's mode of inheritance</button></div>
+<p>All three read a PED file. From an MPED file, they take the first condition, and a carrier (3) counts as unknown. A drawing has to be made into a PED file first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>.</p>
+
+<h2>The pedigree as a graph</h2>
+<p>For each family in the file, this lists:</p>
+<ul>
+  <li><b>its loops</b>, each with the people round it. A loop through a couple who are related is from <i>consanguinity</i>, and a loop through no related couple is from <i>marriage</i>: two families who married into each other more than once.</li>
+  <li><b>who is inbred</b>, with their inbreeding coefficient, F: the chance that the two copies of a gene they have are copies of one copy in an ancestor of both their parents. The children of first cousins have F = 1/16 = 0.0625.</li>
+  <li><b>how broad and how tangled it is</b>: its width, the largest number of people none of whom is an ancestor of another, and its elimination width, which sets how much work the exact likelihoods of the other two tools take. Only a pedigree with very many loops is too tangled for them.</li>
+  <li><b>the closest pairs of affected relatives</b>, each with the name of their relationship (brother, first cousin once removed), its degree, and their kinship coefficient: the chance that a copy of a gene taken at random from one of them and a copy taken from the other are the same copy, inherited from an ancestor they share.</li>
+  <li><b>network measures</b>: the original PedNet's measures of where the affected people are, the features of their pattern that the classifier of the mode reads, and the people most central to the graph.</li>
+</ul>
+<p>It can also save everyone's <b>kinship coefficients</b> as a table, for the autosomes or for the X chromosome, and the graph as <b>GraphML</b>, which Gephi, Cytoscape and other network tools open. The <i>mating graph</i> has a node for each couple as well, between the partners and their children. Both need one family, so if the file holds several, give the family.</p>
+
+<h2>Mode of inheritance</h2>
+<p>This weighs up autosomal dominant (AD), autosomal recessive (AR), X-linked dominant (XLD) and X-linked recessive (XLR) inheritance, and gives the probability of each, with the probabilities that the condition is dominant or recessive, and autosomal or X-linked. A mode is named only when its probability reaches the threshold, 0.8 unless you change it. Otherwise the answer is <i>uncertain</i>. The third method, network measures, works differently.</p>
+<dl>
+  <dt>Exact likelihoods (the default)</dt><dd>PedNet treats the pedigree as a Bayesian network of everyone's genotypes, and works out exactly how likely it is that just these people are affected under each mode, averaged over four penetrances, 0.6, 0.8, 0.95 and 0.99, unless you give others, with a chance of 0.001 of being affected without the disease genotype. A family comes to notice through someone affected, the proband, so the likelihoods are worked out given that the proband has the disease genotype. If you don't say who the proband is, each affected person is taken in turn. A pattern that only a new mutation would explain comes out unlikely, because PedNet doesn't model new mutations. With several families that have the same condition, tick <i>The families have the same condition</i> to get one answer from them all.</dd>
+  <dt>The pattern of affected people</dt><dd>A classifier that learnt, from thousands of simulated families, where the affected people sit in the graph under each mode: in every generation or skipping some, passed from father to son, mostly male, the children of related parents, and so on.</dd>
+  <dt>Network measures</dt><dd>The original PedNet's classifier, which tells dominant from recessive by a vote. Two of the four network measures it shows have a vote each: the share of affected people who have an affected parent, and the share of generations in which someone is affected. A third vote goes to dominant inheritance, unless an affected person has two unaffected parents, which gives two votes to recessive inheritance. The classifier calls a condition dominant when all three votes say so, and recessive when it has three votes or more for recessive inheritance. Otherwise, it says <i>uncertain</i>. It gives no probabilities, so the threshold doesn't apply to it.</dd>
+</dl>
+<p>The likelihoods are the method to rely on. The classifiers show what the pattern alone suggests. PedNet takes a condition to be rare: it gives the allele a frequency of 1 in 1,000 for autosomal recessive inheritance, 1 in 2,000 for X-linked recessive, and 1 in 10,000 for the dominant modes. In Python, <code>infer_mode</code> takes other frequencies, as in <code>allele_frequency={"AR": 0.01}</code>.</p>
+
+<h2>Rank candidate variants</h2>
+<p>For each candidate variant, PedNet works out how likely everyone's genotypes and the pattern of affected people are if the variant causes the condition, and if it doesn't. The ratio of the two is a Bayes factor. Its strength as evidence for co-segregation (PP1) or against it (BS4), under the ACMG/AMP guidelines, is given as Supporting, Moderate or Strong: for co-segregation at Bayes factors of 2.08, 4.33 and 18.7, the odds of the guidelines as a Bayesian framework, and against it at 1/2.08, 1/4.33 and 1/18.7. On the whole, a variant scores higher the more of the affected people carry it and the fewer of the unaffected do, but who the carriers are matters too, and genotypes that can't have come from the parents count heavily against a variant.</p>
+<p>The variants are ranked by their odds of being the cause: the Bayes factor times the probability, from who is affected, that the condition is inherited in a way that suits the variant's chromosome. So a variant on the X chromosome ranks low in a family whose condition is clearly autosomal. The table gives both, as <i>log10 odds</i> and <i>log10 BF</i>. Pairs of variants in one gene that an affected person carries both of are scored too, as compound heterozygotes under the recessive modes. Genotypes that break Mendel's laws are counted, and PedNet names anyone who carries a variant that their parents were found not to carry (on the X chromosome, a son whose mother was found not to carry it), as a new mutation in them would explain that genotype, though not necessarily the others.</p>
+<dl>
+  <dt>The variants</dt><dd>A VCF file, plain or gzipped, whose samples are named with the PED file's ids; or a table with a row for each variant and a column for each person, holding the number of copies of the variant (0, 1 or 2) or a call such as <code>0/1</code>. A table names its variants in a column <code>variant</code>, and can also have the columns <code>chrom</code>, <code>pos</code>, <code>ref</code>, <code>alt</code>, <code>af</code> (the allele frequency) and <code>gene</code>. <a href="#h-tool-pedgen">Simulate a family</a> writes one.</dd>
+  <dt>Modes of inheritance</dt><dd>All four, weighed up as in Mode of inheritance; the two autosomal ones; or the one you know.</dd>
+  <dt>Leave out variants commoner than</dt><dd>An allele frequency. Variants with no frequency in the file are kept.</dd>
+  <dt>How many to show, Save every variant's scores</dt><dd>The table under the result shows the best 20, unless you change it. The table you save, separated by tabs, has every variant, with every score.</dd>
+</dl>
+<p>If the PED file holds several families, they're taken to have the same condition, and each variant is ranked by its evidence across the families in which an affected person carries it.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pednet graph /data/examples/okafor.mped
+pednet graph /data/examples/pednet/consanguineous.ped --kinship ~/results/fam3-kinship.tsv --graphml ~/results/fam3.graphml
+pednet mode /data/examples/lynch.ped
+pednet mode /data/examples/okafor.mped --method patterns
+pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vcf --out ~/results/dominant-ranked.tsv
+pednet check /data/examples/cf-cousins.mped</code></pre>
+<p><code>pednet check</code> says what PedNet makes of a PED file: its families, the children of related parents, and anything odd, such as someone whose sex isn't recorded. <code>man pednet</code> gives examples and PedNet's four commands, and <code>pednet graph --help</code>, <code>pednet mode --help</code>, <code>pednet rank --help</code> and <code>pednet check --help</code> list the options of each.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pednet
+
+okafor = pednet.read_ped("/data/examples/okafor.mped")["FAM1"]
+print(pednet.loops(okafor))
+print(pednet.inbreeding(okafor)["IV-3"])
+print(pednet.relationship(okafor, "IV-3", "II-3").name)
+print(pednet.infer_mode(okafor))
+
+family = pednet.read_ped("/data/examples/pednet/dominant.ped")["FAM1"]
+variants = pednet.read_vcf("/data/examples/pednet/dominant.vcf", samples=family.ids)
+for s in pednet.rank_variants(family, variants)[:3]:
+    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)</code></pre>
+<p>How PedNet's methods work, and how well they do on simulated families, is in <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">PedNet's README</a>.</p>
+<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>The first time</div><p>PedNet needs NumPy, which Python downloads with PedNet the first time one of its tools or commands runs, or a notebook imports it. That is about 4 MB, and your browser keeps it for next time.</p></div>
+<h2 data-anchor="cite">References</h2>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>PedNet</dt>
+<dd>Hearn TJ, Taylor N. PedNet [software]. <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">github.com/comparativechrono/PedNet</a></dd>
+<dt>Co-segregation, and its strength as evidence (PP1, BS4)</dt>
+<dd>Thompson D, Easton DF, Goldgar DE (2003) A full-likelihood method for the evaluation of causality of sequence variants from family data. <i>American Journal of Human Genetics</i> 73(3): 652–655. <a href="https://doi.org/10.1086/378100" target="_blank" rel="noopener">doi:10.1086/378100</a></dd>
+<dd>Jarvik GP, Browning BL (2016) Consideration of cosegregation in the pathogenicity classification of genomic variants. <i>American Journal of Human Genetics</i> 98(6): 1077–1081. <a href="https://doi.org/10.1016/j.ajhg.2016.04.003" target="_blank" rel="noopener">doi:10.1016/j.ajhg.2016.04.003</a></dd>
+<dd>Richards S, Aziz N, Bale S, Bick D, Das S, Gastier-Foster J, et al. (2015) Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the American College of Medical Genetics and Genomics and the Association for Molecular Pathology. <i>Genetics in Medicine</i> 17(5): 405–424. <a href="https://doi.org/10.1038/gim.2015.30" target="_blank" rel="noopener">doi:10.1038/gim.2015.30</a></dd>
+<dd>Tavtigian SV, Greenblatt MS, Harrison SM, Nussbaum RL, Prabhu SA, Boucher KM, et al. (2018) Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework. <i>Genetics in Medicine</i> 20(9): 1054–1060. <a href="https://doi.org/10.1038/gim.2017.210" target="_blank" rel="noopener">doi:10.1038/gim.2017.210</a></dd>
+<dt>Pedigrees as Bayesian networks</dt>
+<dd>Lauritzen SL, Sheehan NA (2003) Graphical models for genetic analyses. <i>Statistical Science</i> 18(4): 489–514. <a href="https://doi.org/10.1214/ss/1081443232" target="_blank" rel="noopener">doi:10.1214/ss/1081443232</a></dd>
+<dt>Kinship and inbreeding coefficients</dt>
+<dd>Wright S (1922) Coefficients of inbreeding and relationship. <i>The American Naturalist</i> 56(645): 330–338. <a href="https://doi.org/10.1086/279872" target="_blank" rel="noopener">doi:10.1086/279872</a></dd>
+<dt>NetworkX</dt>
+<dd>Hagberg AA, Schult DA, Swart PJ (2008) Exploring network structure, dynamics, and function using NetworkX. <i>Proceedings of the 7th Python in Science Conference (SciPy2008)</i>, pp. 11–15. <a href="https://conference.scipy.org/proceedings/SciPy2008/paper_2/" target="_blank" rel="noopener">conference.scipy.org/proceedings/SciPy2008/paper_2</a></dd>
+</dl>
+</article>
+<article class="help-page" id="h-tool-pedgen" data-title="Simulate a family" data-group="Tools" data-group-page="h-tools" data-keys="pedgen simulate simulation simulated generate made up random family pedigree mendelian dominant recessive seed genotypes allele frequency teaching test" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l2 5.5L19.5 10 14 12l-2 5.5L10 12l-5.5-2L10 8.5z"/><path d="M19 17l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>Simulate a family</h1>
+<p class="lede">PedGen makes up a family with an autosomal dominant or recessive condition, by Mendelian inheritance from an affected founder, and writes it as a PED file. Use it for teaching, or to try PedNet on families whose mode of inheritance you know.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedgen">Simulate a family</button></div>
+
+<h2>How it works</h2>
+<p>The founder has the condition. In each generation, every child gets one of each parent's two copies of the gene, at random, and each couple has between one child and the most you allow. In every generation but the last, the first child of a couple always has a partner and children, and their brothers and sisters each have them with the chance you give, so that the family has as many generations as you ask for. Partners come from a population in which the condition's allele has the frequency you give, and some come with their own parents, and theirs. Who is affected follows from the genotypes: one copy of the allele is enough for a dominant condition, and a recessive one needs two. As everyone's genotype is known, PedGen can write them too, as a candidate variant for <a href="#h-tool-pednet">Rank candidate variants</a>.</p>
+
+<h2>The form</h2>
+<dl>
+  <dt>Mode of inheritance, Generations, The most children a couple has</dt><dd>The family's condition and shape.</dd>
+  <dt>Seed</dt><dd>A whole number. With the same seed and settings, PedGen makes the same family, here, in the terminal and in Python. Leave it empty to get a new family every time.</dd>
+  <dt>Family id</dt><dd>It names the PED file: <code>FAM1.ped</code>, unless you change it.</dd>
+  <dt>Chance that a child has a partner, and children; Chance that a partner's parents are added</dt><dd>0.6 and 0.25, unless you change them.</dd>
+  <dt>Frequency of the allele among partners</dt><dd>0.1, unless you change it. That is a common allele: about one partner in five carries it, and one in a hundred has two copies, so a recessive condition turns up again in later generations far more often than a rare one would. For a rare condition, give 0.01 or less, though then a recessive condition seldom turns up again, and most families have no one affected but the founder. <i>Partners never carry the allele</i> gives the partners who marry in no copy of it, but their parents and grandparents, if they're added, can still carry it. To keep the allele to the founder and their descendants, give a frequency of 0 instead.</dd>
+  <dt>Save everyone's genotypes too</dt><dd>A table, <code>FAM1-genotypes.tsv</code>, of the number of copies of the allele that each person has, as a variant called <code>causal</code>, for Rank candidate variants.</dd>
+</dl>
+
+<h2>What PedNet makes of it</h2>
+<p>PedNet takes a condition to be rare: for autosomal recessive inheritance, it gives the allele a frequency of 1 in 1,000. In a recessive family that PedGen makes with its frequency of 0.1, several of the partners who marry in may be carriers, which PedNet's model finds very unlikely, so PedNet may favour another mode, or be uncertain. Of 19 such families of four generations with two or more people affected, it called none autosomal recessive. Given PedGen's frequency, as the Python below does, it called 4 of them autosomal recessive, and put that mode first in 11. Dominant families are clearer, though one of three generations is often too small for a confident answer.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedgen --mode AD --generations 4 --seed 4 -d ~/results --genotypes ~/results/FAM1-genotypes.tsv
+pednet mode ~/results/FAM1.ped
+pednet rank ~/results/FAM1.ped ~/results/FAM1-genotypes.tsv
+ped2studio ~/results/FAM1.ped ~/pedigrees/simulated.studio.json</code></pre>
+<table>
+<tr><th>Option</th><th></th></tr>
+<tr><td><code>-m</code>, <code>--mode AD|AR</code></td><td>the mode of inheritance (default: AD)</td></tr>
+<tr><td><code>-g</code>, <code>--generations N</code>; <code>-c</code>, <code>--max-children N</code></td><td>the number of generations (3), and the most children a couple can have (3)</td></tr>
+<tr><td><code>-s</code>, <code>--seed N</code></td><td>makes the family reproducible</td></tr>
+<tr><td><code>-f</code>, <code>--family ID</code>; <code>-d</code>, <code>--output-dir FOLDER</code></td><td>the family id, which names the file (FAM1), and where to write it</td></tr>
+<tr><td><code>--partners CHANCE</code>, <code>--ancestors CHANCE</code></td><td>the chance that a child has a partner (0.6), and that a partner's parents are added (0.25)</td></tr>
+<tr><td><code>--allele-frequency F</code>, <code>--unaffected-partners</code></td><td>the allele's frequency among partners and their ancestors (0.1); with <code>--unaffected-partners</code>, the partners themselves never carry it</td></tr>
+<tr><td><code>--genotypes FILE</code></td><td>also write everyone's genotypes, as a table</td></tr>
+</table>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pednet
+from PedGen import pedigree_generator, gen_PED_export
+
+df = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AR", generation_count=4, seed=34)
+print(df.head())
+pedigree = pednet.pedigree_from_rows(df)
+print(pednet.infer_mode(pedigree).call, "for a rare allele;",
+      pednet.infer_mode(pedigree, allele_frequency={"AR": 0.1}).call, "at PedGen's frequency")
+print("wrote", gen_PED_export(df, "/home/user/results"))</code></pre>
+<p>PedGen's <code>plot_pedigree_tree</code> draws a family with matplotlib. In a notebook, put <code>import matplotlib.pyplot as plt</code> in the same cell, so that Python loads matplotlib before PedGen needs it. Pedigree Studio draws a family better, though: draw the PED file with <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</p>
+<div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>The first time</div><p>PedGen needs NumPy and pandas, which Python downloads the first time you use it. That is about 9 MB, or less if PedNet has already run, and your browser keeps them for next time.</p></div>
+<h2 data-anchor="cite">References</h2>
+<p>If you use this program in your work, cite the papers below, and give the version you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>PedGen</dt>
+<dd>Taylor N. PedGen [software]. <a href="https://github.com/comparativechrono/pedigree-generator" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-generator</a></dd>
+</dl>
+</article>
 <article class="help-page" id="h-files" data-title="Your files" data-group="Files and standards" data-group-page="h-files" data-keys="files tab folders home examples upload download zip kept stored browser storage indexeddb delete rename start afresh private window quota space" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7l-4 9z"/><path d="M3 19l3.5-8H22l-3.5 8z"/></svg>Your files</h1>
 <p class="lede">Your drawings, your notebooks and the files the tools write are all kept in a home folder, <code>~</code> (<code>/home/user</code>), which every tab shares. The <b>Files</b> tab shows them, along with the examples.</p>
@@ -1424,7 +1703,10 @@ mpedtools.write(one, "/home/user/results/okafor_hearing.ped", force_format="ped"
 <tr><td><b>PED file</b>, <b>MPED file</b></td><td><code>*.ped</code>, <code>*.fam</code>; <code>*.mped</code></td><td>The pedigree as a table for linkage programs. An MPED file has a column for each of several conditions (<a href="#h-ped">PED and MPED</a>).</td></tr>
 <tr><td><b>Terms file</b></td><td><code>*-terms.json</code></td><td>Condition names and their ontology terms (<a href="#h-terms">terms files</a>).</td></tr>
 <tr><td><b>Ontology</b></td><td><code>hp.obo</code>, <code>mondo.obo</code></td><td>A copy of the HPO or Mondo, to search without the internet.</td></tr>
-<tr><td>Other</td><td><code>*.tsv</code>, <code>*.yaml</code>, <code>*.jsonl</code>, <code>*.log.json</code></td><td>What the tools export: a table, YAML, JSON Lines, a log of decisions.</td></tr>
+<tr><td><b>Picture</b></td><td><code>*.png</code>, <code>*.jpg</code></td><td>A picture of a pedigree, which <a href="#h-tool-pedinterp">Picture → PED file</a> reads.</td></tr>
+<tr><td><b>VCF file</b></td><td><code>*.vcf</code>, <code>*.vcf.gz</code></td><td>Variants found by sequencing, with each person's genotypes, for <a href="#h-tool-pednet">Rank candidate variants</a>.</td></tr>
+<tr><td><b>Table of genotypes</b></td><td><code>*-genotypes.tsv</code></td><td>A row for each variant and a column for each person, as <a href="#h-tool-pedgen">Simulate a family</a> writes it. The workbench recognises one by its name, or by a first column called <code>variant</code>.</td></tr>
+<tr><td>Other</td><td><code>*.tsv</code>, <code>*.yaml</code>, <code>*.jsonl</code>, <code>*.log.json</code>, <code>*.graphml</code></td><td>What the tools export: a table (such as PedNet's kinship coefficients or its variants' scores), YAML, JSON Lines, a log of decisions, or a graph for network tools.</td></tr>
 </table>
 
 <h2>How the workbench tells them apart</h2>
@@ -1748,6 +2030,8 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
   <li>To make a PED file from a drawing, use <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>, or go through the GA4GH files. <a href="#h-walk-ped">Make a PED file for a linkage program</a> compares the two ways.</li>
   <li>To draw a PED file, use <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</li>
   <li>To check PED files, take conditions out of them, or merge and split them, use <a href="#h-tool-mpedtools">mpedtools</a>.</li>
+  <li>To read a PED file from a picture of a pedigree, use <a href="#h-tool-pedinterp">Picture → PED file</a>, and to make one up, <a href="#h-tool-pedgen">Simulate a family</a>.</li>
+  <li>To analyse a family, with its loops, kinship, mode of inheritance and candidate variants, use <a href="#h-tool-pednet">PedNet</a>. It reads PED files, and the first condition of an MPED file.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-edit="/data/examples/cf-cousins.mped">Look at an MPED file</button> <button class="do" type="button" data-tool="mped-info" data-input="/data/examples/cf-cousins.mped">Summary and check</button></div>
 <h2 data-anchor="cite">References</h2>
@@ -1813,10 +2097,10 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 <article class="help-page" id="h-notebook" data-title="The Notebook" data-group="Notebook and terminal" data-group-page="h-notebook" data-keys="notebook jupyter ipynb python cells run shift enter markdown pip magic cd bash writefile download restart variables starter pedigree-tools" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M12 8h4M12 12h4"/></svg>The Notebook</h1>
 <p class="lede">The Notebook tab runs Python notebooks in your browser, with all the pedigree packages installed. They're the same <code>.ipynb</code> files that Jupyter uses. The tab is for work the forms don't cover, such as many families at once, your own checks, or a record of an analysis that can be run again.</p>
-<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-tools.ipynb">Open the welcome notebook</button> <button class="do" type="button" data-new-nb="python">Start a new notebook</button></div>
+<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-tools.ipynb">Open the welcome notebook</button> <button class="do" type="button" data-open-nb="~/notebooks/pedigree-analysis.ipynb">Open the analysis notebook</button> <button class="do" type="button" data-new-nb="python">Start a new notebook</button></div>
 
-<h2>The welcome notebook</h2>
-<p><code>~/notebooks/pedigree-tools.ipynb</code> walks you through the packages. It covers reading a drawing, converting it and checking the result, the family as Python objects, the phenopacket toolkit, PED files, and running commands from a cell. Run its cells from the top.</p>
+<h2>The notebooks to start from</h2>
+<p><code>~/notebooks/pedigree-tools.ipynb</code> walks you through the packages. It covers reading a drawing, converting it and checking the result, the family as Python objects, the phenopacket toolkit, PED files, and running commands from a cell. <code>~/notebooks/pedigree-analysis.ipynb</code> goes on to PedNet, PedGen and PedInterp: a family as a graph, its kinship and loops, its mode of inheritance, candidate variants, simulated families, and a pedigree read from a picture. Run their cells from the top. If you've deleted one, its button here brings back a fresh copy.</p>
 
 <h2>Working in a notebook</h2>
 <ul>
@@ -1840,10 +2124,10 @@ FAM1	Amelia	Philip	Ruth	2	2	1</code></pre>
 </table>
 
 <h2>The packages</h2>
-<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
+<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. PedNet (<code>pednet</code>), PedGen and PedInterp are loaded, with NumPy, pandas, OpenCV and Pillow as they need them, when a cell first imports one of them or runs one of their commands. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>One Python for three tabs</div><p>The Tools tab, the Notebook tab and the Terminal tab share one Python. While a notebook cell is running, a tool waits for it to finish, and the other way round.</p></div>
 </article>
-<article class="help-page" id="h-python" data-title="The packages in Python" data-group="Notebook and terminal" data-group-page="h-notebook" data-keys="python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm notebook code" hidden>
+<article class="help-page" id="h-python" data-title="The packages in Python" data-group="Notebook and terminal" data-group-page="h-notebook" data-keys="python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm pednet pedgen pedinterp read_ped infer_mode rank_variants kinship pedigree_generator pedigree_processing notebook code" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3c-4 0-4 1.5-4 3v2h4v1H6c-2 0-3 1.5-3 4s1 4 3 4h2v-3a2 2 0 0 1 2-2h4a2 2 0 0 0 2-2V6c0-1.5-1-3-4-3z"/><path d="M12 21c4 0 4-1.5 4-3v-2h-4v-1h6c2 0 3-1.5 3-4s-1-4-3-4h-2v3a2 2 0 0 1-2 2h-4a2 2 0 0 0-2 2v4c0 1.5 1 3 4 3z"/><path d="M10 5.5h.01M14 18.5h.01"/></svg>The packages in Python</h1>
 <p class="lede">These are the main functions of each package, for use in notebooks and scripts. You can add each box to the open notebook. The packages' own help, such as <code>help(studio2ga4gh.convert_file)</code>, tells you more.</p>
 
@@ -1910,6 +2194,37 @@ print([(i.level, i.message) for i in mpedtools.validate(ped)])
 cf = mpedtools.extract_phenotype(ped, "Cystic_fibrosis")
 mpedtools.write(cf, "/home/user/results/cf.ped", force_format="ped")</code></pre>
 
+<h2>pednet: a family as a graph</h2>
+<pre class="code" data-run="py"><code>import pednet
+
+families = pednet.read_ped("/data/examples/okafor.mped")   # {family id: pedigree}; from an MPED file, its first condition
+okafor = families["FAM1"]
+graph = pednet.pedigree_graph(okafor)                       # a networkx DiGraph, parent → child
+print(graph.number_of_nodes(), "people;", [loop.people for loop in pednet.loops(okafor)])
+ids, phi = pednet.kinship_matrix(okafor)                    # everyone's kinship coefficients
+print(pednet.inbreeding(okafor)["IV-3"], pednet.relationship(okafor, "IV-3", "III-3").name)
+
+result = pednet.infer_mode(okafor)                          # exact likelihoods; or classify_by_patterns(okafor)
+print(result.call, {m.mode: round(m.posterior, 3) for m in result.modes})
+
+family = pednet.read_ped("/data/examples/pednet/recessive.ped")["FAM2"]
+variants = pednet.read_vcf("/data/examples/pednet/recessive.vcf", samples=family.ids)
+for s in pednet.rank_variants(family, variants, modes="AR")[:3]:
+    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)</code></pre>
+<p><code>infer_shared_mode</code> and <code>rank_variants_across</code> take several families with the same condition. <code>pedigree_from_rows</code> makes a pedigree from a table with the PED columns, such as PedGen and PedInterp make.</p>
+
+<h2>PedGen and PedInterp: simulated families, and pictures</h2>
+<pre class="code" data-run="py"><code>import pednet
+from PedGen import pedigree_generator
+from PedInterp import pedigree_processing
+
+sim = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AD", generation_count=4, seed=4)
+print(pednet.infer_mode(pednet.pedigree_from_rows(sim)).call)
+
+read = pedigree_processing("LYNCH", image_path="/data/examples/lynch.png", ocr=None)
+print(read.head())</code></pre>
+<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files.</p>
+
 <h2>hponorm, mondonorm: searching the ontologies</h2>
 <pre class="code" data-run="py"><code>from mondonorm.mondo import MondoIndex      # a copy of Mondo among your files (or: from mondonorm.ols import OlsClient)
 index = MondoIndex.load("/home/user/ontologies/mondo.obo", allow_download=False)
@@ -1945,9 +2260,12 @@ for path in sorted(glob.glob("/data/examples/*.studio.json")):
 <tr><td><code>phenotk</code></td><td>the phenopacket toolkit: <code>view</code>, <code>stats</code>, <code>validate</code>, <code>normalise</code>, <code>filter</code>, <code>deidentify</code>, <code>convert</code>, <code>upgrade</code>, <code>diff</code>, <code>split</code>, <code>merge</code>, <code>add</code>, <code>ped</code>, <code>sort</code></td></tr>
 <tr><td><code>pedigree-ga4gh</code></td><td>the GA4GH implementation that studio2ga4gh, ga4gh2studio and phenotk share: <code>validate</code>, <code>upgrade</code>, <code>convert</code>, <code>kin</code></td></tr>
 <tr><td><code>hponorm</code>, <code>mondonorm</code></td><td>match the names in a GA4GH file to HPO or Mondo terms (see below)</td></tr>
+<tr><td><code>pednet</code></td><td>a PED file as a graph: <code>graph</code> (loops, kinship, inbreeding, the closest affected relatives), <code>mode</code> (the mode of inheritance), <code>rank</code> (candidate variants by co-segregation), <code>check</code></td></tr>
+<tr><td><code>pedgen</code></td><td>simulate a family with a dominant or recessive condition, as a PED file</td></tr>
+<tr><td><code>pedinterp</code></td><td>a picture of a pedigree → a PED file</td></tr>
 <tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out from scratch)</td></tr>
 </table>
-<p><code>man NAME</code> shows examples and the options, and <code>NAME --help</code> shows just the options, from the program itself. Each program also runs as <code>python -m pedwb NAME …</code>.</p>
+<p><code>man NAME</code> shows examples and the options, and <code>NAME --help</code> shows just the options, from the program itself. Each program also runs as <code>python -m pedwb NAME …</code>. The first time <code>pednet</code>, <code>pedgen</code> or <code>pedinterp</code> runs, Python downloads it, with NumPy and whatever else it needs, and says so: from about 4 MB for pednet to about 21 MB in all.</p>
 <pre class="code" data-run="term"><code>cd ~/results
 studio2ga4gh /data/examples/lynch.studio.json -t /data/examples/example-terms.json -d . -o lynch
 pedigree-ga4gh validate lynch_ga4gh-pedigree.json
@@ -1982,10 +2300,13 @@ for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedig
 <p class="lede">The packages that run here are ordinary Python packages, so the commands and code that the workbench shows you will also work on your own computer: in a pipeline, on a server, or over many families at once.</p>
 
 <h2>Installing them</h2>
-<p>All of them except pedwb, the workbench's own runner, are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
+<p>All of them except pedwb, the workbench's own runner, PedGen and PedInterp are on PyPI, at the same versions as here (<a href="#h-versions">Versions</a>). They need Python 3.9 or later.</p>
 <pre class="code"><code>pip install pedigree-ga4gh studio2ga4gh ga4gh2studio studio2ped ped2studio mpedtools hponorm mondonorm phenopacket-toolkit</code></pre>
 <p>If you installed them before October 2026, add <code>--upgrade</code> to that command. The earlier releases of studio2ga4gh, ga4gh2studio and phenopacket-toolkit write or read the older forms that the workbench now upgrades.</p>
-<p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code> and <code>pedigree-ga4gh</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
+<p>PedNet is on PyPI too, at the same version as here, and needs NumPy and networkx, which pip installs with it. The commands for PedGen and PedInterp aren't released yet, so install those two from GitHub for now. The change that lets PedInterp read children drawn straight under their parents came after its command, in <a href="https://github.com/comparativechrono/pedigree-interpreter/pull/4" target="_blank" rel="noopener">pull request 4</a>: until that is merged, the PedInterp on GitHub doesn't have it, but the workbench's own copy, below, does. PedInterp needs OpenCV, and to read the labels under the symbols, the Tesseract program (its README says how to install it).</p>
+<pre class="code"><code>pip install PedNet
+pip install "git+https://github.com/comparativechrono/pedigree-generator" "git+https://github.com/comparativechrono/pedigree-interpreter"</code></pre>
+<p>Each package installs its own command: <code>studio2ga4gh</code>, <code>ga4gh2studio</code>, <code>studio2ped</code>, <code>ped2studio</code>, <code>mpedtools</code>, <code>hponorm</code>, <code>mondonorm</code>, <code>phenotk</code>, <code>pedigree-ga4gh</code>, <code>pednet</code>, <code>pedgen</code> and <code>pedinterp</code>. They take the same options as in the Terminal tab, so the commands that the Tools tab shows will work on your computer once you change the paths to those of your own files. In Python, the imports are the ones described in <a href="#h-python">The packages in Python</a>.</p>
 
 <h2>The workbench's own copies</h2>
 <p>You can also download the exact copies of the packages that the workbench uses, in one archive. This is handy on a computer that can't reach PyPI, and it includes the workbench's own runner, <code>pedwb</code>.</p>
@@ -1994,6 +2315,8 @@ for f in ~/results/all/*_ga4gh-pedigree.json; do echo "$(basename "$f"): $(pedig
 export PYTHONPATH="$PWD/pedigree-tools"
 python -m pedwb studio2ga4gh okafor.studio.json -t example-terms.json -d results
 python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code></pre>
+<p>PedNet, PedGen and PedInterp, with networkx, are in a second archive, which needs NumPy, pandas, OpenCV and Pillow (<code>pip install numpy pandas opencv-python pillow</code>). Unzip it into the same folder.</p>
+<div class="tryrow"><a class="do" href="assets/py/pedigree-analysis.zip" download="pedigree-analysis.zip">Download PedNet, PedGen and PedInterp (.zip, about 1 MB)</a></div>
 <p><code>python -m pedwb PROGRAM …</code> runs any of the programs, just as the terminal here does. Most of them also run as <code>python -m studio2ga4gh …</code>, <code>python -m phenopacket_toolkit …</code> and so on. In Python, put the folder on <code>PYTHONPATH</code> (or in <code>sys.path</code>) and import the packages as usual.</p>
 
 <h2>What else they use</h2>
@@ -2002,9 +2325,9 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <li><b>rapidfuzz</b> is optional (<code>pip install rapidfuzz</code>). If it's installed, hponorm's and mondonorm's searches of local copies of the ontologies also find names that are alike letter by letter but share no word. You don't need it for speed, and the scores are the same without it.</li>
   <li><b>rich</b>, if it's installed, gives hponorm and mondonorm their coloured questions.</li>
 </ul>
-<p>Everything else is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they go, which they can't do in the terminal here.</p>
+<p>Apart from these, and what PedNet, PedGen and PedInterp need (above), everything they use is part of Python's standard library. On your own computer, hponorm and mondonorm can also ask you their questions as they go, which they can't do in the terminal here.</p>
 </article>
-<article class="help-page" id="h-versions" data-title="Versions, and how to cite" data-group="Reference" data-group-page="h-versions" data-keys="versions version cite citation reference papers pypi release studio2ga4gh 0.4.0 pedigree-ga4gh 1.0.0 phenopacket-toolkit zenodo doi" hidden>
+<article class="help-page" id="h-versions" data-title="Versions, and how to cite" data-group="Reference" data-group-page="h-versions" data-keys="versions version cite citation reference papers pypi release studio2ga4gh 0.4.0 pedigree-ga4gh 1.0.0 phenopacket-toolkit pednet 2.0.0 pedgen pedinterp github development zenodo doi" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Versions, and how to cite</h1>
 <p class="lede">These are the versions that this copy of the workbench runs. When you report work done with it, say which versions you used. The files record them too, in their <code>metaData</code> (for example <code>createdBy: studio2ga4gh 0.4.0</code>).</p>
 
@@ -2020,13 +2343,18 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <tr><td>phenopacket-toolkit (phenotk)</td><td>0.4.0</td></tr>
 <tr><td>pedigree-ga4gh</td><td>1.0.0</td></tr>
 <tr><td>pedwb (the workbench&#x27;s own runner, not on PyPI)</td><td>1.0.0</td></tr>
+<tr><td>PedNet <small>(loaded when first used)</small></td><td>2.0.0</td></tr>
+<tr><td>PedGen <small>(loaded when first used)</small></td><td>0.1.4.dev6, a development version built from GitHub (commit <code>e298027</code>), not on PyPI yet</td></tr>
+<tr><td>PedInterp <small>(loaded when first used)</small></td><td>0.1.8.dev8, a development version built from GitHub (commit <code>7e28b70</code>), not on PyPI yet</td></tr>
+<tr><td>networkx (which PedNet and PedGen use) <small>(loaded when first used)</small></td><td>3.4.2</td></tr>
 <tr><td>Pedigree Studio</td><td>commit <code>9e6b524</code> of 2026-10-17</td></tr>
 </table>
 <p>Python itself comes from Pyodide, which is downloaded from jsDelivr the first time Python starts. To see which version you have, type <code>python --version</code> in the terminal, or click the Python pill in the Tools tab.</p>
 
 <h2>The same as on PyPI</h2>
-<p>Every package here except pedwb, the workbench's own runner, is the version released on PyPI. So <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. The releases of October 2026 brought these changes:</p>
+<p>Every package here except pedwb, the workbench's own runner, PedGen and PedInterp is the version released on PyPI. So <code>pip install</code> on your own computer gives you exactly the code that runs in the workbench. PedGen and PedInterp are built from GitHub, with changes made for the workbench that will be in their next releases: their commands, <code>pedgen</code> and <code>pedinterp</code>, PedGen's table of genotypes for PedNet, and PedInterp's reading of children drawn straight under their parents. The releases of October 2026 brought these changes:</p>
 <ul>
+  <li><b>PedNet 2.0.0</b> analyses pedigrees as graphs: their loops, kinship and inbreeding, the pattern of affected people, and, with the graph as a Bayesian network, exact likelihoods for the mode of inheritance and for how well candidate variants co-segregate with a condition (<a href="#h-tool-pednet">PedNet</a>). It keeps the network metric classifier of the earlier PedNet, by Nick Taylor.</li>
   <li><b>pedigree-ga4gh 1.0.0</b> is new. It's the one implementation of the GA4GH Pedigree and of Phenopackets that studio2ga4gh, ga4gh2studio and the phenopacket toolkit share, so they all read and write the same, corrected form (<a href="#h-ga4gh">The GA4GH Pedigree</a>).</li>
   <li><b>studio2ga4gh, ga4gh2studio and phenopacket-toolkit 0.4.0</b> read and write their GA4GH files through pedigree-ga4gh. The toolkit also fixes faults in 0.3.0 that made some of its files invalid. Its <code>normalise</code> now fills in a term only when the name is the term's label or one of its synonyms, unless you ask it to accept close matches too.</li>
   <li><b>studio2ped 0.2.0</b> names people by their pedigree numbers by default, as studio2ga4gh does, and puts only genetic parents in the father and mother columns. It also leaves out the <i>no children</i> and <i>infertility</i> bars, which aren't people.</li>
@@ -2057,6 +2385,12 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
 <dt>pedigree-ga4gh</dt>
 <dd>Hearn TJ. pedigree-ga4gh [software]. <a href="https://github.com/comparativechrono/pedigree-ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-ga4gh</a></dd>
+<dt>PedNet</dt>
+<dd>Hearn TJ, Taylor N. PedNet [software]. <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">github.com/comparativechrono/PedNet</a></dd>
+<dt>PedGen</dt>
+<dd>Taylor N. PedGen [software]. <a href="https://github.com/comparativechrono/pedigree-generator" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-generator</a></dd>
+<dt>PedInterp</dt>
+<dd>Taylor N. PedInterp [software]. <a href="https://github.com/comparativechrono/pedigree-interpreter" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-interpreter</a></dd>
 <dt>Phenopackets</dt>
 <dd>Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology</i> 40(6): 817–820. <a href="https://doi.org/10.1038/s41587-022-01357-4" target="_blank" rel="noopener">doi:10.1038/s41587-022-01357-4</a></dd>
 <dt>phenopacket-tools (the Phenopackets team&#x27;s validator)</dt>
@@ -2074,6 +2408,17 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dt>Pedigree nomenclature</dt>
 <dd>Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 17(5): 424–433. <a href="https://doi.org/10.1007/s10897-008-9169-9" target="_blank" rel="noopener">doi:10.1007/s10897-008-9169-9</a></dd>
 <dd>Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 31(6): 1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a></dd>
+<dt>Co-segregation, and its strength as evidence (PP1, BS4)</dt>
+<dd>Thompson D, Easton DF, Goldgar DE (2003) A full-likelihood method for the evaluation of causality of sequence variants from family data. <i>American Journal of Human Genetics</i> 73(3): 652–655. <a href="https://doi.org/10.1086/378100" target="_blank" rel="noopener">doi:10.1086/378100</a></dd>
+<dd>Jarvik GP, Browning BL (2016) Consideration of cosegregation in the pathogenicity classification of genomic variants. <i>American Journal of Human Genetics</i> 98(6): 1077–1081. <a href="https://doi.org/10.1016/j.ajhg.2016.04.003" target="_blank" rel="noopener">doi:10.1016/j.ajhg.2016.04.003</a></dd>
+<dd>Richards S, Aziz N, Bale S, Bick D, Das S, Gastier-Foster J, et al. (2015) Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the American College of Medical Genetics and Genomics and the Association for Molecular Pathology. <i>Genetics in Medicine</i> 17(5): 405–424. <a href="https://doi.org/10.1038/gim.2015.30" target="_blank" rel="noopener">doi:10.1038/gim.2015.30</a></dd>
+<dd>Tavtigian SV, Greenblatt MS, Harrison SM, Nussbaum RL, Prabhu SA, Boucher KM, et al. (2018) Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework. <i>Genetics in Medicine</i> 20(9): 1054–1060. <a href="https://doi.org/10.1038/gim.2017.210" target="_blank" rel="noopener">doi:10.1038/gim.2017.210</a></dd>
+<dt>Pedigrees as Bayesian networks</dt>
+<dd>Lauritzen SL, Sheehan NA (2003) Graphical models for genetic analyses. <i>Statistical Science</i> 18(4): 489–514. <a href="https://doi.org/10.1214/ss/1081443232" target="_blank" rel="noopener">doi:10.1214/ss/1081443232</a></dd>
+<dt>Kinship and inbreeding coefficients</dt>
+<dd>Wright S (1922) Coefficients of inbreeding and relationship. <i>The American Naturalist</i> 56(645): 330–338. <a href="https://doi.org/10.1086/279872" target="_blank" rel="noopener">doi:10.1086/279872</a></dd>
+<dt>NetworkX</dt>
+<dd>Hagberg AA, Schult DA, Swart PJ (2008) Exploring network structure, dynamics, and function using NetworkX. <i>Proceedings of the 7th Python in Science Conference (SciPy2008)</i>, pp. 11–15. <a href="https://conference.scipy.org/proceedings/SciPy2008/paper_2/" target="_blank" rel="noopener">conference.scipy.org/proceedings/SciPy2008/paper_2</a></dd>
 <dt>Pyodide</dt>
 <dd>The Pyodide development team. Pyodide: Python in the browser. <a href="https://pyodide.org/" target="_blank" rel="noopener">pyodide.org</a></dd>
 </dl>
@@ -2094,6 +2439,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <table>
 <tr><th>When</th><th>From</th><th>What is sent</th></tr>
 <tr><td>Python first starts</td><td>cdn.jsdelivr.net (Pyodide)</td><td>nothing of yours, because it's an ordinary download</td></tr>
+<tr><td>PedNet, PedGen or PedInterp first runs</td><td>cdn.jsdelivr.net (NumPy, pandas, OpenCV, Pillow)</td><td>nothing of yours: the same kind of download. The pictures PedInterp reads stay here.</td></tr>
 <tr><td>Match conditions to terms, or Fill in missing terms, with EBI's service</td><td>www.ebi.ac.uk (the Ontology Lookup Service)</td><td>the words you search for, or the ids you type, but not the drawing or anything else in the file</td></tr>
 <tr><td>Downloading the HPO in Match conditions to terms</td><td>raw.githubusercontent.com</td><td>an ordinary download</td></tr>
 <tr><td><code>curl</code>, <code>wget</code>, <code>pip install</code> in the terminal or a notebook</td><td>wherever you point them</td><td>whatever you send</td></tr>
@@ -2139,7 +2485,19 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <dd>The bar above the drawing shows which file it belongs to. <b>Open…</b> lets you open any of your drawings, and the file button lists the most recent ones.</dd>
 
   <dt>A tool waits for a long time</dt>
-  <dd>A notebook cell may be running. The tools share the notebook's Python, so they wait for the cell to finish. You can stop the cell in the Notebook tab. The first search of a local copy of Mondo also takes a while, because it reads the whole file.</dd>
+  <dd>A notebook cell may be running. The tools share the notebook's Python, so they wait for the cell to finish. You can stop the cell in the Notebook tab. The first search of a local copy of Mondo also takes a while, because it reads the whole file. The first time a tool of PedNet, PedGen or PedInterp runs, Python downloads it, with what it needs, which is up to about 21 MB, and says so under the form.</dd>
+
+  <dt>“… couldn't be downloaded – check the internet connection”</dt>
+  <dd>PedNet, PedGen and PedInterp need NumPy and other packages, which come from cdn.jsdelivr.net, as Python does. If the connection drops, or your network blocks that site, run the tool again once it's back.</dd>
+
+  <dt>Picture → PED file misses someone, or gives someone the wrong parents</dt>
+  <dd>PedInterp needs a clear drawing: black on white, square to the edges, with each generation in a row of its own and the lines meeting the symbols. A photograph of a page reads worse than a scan or a screenshot. <i>Enlarge the picture by</i> is worked out from the picture's size, so that the enlarged picture is about 5,000 pixels across, but some pictures read better a little larger or smaller: try a number or two either side. In the terminal, give <code>--upscale</code>, as the default there is 10, which suits a picture about 500 pixels across. The Files tab gives a picture's size. Half-filled or shaded symbols, lines that slope (for twins) and dashed lines aren't read yet. Whatever the picture, check the PED file against it, and correct the drawing that ped2studio makes from it in the Studio.</dd>
+
+  <dt>PedNet says that an option needs --family</dt>
+  <dd>The kinship table, the graph file and a proband are for one family. If the PED file holds several, give the family's id in <i>Family</i>.</dd>
+
+  <dt>PedNet calls a family that PedGen simulated as recessive something else</dt>
+  <dd>PedGen's partners carry the allele at 0.1 unless you give another frequency, so a recessive family it makes can have several carriers marrying in. PedNet takes a condition to be rare, and finds that pattern unlikely under recessive inheritance. Giving PedNet PedGen's frequency, in Python, helps: of 19 such families with two or more people affected, it then called 4 autosomal recessive rather than none, and put autosomal recessive first in 11 (<a href="#h-tool-pedgen">Simulate a family</a>). A lower frequency in PedGen doesn't help, because a rare recessive condition seldom turns up again in later generations: at 0.01, nearly every family has no one affected but the founder, and one affected person can't show how a condition is inherited.</dd>
 
   <dt>hponorm or mondonorm stops straight away in the terminal</dt>
   <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
@@ -2163,6 +2521,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <tr><th>Component</th><th>Licence</th></tr>
 <tr><td>Pedigree Studio (Timothy J Hearn), copied into <code>assets/studio</code></td><td>MIT</td></tr>
 <tr><td>pedigree-ga4gh, studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit (Tim Hearn)</td><td>MIT</td></tr>
+<tr><td>PedNet (Tim Hearn and Nick Taylor)</td><td>MIT</td></tr>
+<tr><td>PedGen and PedInterp (Nick Taylor, with changes by Tim Hearn)</td><td>MIT</td></tr>
 <tr><td>pedwb, which runs the packages in the workbench</td><td>MIT</td></tr>
 <tr><td>The workbench: the page, the help, the Tools tab, the shell, the notebook and the editor (from the Bioinformatics workbench)</td><td>MIT</td></tr>
 </table>
@@ -2172,6 +2532,8 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <tr><th>Component</th><th>Licence</th></tr>
 <tr><td>KIN, the Kinship Ontology (GA4GH Pedigree Standard), whose codes, labels and definitions are included in pedigree-ga4gh</td><td>Apache 2.0</td></tr>
 <tr><td>Pyodide (Python for the browser) and PyYAML, loaded from jsDelivr when Python starts</td><td>MPL 2.0 (Python: PSF licence); PyYAML: MIT</td></tr>
+<tr><td>networkx, which PedNet and PedGen use, included in their archive</td><td>BSD 3-clause</td></tr>
+<tr><td>NumPy, pandas (with python-dateutil, pytz and six), OpenCV and Pillow, loaded from jsDelivr when PedNet, PedGen or PedInterp first runs</td><td>NumPy and pandas: BSD 3-clause; OpenCV: Apache 2.0; Pillow: MIT-CMU; python-dateutil: Apache 2.0 or BSD 3-clause; pytz and six: MIT</td></tr>
 <tr><td>CodeMirror 5 (the editors)</td><td>MIT</td></tr>
 <tr><td>marked (Markdown)</td><td>MIT</td></tr>
 <tr><td>DOMPurify</td><td>Apache 2.0 or MPL 2.0</td></tr>
@@ -2206,6 +2568,14 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 <dt>Pedigree nomenclature</dt>
 <dd>Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 17(5): 424–433. <a href="https://doi.org/10.1007/s10897-008-9169-9" target="_blank" rel="noopener">doi:10.1007/s10897-008-9169-9</a></dd>
 <dd>Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 31(6): 1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a></dd>
+<dt>PedNet</dt>
+<dd>Hearn TJ, Taylor N. PedNet [software]. <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">github.com/comparativechrono/PedNet</a></dd>
+<dt>PedGen</dt>
+<dd>Taylor N. PedGen [software]. <a href="https://github.com/comparativechrono/pedigree-generator" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-generator</a></dd>
+<dt>PedInterp</dt>
+<dd>Taylor N. PedInterp [software]. <a href="https://github.com/comparativechrono/pedigree-interpreter" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-interpreter</a></dd>
+<dt>NetworkX</dt>
+<dd>Hagberg AA, Schult DA, Swart PJ (2008) Exploring network structure, dynamics, and function using NetworkX. <i>Proceedings of the 7th Python in Science Conference (SciPy2008)</i>, pp. 11–15. <a href="https://conference.scipy.org/proceedings/SciPy2008/paper_2/" target="_blank" rel="noopener">conference.scipy.org/proceedings/SciPy2008/paper_2</a></dd>
 <dt>Pyodide</dt>
 <dd>The Pyodide development team. Pyodide: Python in the browser. <a href="https://pyodide.org/" target="_blank" rel="noopener">pyodide.org</a></dd>
 </dl>
@@ -2237,11 +2607,11 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <noscript><p style="padding:20px">This page needs JavaScript.</p></noscript>
 
-<script>window.WB_EXAMPLES = [{"p":"README.md","s":2029},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":523},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224}];
-window.WB_STARTERS = [{"p":"notebooks/pedigree-tools.ipynb"}];
-window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"9a58c9481ec3c8b1beb0e8669a989d7cbcea87bf6148339dbacb99f20567bd0f","bytes":211338,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"}};
+<script>window.WB_EXAMPLES = [{"p":"README.md","s":2506},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.png","s":10428},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor.mped","s":523},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224},{"p":"pednet/consanguineous.ped","s":425},{"p":"pednet/dominant.ped","s":439},{"p":"pednet/dominant.vcf","s":920},{"p":"pednet/recessive.ped","s":170},{"p":"pednet/recessive.vcf","s":732}];
+window.WB_STARTERS = [{"p":"notebooks/pedigree-analysis.ipynb"},{"p":"notebooks/pedigree-tools.ipynb"}];
+window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"4fae72edcbc0fa7340252a5bfa2a0d5eb76e166e5ece2bc5d3364b2618628ceb","bytes":213354,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"},"analysis":{"archive":"pedigree-analysis.zip","sha256":"650f1ff7afebe586d8c95c642336a29fea6b6ae0f2e17bf56e2d50ae07c5f18d","bytes":1103007,"packages":{"pednet":"2.0.0","PedGen":"0.1.4.dev6+ge298027e2","PedInterp":"0.1.8.dev8+g7e28b706f","networkx":"3.4.2"}}};
 window.WB_STUDIO = "9e6b524d4469";
-window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/ga4gh/pedigree_family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/pedigree_family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/ga4gh/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh [software]. <a href=\"https://github.com/comparativechrono/pedigree-ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-ga4gh<\/a>"};</script>
+window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Beckmann JS, Beltran S, Buske OJ, et al. (2022) The GA4GH Phenopacket schema defines a computable representation of clinical data. <i>Nature Biotechnology<\/i> 40(6): 817–820. <a href=\"https://doi.org/10.1038/s41587-022-01357-4\" target=\"_blank\" rel=\"noopener\">doi:10.1038/s41587-022-01357-4<\/a>","phenopackettools2023":"Danis D, Jacobsen JOB, Wagner AH, Groza T, Beckwith MA, Rekerle L, et al. (2023) Phenopacket-tools: building and validating GA4GH Phenopackets. <i>PLoS ONE<\/i> 18(5): e0285433. <a href=\"https://doi.org/10.1371/journal.pone.0285433\" target=\"_blank\" rel=\"noopener\">doi:10.1371/journal.pone.0285433<\/a>","hpo2024":"Gargano MA, Matentzoglu N, Coleman B, Addo-Lartey EB, Anagnostopoulos AV, Anderton J, et al. (2024) The Human Phenotype Ontology in 2024: phenotypes around the world. <i>Nucleic Acids Research<\/i> 52(D1): D1333–D1346. <a href=\"https://doi.org/10.1093/nar/gkad1005\" target=\"_blank\" rel=\"noopener\">doi:10.1093/nar/gkad1005<\/a>","mondo2022":"Vasilevsky NA, Matentzoglu NA, Toro S, Flack JE, Hegde H, Unni DR, et al. (2022) Mondo: unifying diseases for the world, by the world. <i>medRxiv<\/i> 2022.04.13.22273750. <a href=\"https://doi.org/10.1101/2022.04.13.22273750\" target=\"_blank\" rel=\"noopener\">doi:10.1101/2022.04.13.22273750<\/a>","ga4ghpedigree":"GA4GH Pedigree Standard. Pedigree Standard: documentation, examples and the Kinship Ontology (KIN). <a href=\"https://pedigree.readthedocs.io/\" target=\"_blank\" rel=\"noopener\">pedigree.readthedocs.io<\/a>","kin":"GA4GH Pedigree Standard. pedigree_family_history_terminology: the Kinship Ontology (KIN), kin.owl. <a href=\"https://github.com/ga4gh/pedigree_family_history_terminology\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/pedigree_family_history_terminology<\/a>","pr364":"Jacobsen JOB. Pedigree (phenopacket-schema pull request 364, opened 24 November 2022, closed without merging 26 September 2025). <a href=\"https://github.com/ga4gh/phenopacket-schema/pull/364\" target=\"_blank\" rel=\"noopener\">github.com/ga4gh/phenopacket-schema/pull/364<\/a>","bennett2008":"Bennett RL, French KS, Resta RG, Doyle DL (2008) Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 17(5): 424–433. <a href=\"https://doi.org/10.1007/s10897-008-9169-9\" target=\"_blank\" rel=\"noopener\">doi:10.1007/s10897-008-9169-9<\/a>","bennett2022":"Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling<\/i> 31(6): 1238–1248. <a href=\"https://doi.org/10.1002/jgc4.1621\" target=\"_blank\" rel=\"noopener\">doi:10.1002/jgc4.1621<\/a>","pedigreestudio":"Hearn TJ. Pedigree Studio [software]. Zenodo. <a href=\"https://doi.org/10.5281/zenodo.20209376\" target=\"_blank\" rel=\"noopener\">doi:10.5281/zenodo.20209376<\/a>","pyodide":"The Pyodide development team. Pyodide: Python in the browser. <a href=\"https://pyodide.org/\" target=\"_blank\" rel=\"noopener\">pyodide.org<\/a>","studio2ped":"Hearn TJ. studio2ped [software]. <a href=\"https://github.com/comparativechrono/studio2ped\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ped<\/a>","ped2studio":"Hearn TJ. ped2studio [software]. <a href=\"https://github.com/comparativechrono/ped2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ped2studio<\/a>","studio2ga4gh":"Hearn TJ. studio2ga4gh [software]. <a href=\"https://github.com/comparativechrono/studio2ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/studio2ga4gh<\/a>","ga4gh2studio":"Hearn TJ. ga4gh2studio [software]. <a href=\"https://github.com/comparativechrono/ga4gh2studio\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/ga4gh2studio<\/a>","mpedtools":"Hearn TJ. mpedtools [software]. <a href=\"https://github.com/comparativechrono/mpedtools\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mpedtools<\/a>","hponorm":"Hearn TJ. hponorm [software]. <a href=\"https://github.com/comparativechrono/hponorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/hponorm<\/a>","mondonorm":"Hearn TJ. mondonorm [software]. <a href=\"https://github.com/comparativechrono/mondonorm\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/mondonorm<\/a>","phenopackettoolkit":"Hearn TJ. phenopacket-toolkit [software]. <a href=\"https://pypi.org/project/phenopacket-toolkit/\" target=\"_blank\" rel=\"noopener\">pypi.org/project/phenopacket-toolkit<\/a>","pedigreega4gh":"Hearn TJ. pedigree-ga4gh [software]. <a href=\"https://github.com/comparativechrono/pedigree-ga4gh\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-ga4gh<\/a>","pednet":"Hearn TJ, Taylor N. PedNet [software]. <a href=\"https://github.com/comparativechrono/PedNet\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/PedNet<\/a>","pedgen":"Taylor N. PedGen [software]. <a href=\"https://github.com/comparativechrono/pedigree-generator\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-generator<\/a>","pedinterp":"Taylor N. PedInterp [software]. <a href=\"https://github.com/comparativechrono/pedigree-interpreter\" target=\"_blank\" rel=\"noopener\">github.com/comparativechrono/pedigree-interpreter<\/a>","thompson2003":"Thompson D, Easton DF, Goldgar DE (2003) A full-likelihood method for the evaluation of causality of sequence variants from family data. <i>American Journal of Human Genetics<\/i> 73(3): 652–655. <a href=\"https://doi.org/10.1086/378100\" target=\"_blank\" rel=\"noopener\">doi:10.1086/378100<\/a>","jarvik2016":"Jarvik GP, Browning BL (2016) Consideration of cosegregation in the pathogenicity classification of genomic variants. <i>American Journal of Human Genetics<\/i> 98(6): 1077–1081. <a href=\"https://doi.org/10.1016/j.ajhg.2016.04.003\" target=\"_blank\" rel=\"noopener\">doi:10.1016/j.ajhg.2016.04.003<\/a>","richards2015":"Richards S, Aziz N, Bale S, Bick D, Das S, Gastier-Foster J, et al. (2015) Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the American College of Medical Genetics and Genomics and the Association for Molecular Pathology. <i>Genetics in Medicine<\/i> 17(5): 405–424. <a href=\"https://doi.org/10.1038/gim.2015.30\" target=\"_blank\" rel=\"noopener\">doi:10.1038/gim.2015.30<\/a>","tavtigian2018":"Tavtigian SV, Greenblatt MS, Harrison SM, Nussbaum RL, Prabhu SA, Boucher KM, et al. (2018) Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework. <i>Genetics in Medicine<\/i> 20(9): 1054–1060. <a href=\"https://doi.org/10.1038/gim.2017.210\" target=\"_blank\" rel=\"noopener\">doi:10.1038/gim.2017.210<\/a>","lauritzen2003":"Lauritzen SL, Sheehan NA (2003) Graphical models for genetic analyses. <i>Statistical Science<\/i> 18(4): 489–514. <a href=\"https://doi.org/10.1214/ss/1081443232\" target=\"_blank\" rel=\"noopener\">doi:10.1214/ss/1081443232<\/a>","wright1922":"Wright S (1922) Coefficients of inbreeding and relationship. <i>The American Naturalist<\/i> 56(645): 330–338. <a href=\"https://doi.org/10.1086/279872\" target=\"_blank\" rel=\"noopener\">doi:10.1086/279872<\/a>","networkx2008":"Hagberg AA, Schult DA, Swart PJ (2008) Exploring network structure, dynamics, and function using NetworkX. <i>Proceedings of the 7th Python in Science Conference (SciPy2008)<\/i>, pp. 11–15. <a href=\"https://conference.scipy.org/proceedings/SciPy2008/paper_2/\" target=\"_blank\" rel=\"noopener\">conference.scipy.org/proceedings/SciPy2008/paper_2<\/a>"};</script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/core.js"></script>
 <script src="assets/js/icons.js"></script>

@@ -1,0 +1,31 @@
+<!-- id: h-walk-pednet | title: Weigh up the mode of inheritance, and rank candidate variants | group: Walkthroughs | summary: PedNet: a family's loops and kinship, its mode of inheritance, and the variants that co-segregate with its condition | keys: pednet mode inheritance dominant recessive x-linked variants vcf rank cosegregation co-segregation pp1 bs4 acmg kinship inbreeding loop consanguinity walkthrough -->
+<h1><!--ICON:network-->Weigh up the mode of inheritance, and rank candidate variants</h1>
+<p class="lede">From a family's PED file, PedNet shows how the family is put together, weighs up how its condition is inherited, and ranks the variants found by sequencing some of its members by how well each co-segregates with the condition. This walkthrough uses three of the example families: the Okafor family, whose twin boys with hearing loss are the sons of first cousins; the Lynch family, with bowel cancer over three generations; and one of PedNet's own families, with six candidate variants.</p>
+<p>The tools read PED files. To use one of your drawings, make it into a PED file first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>.</p>
+
+<h2>1 · The family as a graph</h2>
+<p><b>The pedigree as a graph</b> lists the family's loops, who is inbred, and how closely the affected people are related. In the Okafor family, the twins' parents, III-2 and III-3, are first cousins: III-2's father and III-3's mother, II-2 and II-3, are brother and sister, so the marriage closes a loop through them. All five of the couple's children have an inbreeding coefficient of 1/16.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-graph" data-input="/data/examples/okafor.mped">The Okafor family as a graph</button></div>
+<p>From an MPED file, PedNet takes the first condition: for the Okafor family, hearing loss from birth.</p>
+
+<h2>2 · The mode of inheritance</h2>
+<p><b>Mode of inheritance</b> gives the probability of each mode. In the Lynch family, there is cancer in three generations in a row: in I-1, in his sons II-2 and II-3, and in II-2's daughters III-2 and III-3. Autosomal dominant inheritance has a probability of 0.97.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/lynch.ped">The Lynch family</button> <button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/okafor.mped">The Okafor family</button></div>
+<p>In the Okafor family, two affected brothers whose parents are cousins make a recessive condition almost certain, at 0.98, but they can't show whether it is autosomal or X-linked. The answer is <i>uncertain</i>, with autosomal recessive at 0.69 and X-linked recessive at 0.29. That is all one family can say. If other families have the same condition, put them in one PED file, and tick <i>The families have the same condition</i>.</p>
+
+<h2>3 · Rank the candidate variants</h2>
+<p><b>Rank candidate variants</b> needs the PED file and the variants: a VCF file whose samples are named with the PED file's ids, or a table of genotypes. PedNet's example family has a dominant condition, and six variants found in some of its members.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-rank" data-input="/data/examples/pednet/dominant.ped" data-variants="/data/examples/pednet/dominant.vcf">Rank the variants</button></div>
+<p>var1, which all six of the affected people carry and none of the three unaffected people who were tested, comes first, with a log10 Bayes factor of 2.05: strong evidence for co-segregation (PP1_Strong). Each of the others is strong evidence against causing the condition (BS4_Strong). The variants are ranked by their odds of being the cause, which take account of whether a variant's chromosome suits the family's mode of inheritance as well as of its Bayes factor. This family's condition is almost certainly autosomal, so var5, on the X chromosome, comes fourth, below var2 and var4, though its Bayes factor is higher than theirs.</p>
+<p>PedNet also notes genotypes that break Mendel's laws. Only III-1 carries var6, though neither of his parents does, which a new mutation in III-1 would explain. var5 breaks them three times: II-3 and III-2 don't carry it, though their fathers do, and a father passes his X chromosome to every daughter; and III-1 carries it, though his mother doesn't. A new mutation in III-1 would explain only the last of these.</p>
+<p>The tool saves every score in a table, <code>~/results/dominant-ranked.tsv</code>, which you can open in the Files tab or a spreadsheet.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->What the evidence means</div><p>Co-segregation is one line of evidence among many under the ACMG/AMP guidelines, and PP1 applies only to a gene that is known to cause the condition. The Bayes factor assumes that the PED file is right and that the genotypes were called correctly, apart from a small error rate. A variant that co-segregates may only be close to the one that causes the condition. Weigh it with the rest of the evidence.</p></div>
+
+<h2>The same in the terminal</h2>
+<pre class="code" data-run="term"><code>pednet graph /data/examples/okafor.mped
+pednet mode /data/examples/lynch.ped
+pednet mode /data/examples/okafor.mped
+pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vcf --out ~/results/dominant-ranked.tsv</code></pre>
+<p>The notebook <code>~/notebooks/pedigree-analysis.ipynb</code> does the same in Python, and goes on to simulated families and pictures.</p>
+<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-analysis.ipynb">Open the analysis notebook</button></div>
+<!--CITE: pednet cosegregation graphical-models kinship-->

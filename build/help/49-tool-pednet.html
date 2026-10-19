@@ -1,0 +1,62 @@
+<!-- id: h-tool-pednet | title: PedNet: the graph, the mode of inheritance and the variants | group: Tools | summary: The pedigree as a graph; the mode of inheritance; candidate variants ranked by co-segregation | keys: pednet graph network dag directed acyclic loop loops consanguinity kinship inbreeding coefficient relationship centrality graphml gephi cytoscape mode inheritance dominant recessive x-linked likelihood bayesian network classifier variants vcf rank cosegregation co-segregation bayes factor pp1 bs4 acmg amp compound heterozygote check -->
+<h1><!--ICON:network-->PedNet: the graph, the mode of inheritance and the variants</h1>
+<p class="lede">PedNet analyses a pedigree as a graph: a directed acyclic graph, with a node for each person and an edge from each parent to each child. Its three tools in the Tools tab show how a family is put together, weigh up how likely each mode of inheritance is, and rank candidate variants by how well each co-segregates with the condition.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pednet-graph" data-input="/data/examples/okafor.mped">The Okafor family as a graph</button> <button class="do" type="button" data-tool="pednet-mode" data-input="/data/examples/lynch.ped">The Lynch family's mode of inheritance</button></div>
+<p>All three read a PED file. From an MPED file, they take the first condition, and a carrier (3) counts as unknown. A drawing has to be made into a PED file first, with <a href="#h-tool-studio2ped">Drawing → PED or MPED</a>.</p>
+
+<h2>The pedigree as a graph</h2>
+<p>For each family in the file, this lists:</p>
+<ul>
+  <li><b>its loops</b>, each with the people round it. A loop through a couple who are related is from <i>consanguinity</i>, and a loop through no related couple is from <i>marriage</i>: two families who married into each other more than once.</li>
+  <li><b>who is inbred</b>, with their inbreeding coefficient, F: the chance that the two copies of a gene they have are copies of one copy in an ancestor of both their parents. The children of first cousins have F = 1/16 = 0.0625.</li>
+  <li><b>how broad and how tangled it is</b>: its width, the largest number of people none of whom is an ancestor of another, and its elimination width, which sets how much work the exact likelihoods of the other two tools take. Only a pedigree with very many loops is too tangled for them.</li>
+  <li><b>the closest pairs of affected relatives</b>, each with the name of their relationship (brother, first cousin once removed), its degree, and their kinship coefficient: the chance that a copy of a gene taken at random from one of them and a copy taken from the other are the same copy, inherited from an ancestor they share.</li>
+  <li><b>network measures</b>: the original PedNet's measures of where the affected people are, the features of their pattern that the classifier of the mode reads, and the people most central to the graph.</li>
+</ul>
+<p>It can also save everyone's <b>kinship coefficients</b> as a table, for the autosomes or for the X chromosome, and the graph as <b>GraphML</b>, which Gephi, Cytoscape and other network tools open. The <i>mating graph</i> has a node for each couple as well, between the partners and their children. Both need one family, so if the file holds several, give the family.</p>
+
+<h2>Mode of inheritance</h2>
+<p>This weighs up autosomal dominant (AD), autosomal recessive (AR), X-linked dominant (XLD) and X-linked recessive (XLR) inheritance, and gives the probability of each, with the probabilities that the condition is dominant or recessive, and autosomal or X-linked. A mode is named only when its probability reaches the threshold, 0.8 unless you change it. Otherwise the answer is <i>uncertain</i>. The third method, network measures, works differently.</p>
+<dl>
+  <dt>Exact likelihoods (the default)</dt><dd>PedNet treats the pedigree as a Bayesian network of everyone's genotypes, and works out exactly how likely it is that just these people are affected under each mode, averaged over four penetrances, 0.6, 0.8, 0.95 and 0.99, unless you give others, with a chance of 0.001 of being affected without the disease genotype. A family comes to notice through someone affected, the proband, so the likelihoods are worked out given that the proband has the disease genotype. If you don't say who the proband is, each affected person is taken in turn. A pattern that only a new mutation would explain comes out unlikely, because PedNet doesn't model new mutations. With several families that have the same condition, tick <i>The families have the same condition</i> to get one answer from them all.</dd>
+  <dt>The pattern of affected people</dt><dd>A classifier that learnt, from thousands of simulated families, where the affected people sit in the graph under each mode: in every generation or skipping some, passed from father to son, mostly male, the children of related parents, and so on.</dd>
+  <dt>Network measures</dt><dd>The original PedNet's classifier, which tells dominant from recessive by a vote. Two of the four network measures it shows have a vote each: the share of affected people who have an affected parent, and the share of generations in which someone is affected. A third vote goes to dominant inheritance, unless an affected person has two unaffected parents, which gives two votes to recessive inheritance. The classifier calls a condition dominant when all three votes say so, and recessive when it has three votes or more for recessive inheritance. Otherwise, it says <i>uncertain</i>. It gives no probabilities, so the threshold doesn't apply to it.</dd>
+</dl>
+<p>The likelihoods are the method to rely on. The classifiers show what the pattern alone suggests. PedNet takes a condition to be rare: it gives the allele a frequency of 1 in 1,000 for autosomal recessive inheritance, 1 in 2,000 for X-linked recessive, and 1 in 10,000 for the dominant modes. In Python, <code>infer_mode</code> takes other frequencies, as in <code>allele_frequency={"AR": 0.01}</code>.</p>
+
+<h2>Rank candidate variants</h2>
+<p>For each candidate variant, PedNet works out how likely everyone's genotypes and the pattern of affected people are if the variant causes the condition, and if it doesn't. The ratio of the two is a Bayes factor. Its strength as evidence for co-segregation (PP1) or against it (BS4), under the ACMG/AMP guidelines, is given as Supporting, Moderate or Strong: for co-segregation at Bayes factors of 2.08, 4.33 and 18.7, the odds of the guidelines as a Bayesian framework, and against it at 1/2.08, 1/4.33 and 1/18.7. On the whole, a variant scores higher the more of the affected people carry it and the fewer of the unaffected do, but who the carriers are matters too, and genotypes that can't have come from the parents count heavily against a variant.</p>
+<p>The variants are ranked by their odds of being the cause: the Bayes factor times the probability, from who is affected, that the condition is inherited in a way that suits the variant's chromosome. So a variant on the X chromosome ranks low in a family whose condition is clearly autosomal. The table gives both, as <i>log10 odds</i> and <i>log10 BF</i>. Pairs of variants in one gene that an affected person carries both of are scored too, as compound heterozygotes under the recessive modes. Genotypes that break Mendel's laws are counted, and PedNet names anyone who carries a variant that their parents were found not to carry (on the X chromosome, a son whose mother was found not to carry it), as a new mutation in them would explain that genotype, though not necessarily the others.</p>
+<dl>
+  <dt>The variants</dt><dd>A VCF file, plain or gzipped, whose samples are named with the PED file's ids; or a table with a row for each variant and a column for each person, holding the number of copies of the variant (0, 1 or 2) or a call such as <code>0/1</code>. A table names its variants in a column <code>variant</code>, and can also have the columns <code>chrom</code>, <code>pos</code>, <code>ref</code>, <code>alt</code>, <code>af</code> (the allele frequency) and <code>gene</code>. <a href="#h-tool-pedgen">Simulate a family</a> writes one.</dd>
+  <dt>Modes of inheritance</dt><dd>All four, weighed up as in Mode of inheritance; the two autosomal ones; or the one you know.</dd>
+  <dt>Leave out variants commoner than</dt><dd>An allele frequency. Variants with no frequency in the file are kept.</dd>
+  <dt>How many to show, Save every variant's scores</dt><dd>The table under the result shows the best 20, unless you change it. The table you save, separated by tabs, has every variant, with every score.</dd>
+</dl>
+<p>If the PED file holds several families, they're taken to have the same condition, and each variant is ranked by its evidence across the families in which an affected person carries it.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pednet graph /data/examples/okafor.mped
+pednet graph /data/examples/pednet/consanguineous.ped --kinship ~/results/fam3-kinship.tsv --graphml ~/results/fam3.graphml
+pednet mode /data/examples/lynch.ped
+pednet mode /data/examples/okafor.mped --method patterns
+pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vcf --out ~/results/dominant-ranked.tsv
+pednet check /data/examples/cf-cousins.mped</code></pre>
+<p><code>pednet check</code> says what PedNet makes of a PED file: its families, the children of related parents, and anything odd, such as someone whose sex isn't recorded. <code>man pednet</code> gives examples and PedNet's four commands, and <code>pednet graph --help</code>, <code>pednet mode --help</code>, <code>pednet rank --help</code> and <code>pednet check --help</code> list the options of each.</p>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pednet
+
+okafor = pednet.read_ped("/data/examples/okafor.mped")["FAM1"]
+print(pednet.loops(okafor))
+print(pednet.inbreeding(okafor)["IV-3"])
+print(pednet.relationship(okafor, "IV-3", "II-3").name)
+print(pednet.infer_mode(okafor))
+
+family = pednet.read_ped("/data/examples/pednet/dominant.ped")["FAM1"]
+variants = pednet.read_vcf("/data/examples/pednet/dominant.vcf", samples=family.ids)
+for s in pednet.rank_variants(family, variants)[:3]:
+    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)</code></pre>
+<p>How PedNet's methods work, and how well they do on simulated families, is in <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">PedNet's README</a>.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->The first time</div><p>PedNet needs NumPy, which Python downloads with PedNet the first time one of its tools or commands runs, or a notebook imports it. That is about 4 MB, and your browser keeps it for next time.</p></div>
+<!--CITE: pednet cosegregation graphical-models kinship networkx-->

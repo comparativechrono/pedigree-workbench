@@ -676,7 +676,14 @@
           const blob = await this.fs.toBlob(path);
           if (stale()) return;
           this._url = URL.createObjectURL(blob);
-          V.appendChild(h('div.ed-img', h('img', { src: this._url, alt: path.split('/').pop() })));
+          const img = h('img', { src: this._url, alt: path.split('/').pop() });
+          // (its size in pixels, which says how much Picture → PED file should enlarge it)
+          const size = h('p.ed-note.muted.ed-img-size');
+          img.addEventListener('load', () => {
+            if (img.naturalWidth) size.textContent = `${img.naturalWidth.toLocaleString('en-GB')} × ${img.naturalHeight.toLocaleString('en-GB')} pixels`;
+          });
+          V.appendChild(h('div.ed-img', img));
+          V.appendChild(size);
         } else if (k === 'svg') {
           const text = await this.fs.readText(path);
           if (stale()) return;

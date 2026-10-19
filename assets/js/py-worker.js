@@ -13,6 +13,9 @@
 
    The packages (python/ in the repository) come as one archive,
    assets/py/pedigree-tools.zip, unpacked into /lib/pedwb at the start.
+   PedNet, PedGen and PedInterp, which need NumPy and other packages of
+   Pyodide's, are in a second archive, loaded with those packages the
+   first time one of them is used (see ensureAnalysis).
 
    Files: the page's file system is the master copy. Before Python runs,
    the page pushes changed files here ('push'); afterwards this worker
@@ -236,12 +239,115 @@ function transferOf(ch) {
 }
 
 /* ------------------------------------------------------------------
+   the second archive: PedNet, PedGen and PedInterp, with networkx.
+   They need NumPy and other packages of Pyodide's (OpenCV alone is
+   about 11 MB), so the archive and those packages are loaded the first
+   time one of them is used – by its program (pednet, pedgen,
+   pedinterp), by the Tools tab, or by an import in a notebook or a
+   script – rather than every time Python starts. pedwb.cli says what
+   each program needs (NEEDS) and which program each package is
+   (MODULES).
+   ------------------------------------------------------------------ */
+const ANALYSIS_DIR = '/lib/pedwb-analysis';
+let analysisUrl = null;
+let analysisUnpacked = null; // the promise of unpacking the archive, once it has started
+let analysisDone = false;
+let NEEDS = {}; // program → the packages of Pyodide's it needs
+let MODULES = {}; // a package of the archive → its program
+const SHOWN = { pednet: 'PedNet', pedgen: 'PedGen', pedinterp: 'PedInterp', numpy: 'NumPy', pandas: 'pandas', 'opencv-python': 'OpenCV', pillow: 'Pillow' };
+// what each costs to download the first time, in megabytes: Pyodide 0.29.5's wheels (pandas with python-dateutil,
+// pytz and six), and the archive
+const MB = { numpy: 2.8, pandas: 5.2, 'opencv-python': 10.6, pillow: 1.0, archive: 1.1 };
+const listed = (xs) => (xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]);
+// whether Pyodide has loaded a package: it records some under the name of their wheel (opencv_python, Pillow) rather
+// than of its list (opencv-python, pillow), so names are compared as PyPI compares them
+const canon = (name) => String(name).toLowerCase().replace(/[-_.]+/g, '-');
+const isLoaded = (name) => Object.keys(pyodide.loadedPackages).some((k) => canon(k) === canon(name));
+
+/** the programs among names (programs, or packages imported) whose packages are in the second archive */
+function analysisPrograms(names) {
+  const out = [];
+  for (const n of names || []) {
+    const prog = NEEDS[n] ? n : MODULES[n];
+    if (prog && !out.includes(prog)) out.push(prog);
+  }
+  return out;
+}
+
+/** load what the programs and packages among names need, saying so (a status message for the request id) */
+async function ensureAnalysis(names, id) {
+  const progs = analysisPrograms(names);
+  if (!progs.length) return;
+  if (!analysisUrl) throw new Error(`${listed(progs.map((p) => SHOWN[p] || p))} isn’t part of this copy of the workbench.`);
+  const need = [];
+  progs.forEach((p) => NEEDS[p].forEach((x) => need.includes(x) || need.push(x)));
+  const missing = need.filter((x) => !isLoaded(x));
+  if (!missing.length && analysisDone) return;
+  const mb = missing.reduce((s, x) => s + (MB[x] || 1), 0) + (analysisDone ? 0 : MB.archive);
+  const what = listed(progs.map((p) => SHOWN[p] || p)) + (missing.length ? `, with ${listed(missing.map((x) => SHOWN[x] || x))},` : '');
+  post({ type: 'status', id, text: `Loading ${what} into Python (the first time, this downloads about ${Math.max(1, Math.round(mb))} MB, which your browser then keeps)…` });
+  if (missing.length) {
+    const failed = [];
+    try {
+      await pyodide.loadPackage(missing, { messageCallback: () => {}, errorCallback: (msg) => failed.push(String(msg)) });
+    } catch (e) {
+      failed.push(String((e && e.message) || e));
+    }
+    const still = missing.filter((x) => !isLoaded(x));
+    // (Pyodide's first message is a heading – "The following error occurred while loading numpy:" – and the error
+    // itself comes after it)
+    const why = failed.filter((x) => !/following error occurred/i.test(x)).pop() || '';
+    if (still.length) throw new Error(`${listed(still.map((x) => SHOWN[x] || x))} couldn’t be downloaded – check the internet connection, and try again.` + (why ? ` (${why.trim().slice(0, 200)})` : ''));
+  }
+  if (!analysisUnpacked) {
+    analysisUnpacked = (async () => {
+      let r;
+      try {
+        r = await fetch(analysisUrl);
+      } catch (e) {
+        throw new Error('PedNet, PedGen and PedInterp couldn’t be downloaded – check the internet connection, and try again.');
+      }
+      if (!r.ok) throw new Error('PedNet, PedGen and PedInterp couldn’t be loaded (' + analysisUrl.split('?')[0] + ': HTTP ' + r.status + ')');
+      pyodide.unpackArchive(await r.arrayBuffer(), 'zip', { extractDir: ANALYSIS_DIR });
+      await pyodide.runPythonAsync(`import sys, importlib\nif '${ANALYSIS_DIR}' not in sys.path: sys.path.insert(1, '${ANALYSIS_DIR}')\nimportlib.invalidate_caches()`);
+      analysisDone = true;
+    })();
+    // (if it fails, the next use tries again)
+    analysisUnpacked.catch(() => (analysisUnpacked = null));
+  }
+  await analysisUnpacked;
+  post({ type: 'status', id, text: '' });
+}
+
+/** the top-level packages that code imports ([] if it can't be read) */
+function importsOf(code) {
+  try {
+    const found = pyodide.pyimport('pyodide.code').find_imports(code);
+    const names = found.toJs();
+    found.destroy();
+    return Array.from(names);
+  } catch (e) {
+    return [];
+  }
+}
+
+/* Python's way in: a notebook's  !pednet …  line (see _wb_sh) → '' when what it needs is loaded, else why not */
+self.wb_ensure = async (namesJson) => {
+  try {
+    await ensureAnalysis(JSON.parse(namesJson), runId || termId);
+    return '';
+  } catch (e) {
+    return String((e && e.message) || e);
+  }
+};
+
+/* ------------------------------------------------------------------
    Python set-up
    ------------------------------------------------------------------ */
 const PY_SETUP = String.raw`
 import sys, io, os, re, json, base64, ast, inspect, linecache, traceback, difflib, warnings, runpy, asyncio, time, shlex, builtins
 os.environ.setdefault('MPLBACKEND', 'Agg')
-from js import nb_post_output, nb_stream, term_emit, nb_shell
+from js import nb_post_output, nb_stream, term_emit, nb_shell, wb_ensure
 
 def _emit(obj):
     nb_post_output(json.dumps(obj))
@@ -576,8 +682,10 @@ def _hints(e, code):
                 hints.append("The Phenopackets Python library (phenopackets, built on protobuf) is not part of the workbench. Read and write the files as JSON, or with phenopacket_toolkit and pedigree_ga4gh, which are here:  import pedigree_ga4gh as pg")
             elif mod in ('pysam', 'tensorflow', 'torch'):
                 hints.append(f"{mod} cannot run in a web browser.")
+            elif mod in ('pednet', 'PedGen', 'PedInterp'):
+                hints.append(f"{mod} comes with the workbench, and is loaded when a cell imports it, or runs one of its commands: put  import {mod}  in the cell, and run it again.")
             elif mod:
-                hints.append(f"Packages that are part of Pyodide load by themselves when imported. {mod} is not one of them: try  %pip install {mod}  (it works for pure-Python packages), then run this cell again.")
+                hints.append(f"Packages that are part of Pyodide load by themselves when a cell imports them, so if {mod} is one, put  import {mod}  in the cell (a package can import another one only once it is loaded). If it isn't, try  %pip install {mod}  (it works for pure-Python packages). Then run the cell again.")
         elif name == 'FileNotFoundError':
             hints.append(f"The notebook runs in {os.getcwd()}; relative paths start there. Your files are in {os.path.expanduser('~')} (~), the example pedigrees in /data/examples. Check the name in the Files tab.")
         elif name == 'UnboundLocalError':
@@ -727,10 +835,54 @@ def _wb_inproc(cmd, capture):
             code = _run(words)
     return code, buf.getvalue()
 
+def _wb_imports(code):
+    try:
+        from pyodide.code import find_imports
+        return list(find_imports(code))
+    except Exception:
+        return []
+
+def _wb_needs(words):
+    """the programs and packages of the workbench's second archive (PedNet, PedGen, PedInterp) that a command uses:
+    the program itself, or what  python -m …,  python -c …  or a script imports"""
+    try:
+        from pedwb.cli import NEEDS, MODULES
+    except ImportError:
+        return []
+    names = []
+    a = words[1:]
+    if not words:
+        pass
+    elif words[0] not in ('python', 'python3'):
+        names = [words[0]]
+    elif len(a) > 1 and a[0] == '-m':
+        names = [a[2]] if a[1] == 'pedwb' and len(a) > 2 else [a[1].split('.')[0]]
+    elif len(a) > 1 and a[0] == '-c':
+        names = _wb_imports(a[1])
+    elif a and os.path.isfile(a[0]):
+        try:
+            with open(a[0]) as fh:
+                names = _wb_imports(fh.read())
+        except Exception:
+            names = []
+    return [n for n in names if n in NEEDS or n in MODULES]
+
 async def _wb_sh(cmd, capture=False):
     cmd = _wb_expand(cmd)
     if re.match(r'^\s*(pip3?|python3? -m pip)\s+install\b', cmd):
         return await _wb_pip(re.sub(r'^\s*(pip3?|python3? -m pip)\s+install\b', '', cmd))
+    # (PedNet, PedGen and PedInterp, and the packages they need, are loaded the first time they're used)
+    if not _WB_SHELLY.search(cmd):
+        try:
+            needs = _wb_needs(_wb_words(cmd))
+        except ValueError:
+            needs = []
+        if needs:
+            problem = str(await wb_ensure(json.dumps(needs)))
+            if problem:
+                print(problem, file=sys.stderr)
+                _G['_exit_code'] = 1
+                return _SList() if capture else None
     here = _wb_inproc(cmd, capture)
     if here is not None:
         _G['_exit_code'] = here[0]
@@ -802,6 +954,13 @@ async def _wb_magic(name, args):
         if not a:
             print('Usage: %run script.py', file=sys.stderr)
             return
+        # (PedNet, PedGen and PedInterp, if the script imports them, are loaded the first time, as for python script.py)
+        needs = _wb_needs(['python'] + a)
+        if needs:
+            problem = str(await wb_ensure(json.dumps(needs)))
+            if problem:
+                print(problem, file=sys.stderr)
+                return
         old = sys.argv[:]
         sys.argv[:] = a
         try:
@@ -1250,6 +1409,15 @@ async function init(m) {
   pyodide.FS.chdir(HOME);
   await pyodide.runPythonAsync(PY_SETUP);
   await pyodide.runPythonAsync(`import sys\nif '${lib}' not in sys.path: sys.path.insert(0, '${lib}')\nimport importlib\nimportlib.invalidate_caches()`);
+  // the second archive: where it is, and what each of its programs needs (it is loaded when first used)
+  analysisUrl = m.analysis || null;
+  try {
+    const n = JSON.parse(await pyodide.runPythonAsync("import json\nfrom pedwb.cli import NEEDS, MODULES\njson.dumps({'needs': NEEDS, 'modules': MODULES})"));
+    NEEDS = n.needs || {};
+    MODULES = n.modules || {};
+  } catch (e) {
+    /* a pedwb without the second archive's programs */
+  }
   await pyodide.runPythonAsync('_mpl_setup()');
   // urllib.request (and what uses it: Bio.Entrez, pandas.read_csv(URL) …) has no HTTPS in the browser: it is given
   // one that asks the browser (a synchronous XMLHttpRequest – this is a worker). requests works without it.
@@ -1289,17 +1457,34 @@ async function init(m) {
 }
 
 async function loadImports(code, id) {
+  // PedNet, PedGen and PedInterp (the second archive), and what they need
+  const mine = analysisPrograms(importsOf(code));
+  if (mine.length) {
+    try {
+      await ensureAnalysis(mine, id);
+    } catch (e) {
+      const text = String((e && e.message) || e) + '\n';
+      if (id != null && id === runId) self.nb_stream('stderr', text);
+      else if (id != null && id === termId) self.term_emit(text, 'err', 'red');
+    }
+  }
+  let said = false;
   try {
     await pyodide.loadPackagesFromImports(code, {
       messageCallback: (msg) => {
         const mm = /Loading (.+)/.exec(msg);
-        if (mm) post({ type: 'status', text: 'Loading ' + mm[1].slice(0, 80) + '…', id });
+        if (mm) {
+          said = true;
+          post({ type: 'status', text: 'Loading ' + mm[1].slice(0, 80) + '…', id });
+        }
       },
       errorCallback: () => {}
     });
   } catch (e) {
     /* a missing package is reported by Python itself when the import runs */
   }
+  // (loaded: the status line goes back to saying that the code is running)
+  if (said) post({ type: 'status', text: '', id });
 }
 
 function doneWithChanges(msg) {
@@ -1330,7 +1515,7 @@ async function run(m) {
   resetOutput();
   const t0 = performance.now();
   // packages of the imports in the cell (and of  %pip install  lines, which micropip does itself)
-  await loadImports(m.code.replace(/^\s*[!%].*$/gm, ''), m.id);
+  await loadImports(m.code.replace(/^\s*(?:[A-Za-z_][\w.]*\s*=\s*)?[!%](?!=).*$/gm, ''), m.id);
   const runner = pyodide.globals.get('_nb_run');
   let ok = false;
   try {
@@ -1367,6 +1552,8 @@ async function termRun(m) {
         }
       }
       if (src) await loadImports(src, m.id);
+      // (python -m pedwb PROGRAM …, as the terminal runs the pedigree programs, or python -m MODULE …)
+      if (m.argv[0] === '-m') await ensureAnalysis(m.argv[1] === 'pedwb' ? [m.argv[2]] : [String(m.argv[1] || '').split('.')[0]], m.id);
       const f = pyodide.globals.get('_py_script');
       try {
         code = await f(pyodide.toPy(m.argv), m.cwd);
@@ -1394,6 +1581,22 @@ async function termRun(m) {
 /** the Tools tab calls a function of the packages: {fn: 'pedwb.gui.inspect', args: {...}} → 'called' */
 async function call(m) {
   setUser(m.user);
+  // a program of the second archive (pedwb.gui.run with its command line), or a function of one of its packages
+  let names = [String(m.fn).split('.')[0]];
+  if (m.fn === 'pedwb.gui.run') {
+    try {
+      names = [JSON.parse(m.args || '{}').argv[0]];
+    } catch (e) {
+      names = [];
+    }
+  }
+  try {
+    await ensureAnalysis(names, m.id);
+  } catch (e) {
+    const message = String((e && e.message) || e);
+    doneWithChanges({ type: 'called', id: m.id, ok: false, error: message, kind: 'LoadError', message, stdout: '', stderr: '' });
+    return;
+  }
   const f = pyodide.globals.get('_wb_call');
   let r;
   try {

@@ -7,6 +7,8 @@ those of the workbench: /data/examples and /home/user (~) are replaced by folder
 pedigree programs are small scripts that run the workbench's own packages (python/). `studio`, `download` and
 `export-session` do nothing here. Boxes that would ask EBI's Ontology Lookup Service are skipped (the tests never
 contact it); boxes that need copies of the ontologies run only when ONTOLOGIES is a folder with hp.obo and mondo.obo.
+The boxes of PedNet, PedGen and PedInterp need NumPy, pandas, OpenCV and Pillow in the Python that runs this (networkx
+comes from its wheel in python/vendor): without them, those boxes are skipped, and the count says so.
 
 Run:  python3 tests/help_code.py            (after python3 build/make_page.py)
 """
@@ -20,7 +22,10 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROGRAMS = ["studio2ped", "ped2studio", "studio2ga4gh", "ga4gh2studio", "mpedtools", "hponorm", "mondonorm",
-            "phenotk", "pedigree-ga4gh"]
+            "phenotk", "pedigree-ga4gh", "pednet", "pedgen", "pedinterp"]
+# what the boxes of the second archive's packages need, besides networkx
+ANALYSIS = {"pednet": ["numpy"], "pedgen": ["numpy", "pandas"], "pedinterp": ["numpy", "pandas", "cv2", "PIL"],
+            "PedGen": ["numpy", "pandas"], "PedInterp": ["numpy", "pandas", "cv2", "PIL"]}
 
 
 COLUMN = (
@@ -60,10 +65,14 @@ def main():
         for f in ("hp.obo", "mondo.obo"):
             shutil.copyfile(os.path.join(onto, f), os.path.join(home, "ontologies", f))
     py = os.path.join(ROOT, "python")
+    # (networkx, which PedNet and PedGen need, is kept as its wheel, which Python imports from as it is)
+    vendor = os.path.join(py, "vendor")
+    wheels = [os.path.join(vendor, f) for f in sorted(os.listdir(vendor)) if f.endswith(".whl")]
+    path = [py] + wheels
     for name in PROGRAMS:
         with open(os.path.join(bin_, name), "w") as fh:
-            fh.write('#!/bin/sh\nexec "%s" -I -c "import sys; sys.path.insert(0, %r); from pedwb.cli import run; '
-                     'sys.exit(run(sys.argv[1:]))" %s "$@"\n' % (sys.executable, py, name))
+            fh.write('#!/bin/sh\nexec "%s" -I -c "import sys; sys.path[:0] = %r; from pedwb.cli import run; '
+                     'sys.exit(run(sys.argv[1:]))" %s "$@"\n' % (sys.executable, path, name))
     for name in ("studio", "download", "export-session"):
         with open(os.path.join(bin_, name), "w") as fh:
             fh.write("#!/bin/sh\nexit 0\n")
@@ -72,18 +81,25 @@ def main():
         with open(os.path.join(bin_, "column"), "w") as fh:
             fh.write('#!/bin/sh\nexec "%s" -I -c "%s" "$@"\n' % (sys.executable, COLUMN))
     with open(os.path.join(bin_, "python"), "w") as fh:
-        fh.write('#!/bin/sh\nPYTHONPATH=%r exec "%s" "$@"\n' % (py, sys.executable))
+        fh.write('#!/bin/sh\nPYTHONPATH=%r exec "%s" "$@"\n' % (os.pathsep.join(path), sys.executable))
     for f in os.listdir(bin_):
         os.chmod(os.path.join(bin_, f), 0o755)
-    env = dict(os.environ, HOME=home, PATH=bin_ + os.pathsep + os.environ.get("PATH", ""), PYTHONPATH=py)
+    env = dict(os.environ, HOME=home, PATH=bin_ + os.pathsep + os.environ.get("PATH", ""), PYTHONPATH=os.pathsep.join(path))
+    import importlib.util
+    have = lambda mods: all(importlib.util.find_spec(m) is not None for m in mods)
 
     def paths(text):
         return text.replace("/data/examples", ex).replace("/home/user", home)
 
-    failed, ran, skipped = [], 0, 0
+    failed, ran, skipped, missing = [], 0, 0, set()
     for page, kind, code in boxes():
         if "OlsClient" in code or "ebi.ac.uk" in code:
             skipped += 1
+            continue
+        needed = [m for name, mods in ANALYSIS.items() if re.search(r"(^|[\s!(])" + name + r"\b", code) for m in mods]
+        if not have(needed):
+            skipped += 1
+            missing.update(m for m in needed if importlib.util.find_spec(m) is None)
             continue
         if "/ontologies/" in code and not have_onto:
             skipped += 1
@@ -100,7 +116,7 @@ def main():
                     lines.append("__import__('subprocess').run(%r, shell=True, check=True, executable='bash')" % line[1:])
                 else:
                     lines.append(line)
-            r = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r)\n" % py + "\n".join(lines)],
+            r = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path[:0] = %r\n" % path + "\n".join(lines)],
                                cwd=home, env=env, capture_output=True, text=True, timeout=600)
         ran += 1
         # (validate and diff end with 1 when a file is invalid or files differ, as they should in some boxes)
@@ -108,7 +124,8 @@ def main():
             failed.append((page, kind, code, r.stdout[-1500:], r.stderr[-1500:]))
     for page, kind, code, out, err in failed:
         print("=" * 70, "\nFAILED", page, kind, "\n" + code, "\n--- stdout\n" + out, "\n--- stderr\n" + err)
-    print("%d boxes run, %d skipped, %d failed" % (ran, skipped, len(failed)))
+    print("%d boxes run, %d skipped, %d failed" % (ran, skipped, len(failed)) +
+          (" (skipped for want of %s)" % ", ".join(sorted(missing)) if missing else ""))
     shutil.rmtree(tmp, ignore_errors=True)
     return 1 if failed else 0
 

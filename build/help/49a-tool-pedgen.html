@@ -1,0 +1,50 @@
+<!-- id: h-tool-pedgen | title: Simulate a family | group: Tools | summary: PedGen: a made-up family with a dominant or recessive condition | keys: pedgen simulate simulation simulated generate made up random family pedigree mendelian dominant recessive seed genotypes allele frequency teaching test -->
+<h1><!--ICON:sparkle-->Simulate a family</h1>
+<p class="lede">PedGen makes up a family with an autosomal dominant or recessive condition, by Mendelian inheritance from an affected founder, and writes it as a PED file. Use it for teaching, or to try PedNet on families whose mode of inheritance you know.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedgen">Simulate a family</button></div>
+
+<h2>How it works</h2>
+<p>The founder has the condition. In each generation, every child gets one of each parent's two copies of the gene, at random, and each couple has between one child and the most you allow. In every generation but the last, the first child of a couple always has a partner and children, and their brothers and sisters each have them with the chance you give, so that the family has as many generations as you ask for. Partners come from a population in which the condition's allele has the frequency you give, and some come with their own parents, and theirs. Who is affected follows from the genotypes: one copy of the allele is enough for a dominant condition, and a recessive one needs two. As everyone's genotype is known, PedGen can write them too, as a candidate variant for <a href="#h-tool-pednet">Rank candidate variants</a>.</p>
+
+<h2>The form</h2>
+<dl>
+  <dt>Mode of inheritance, Generations, The most children a couple has</dt><dd>The family's condition and shape.</dd>
+  <dt>Seed</dt><dd>A whole number. With the same seed and settings, PedGen makes the same family, here, in the terminal and in Python. Leave it empty to get a new family every time.</dd>
+  <dt>Family id</dt><dd>It names the PED file: <code>FAM1.ped</code>, unless you change it.</dd>
+  <dt>Chance that a child has a partner, and children; Chance that a partner's parents are added</dt><dd>0.6 and 0.25, unless you change them.</dd>
+  <dt>Frequency of the allele among partners</dt><dd>0.1, unless you change it. That is a common allele: about one partner in five carries it, and one in a hundred has two copies, so a recessive condition turns up again in later generations far more often than a rare one would. For a rare condition, give 0.01 or less, though then a recessive condition seldom turns up again, and most families have no one affected but the founder. <i>Partners never carry the allele</i> gives the partners who marry in no copy of it, but their parents and grandparents, if they're added, can still carry it. To keep the allele to the founder and their descendants, give a frequency of 0 instead.</dd>
+  <dt>Save everyone's genotypes too</dt><dd>A table, <code>FAM1-genotypes.tsv</code>, of the number of copies of the allele that each person has, as a variant called <code>causal</code>, for Rank candidate variants.</dd>
+</dl>
+
+<h2>What PedNet makes of it</h2>
+<p>PedNet takes a condition to be rare: for autosomal recessive inheritance, it gives the allele a frequency of 1 in 1,000. In a recessive family that PedGen makes with its frequency of 0.1, several of the partners who marry in may be carriers, which PedNet's model finds very unlikely, so PedNet may favour another mode, or be uncertain. Of 19 such families of four generations with two or more people affected, it called none autosomal recessive. Given PedGen's frequency, as the Python below does, it called 4 of them autosomal recessive, and put that mode first in 11. Dominant families are clearer, though one of three generations is often too small for a confident answer.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedgen --mode AD --generations 4 --seed 4 -d ~/results --genotypes ~/results/FAM1-genotypes.tsv
+pednet mode ~/results/FAM1.ped
+pednet rank ~/results/FAM1.ped ~/results/FAM1-genotypes.tsv
+ped2studio ~/results/FAM1.ped ~/pedigrees/simulated.studio.json</code></pre>
+<table>
+<tr><th>Option</th><th></th></tr>
+<tr><td><code>-m</code>, <code>--mode AD|AR</code></td><td>the mode of inheritance (default: AD)</td></tr>
+<tr><td><code>-g</code>, <code>--generations N</code>; <code>-c</code>, <code>--max-children N</code></td><td>the number of generations (3), and the most children a couple can have (3)</td></tr>
+<tr><td><code>-s</code>, <code>--seed N</code></td><td>makes the family reproducible</td></tr>
+<tr><td><code>-f</code>, <code>--family ID</code>; <code>-d</code>, <code>--output-dir FOLDER</code></td><td>the family id, which names the file (FAM1), and where to write it</td></tr>
+<tr><td><code>--partners CHANCE</code>, <code>--ancestors CHANCE</code></td><td>the chance that a child has a partner (0.6), and that a partner's parents are added (0.25)</td></tr>
+<tr><td><code>--allele-frequency F</code>, <code>--unaffected-partners</code></td><td>the allele's frequency among partners and their ancestors (0.1); with <code>--unaffected-partners</code>, the partners themselves never carry it</td></tr>
+<tr><td><code>--genotypes FILE</code></td><td>also write everyone's genotypes, as a table</td></tr>
+</table>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>import pednet
+from PedGen import pedigree_generator, gen_PED_export
+
+df = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AR", generation_count=4, seed=34)
+print(df.head())
+pedigree = pednet.pedigree_from_rows(df)
+print(pednet.infer_mode(pedigree).call, "for a rare allele;",
+      pednet.infer_mode(pedigree, allele_frequency={"AR": 0.1}).call, "at PedGen's frequency")
+print("wrote", gen_PED_export(df, "/home/user/results"))</code></pre>
+<p>PedGen's <code>plot_pedigree_tree</code> draws a family with matplotlib. In a notebook, put <code>import matplotlib.pyplot as plt</code> in the same cell, so that Python loads matplotlib before PedGen needs it. Pedigree Studio draws a family better, though: draw the PED file with <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->The first time</div><p>PedGen needs NumPy and pandas, which Python downloads the first time you use it. That is about 9 MB, or less if PedNet has already run, and your browser keeps them for next time.</p></div>
+<!--CITE: pedgen-->

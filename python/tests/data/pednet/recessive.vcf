@@ -1,0 +1,11 @@
+##fileformat=VCFv4.2
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency in the population">
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	F	M	C1	C2	C3	C4
+4	1001100	var7a	C	T	.	PASS	AF=0.0004;GENE=GENE7	GT	0/1	0/0	0/1	0/1	0/1	0/0
+4	1003020	var7b	G	A	.	PASS	AF=0.0001;GENE=GENE7	GT	0/0	0/1	0/1	0/1	0/0	0/1
+9	5002000	var8a	A	G	.	PASS	AF=0.002;GENE=GENE8	GT	0/1	0/0	0/1	0/1	0/1	0/0
+9	5002010	var8b	T	C	.	PASS	AF=0.002;GENE=GENE8	GT	0/1	0/0	0/1	0/1	0/1	0/0
+12	900300	var9	G	C	.	PASS	AF=0.006;GENE=GENE9	GT	0/1	0/1	1/1	1/1	0/1	0/0
+1	2003004	var10	C	A	.	PASS	AF=0.0002;GENE=GENE10	GT	0/0	0/1	0/1	0/1	0/0	0/0

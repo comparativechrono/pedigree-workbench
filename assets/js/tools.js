@@ -13,6 +13,10 @@
    what can be done with that file.
 
    The Match terms tool has a page of its own (TermsTool, below).
+
+   PedNet, PedGen and PedInterp are loaded into Python the first time
+   one of their tools runs (py-worker.js), which can take a while: what
+   is being loaded is shown under the form.
    ===================================================================== */
 (function () {
   'use strict';
@@ -24,13 +28,18 @@
   const expand = (p) => String(p || '').replace(/^~(?=\/|$)/, HOME());
   const tilde = (p) => (p === HOME() ? '~' : String(p).startsWith(HOME() + '/') ? '~' + String(p).slice(HOME().length) : String(p));
   const shq = (s) => (/^[\w@%+=:,./~-]+$/.test(s) ? s : "'" + String(s).replace(/'/g, "'\\''") + "'");
+  /** a path or word for the terminal: ~/my lynch.png → ~/'my lynch.png' (a ~ in quotes isn't the home folder) */
+  const shArg = (s) => {
+    const t = tilde(s);
+    return /^~\//.test(t) && shq(t) !== t ? '~/' + shq(t.slice(2)) : shq(t);
+  };
   const pyq = (s) => JSON.stringify(String(s));
   const base = (p) => String(p || '').split('/').pop();
   const dirOf = (p) => MG.path.dirname(p);
   /** the name of a file without its kind's ending: okafor.studio.json → okafor */
   const stemOf = (p) =>
     base(p)
-      .replace(/(_ga4gh-pedigree|_phenopackets-family|\.normalised|\.upgraded|\.deidentified)?\.(studio\.json|json|ya?ml|ped|mped|fam|obo|tsv|jsonl)$/i, '')
+      .replace(/(_ga4gh-pedigree|_phenopackets-family|\.normalised|\.upgraded|\.deidentified|-genotypes)?\.(studio\.json|json|ya?ml|ped|mped|fam|obo|tsv|jsonl|png|jpe?g|gif|bmp|tiff?|webp|vcf|vcf\.gz|graphml)$/i, '')
       .replace(/^$/, 'family') || 'family';
   const joinPath = (dir, name) => expand(dir).replace(/\/+$/, '') + '/' + name;
   const GA4GH = ['pedigree', 'family', 'cohort', 'phenopacket'];
@@ -39,19 +48,43 @@
 
   /* ------------------------------------------------------------------ Python */
   const kernel = () => MG.kernels.get();
-  /** a function of the packages, by name → {ok, result, error, stdout, stderr, files: the paths it wrote} */
-  async function pyCall(fn, args) {
-    const r = await kernel().call(fn, args);
+  /** a function of the packages, by name → {ok, result, error, stdout, stderr, files: the paths it wrote}.
+      onStatus(text): what Python is loading for it, if anything (PedNet and NumPy, say, the first time) */
+  async function pyCall(fn, args, onStatus) {
+    const r = await kernel().call(fn, args, onStatus ? { handlers: { onStatus } } : {});
     const files = ((r.changes && r.changes.files) || []).map((f) => f.path);
     return Object.assign({}, r, { files });
   }
   /** a command line, as the terminal runs it → {ok, code, stdout, stderr, files, error} */
-  async function runArgv(argv) {
-    const r = await pyCall('pedwb.gui.run', { argv });
+  async function runArgv(argv, onStatus) {
+    const r = await pyCall('pedwb.gui.run', { argv }, onStatus);
+    if (!r.ok && r.kind === 'LoadError') throw new Error(r.error);
     if (!r.ok) return { ok: false, code: 1, stdout: r.stdout || '', stderr: (r.stderr || '') + (r.error || ''), files: r.files, error: r.error, traceback: r.traceback };
     return { ok: r.result.code === 0, code: r.result.code, stdout: r.result.stdout, stderr: r.result.stderr, files: r.files };
   }
   MG.app.pyCall = pyCall;
+
+  /** a picture's size in pixels, {width, height}, or null if the browser can't show it (a TIFF, in most) */
+  async function pictureSize(fs, path) {
+    if (!path || !fs.exists(path)) return null;
+    const url = URL.createObjectURL(await fs.toBlob(path));
+    try {
+      return await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img.naturalWidth ? { width: img.naturalWidth, height: img.naturalHeight } : null);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  /** how much PedInterp should enlarge a picture: so that it is about 5,000 pixels across, which reads well both for
+      a picture cut from a paper and for a scan (its own default, 10, suits a picture about 500 pixels across) */
+  async function suggestUpscale(fs, path) {
+    const size = await pictureSize(fs, path);
+    return size ? Math.min(20, Math.max(1, Math.round(5000 / size.width))) : null;
+  }
 
   /* ------------------------------------------------------------------ the tools */
   const GROUPS = [
@@ -60,9 +93,20 @@
     ['terms', 'Ontology terms', 'tag'],
     ['check', 'Check and look inside', 'badgeCheck'],
     ['share', 'Prepare to share', 'eyeOff'],
-    ['ped', 'PED and MPED files', 'table']
+    ['ped', 'PED and MPED files', 'table'],
+    ['analyse', 'Analyse and simulate', 'network']
   ];
   const optArgs = (cond, ...a) => (cond ? a : []);
+  /** a number for a command line and for Python: 0.6, not '0.60' or '.6' */
+  const num = (x) => String(Number(x));
+  /** the family id of a PED file to write: one word */
+  const oneWord = (label, x) => (!String(x || '').trim() ? `Give the ${label}.` : /\s/.test(String(x)) ? `The ${label} must be one word, with no spaces: PED files are split at spaces.` : '');
+  const PENETRANCE = '0.6,0.8,0.95,0.99';
+  /** penetrances as given (0.6 0.8, or 0.6, 0.8) → as the command takes them: 0.6,0.8 */
+  const penList = (x) => String(x || '').trim().split(/[\s,]+/).filter(Boolean).map(num).join(',');
+  const ALL_MODES = 'AD,AR,XLR,XLD';
+  /** the families of a PED file, in Python, for PedNet's tools */
+  const readFamilies = (v) => `families = pednet.read_ped(${pyq(v.input)}${v.family ? `, ${pyq(v.family)}` : ''})   # {family id: pedigree}`;
   /** the file of ids for phenotk filter --id-list ('' when no ids are given) */
   const idFile = (v) => ((v.ids || '').trim() && v.out ? joinPath(dirOf(v.out), stemOf(v.out) + '-ids.txt') : '');
 
@@ -214,6 +258,36 @@
         if (v.fmt === 'yaml') return head.concat([`ptk.write(doc, ${pyq(v.out)}, fmt="yaml")`]).join('\n');
         if (v.fmt === 'jsonl') return head.concat([`ptk.write_many([doc], ${pyq(v.out)})`]).join('\n');
         return ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import to_format', '', `doc = ptk.read(${pyq(v.input)})`, `with open(${pyq(v.out)}, "w") as fh:`, `    fh.write(to_format(doc, ${pyq(v.fmt)}))`].join('\n');
+      }
+    },
+    {
+      id: 'pedinterp',
+      group: 'convert',
+      title: 'Picture → PED file',
+      pkg: 'PedInterp',
+      what: 'Read a picture of a pedigree, such as one in a paper or a clinic letter, and write it as a PED file.',
+      about:
+        'PedInterp finds the symbols and the lines between them, and so who is male or female, who is affected (a filled symbol), and who are partners, parents and children. It reads pictures drawn in the usual way, in black on white, with each generation in a row of its own. The labels under the symbols can’t be read here, because that needs the Tesseract program, which can’t run in a browser. Instead, the people are numbered by generation, from the top, and from the left in each: I-1, I-2, II-1 and so on, as Pedigree Studio numbers them. Half-filled or shaded symbols, and lines that slope, as for twins, aren’t read yet, so compare the PED file with the picture, or draw it, before you use it.',
+      help: 'h-tool-pedinterp',
+      fields: [
+        { key: 'input', type: 'file', label: 'The picture', kinds: ['image'] },
+        { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the PED file too.' },
+        { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
+        { key: 'upscale', type: 'number', label: 'Enlarge the picture by', def: 10, min: 1, max: 20, step: 1, autoFrom: ['input'], auto: (v, fs) => suggestUpscale(fs, v.input), help: 'PedInterp reads a picture best when the enlarged picture is about 5,000 pixels across, so this is worked out from the picture’s size: 10 for a picture 500 pixels across, 5 for one 1,000 pixels across.' }
+      ],
+      check: (v) => oneWord('family id', v.family) || (!(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0.' : ''),
+      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(Number(v.upscale) !== 10, '--upscale', num(v.upscale))],
+      outputs: (v) => [joinPath(v.outdir, v.family + '.ped')],
+      // (what it prints is the table it read, which is better kept whole than wrapped)
+      stdoutIsResult: true,
+      python: (v) =>
+        ['from PedInterp import pedigree_processing, PED_export', '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${Number(v.upscale) !== 10 ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`].join('\n'),
+      next: (res, v) => {
+        const ped = joinPath(v.outdir, v.family + '.ped');
+        return [
+          ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
+          ['network', 'Look at it with PedNet', () => MG.app.useTool('pednet-graph', { input: ped })]
+        ];
       }
     },
 
@@ -597,6 +671,230 @@
         const f = v.action === 'to-ped' ? 'ped' : 'mped';
         return head.concat([`new = mpedtools.to_${f}(ped${v.column ? `, ${pyq(v.column)}` : ''})`, `mpedtools.write(new, ${pyq(v.out)}, force_format=${pyq(f)})`]).join('\n');
       }
+    },
+
+    /* ---------------- Analyse and simulate ---------------- */
+    {
+      id: 'pednet-graph',
+      group: 'analyse',
+      title: 'The pedigree as a graph',
+      pkg: 'PedNet',
+      what: 'See how a family is put together: its loops, how closely its people are related, who is inbred, which affected people are closest, and network measures of the pedigree.',
+      about:
+        'PedNet treats a pedigree as a directed graph, with an edge from each parent to each child. It finds the loops (a marriage between relatives makes one), works out the kinship coefficient of every pair of people and the inbreeding coefficient of each person, and names the relationships of the affected people who are related, the closest first. It also gives network measures of the pedigree, and of the pattern of affected people in it. The kinship coefficients can be saved as a table, and the graph as GraphML, for network tools such as Gephi or Cytoscape. In an MPED file, the first condition is taken as who is affected.',
+      help: 'h-tool-pednet',
+      fields: [
+        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
+        { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file', help: 'The kinship table and the graph need one family, if the file holds more than one.' },
+        { key: 'kinship', type: 'check', label: 'Save everyone’s kinship coefficients as a table', def: false },
+        { key: 'xlinked', type: 'check', label: 'For the X chromosome', def: false, show: (v) => v.kinship },
+        { key: 'kinout', type: 'path', label: 'Save the table as', def: (v) => `~/results/${stemOf(v.input)}${v.family ? '-' + v.family : ''}-kinship${v.xlinked ? '-x' : ''}.tsv`, show: (v) => v.kinship },
+        { key: 'graphml', type: 'check', label: 'Save the graph as GraphML', def: false },
+        { key: 'mating', type: 'check', label: 'The mating graph, with a node for each couple', def: false, show: (v) => v.graphml },
+        { key: 'gout', type: 'path', label: 'Save the graph as', def: (v) => `~/results/${stemOf(v.input)}${v.family ? '-' + v.family : ''}${v.mating ? '-mating' : ''}.graphml`, show: (v) => v.graphml }
+      ],
+      argv: (v) => ['pednet', 'graph', v.input, ...optArgs(v.family, '--family', v.family), ...(v.kinship ? ['--kinship', v.kinout, ...optArgs(v.xlinked, '--x')] : []), ...(v.graphml ? ['--graphml', v.gout, ...optArgs(v.mating, '--mating')] : [])],
+      outputs: (v) => [v.kinship && v.kinout, v.graphml && v.gout].filter(Boolean),
+      stdoutIsResult: true,
+      python: (v) =>
+        [
+          ...(v.kinship ? ['import csv'] : []),
+          'import pednet',
+          ...(v.graphml ? ['from pednet.graph import write_graph'] : []),
+          '',
+          readFamilies(v),
+          ...((v.kinship || v.graphml) && !v.family ? ['if len(families) > 1:', '    raise ValueError("the kinship table and the graph are for one family, and the file holds several: give the family\'s id")'] : []),
+          'for name, pedigree in families.items():',
+          '    print("Family", name)',
+          '    for loop in pednet.loops(pedigree):',
+          '        print("  a loop, from", loop.kind + ":", ", ".join(loop.people))',
+          '    inbred = {pid: round(f, 4) for pid, f in pednet.inbreeding(pedigree).items() if f > 0}',
+          '    print("  inbred:", inbred or "no one")',
+          '    affected = pedigree.affected()',
+          '    for i, a in enumerate(affected):',
+          '        for b in affected[i + 1:]:',
+          '            r = pednet.relationship(pedigree, a, b)',
+          '            if r.degree is not None:',
+          '                print(f"  {b} is the {r.name} of {a} (kinship {r.kinship:.4f})")',
+          '    print("  network metrics:", {k: round(x, 3) for k, x in pednet.network_metrics(pedigree).items()})',
+          ...(v.kinship
+            ? [
+                `    # everyone's kinship coefficients${v.xlinked ? ' for the X chromosome' : ''}, without the parents PedNet adds for people with one parent in the file`,
+                `    ids, phi = pednet.kinship_matrix(pedigree${v.xlinked ? ', x_linked=True' : ''})`,
+                '    keep = [k for k, pid in enumerate(ids) if not pedigree[pid].placeholder]',
+                `    with open(${pyq(v.kinout)}, "w", newline="") as fh:`,
+                '        table = csv.writer(fh, delimiter="\\t", lineterminator="\\n")',
+                '        table.writerow([""] + [ids[k] for k in keep])',
+                '        for k in keep:',
+                '            table.writerow([ids[k]] + [f"{phi[k, j]:.6g}" for j in keep])'
+              ]
+            : []),
+          ...(v.graphml ? [`    write_graph(pedigree, ${pyq(v.gout)}${v.mating ? ', mating=True' : ''})`] : [])
+        ].join('\n'),
+      next: (res, v) => [['network', 'Its mode of inheritance', () => MG.app.useTool('pednet-mode', { input: v.input })]]
+    },
+    {
+      id: 'pednet-mode',
+      group: 'analyse',
+      title: 'Mode of inheritance',
+      pkg: 'PedNet',
+      what: 'Weigh up how likely each mode of inheritance is – autosomal dominant or recessive, X-linked dominant or recessive – from who is affected in a family.',
+      about:
+        'The default method is exact. PedNet treats the pedigree as a Bayesian network of genotypes, works out the likelihood of who is affected under each mode, summed over everyone’s genotypes and averaged over a range of penetrances, and turns the likelihoods into probabilities. The other two methods are classifiers that learnt from simulated families: one reads the pattern of affected people in the graph, and the other is the original PedNet’s classifier of network measures, which tells dominant from recessive by a vote. With the first two methods, a mode is called only when its probability reaches the threshold. Otherwise the answer is “uncertain”, with the probabilities.',
+      help: 'h-tool-pednet',
+      fields: [
+        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'] },
+        { key: 'method', type: 'select', label: 'Method', def: 'likelihood', options: [['likelihood', 'exact likelihoods'], ['patterns', 'the pattern of affected people (a classifier)'], ['metrics', 'network measures (the original PedNet: dominant or recessive)']] },
+        { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file' },
+        { key: 'together', type: 'check', label: 'The families have the same condition: give one answer for them all', def: false, show: (v) => v.method === 'likelihood' && !v.family },
+        { key: 'proband', type: 'text', label: 'Proband (optional)', def: '', placeholder: 'e.g. III-2', show: (v) => v.method === 'likelihood' && !(v.together && !v.family), help: 'The person through whom the family came to attention. Without one, each affected person is taken in turn.' },
+        { key: 'penetrance', type: 'text', label: 'Penetrance', def: PENETRANCE, show: (v) => v.method === 'likelihood', help: 'The chance that someone with the disease genotype is affected, or several, separated by commas, to average over.' },
+        { key: 'phenocopy', type: 'number', label: 'Chance of being affected without the disease genotype', def: 0.001, min: 0, max: 0.5, step: 0.001, show: (v) => v.method === 'likelihood' },
+        { key: 'threshold', type: 'number', label: 'Probability needed to call a mode', def: 0.8, min: 0.5, max: 1, step: 0.05, show: (v) => v.method !== 'metrics' }
+      ],
+      check: (v) => {
+        const within = (x, lo, hi) => String(x == null ? '' : x).trim() !== '' && Number(x) >= lo && Number(x) <= hi;
+        if (v.method === 'likelihood' && !/^\s*(0?\.\d+|1(\.0*)?|0)(\s*[,\s]\s*(0?\.\d+|1(\.0*)?|0))*\s*$/.test(v.penetrance || '')) return 'Give the penetrance as numbers between 0 and 1, separated by commas.';
+        if (v.method === 'likelihood' && !within(v.phenocopy, 0, 0.5)) return 'Give the chance of being affected without the disease genotype as a number from 0 to 0.5.';
+        if (v.method !== 'metrics' && !within(v.threshold, 0.5, 1)) return 'Give the probability needed to call a mode as a number from 0.5 to 1.';
+        return '';
+      },
+      argv: (v) => {
+        const lik = v.method === 'likelihood';
+        return ['pednet', 'mode', v.input, ...optArgs(!lik, '--method', v.method), ...optArgs(v.family, '--family', v.family), ...optArgs(lik && v.together, '--together'), ...optArgs(lik && v.proband, '--proband', v.proband), ...optArgs(lik && penList(v.penetrance) !== PENETRANCE, '--penetrance', penList(v.penetrance)), ...optArgs(lik && Number(v.phenocopy) !== 0.001, '--phenocopy', num(v.phenocopy)), ...optArgs(v.method !== 'metrics' && Number(v.threshold) !== 0.8, '--threshold', num(v.threshold))];
+      },
+      stdoutIsResult: true,
+      python: (v) => {
+        const lik = v.method === 'likelihood';
+        const pen = (v.penetrance || PENETRANCE).split(/[\s,]+/).filter(Boolean).map(num).join(', ');
+        const opts = lik ? `, penetrance=[${pen}], phenocopy=${num(v.phenocopy)}${v.proband && !v.together ? `, proband=${pyq(v.proband)}` : ''}, threshold=${num(v.threshold)}` : '';
+        const head = ['import pednet', '', readFamilies(v)];
+        if (lik && v.together) return head.concat([`print(pednet.infer_shared_mode(families${opts.replace(/, proband=[^,]*/, '')}))`]).join('\n');
+        if (lik) return head.concat(['for pedigree in families.values():', `    print(pednet.infer_mode(pedigree${opts}))`, '    print()']).join('\n');
+        if (v.method === 'patterns') return head.concat(['for pedigree in families.values():', `    print(pednet.classify_by_patterns(pedigree, threshold=${num(v.threshold)}))`, '    print()']).join('\n');
+        return head.concat(['for name, pedigree in families.items():', '    print(f"Family {name}, by the original PedNet metric classifier: {pednet.classify_by_metrics(pedigree)}")', '    print("  " + ", ".join(f"{k} {x:.3f}" for k, x in pednet.network_metrics(pedigree).items()))', '    print()']).join('\n');
+      },
+      next: (res, v) => [['network', 'The pedigree as a graph', () => MG.app.useTool('pednet-graph', { input: v.input })]]
+    },
+    {
+      id: 'pednet-rank',
+      group: 'analyse',
+      title: 'Rank candidate variants',
+      pkg: 'PedNet',
+      what: 'Rank the candidate variants found in a family by how well each co-segregates with the condition, as evidence for (PP1) or against (BS4) its causing it.',
+      about:
+        'For each variant, PedNet works out the likelihood of everyone’s genotypes and of who is affected if the variant causes the condition, and if it doesn’t. The ratio of the two is a Bayes factor, and its strength is given as evidence for co-segregation (PP1) or against it (BS4) under the ACMG/AMP guidelines. The variants are ranked by their odds of being the cause, which also take account of whether a variant’s chromosome suits the family’s mode of inheritance. Pairs of variants in one gene that an affected person carries both of are scored too, as compound heterozygotes under the recessive modes. The variants come from a VCF file, whose samples must be named with the PED file’s ids, or from a table with a column for each person, like the one Simulate a family writes. If the PED file holds several families, they are taken to have the same condition, and each variant is ranked by its evidence across the families in which an affected person carries it.',
+      help: 'h-tool-pednet',
+      fields: [
+        { key: 'input', type: 'file', label: 'The PED file', kinds: ['ped', 'mped'], pair: 'variants' },
+        { key: 'variants', type: 'file', label: 'The variants (VCF, or a table of genotypes)', kinds: ['vcf', 'variants'], pair: 'input', primary: true },
+        { key: 'family', type: 'text', label: 'Family (optional)', def: '', placeholder: 'every family in the file' },
+        { key: 'modes', type: 'select', label: 'Modes of inheritance', def: ALL_MODES, options: [[ALL_MODES, 'all four, weighed up'], ['AD', 'autosomal dominant'], ['AR', 'autosomal recessive'], ['XLR', 'X-linked recessive'], ['XLD', 'X-linked dominant'], ['AD,AR', 'autosomal: dominant or recessive']] },
+        { key: 'maxfreq', type: 'text', label: 'Leave out variants commoner than (optional)', def: '', placeholder: 'an allele frequency, e.g. 0.01' },
+        { key: 'passed', type: 'check', label: 'Only the VCF’s sites that passed their filters', def: false, show: (v) => MG.app.pedKind(v.variants || '') === 'vcf' },
+        { key: 'top', type: 'number', label: 'How many to show', def: 20, min: 0, step: 1, help: '0 shows them all.' },
+        { key: 'out', type: 'path', label: 'Save every variant’s scores as (optional)', def: (v) => `~/results/${stemOf(v.variants || v.input)}-ranked.tsv`, optional: true }
+      ],
+      check: (v) => ((v.maxfreq || '').trim() && !(Number(v.maxfreq) >= 0 && Number(v.maxfreq) <= 1) ? 'Give the frequency as a number between 0 and 1.' : !/^\d+$/.test(String(v.top == null ? '' : v.top).trim()) ? 'Give how many to show as a whole number (0 for all).' : ''),
+      argv: (v) => {
+        const vcf = MG.app.pedKind(v.variants || '') === 'vcf';
+        return ['pednet', 'rank', v.input, v.variants, ...optArgs(v.family, '--family', v.family), ...optArgs(v.modes !== ALL_MODES, '--modes', v.modes), ...optArgs((v.maxfreq || '').trim(), '--max-frequency', num(v.maxfreq)), ...optArgs(vcf && v.passed, '--passed-only'), ...optArgs(Number(v.top) !== 20, '--top', String(Math.round(Number(v.top) || 0))), ...optArgs(v.out, '--out', v.out)];
+      },
+      outputs: (v) => [v.out].filter(Boolean),
+      stdoutIsResult: true,
+      python: (v) => {
+        const vcf = MG.app.pedKind(v.variants || '') === 'vcf';
+        const modes = v.modes !== ALL_MODES ? `modes=${JSON.stringify(v.modes.split(','))}` : '';
+        return [
+          ...(v.out ? ['import csv'] : []),
+          'import pednet',
+          '',
+          readFamilies(v),
+          vcf
+            ? `variants = pednet.read_vcf(${pyq(v.variants)}, samples={pid for p in families.values() for pid in p.ids}${v.passed ? ', passed_only=True' : ''})`
+            : `variants = pednet.read_genotype_table(${pyq(v.variants)})`,
+          ...((v.maxfreq || '').trim() ? [`variants = [x for x in variants if x.allele_frequency is None or x.allele_frequency <= ${num(v.maxfreq)}]`] : []),
+          '# one family on its own, or several taken to have the same condition',
+          'if len(families) == 1:',
+          `    scores = pednet.rank_variants(next(iter(families.values())), variants${modes ? ', ' + modes : ''})`,
+          'else:',
+          `    scores = pednet.rank_variants_across(families, variants${modes ? ', ' + modes : ''})`,
+          `for s in scores${Number(v.top) ? `[:${Math.round(Number(v.top))}]` : ''}:`,
+          '    print(s.rank, s.id, s.log10_bf, s.evidence)',
+          ...(v.out
+            ? [
+                '# every variant\'s scores, as a table',
+                'rows = [s.row() for s in scores]',
+                `with open(${pyq(v.out)}, "w", newline="") as fh:`,
+                '    table = csv.DictWriter(fh, fieldnames=list(dict.fromkeys(k for row in rows for k in row)) or ["candidate"],',
+                '                           delimiter="\\t", lineterminator="\\n")',
+                '    table.writeheader()',
+                '    table.writerows(rows)'
+              ]
+            : [])
+        ].join('\n');
+      }
+    },
+    {
+      id: 'pedgen',
+      group: 'analyse',
+      title: 'Simulate a family',
+      pkg: 'PedGen',
+      what: 'Make up a family with a dominant or recessive condition, by Mendelian inheritance from an affected founder, as a PED file.',
+      about:
+        'PedGen starts from a founder with the condition and adds generations of children, each inheriting one of each parent’s two copies of the gene. Partners join the family from a population in which the condition’s allele has the frequency you give, and some of them come with their own parents. Who is affected follows from the genotypes: one copy is enough for a dominant condition, and a recessive one needs two. The families are good for teaching, and for trying out PedNet on families whose mode of inheritance is known. With a seed, the same settings always make the same family, here, in the terminal and in Python.',
+      help: 'h-tool-pedgen',
+      fields: [
+        { key: 'mode', type: 'select', label: 'Mode of inheritance', def: 'AD', options: [['AD', 'autosomal dominant'], ['AR', 'autosomal recessive']] },
+        { key: 'generations', type: 'number', label: 'Generations', def: 3, min: 1, max: 8, step: 1 },
+        { key: 'children', type: 'number', label: 'The most children a couple has', def: 3, min: 1, max: 10, step: 1 },
+        { key: 'seed', type: 'text', label: 'Seed (optional)', def: '', placeholder: 'a whole number, e.g. 7', help: 'Leave it empty for a new family every time. Give a number to make the same family again.' },
+        { key: 'family', type: 'text', label: 'Family id', def: 'FAM1', help: 'It names the PED file too.' },
+        { key: 'partners', type: 'number', label: 'Chance that a child has a partner, and children', def: 0.6, min: 0, max: 1, step: 0.05, help: 'In every generation but the last, the first child of each couple always does.' },
+        { key: 'ancestors', type: 'number', label: 'Chance that a partner’s parents are added', def: 0.25, min: 0, max: 1, step: 0.05 },
+        { key: 'freq', type: 'number', label: 'Frequency of the allele among partners', def: 0.1, min: 0, max: 1, step: 0.01 },
+        { key: 'clean', type: 'check', label: 'Partners never carry the allele', def: false, help: 'Their parents and grandparents, if they’re added, still can. A frequency of 0 keeps the allele to the founder’s descendants.' },
+        { key: 'genotypes', type: 'check', label: 'Save everyone’s genotypes too, to rank as a candidate variant', def: true },
+        { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' }
+      ],
+      check: (v) => {
+        const whole = (x, lo, hi) => /^\d+$/.test(String(x).trim()) && Number(x) >= lo && Number(x) <= hi;
+        const share = (x) => String(x).trim() !== '' && Number(x) >= 0 && Number(x) <= 1;
+        if (!whole(v.generations, 1, 8)) return 'Give between 1 and 8 generations.';
+        if (!whole(v.children, 1, 10)) return 'Give the most children as a whole number from 1 to 10.';
+        if ((v.seed || '').trim() && !/^-?\d+$/.test(v.seed.trim())) return 'The seed must be a whole number.';
+        if (![v.partners, v.ancestors, v.freq].every(share)) return 'Give the chances and the frequency as numbers between 0 and 1.';
+        return oneWord('family id', v.family);
+      },
+      argv: (v) => [
+        'pedgen', '-m', v.mode, '-g', num(v.generations), '-c', num(v.children), '-f', v.family, '-d', v.outdir,
+        ...optArgs((v.seed || '').trim(), '-s', String(v.seed).trim()),
+        ...optArgs(Number(v.partners) !== 0.6, '--partners', num(v.partners)),
+        ...optArgs(Number(v.ancestors) !== 0.25, '--ancestors', num(v.ancestors)),
+        ...optArgs(Number(v.freq) !== 0.1, '--allele-frequency', num(v.freq)),
+        ...optArgs(v.clean, '--unaffected-partners'),
+        ...optArgs(v.genotypes, '--genotypes', joinPath(v.outdir, v.family + '-genotypes.tsv'))
+      ],
+      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.genotypes && joinPath(v.outdir, v.family + '-genotypes.tsv')].filter(Boolean),
+      python: (v) =>
+        [
+          `from PedGen import pedigree_generator, gen_PED_export${v.genotypes ? ', gen_genotype_export' : ''}`,
+          '',
+          `df = pedigree_generator(max_children=${num(v.children)}, FamilyID=${pyq(v.family)}, mode=${pyq(v.mode)}, generation_count=${num(v.generations)},`,
+          `                        SpouseLikelihood=${num(v.partners)}, AffectedSpouse=${v.clean ? 'False' : 'True'}, BackpropLikelihood=${num(v.ancestors)},`,
+          `                        alt_freq=${num(v.freq)}, seed=${/^-?\d+$/.test((v.seed || '').trim()) ? BigInt(v.seed.trim()).toString() : 'None'})`,
+          'print(len(df), "people,", (df["Phenotype"] == 2).sum(), "affected")',
+          `print("wrote", gen_PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`,
+          ...(v.genotypes ? [`print("wrote", gen_genotype_export(df, ${pyq(joinPath(v.outdir, v.family + '-genotypes.tsv'))}, alt_freq=${num(v.freq)}))`] : [])
+        ].join('\n'),
+      next: (res, v) => {
+        const ped = joinPath(v.outdir, v.family + '.ped');
+        return [
+          ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
+          ['network', 'Its mode of inheritance', () => MG.app.useTool('pednet-mode', { input: ped })],
+          ...(v.genotypes ? [['dna', 'Rank its variant', () => MG.app.useTool('pednet-rank', { input: ped, variants: joinPath(v.outdir, v.family + '-genotypes.tsv') })]] : [])
+        ];
+      }
     }
   ];
   const TOOL = Object.fromEntries(TOOLS.map((t) => [t.id, t]));
@@ -609,7 +907,9 @@
     ['pedigree', 'Draw a PED file I have been sent', ['ped2studio'], 'h-walk-draw-ped'],
     ['pedigree', 'Draw a GA4GH or Phenopackets file', ['ga4gh2studio'], 'h-walk-draw-ga4gh'],
     ['badgeCheck', 'Check a GA4GH file, or update an old one', ['validate', 'upgrade'], 'h-walk-check'],
-    ['tag', 'Give the conditions ontology terms', ['terms', 'normalise'], 'h-walk-terms']
+    ['tag', 'Give the conditions ontology terms', ['terms', 'normalise'], 'h-walk-terms'],
+    ['image', 'Turn a picture of a pedigree into a PED file and a drawing', ['pedinterp', 'ped2studio'], 'h-walk-picture'],
+    ['network', 'Weigh up the mode of inheritance, and rank candidate variants', ['pednet-graph', 'pednet-mode', 'pednet-rank'], 'h-walk-pednet']
   ];
 
   /* ------------------------------------------------------------------ files for the pickers */
@@ -629,8 +929,18 @@
     ex.sort((a, b) => (a.path < b.path ? -1 : 1));
     return { mine, ex };
   }
+  /** the file of some kinds that goes with path: the same name in the same folder with another ending, as a PED file
+      and its variants (dominant.ped and dominant.vcf, or FAM1.ped and FAM1-genotypes.tsv) – or '' */
+  const pairStem = (p) => String(p || '').replace(/(-genotypes)?\.(ped|mped|fam|vcf|vcf\.gz|tsv|csv|txt)$/i, '');
+  function pairOf(path, kinds) {
+    if (!path) return '';
+    const stem = pairStem(path);
+    const { mine, ex } = filesOfKinds(kinds);
+    const hit = mine.concat(ex).find((x) => x.path !== path && pairStem(x.path) === stem);
+    return hit ? hit.path : '';
+  }
   /** where an upload of a kind goes */
-  const uploadDir = (kinds) => HOME() + '/' + (kinds.includes('studio') ? 'pedigrees' : kinds.includes('terms') ? 'terms' : kinds.includes('obo') ? 'ontologies' : 'data');
+  const uploadDir = (kinds) => HOME() + '/' + (kinds.includes('studio') ? 'pedigrees' : kinds.includes('terms') ? 'terms' : kinds.includes('obo') ? 'ontologies' : kinds.includes('image') ? 'pictures' : 'data');
 
   /* ------------------------------------------------------------------ the tab */
   class ToolsTab {
@@ -728,15 +1038,17 @@
     _pyMenu() {
       const K = MG.kernels.get();
       const v = (K.versions && K.versions.packages) || (window.WB_BUNDLE && window.WB_BUNDLE.packages) || {};
+      const later = (window.WB_BUNDLE && window.WB_BUNDLE.analysis && window.WB_BUNDLE.analysis.packages) || {};
       const rows = Object.entries(v)
         .filter(([n]) => n !== 'pedwb' && n !== 'error')
         .map(([n, ver]) => `<tr><td><code>${esc(n)}</code></td><td>${esc(ver || '')}</td></tr>`)
+        .concat(Object.entries(later).map(([n, ver]) => `<tr><td><code>${esc(n)}</code> <small class="muted">loaded when first used</small></td><td>${esc(ver || '')}</td></tr>`))
         .join('');
       const m = MG.modal(
         'Python for the tools',
         `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python.</p>
          <table class="table small"><tr><th>Package</th><th>Version</th></tr>${rows}</table>
-         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer (see the help: Reference → Versions, and how to cite).</p>
+         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
          <div class="prompt-actions"><button class="btn" data-x="start" type="button">${K.state === 'ready' ? 'Restart Python' : 'Start Python now'}</button></div>`
       );
       m.box.querySelector('[data-x="start"]').addEventListener('click', () => {
@@ -787,7 +1099,7 @@
         grid.appendChild(card);
       }
       M.appendChild(grid);
-      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. Your files never leave this computer.'));
+      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. The tools for analysing and simulating, and Picture → PED file, need more, which Python downloads the first time one of them runs: about 4 MB for PedNet’s tools, and about 21 MB in all. Your files never leave this computer.'));
     }
     /** under the map: what can be done with a kind of file */
     _kindPanel(kind, panel) {
@@ -824,7 +1136,8 @@
       const panel = h('div.tl-kindpanel');
       M.appendChild(panel);
       const kinds = kind === 'mped' ? ['mped', 'ped'] : [kind];
-      const tools = TOOLS.filter((t) => !t.custom && (t.fields || []).some((f) => f.key === 'input' && f.kinds.some((k) => kinds.includes(k))));
+      const mainField = (t) => (t.fields || []).find((f) => (f.key === 'input' || f.primary) && f.kinds.some((k) => kinds.includes(k)));
+      const tools = TOOLS.filter((t) => !t.custom && mainField(t));
       panel.appendChild(h('h3.tl-sub', 'What you can do with it'));
       const list = h('div.tl-chooser');
       if (kind === 'studio') {
@@ -835,12 +1148,18 @@
       }
       tools.forEach((t) => {
         const b = h('button.tl-choice', { type: 'button' }, h('b', t.title), h('small', t.what));
-        b.addEventListener('click', () => this.choose(t.id, t.id === 'terms' ? { drawing: path } : { input: path }));
+        b.addEventListener('click', () => this.choose(t.id, t.id === 'terms' ? { drawing: path } : { [mainField(t).key]: path }));
         list.appendChild(b);
       });
       if (!tools.length) list.appendChild(h('p.muted', 'None of the tools reads this kind of file, but you can open it in the Files tab to look at it.'));
       panel.appendChild(list);
-      // what is in it (Python)
+      // what is in it: a picture's size, from the browser; anything else, from Python
+      if (kind === 'image') {
+        const size = await pictureSize(this.fs, path).catch(() => null);
+        info.innerHTML = '';
+        info.appendChild(fileSummary({ kind, name: KIND().image || 'picture', size }));
+        return;
+      }
       try {
         const r = await pyCall('pedwb.gui.inspect', { path });
         if (!r.ok) throw new Error(r.error);
@@ -881,7 +1200,17 @@
       const defOf = (f) => (typeof f.def === 'function' ? f.def(v) : f.def);
       const refreshDerived = (except) => {
         for (const f of tool.fields) {
-          if (f.key === except || touched.has(f.key) || typeof f.def !== 'function') continue;
+          if (f.key === except || touched.has(f.key)) continue;
+          // (a file that goes with the one just chosen: the variants of a PED file)
+          if (f.type === 'file' && f.pair && f.pair === except) {
+            const paired = pairOf(v[except], f.kinds);
+            if (paired && rows[f.key] && rows[f.key].set) {
+              v[f.key] = paired;
+              rows[f.key].set(paired);
+            }
+            continue;
+          }
+          if (typeof f.def !== 'function') continue;
           v[f.key] = defOf(f);
           if (rows[f.key] && rows[f.key].set) rows[f.key].set(v[f.key]);
         }
@@ -893,19 +1222,46 @@
         else if (last[f.key] != null && f.type !== 'file' && f.type !== 'files' && typeof f.def !== 'function') v[f.key] = last[f.key];
         else v[f.key] = f.type === 'files' ? [] : f.type === 'file' ? '' : defOf(f);
       }
-      // a file not given: the last one used, if it is still there; else the first that fits
+      // a file not given: the last one used, if it is still there; else the first that fits – and for a tool that takes
+      // two files that go together (a PED file and its variants), the first that has its pair, and then that pair
+      const fieldOf = (key) => tool.fields.find((x) => x.key === key);
       for (const f of tool.fields.filter((x) => x.type === 'file')) {
         if (v[f.key]) continue;
-        if (last[f.key] && this.fs.exists(last[f.key])) v[f.key] = last[f.key];
+        const paired = f.pair && v[f.pair] ? pairOf(v[f.pair], f.kinds) : '';
+        if (paired) v[f.key] = paired;
+        else if (last[f.key] && this.fs.exists(last[f.key])) v[f.key] = last[f.key];
         else if (!f.optional) {
           const { mine, ex } = filesOfKinds(f.kinds);
-          v[f.key] = (mine[0] || ex[0] || {}).path || '';
+          const all = mine.concat(ex);
+          v[f.key] = ((f.pair && all.find((x) => pairOf(x.path, fieldOf(f.pair).kinds))) || all[0] || {}).path || '';
         }
       }
       const onChange = (key, val) => {
         v[key] = val;
         touched.add(key);
         refreshDerived(key);
+        autoFill();
+      };
+      // a value worked out from a file once it has been read (f.auto(v, fs) → a promise of it, or of null), unless it
+      // has been set by hand: how much to enlarge a picture, from its size. Worked out again when the fields it
+      // depends on (f.autoFrom) change; an answer that comes after they have changed again is dropped
+      const autoAt = {};
+      const autoFill = () => {
+        for (const f of tool.fields) {
+          if (!f.auto || touched.has(f.key)) continue;
+          const at = JSON.stringify((f.autoFrom || []).map((k) => v[k]));
+          if (autoAt[f.key] === at) continue;
+          autoAt[f.key] = at;
+          Promise.resolve()
+            .then(() => f.auto(v, this.fs))
+            .then((val) => {
+              if (val == null || touched.has(f.key) || autoAt[f.key] !== at) return;
+              v[f.key] = val;
+              if (rows[f.key] && rows[f.key].set) rows[f.key].set(val);
+              update();
+            })
+            .catch(() => {});
+        }
       };
       for (const f of tool.fields) {
         const r = fieldRow(this, f, v, onChange);
@@ -947,6 +1303,7 @@
         }
       };
       refreshDerived(null);
+      autoFill();
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const x = full();
@@ -971,17 +1328,20 @@
       const K = kernel();
       const status = h('div.tl-status', h('span.spinner.small'), h('span', K.state === 'ready' ? (K.cellRunning ? 'Waiting for Python, which is busy with a notebook cell…' : 'Running…') : 'Starting Python in your browser (about 10 MB to download the first time)…'));
       result.appendChild(status);
+      // (PedNet, PedGen and PedInterp are loaded the first time one of their tools runs: Python says what it loads)
+      const onStatus = (text) => (status.lastChild.textContent = text || 'Running…');
       const t0 = performance.now();
       try {
         let res;
         if (tool.call) {
-          const r = await pyCall(tool.call.fn, tool.call.args(x));
+          const r = await pyCall(tool.call.fn, tool.call.args(x), onStatus);
+          if (!r.ok && r.kind === 'LoadError') throw new Error(r.error);
           res = { ok: r.ok, code: r.ok ? 0 : 1, stdout: r.stdout || '', stderr: r.stderr || '', files: r.files, result: r.result, error: r.error, traceback: r.traceback };
         } else {
           const list = Array.isArray(tool.argv(x)[0]) ? tool.argv(x) : [tool.argv(x)];
           res = { ok: true, code: 0, stdout: '', stderr: '', files: [] };
           for (const argv of list) {
-            const r = await runArgv(argv);
+            const r = await runArgv(argv, onStatus);
             res.stdout += r.stdout;
             res.stderr += r.stderr;
             res.files = res.files.concat(r.files || []);
@@ -1219,7 +1579,7 @@
   function renderSame(box, tool, x) {
     let argvs = tool.argv(x);
     if (!Array.isArray(argvs[0])) argvs = [argvs];
-    const cmd = argvs.map((a) => a.map((s) => shq(tilde(s))).join(' ')).join('\n');
+    const cmd = argvs.map((a) => a.map(shArg).join(' ')).join('\n');
     const code = tool.python ? tool.python(x) : '';
     const details = h('details.tl-samebox', { open: store.get('toolsSameOpen', false) ? '' : null });
     details.addEventListener('toggle', () => store.set('toolsSameOpen', details.open));
@@ -1238,7 +1598,7 @@
   /** a file the tool wrote: its name, and buttons to open it where it belongs */
   function fileChip(p) {
     const kind = MG.app.pedKind(p);
-    const chip = h('div.tl-filechip', h('span.tl-fname', { html: icon(kind === 'studio' ? 'pedigree' : kind === 'ped' || kind === 'mped' ? 'table' : 'file') + `<code>${esc(tilde(p))}</code>` }), h('span.tl-fkind', KIND()[kind] || ''));
+    const chip = h('div.tl-filechip', h('span.tl-fname', { html: icon(kind === 'studio' ? 'pedigree' : kind === 'ped' || kind === 'mped' ? 'table' : kind === 'image' ? 'image' : kind === 'vcf' || kind === 'variants' ? 'dna' : 'file') + `<code>${esc(tilde(p))}</code>` }), h('span.tl-fkind', KIND()[kind] || ''));
     const acts = h('span.tl-facts');
     const add = (ic, label, fn) => {
       const b = h('button.linkbtn', { type: 'button', html: icon(ic) + `<span>${esc(label)}</span>` });
@@ -1280,6 +1640,15 @@
       row('Families', (info.families || []).join(', '));
       row('Conditions', (info.phenotypes || []).join(', '));
       row('Affected', String(info.affected));
+    } else if (info.kind === 'vcf') {
+      row('Variants', String(info.variants));
+      row('Samples', String(info.samples));
+      if (info.chromosomes && info.chromosomes.length) row('Chromosomes', info.chromosomes.join(', '));
+    } else if (info.kind === 'variants') {
+      row('Variants', String(info.variants));
+      row('People', String(info.people));
+    } else if (info.kind === 'image') {
+      row('Size', info.size ? `${info.size.width.toLocaleString('en-GB')} × ${info.size.height.toLocaleString('en-GB')} pixels` : 'not known: your browser can’t show this picture');
     } else if (info.kind === 'terms') row('Names matched', String(info.terms));
     else if (info.kind === 'obo') {
       row('Ontology', info.ontology);

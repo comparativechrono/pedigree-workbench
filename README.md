@@ -10,7 +10,13 @@ person using it.
 
 The packages are studio2ped, ped2studio, studio2ga4gh, ga4gh2studio,
 mpedtools, hponorm, mondonorm and the phenopacket toolkit (phenotk), with
-pedigree-ga4gh, the one GA4GH implementation that the others now share.
+pedigree-ga4gh, the one GA4GH implementation that the others now share. With
+them are three packages for analysing pedigrees: **PedNet**, which analyses a
+family as a graph and weighs up its mode of inheritance and how well candidate
+variants co-segregate with its condition; **PedGen**, which simulates
+families; and **PedInterp**, which reads a pedigree from a picture of one.
+They need NumPy, pandas, OpenCV and Pillow, so the page loads them only when
+one of them is first used.
 
 ## Contents
 
@@ -51,6 +57,12 @@ The tools in the Tools tab:
 | Check and look inside | Check against the standard · Upgrade a file from an older tool (pedigree-ga4gh) · Look inside a GA4GH file · Compare two files (phenotk) |
 | Prepare to share | De-identify · Keep some people or terms · One file for each person · Put files together · Add findings to people (phenotk) |
 | PED and MPED files | Summary and check · Take one condition out · Put PED files together · One file for each family · PED ⇄ MPED, and columns (mpedtools) |
+| Analyse and simulate | The pedigree as a graph · Mode of inheritance · Rank candidate variants (PedNet) · Simulate a family (PedGen) |
+
+*Picture → PED file* (PedInterp) is with the conversions. A browser can't run
+Tesseract, which PedInterp uses to read the labels under the symbols, so in
+the workbench it numbers the people by generation (I-1, I-2, II-1 …), as
+Pedigree Studio does.
 
 *Match conditions to terms* finds the HPO or Mondo term for each condition in
 a drawing's colour key, searching EBI's Ontology Lookup Service or copies of
@@ -116,9 +128,10 @@ python3 serve.py          # then open http://localhost:8000/
 
 | You changed | Run |
 |---|---|
-| the Python packages (`python/`) | `python3 python/build_bundle.py` (makes `assets/py/pedigree-tools.zip`), then `python3 build/make_page.py` |
+| the Python packages (`python/`) | `python3 python/build_bundle.py` (makes `assets/py/pedigree-tools.zip` and `pedigree-analysis.zip`), then `python3 build/make_page.py` |
+| PedNet, PedGen, PedInterp or networkx | `python3 python/tools/vendor_wheels.py WHEEL …` (copies them from their wheels into `python/`), then the line above |
 | the help (`build/help/*.html`), the template, `build/citations.json` | `python3 build/make_page.py` |
-| the welcome notebook | `python3 build/make_starter.py` |
+| the notebooks to start from | `python3 build/make_starter.py` |
 | the example files | `python3 build/make_example_data.py`, then `python3 build/make_page.py` |
 | Pedigree Studio | `python3 build/update_studio.py --git ../PedigreeStudio`, then `python3 build/make_page.py` |
 
@@ -130,7 +143,14 @@ python3 serve.py          # then open http://localhost:8000/
 - **The Python packages** in `python/` are the workbench's copies;
   [python/README.md](python/README.md) says where each comes from and which
   are changed. They are zipped into `assets/py/pedigree-tools.zip`, which the
-  page unpacks into Pyodide when Python starts.
+  page unpacks into Pyodide when Python starts. PedNet, PedGen and PedInterp,
+  with networkx, are in a second archive, `assets/py/pedigree-analysis.zip`,
+  which the page loads with the packages of Pyodide's they need (NumPy,
+  pandas, OpenCV, Pillow) the first time one of them is used: by its command,
+  its tools, or an import in a notebook or script (`py-worker.js`, from what
+  `pedwb.cli.NEEDS` says each needs). OpenCV alone is a download of about
+  11 MB, so loading them every time Python starts would slow every first
+  visit.
 - **The framework** – the page, the help, the shell, the notebook and the
   editor – comes from the lab's Bioinformatics workbench (`assets/js`,
   `assets/css`), with what this workbench does not need taken out. The Studio
@@ -142,7 +162,8 @@ python3 serve.py          # then open http://localhost:8000/
 ## Tests
 
 ```bash
-python3 python/run_tests.py           # the packages: conversions, validation, upgrading, the toolkit, the welcome notebook
+python3 python/run_tests.py           # the packages: conversions, validation, upgrading, the toolkit, PedNet, PedGen,
+                                      # PedInterp, and the notebooks to start from
 python3 tests/help_code.py            # every code box of the help, run as a reader would
 node tests/equivalence/gen.js assets/js/tools.js > /tmp/cases.jsonl && \
   python3 tests/equivalence/run_equiv.py /tmp/cases.jsonl
@@ -150,7 +171,10 @@ node tests/equivalence/gen.js assets/js/tools.js > /tmp/cases.jsonl && \
 python3 tests/browser_smoke.py        # the page in headless Chromium (needs Playwright)
 ```
 
-With `PHENOPACKET_TOOLS_SCHEMAS` pointing at phenopacket-tools' v2 JSON
+The tests of PedNet, PedGen and PedInterp, and their help boxes, need NumPy,
+pandas, OpenCV and Pillow (`pip install numpy pandas opencv-python-headless
+pillow`), and are skipped, with a note, without them. With
+`PHENOPACKET_TOOLS_SCHEMAS` pointing at phenopacket-tools' v2 JSON
 schemas, `run_tests.py` also checks the packages' output against them, and
 `python/tools/official_check.py` checks any file the way phenopacket-tools
 does. The tests never contact EBI's Ontology Lookup Service.
@@ -170,6 +194,15 @@ changed, and how to release new versions. They cover:
 - abusua2ga4gh and ga4gh2abusua, rewritten on pedigree-ga4gh;
 - studio2ped, ped2studio, hponorm and mondonorm.
 
+PedNet 2.0.0 is on PyPI, and the workbench's copy is its wheel. The commands
+the workbench runs from PedGen and PedInterp are merged but not yet released
+([pedigree-generator#2](https://github.com/comparativechrono/pedigree-generator/pull/2),
+[pedigree-interpreter#3](https://github.com/comparativechrono/pedigree-interpreter/pull/3)),
+so the workbench's copies are built from GitHub until they are: PedGen's from
+`main`, and PedInterp's from
+[pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4),
+which fixes how it reads children drawn straight under their parents.
+
 ## Files
 
 ```
@@ -177,14 +210,16 @@ index.html                 the page (built: see above)
 assets/
   js/  css/                the workbench
   studio/                  Pedigree Studio, and bridge.js
-  py/                      the Python packages, zipped for the page
+  py/                      the Python packages, zipped for the page: pedigree-tools.zip, and
+                           pedigree-analysis.zip (PedNet, PedGen, PedInterp), loaded when first used
   vendor/                  CodeMirror, marked, DOMPurify, JSZip
 data/
   examples/                example families, and files made from them (README.md)
-  starter/                 the welcome notebook
+  starter/                 the notebooks to start from
 build/                     what builds index.html, the examples, the notebook and the Studio copy
   help/                    the help pages
 python/                    the packages, their tests, and tools for the examples and checks
+  vendor/                  networkx's wheel, and SOURCES.json: where PedNet, PedGen, PedInterp and networkx come from
 docs/                      ga4gh.md (the GA4GH decision), upstream.md (the packages' pull requests)
 tests/                     the help's code, command/Python equivalence, a browser test
 serve.py                   a small web server for trying it locally
@@ -193,7 +228,10 @@ serve.py                   a small web server for trying it locally
 ## Credits and licences
 
 The workbench, Pedigree Studio and the packages are the Hearn lab's, under
-the MIT licence ([LICENSE](LICENSE)). KIN's terms in `pedigree_ga4gh` are from
+the MIT licence ([LICENSE](LICENSE)); PedNet is by Tim Hearn and Nick Taylor,
+and PedGen and PedInterp by Nick Taylor, also under the MIT licence, with their
+licences beside them in `python/`. networkx is under the 3-clause BSD
+licence. KIN's terms in `pedigree_ga4gh` are from
 the GA4GH Pedigree Standard's `kin.owl` (Apache 2.0). The libraries of the page
 and Pyodide keep their own licences: **[THIRD_PARTY.md](THIRD_PARTY.md)** lists
 them. The example families are the fictional families of the lab's pedigree

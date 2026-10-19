@@ -1,0 +1,41 @@
+<!-- id: h-tool-pedinterp | title: Picture → PED file | group: Tools | summary: PedInterp: a pedigree read from a picture of one | keys: pedinterp picture image png jpeg jpg scan paper photo screenshot read ocr tesseract symbols lines numbering numbered ped convert -->
+<h1><!--ICON:image-->Picture → PED file</h1>
+<p class="lede">PedInterp reads a picture of a pedigree, such as one in a paper, a clinic letter or a scan, and writes it as a PED file. It finds the symbols and the lines between them, and so who is male or female, who is affected, and who are partners, parents and children.</p>
+<div class="tryrow"><button class="do" type="button" data-tool="pedinterp" data-input="/data/examples/lynch.png">Try it with the picture of the Lynch family</button> <button class="do" type="button" data-edit="/data/examples/lynch.png">Look at the picture</button></div>
+
+<h2>The form</h2>
+<dl>
+  <dt>The picture</dt><dd>A PNG or JPEG file, or a GIF, BMP, TIFF or WebP picture. <b>From my computer…</b> adds one of your own, in <code>~/pictures</code>.</dd>
+  <dt>Family id</dt><dd>The family's id in the PED file, which also names the file. It starts as the picture's name.</dd>
+  <dt>Save in</dt><dd>The folder for the PED file: <code>~/results</code>, unless you choose another.</dd>
+  <dt>Enlarge the picture by</dt><dd>PedInterp enlarges the picture before it reads it, and reads it best when the enlarged picture is about 5,000 pixels across. So when you choose a picture, the form works the number out from its size: 5 for a picture 1,000 pixels across, such as the Lynch family's, 10 for one 500 pixels across, and 15 for one 350 pixels across. There is some room either side: the picture of the Lynch family reads correctly at anything from 4 to 12, but not at 3 or 15. Too little or too much enlargement doesn't always bring a warning, so check the parents in the table. In the terminal and in Python, the default is 10, whatever the picture's size.</dd>
+</dl>
+
+<h2>What it reads</h2>
+<p>PedInterp reads pedigrees drawn in the usual way, in black on white: squares, circles and diamonds, filled in for the people who are affected, with each generation in a row of its own. It follows the lines between partners, down from partners to their children, and over a family of brothers and sisters. A slash through a symbol, for someone who has died, doesn't usually stop it reading the symbol, though a slash at an odd angle can make it mistake the person's sex. The father is the male partner and the mother the female one, whichever side each is drawn on.</p>
+<p>Some things aren't read yet: symbols that are half filled or shaded (as they often are for carriers), lines that slope (as they do for twins), and dashed lines. A PED file has no place for deaths, twins or adoptions anyway. So compare the PED file with the picture before you use it. The quickest way is to draw it, with <a href="#h-tool-ped2studio">PED or MPED → drawing</a>.</p>
+
+<h2>Who is who</h2>
+<p>On a computer of your own, PedInterp reads the labels under the symbols with the Tesseract program. A browser can't run Tesseract, so here the people are numbered by generation instead: from the top, and from the left in each generation, I-1, I-2, II-1 and so on. Pedigree Studio numbers people in the same way. The picture of the Lynch family was drawn where the Studio draws the family, so its numbers are the same as those in the Lynch PED file, and the PED file that PedInterp writes is the same as that one, apart from the family's id.</p>
+
+<h2>In the terminal</h2>
+<pre class="code" data-run="term"><code>pedinterp /data/examples/lynch.png --labels none -d ~/results
+diff &lt;(cut -f2- ~/results/lynch.ped) &lt;(cut -f2- /data/examples/lynch.ped) &amp;&amp; echo "the same people, parents, sexes and status"</code></pre>
+<table>
+<tr><th>Option</th><th></th></tr>
+<tr><td><code>-f</code>, <code>--family ID</code></td><td>the family id, which names the PED file (default: the picture's name)</td></tr>
+<tr><td><code>-d</code>, <code>--output-dir FOLDER</code></td><td>where to write the PED file (default: the folder you're in)</td></tr>
+<tr><td><code>--upscale FACTOR</code></td><td>how many times to enlarge the picture (default: 10)</td></tr>
+<tr><td><code>--labels tesseract|none</code></td><td>read the labels with Tesseract, or number the people. Here the people are numbered either way, but with <code>none</code> there's no warning that Tesseract isn't there.</td></tr>
+<tr><td><code>-q</code>, <code>--quiet</code></td><td>don't print the table</td></tr>
+</table>
+
+<h2>In Python</h2>
+<pre class="code" data-run="py"><code>from PedInterp import pedigree_processing, PED_export
+
+df = pedigree_processing("LYNCH", image_path="/data/examples/lynch.png", ocr=None)
+print(df.to_string(index=False))
+print("wrote", PED_export(df, "/home/user/results"))</code></pre>
+<p><code>ocr=None</code> numbers the people. <code>ocr</code> can also be a function that reads the labels with other OCR, such as tesseract.js in a web page: <a href="https://github.com/comparativechrono/pedigree-interpreter#reading-the-labels-with-other-ocr" target="_blank" rel="noopener">PedInterp's README</a> explains how.</p>
+<div class="callout info"><div class="co-t"><!--ICON:info-->The first time</div><p>PedInterp needs NumPy, pandas, OpenCV and Pillow, which Python downloads the first time you use it. That is about 21 MB, or less if PedNet or PedGen has already run, and your browser keeps them for next time.</p></div>
+<!--CITE: pedinterp-->

@@ -3,9 +3,11 @@
    shell-lang.js, shell-extra.js) and its text tools (shell-text.js):
 
      studio2ped, ped2studio, studio2ga4gh, ga4gh2studio, mpedtools,
-     hponorm, mondonorm, phenotk, pedigree-ga4gh
-                            the pedigree programs (Python, run as
-                            python -m pedwb PROGRAM …)
+     hponorm, mondonorm, phenotk, pedigree-ga4gh, pednet, pedgen,
+     pedinterp              the pedigree programs (Python, run as
+                            python -m pedwb PROGRAM …; Python loads
+                            pednet, pedgen and pedinterp, and NumPy and
+                            the rest they need, the first time they run)
      python, pip            Python (Pyodide) – the notebooks' Python; pip
                             installs packages for this visit (micropip)
      studio FILE            open a drawing in the Studio tab
@@ -85,7 +87,10 @@
     hponorm: ['match phenotype names in Phenopackets to HPO terms (it asks questions as it goes, so here give it the answers in a file)', `hponorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"hearing loss from birth": {"id": "HP:0000365", "label": "Hearing impairment"}})`],
     mondonorm: ['match disease names in Phenopackets to Mondo terms (it asks questions as it goes, so here give it the answers in a file)', `mondonorm FILE.json --mapping answers.json --auto-remembered -o OUT.json\n(answers.json: {"breast cancer": {"id": "MONDO:0007254", "label": "breast cancer"}})`],
     phenotk: ['the phenopacket toolkit: validate, view, stats, normalise, filter, deidentify, convert, upgrade, sort, diff, split, merge, ped, add', `phenotk validate ${EX}/okafor_phenopackets-family.json\nphenotk view ${EX}/okafor_phenopackets-family.json\nphenotk convert ${EX}/okafor_ga4gh-pedigree.json --to family -o ~/results/family.json`],
-    'pedigree-ga4gh': ['the one GA4GH implementation the other programs share: validate, upgrade, convert, kin', `pedigree-ga4gh validate ${EX}/okafor_ga4gh-pedigree.json\npedigree-ga4gh upgrade ${EX}/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/upgraded.json\npedigree-ga4gh kin | grep -i mother`]
+    'pedigree-ga4gh': ['the one GA4GH implementation the other programs share: validate, upgrade, convert, kin', `pedigree-ga4gh validate ${EX}/okafor_ga4gh-pedigree.json\npedigree-ga4gh upgrade ${EX}/older/studio2ga4gh-0.3_phenopackets-family.json -o ~/results/upgraded.json\npedigree-ga4gh kin | grep -i mother`],
+    pednet: ['PED files as graphs: graph (loops, kinship, inbreeding, the closest affected relatives), mode (the mode of inheritance), rank (candidate variants by co-segregation), check', `pednet graph ${EX}/cf-cousins.mped\npednet graph ${EX}/pednet/consanguineous.ped --kinship ~/results/kinship.tsv\npednet mode ${EX}/lynch.ped\npednet rank ${EX}/pednet/dominant.ped ${EX}/pednet/dominant.vcf`],
+    pedgen: ['simulate a family with an autosomal dominant or recessive condition, as a PED file (and, with --genotypes, everyone’s genotypes)', 'pedgen --mode AR --generations 4 --seed 7 -d ~/results --genotypes ~/results/FAM1-genotypes.tsv\npednet mode ~/results/FAM1.ped\npednet rank ~/results/FAM1.ped ~/results/FAM1-genotypes.tsv'],
+    pedinterp: ['a picture of a pedigree → PED file (here the people are numbered by generation: --labels none)', `pedinterp ${EX}/lynch.png --labels none -d ~/results\ndiff <(cut -f2- ~/results/lynch.ped) <(cut -f2- ${EX}/lynch.ped) && echo "the same people, parents and status"`]
   };
   MG.pedPrograms = PROGRAMS;
   function pedProgram(name) {
@@ -775,7 +780,8 @@
     MG.shellUtil.ABSENT.splice(
       0,
       MG.shellUtil.ABSENT.length,
-      [/^(plink|plink2|merlin|linkdemo|superlink|madeline2|madeline|kinship2|pedtools|haploview|vcftools|bcftools|samtools|gatk)$/, 'isn’t installed in this terminal, which is for pedigree files (type  help  to see its programs). The PED files you make here with studio2ped open in PLINK, Merlin and similar programs on your own computer.'],
+      [/^(kinship2|pedtools|kinship|ribd|identity)$/, 'isn’t installed in this terminal, but pednet works out kinship and inbreeding coefficients:  pednet graph FAMILY.ped --kinship kinship.tsv  (add --x for the X chromosome). Type  man pednet  for more.'],
+      [/^(plink|plink2|merlin|linkdemo|superlink|madeline2|madeline|haploview|vcftools|bcftools|samtools|gatk)$/, 'isn’t installed in this terminal, which is for pedigree files (type  help  to see its programs). The PED files you make here with studio2ped open in PLINK, Merlin and similar programs on your own computer. For the co-segregation of variants with a condition, try  pednet rank FAMILY.ped VARIANTS.vcf.'],
       [/^(awk|gawk|mawk|nawk|perl|ruby|node|java|julia|R|Rscript|jq)$/, 'isn’t installed in this terminal. For PED files, mpedtools does most jobs (mpedtools info, extract, convert). For JSON, python -m json.tool FILE prints a file neatly, and phenotk view shows a GA4GH file as a table. For anything else, a line of Python will do, for example  python -c "import sys; [print(l.split()[1]) for l in open(sys.argv[1])]" family.ped'],
       [/^(ipython|ipython3|jupyter)$/, 'isn’t a command here. Use the Notebook tab to run Python a line at a time.'],
       [/^(conda|mamba|micromamba|virtualenv|pipenv|poetry|pyenv|uv)$/, 'isn’t needed here, so the workbench doesn’t include it. The pedigree packages are already installed, and you can add other Python packages with  pip install NAME  (they last until you reload the page).'],
@@ -793,9 +799,16 @@
 
   /* ------------------------------------------------------------------ help */
   B.help = (ctx) => {
-    const row = (name, text) => '  ' + name.padEnd(17) + text;
-    const v = (MG.py && MG.py.versions && MG.py.versions.packages) || {};
-    const ver = (n) => (v[n === 'phenotk' ? 'phenopacket-toolkit' : n] ? ' ' + v[n === 'phenotk' ? 'phenopacket-toolkit' : n] : '');
+    // (the versions of pednet, pedgen and pedinterp, which Python loads when they first run, are the archive's; the
+    // others' are known once Python has started)
+    const started = (MG.py && MG.py.versions && MG.py.versions.packages) || {};
+    const later = (window.WB_BUNDLE && window.WB_BUNDLE.analysis && window.WB_BUNDLE.analysis.packages) || {};
+    const v = Object.assign({}, started, { pednet: later.pednet, pedgen: later.PedGen, pedinterp: later.PedInterp });
+    // (a version built from GitHub, such as 0.1.4.dev5+g4ab719d58, without the commit)
+    const ver = (n) => (v[n === 'phenotk' ? 'phenopacket-toolkit' : n] ? ' ' + String(v[n === 'phenotk' ? 'phenopacket-toolkit' : n]).replace(/\+.*$/, '') : '');
+    // (wide enough for the longest name and version, such as pedinterp 0.1.8.dev8)
+    const width = Math.max(17, ...Object.keys(PROGRAMS).map((n) => (n + ver(n)).length + 2));
+    const row = (name, text) => '  ' + name.padEnd(width) + text;
     ctx.out(
       [
         'Commands in this terminal – every one runs here, in your browser.  (man NAME: examples; NAME --help: options)',
@@ -820,7 +833,7 @@
         'The shell is bash: | && || ; > >> < 2> 2>&1, quotes, $VAR, $( ), $(( )), globs, if/for/while/case, functions,',
         '  [[ ]], here-documents, <( ), xargs, printf, read. Scripts: bash script.sh. Not there: background jobs (&), sudo, apt.',
         'Keys: ↑/↓ earlier commands · Tab completes · Ctrl+C stops · Ctrl+L clears.  Full guide: the Help pane (Terminal).',
-        v && Object.keys(v).length ? '' : '(The versions show once Python has started: run any of the programs.)',
+        Object.keys(started).length ? '' : '(The other programs’ versions show once Python has started: run any of them.)',
         ''
       ].join('\n')
     );

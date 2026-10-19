@@ -1,10 +1,10 @@
 <!-- id: h-notebook | title: The Notebook | group: Notebook and terminal | summary: Python notebooks with the pedigree packages, in the browser | keys: notebook jupyter ipynb python cells run shift enter markdown pip magic cd bash writefile download restart variables starter pedigree-tools -->
 <h1><!--ICON:notebook-->The Notebook</h1>
 <p class="lede">The Notebook tab runs Python notebooks in your browser, with all the pedigree packages installed. They're the same <code>.ipynb</code> files that Jupyter uses. The tab is for work the forms don't cover, such as many families at once, your own checks, or a record of an analysis that can be run again.</p>
-<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-tools.ipynb">Open the welcome notebook</button> <button class="do" type="button" data-new-nb="python">Start a new notebook</button></div>
+<div class="tryrow"><button class="do" type="button" data-open-nb="~/notebooks/pedigree-tools.ipynb">Open the welcome notebook</button> <button class="do" type="button" data-open-nb="~/notebooks/pedigree-analysis.ipynb">Open the analysis notebook</button> <button class="do" type="button" data-new-nb="python">Start a new notebook</button></div>
 
-<h2>The welcome notebook</h2>
-<p><code>~/notebooks/pedigree-tools.ipynb</code> walks you through the packages. It covers reading a drawing, converting it and checking the result, the family as Python objects, the phenopacket toolkit, PED files, and running commands from a cell. Run its cells from the top.</p>
+<h2>The notebooks to start from</h2>
+<p><code>~/notebooks/pedigree-tools.ipynb</code> walks you through the packages. It covers reading a drawing, converting it and checking the result, the family as Python objects, the phenopacket toolkit, PED files, and running commands from a cell. <code>~/notebooks/pedigree-analysis.ipynb</code> goes on to PedNet, PedGen and PedInterp: a family as a graph, its kinship and loops, its mode of inheritance, candidate variants, simulated families, and a pedigree read from a picture. Run their cells from the top. If you've deleted one, its button here brings back a fresh copy.</p>
 
 <h2>Working in a notebook</h2>
 <ul>
@@ -28,5 +28,5 @@
 </table>
 
 <h2>The packages</h2>
-<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
+<p>These packages are installed: studio2ga4gh, ga4gh2studio, studio2ped, ped2studio, mpedtools, hponorm, mondonorm, phenopacket-toolkit and pedigree-ga4gh. PedNet (<code>pednet</code>), PedGen and PedInterp are loaded, with NumPy, pandas, OpenCV and Pillow as they need them, when a cell first imports one of them or runs one of their commands. They're the versions that come with the workbench (<a href="#h-versions">Versions</a>). PyYAML is installed too. <a href="#h-python">The packages in Python</a> shows the main functions of each one. Every tool in the Tools tab shows its Python code under <b>The same in the terminal, and in Python</b>, with an <b>Add to notebook</b> button.</p>
 <div class="callout info"><div class="co-t"><!--ICON:info-->One Python for three tabs</div><p>The Tools tab, the Notebook tab and the Terminal tab share one Python. While a notebook cell is running, a tool waits for it to finish, and the other way round.</p></div>

@@ -1,4 +1,4 @@
-<!-- id: h-python | title: The packages in Python | group: Notebook and terminal | summary: The main functions of each package, with examples | keys: python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm notebook code -->
+<!-- id: h-python | title: The packages in Python | group: Notebook and terminal | summary: The main functions of each package, with examples | keys: python api import functions convert_file parse_session pedigree_ga4gh kindred validate upgrade phenopacket_toolkit read write ops mpedtools hponorm mondonorm pednet pedgen pedinterp read_ped infer_mode rank_variants kinship pedigree_generator pedigree_processing notebook code -->
 <h1><!--ICON:python-->The packages in Python</h1>
 <p class="lede">These are the main functions of each package, for use in notebooks and scripts. You can add each box to the open notebook. The packages' own help, such as <code>help(studio2ga4gh.convert_file)</code>, tells you more.</p>
 
@@ -64,6 +64,37 @@ print(mpedtools.summarise(ped))
 print([(i.level, i.message) for i in mpedtools.validate(ped)])
 cf = mpedtools.extract_phenotype(ped, "Cystic_fibrosis")
 mpedtools.write(cf, "/home/user/results/cf.ped", force_format="ped")</code></pre>
+
+<h2>pednet: a family as a graph</h2>
+<pre class="code" data-run="py"><code>import pednet
+
+families = pednet.read_ped("/data/examples/okafor.mped")   # {family id: pedigree}; from an MPED file, its first condition
+okafor = families["FAM1"]
+graph = pednet.pedigree_graph(okafor)                       # a networkx DiGraph, parent → child
+print(graph.number_of_nodes(), "people;", [loop.people for loop in pednet.loops(okafor)])
+ids, phi = pednet.kinship_matrix(okafor)                    # everyone's kinship coefficients
+print(pednet.inbreeding(okafor)["IV-3"], pednet.relationship(okafor, "IV-3", "III-3").name)
+
+result = pednet.infer_mode(okafor)                          # exact likelihoods; or classify_by_patterns(okafor)
+print(result.call, {m.mode: round(m.posterior, 3) for m in result.modes})
+
+family = pednet.read_ped("/data/examples/pednet/recessive.ped")["FAM2"]
+variants = pednet.read_vcf("/data/examples/pednet/recessive.vcf", samples=family.ids)
+for s in pednet.rank_variants(family, variants, modes="AR")[:3]:
+    print(s.rank, s.id, round(s.log10_bf, 2), s.evidence)</code></pre>
+<p><code>infer_shared_mode</code> and <code>rank_variants_across</code> take several families with the same condition. <code>pedigree_from_rows</code> makes a pedigree from a table with the PED columns, such as PedGen and PedInterp make.</p>
+
+<h2>PedGen and PedInterp: simulated families, and pictures</h2>
+<pre class="code" data-run="py"><code>import pednet
+from PedGen import pedigree_generator
+from PedInterp import pedigree_processing
+
+sim = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AD", generation_count=4, seed=4)
+print(pednet.infer_mode(pednet.pedigree_from_rows(sim)).call)
+
+read = pedigree_processing("LYNCH", image_path="/data/examples/lynch.png", ocr=None)
+print(read.head())</code></pre>
+<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files.</p>
 
 <h2>hponorm, mondonorm: searching the ontologies</h2>
 <pre class="code" data-run="py"><code>from mondonorm.mondo import MondoIndex      # a copy of Mondo among your files (or: from mondonorm.ols import OlsClient)
