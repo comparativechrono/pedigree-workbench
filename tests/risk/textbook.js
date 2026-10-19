@@ -1,4 +1,6 @@
-/* PedRisk on the examples of genetic counselling textbooks, whose answers are known */
+/* PedRisk on the examples of genetic counselling textbooks, whose answers are known; on families too many to sum
+   without rescaling; and how chances are worded. Also the page's reader of the test results and statuses that the
+   Risk tab's table gives people (risk-read.js). usage: node tests/risk/textbook.js */
 'use strict';
 const R = require(process.argv[2] || '../../assets/js/risk-engine.js');
 let failures = 0;
@@ -128,10 +130,60 @@ try { R.analyse(twins.map((p) => (p.id === 'II-2' ? Object.assign({}, p, { sex: 
 console.log(`${/identical twins, but not of the same sex/.test(threw) ? 'ok  ' : 'FAIL'}  identical twins of different sexes are refused: ${threw}`);
 if (!/identical twins, but not of the same sex/.test(threw)) failures++;
 
+// many unconnected families in one pedigree (as in a file of many families): each leaves a small number when it is
+// summed out, and their product must not underflow, either into "can't happen" or into a wrong chance (found by the
+// independent review: 18 trios at q = 1e-9 were said to be impossible, and with 52 families and 37 more brothers
+// and sisters, an unaffected sister of someone affected came out as a carrier for certain)
+const trios = [];
+for (let k = 0; k < 60; k++) {
+  trios.push({ id: `f${k}`, sex: 'M', affected: false }, { id: `m${k}`, sex: 'F', affected: false },
+    { id: `a${k}`, sex: 'F', father: `f${k}`, mother: `m${k}`, affected: true }, { id: `s${k}`, sex: 'F', father: `f${k}`, mother: `m${k}`, affected: false });
+}
+for (let k = 0; k < 37; k++) trios.push({ id: `x${k}`, sex: 'M', father: 'f0', mother: 'm0', affected: false });
+a = R.analyse(trios, { mode: 'AR', q: 1e-9 });
+expect('AR, 60 families in one pedigree, q = 1e-9: still possible', a.ok ? 1 : 0, 1);
+if (a.ok) expect('AR, 60 families: an unaffected sister of someone affected is a carrier', a.people.s59.one, 2 / 3, 1e-6);
+a = R.analyse(trios, { mode: 'AR', q: 0.001 });
+expect('AR, 60 families, q = 0.001: the sister with 37 unaffected brothers is a carrier', a.ok ? a.people.s0.one : -1, 2 / 3, 1e-6);
+b = R.bayes(trios, { mode: 'AR', q: 0.001 }, 's0');
+expect('AR, 60 families: her Bayesian posterior', b.ok ? row(b, 1).posterior : -1, 2 / 3, 1e-6);
+
+// a child of either sex has a whole summary under an X-linked mode, as under the autosomal ones
+const either = R.childRisk(dmd, xlr, 'II-3', 'II-2');
+expect('XLR: a child of either sex is a carrier (one copy), half of a daughter\'s chance', either.any.one, either.daughter.one / 2 + either.son.one / 2, 1e-12);
+// the descendants a Bayesian table counts are the person's own, not their identical twin's
+const twinSons = [
+  { id: 'I-1', sex: 'M', affected: false }, { id: 'I-2', sex: 'F', test: 'carrier' },
+  { id: 'II-1', sex: 'F', father: 'I-1', mother: 'I-2', affected: false }, { id: 'II-2', sex: 'F', father: 'I-1', mother: 'I-2', twin: 'II-1', affected: false },
+  { id: 'II-3', sex: 'M', affected: false },
+  ...[1, 2, 3].map((n) => ({ id: `III-${n}`, sex: 'M', father: 'II-3', mother: 'II-2', affected: false }))
+];
+b = R.bayes(twinSons, xlr, 'II-1');
+expect("XLR: a woman's identical twin's three unaffected sons count: her chance", row(b, 1).posterior, 1 / 9, 1e-5);
+expect('XLR: ...but she has no descendants of her own', b.descendants, 0);
+
+// the page's reader: what the Everyone table gives someone replaces what the family says of them (a test result, or
+// a status: affected, unaffected, or not known)
+const READ = require('../../assets/js/risk-read.js');
+const fam = { id: 'F', conditions: [{ key: 'c', label: 'c' }], unrecorded: 'unknown', partners: [], people: [
+  { id: 'a', label: 'a', sex: 'M', father: null, mother: null, status: { c: 'affected' } },
+  { id: 'b', label: 'b', sex: 'F', father: null, mother: null, status: { c: 'carrier' } },
+  { id: 'u', label: 'u', sex: 'M', father: null, mother: null, status: {} }
+] };
+const given = (tests) => READ.forEngine(fam, 'c', tests).map((x) => `${x.id}:${x.affected}/${x.test}`).join(' ');
+const same = (what, got, want) => { const ok = got === want; if (!ok) failures++; console.log(`${ok ? 'ok  ' : 'FAIL'}  ${what}: ${got}, expected ${want}`); };
+same('reader: as the family says', given({}), 'a:true/null b:null/carrier u:null/null');
+same('reader: a status given, and a test result', given({ a: 'unknown', b: 'none', u: 'unaffected' }), 'a:null/null b:null/none u:false/null');
+same('reader: a carrier mark left out, and someone taken as affected', given({ b: 'clear', u: 'affected' }), 'a:true/null b:null/null u:true/null');
+
 // describing chances
 const d = (x) => R.describe(x).text;
 const say = (x, want) => { const ok = d(x) === want; if (!ok) failures++; console.log(`${ok ? 'ok  ' : 'FAIL'}  describe(${x}) = ${d(x)}, expected ${want}`); };
 say(2 / 3, '2/3'); say(1 / 150, '1 in 150'); say(98 / 2499, '2/51'); say(0.0384, 'about 1 in 26'); say(0.2500000009999999, '1 in 4'); say(1 / 2500, '1 in 2,500'); say(0.9999999, 'over 99.9%'); say(0.6612, 'about 66%'); say(1e-9, 'less than 1 in a million'); say(0, '0');
+// near 100%, a tenth of a per cent (the chance of the opposite matters); and 1 in a million is 0.0001%
+say(0.996, 'about 99.6%');
+const pctOf = (x, want) => { const ok = R.describe(x).pct === want; if (!ok) failures++; console.log(`${ok ? 'ok  ' : 'FAIL'}  describe(${x}).pct = ${R.describe(x).pct}, expected ${want}`); };
+pctOf(1e-6, '0.00010%');
 
 console.log(failures ? `${failures} failed` : 'all passed');
 process.exit(failures ? 1 : 0);

@@ -30,6 +30,7 @@
 .rk-notes:empty, .rk-summary:empty { display: none; }
 .rk-notebox > summary { cursor: pointer; font-size: 12.5px; color: var(--muted); }
 .rk-notebox .tl-help { margin-top: 4px; }
+.rk-notes .rk-xnote { margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--warn); border-radius: var(--radius-s); background: var(--warn-soft); color: var(--ink-2); }
 
 /* the answers */
 .rk-answers { display: grid; gap: 12px; align-content: start; min-width: 0; }

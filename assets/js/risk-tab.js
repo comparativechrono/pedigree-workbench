@@ -46,8 +46,9 @@
     source: 'studio', family: null, condition: null, mode: 'AR', freq: 'allele:1000', freqAs: 'allele', freqN: 1000,
     penetrance: 100, phenocopy: 0, mutation: 0, unrecorded: '', person: null, couple: null, single: null, tests: {}
   };
-  // the results that can be given to someone under Everyone (risk-read.js: forEngine)
-  const TESTS = { variant: 'has the variant', carrier: 'a carrier (one copy)', homozygous: 'two copies', none: 'doesn’t have it', clear: 'not tested', unknown: 'status not known' };
+  // what can be given to someone under Everyone (risk-read.js: forEngine): a test result, or a status
+  const TESTS = { variant: 'has the variant', carrier: 'a carrier (one copy)', homozygous: 'two copies', none: 'doesn’t have it', clear: 'not tested' };
+  const STATUS_HERE = { affected: 'taken as affected here', unaffected: 'taken as unaffected here', unknown: 'status left out here' };
 
   const base = (p) => String(p || '').split('/').pop();
   const tilde = (p) => (String(p).startsWith(HOME() + '/') ? '~' + String(p).slice(HOME().length) : String(p));
@@ -254,7 +255,7 @@
       saveBtn.addEventListener('click', () => this.saveTable());
       this.allCard = h('section.tl-form.rk-card.rk-allcard',
         h('div.rk-hrow', h('h3.rk-h', 'Everyone'), saveBtn),
-        h('div.tl-help', 'Each person’s chances, given everything known of the family. Click a name to see that person’s chances above. Give someone a test result to see what it would change, or leave out whether they are affected, as for someone too young to show a condition of later life yet. These are used here only, and aren’t put in the family’s file.'),
+        h('div.tl-help', 'Each person’s chances, given everything known of the family. Click a name to see that person’s chances above. Give someone a test result, or a status, to see what it would change: not known, say, for someone too young to show a condition of later life yet. These are used here only, and aren’t put in the family’s file.'),
         this.tableOut,
         this.savedOut);
       this.answers = h('div.rk-answers', this.problem, personCard, childCard);
@@ -596,6 +597,16 @@
         this.problem.appendChild(h('div.tl-fail', 'Say how common the variant is: 1 in a number above 1.'));
         return;
       }
+      // under X-linked recessive inheritance, a father whose status isn't known might have the variant, which changes
+      // the chances of the women descended from him; for a condition that men who have it don't pass on, he can't
+      if (m.mode === 'XLR') {
+        const fathers = new Set(people.map((x) => x.father).filter(Boolean));
+        const men = people.filter((x) => x.sex === 'M' && x.affected === null && !x.test && fathers.has(x.id)).map((x) => byId.get(x.id).label);
+        if (men.length) {
+          const one = men.length === 1;
+          this.notes.appendChild(h('div.tl-help.rk-xnote', `${listOf(men)} ${one ? 'has' : 'have'} children but no record of the condition, so under X-linked recessive inheritance ${one ? 'he' : 'each'} might have the variant. If men who have it don’t have children, take ${one ? 'him' : 'them'} as unaffected under Everyone.`));
+        }
+      }
       let all;
       try {
         all = ENGINE.analyse(people, m);
@@ -629,14 +640,15 @@
       else if (status === 'unaffected') known = 'unaffected';
       else if (status === 'carrier') known = 'marked as a carrier';
       else known = x.affected === false ? 'unaffected (no record of the condition)' : 'status not known';
-      const test = this._tests()[id];
+      const given = this._tests()[id];
       const what = [];
       if (p.pregnancy) what.push('a pregnancy');
       if (p.loss) what.push('a pregnancy loss');
       what.push(sexWord(p.sex));
-      if (!unborn) what.push(test === 'unknown' ? `${known}, but left out here` : known);
-      if (test === 'clear') what.push('the carrier mark left out here');
-      else if (test && test !== 'unknown' && TESTS[test]) what.push(`tested: ${TESTS[test]}`);
+      if (STATUS_HERE[given]) what.push(unborn ? STATUS_HERE[given] : `${known}, but ${STATUS_HERE[given]}`);
+      else if (!unborn) what.push(known);
+      if (given === 'clear') what.push('the carrier mark left out here');
+      else if (TESTS[given]) what.push(`tested: ${TESTS[given]}`);
       // the chances
       const lines = [];
       if (m.mode === 'AR' || (m.mode === 'XLR' && p.sex === 'F')) lines.push(['Is a carrier (one copy)', r.one, true]);
@@ -735,19 +747,23 @@
     _table(order, q, m, all) {
       const tests = this._tests();
       const ar = m.mode === 'AR';
-      const head = ['Person', 'Status', ar ? 'Carrier (one copy)' : 'Has the variant', 'Two copies', 'Affected (if not known)', 'Sex', 'Test result'];
-      const testSel = (p, x) => {
-        const s = h('select.tl-input.small', { 'aria-label': `Test result: ${p.label}` });
+      const head = ['Person', 'Status', ar ? 'Carrier (one copy)' : 'Has the variant', 'Two copies', 'Affected (if not known)', 'Sex', 'Test result or status'];
+      const testSel = (p) => {
+        const s = h('select.tl-input.small', { 'aria-label': `Test result or status: ${p.label}` });
         const status = p.status && p.status[this.st.condition];
-        const opts = [['', status === 'carrier' ? 'a carrier, as marked' : '—'], ['variant', TESTS.variant]];
-        if (isRecessive(m.mode) && !(isX(m.mode) && p.sex === 'M')) opts.push(['carrier', TESTS.carrier]);
-        if (!(isX(m.mode) && p.sex === 'M')) opts.push(['homozygous', TESTS.homozygous]);
-        opts.push(['none', TESTS.none]);
-        if (status === 'carrier') opts.push(['clear', 'not tested (leave out the mark)']);
-        // (someone affected or unaffected can be taken as not known: someone young, for a condition of later life)
-        if (x.affected !== null || tests[p.id] === 'unknown') opts.push(['unknown', 'status not known (leave it out)']);
-        opts.forEach(([v, t]) => s.appendChild(h('option', { value: v }, t)));
-        s.value = tests[p.id] && opts.some(([v]) => v === tests[p.id]) ? tests[p.id] : '';
+        const tested = [['variant', TESTS.variant]];
+        if (isRecessive(m.mode) && !(isX(m.mode) && p.sex === 'M')) tested.push(['carrier', TESTS.carrier]);
+        if (!(isX(m.mode) && p.sex === 'M')) tested.push(['homozygous', TESTS.homozygous]);
+        tested.push(['none', TESTS.none]);
+        if (status === 'carrier') tested.push(['clear', 'not tested (leave out the mark)']);
+        // a status here only: unaffected, for a man with none recorded in a family with a condition men don't pass
+        // on; not known, for someone too young to show a condition of later life
+        const statuses = [['affected', 'affected'], ['unaffected', 'unaffected'], ['unknown', 'not known (leave it out)']];
+        s.appendChild(h('option', { value: '' }, status === 'carrier' ? 'a carrier, as marked' : '—'));
+        s.append(h('optgroup', { label: 'A test result' }, tested.map(([v, t]) => h('option', { value: v }, t))),
+          h('optgroup', { label: 'A status, here only' }, statuses.map(([v, t]) => h('option', { value: v }, t))));
+        const all = tested.concat(statuses);
+        s.value = tests[p.id] && all.some(([v]) => v === tests[p.id]) ? tests[p.id] : '';
         s.addEventListener('change', () => {
           if (s.value) tests[p.id] = s.value;
           else delete tests[p.id];
@@ -763,6 +779,7 @@
         if (p.pregnancy && status !== 'affected' && status !== 'carrier') known = 'a pregnancy';
         else if (p.loss && status !== 'affected' && status !== 'carrier') known = 'a pregnancy loss';
         if (tests[p.id] === 'unknown') known += ' (left out)';
+        else if (tests[p.id] === 'affected' || tests[p.id] === 'unaffected') known += ` (here: ${tests[p.id]})`;
         const pick = h('button.linkbtn', { type: 'button', title: 'Show this person’s chances above' }, h('b', p.label), p.name ? h('small', p.name) : null);
         pick.addEventListener('click', () => {
           this.choose({ person: p.id });
@@ -773,7 +790,7 @@
           h('td.rk-n', sayShort(ar ? r.one : r.variant)),
           h('td.rk-n', isX(m.mode) && p.sex === 'M' ? '' : sayShort(r.two)),
           h('td.rk-n', x.affected === null ? sayShort(r.affected) : ''),
-          h('td', sexShort(p.sex)), h('td', testSel(p, x)));
+          h('td', sexShort(p.sex)), h('td', testSel(p)));
       });
       this.tableOut.appendChild(h('table.rk-table.rk-all', h('thead', h('tr', head.map((t) => h('th', t)))), h('tbody', rows)));
       this.allCard.hidden = false;

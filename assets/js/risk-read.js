@@ -252,9 +252,9 @@
 
   /** the people of a family as PedRisk takes them, for one condition: affected (true, false or null), a test result
       ('carrier' for a carrier mark), and the status of everyone with no record of it, as unrecorded says. tests
-      (optional) gives test results by id, which replace what the family says: 'variant', 'carrier', 'homozygous' or
-      'none'; 'clear' for no test result (not even a carrier mark); or 'unknown' to leave out what is known of the
-      person altogether, as if their status weren't known */
+      (optional) gives, by id, what replaces what the family says: a test result, 'variant', 'carrier', 'homozygous'
+      or 'none'; 'clear' for no test result (not even a carrier mark); or a status, 'affected', 'unaffected' or
+      'unknown' (which leaves out what is known of the person, as if their status weren't known) */
   function forEngine(family, conditionKey, tests, unrecorded) {
     const rule = unrecorded || unrecordedAs(family, conditionKey);
     const fill = rule === 'unaffected' ? false : null;
@@ -265,8 +265,10 @@
       // someone not yet born, or lost in pregnancy, can't be said to be unaffected
       if ((p.pregnancy || p.loss) && affected === false) affected = null;
       const given = tests && tests[p.id];
-      if (given === 'unknown') affected = test = null;
-      else if (given) test = given === 'clear' ? null : given;
+      if (given === 'unknown' || given === 'affected' || given === 'unaffected') {
+        affected = given === 'affected' ? true : given === 'unaffected' ? false : null;
+        test = null;
+      } else if (given) test = given === 'clear' ? null : given;
       return { id: p.id, label: p.label, sex: p.sex, father: p.father, mother: p.mother, twin: p.twin, affected, test };
     });
   }

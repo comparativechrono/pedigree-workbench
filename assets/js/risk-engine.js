@@ -272,7 +272,10 @@
   }
 
   /* the genotypes of the people in keep, jointly, with everyone else summed out: a table, and the log of the scale
-     it was divided by along the way (so that very small probabilities don't underflow) */
+     it was divided by along the way. Each table made by summing someone out is divided by its largest value, so that
+     very small probabilities don't underflow, however many families or people there are: a pedigree of many
+     unconnected families leaves a number for each, and their product would otherwise fall below the smallest number
+     there is */
   function joint(net, keep) {
     let factors = net.factors.slice();
     let log = 0;
@@ -285,7 +288,8 @@
       let top = 0;
       for (const x of g.values) if (x > top) top = x;
       if (top === 0) return null;   // what is known can't happen under this model
-      if (top < 1e-150 || top > 1e150) { for (let i = 0; i < g.values.length; i++) g.values[i] /= top; log += Math.log(top); }
+      for (let i = 0; i < g.values.length; i++) g.values[i] /= top;
+      log += Math.log(top);
       rest.push(g);
       factors = rest;
     }
@@ -393,9 +397,9 @@
     const what = p ? (p.affected === true ? 'affected' : p.affected === false ? 'unaffected' : 'tested as they were') : '';
     const message = p
       ? `${p.label} can't be ${what} under this model, given the rest of the family. ` +
-        (p.affected === true ? 'Allow for new mutations, a lower penetrance or phenocopies, or try another mode of inheritance.'
-          : p.affected === false ? 'Allow for a lower penetrance, or try another mode of inheritance.'
-            : 'Check the test results, or try another mode of inheritance.')
+        (p.affected === true ? 'Check the family and any test results; or allow for new mutations, a lower penetrance or phenocopies; or try another mode of inheritance.'
+          : p.affected === false ? 'Check the family and any test results; or allow for a lower penetrance; or try another mode of inheritance.'
+            : 'Check the family and the test results, or try another mode of inheritance.')
       : 'What is known of this family can\'t happen under this model.';
     return { ok: false, impossible: true, who: p ? p.id : null, message };
   }
@@ -435,13 +439,12 @@
       if (!j) return null;
       return summarise(net.states[i], normalise(j.values), m);
     };
-    if (!x) {
-      const any = one('U');
-      return any ? { ok: true, any, son: any, daughter: any } : impossible(base, m);
-    }
+    // a child of either sex (a boy or a girl with a chance of 1/2 each, under an X-linked mode)
+    const any = one('U');
+    if (!any) return impossible(base, m);
+    if (!x) return { ok: true, any, son: any, daughter: any };
     const son = one('M'), daughter = one('F');
     if (!son || !daughter) return impossible(base, m);
-    const any = { variant: (son.variant + daughter.variant) / 2, affected: (son.affected + daughter.affected) / 2 };
     return { ok: true, any, son, daughter };
   }
 
@@ -474,9 +477,14 @@
     const conditional = Array.from(b.values, (v, k) => (a.values[k] > 0 ? (v / a.values[k]) * Math.exp(b.log - a.log) : 0));
     const rows = all.states[i].map((s, k) => ({ sex: s.sex, copies: s.copies, prior: prior[k], conditional: conditional[k], joint: prior[k] * conditional[k], posterior: posterior[k] }))
       .filter((r) => r.prior >= 1e-6 || r.posterior >= 1e-6);
-    // the evidence the conditional is about: the person and their descendants who have a phenotype or test result
+    // the evidence the conditional is about: the person, their identical twins and the descendants of them all, who
+    // have a phenotype or test result
     const about = [...below].map((pid) => prep.byId.get(pid)).filter((p) => p.affected !== null || p.test);
-    return { ok: true, rows, about: about.map((p) => p.id), descendants: below.size - 1 };
+    // (the person's own descendants, without their twins' families)
+    const own = new Set([who.id]);
+    const next = [who.id];
+    while (next.length) for (const c of children.get(next.shift()) || []) if (!own.has(c)) { own.add(c); next.push(c); }
+    return { ok: true, rows, about: about.map((p) => p.id), descendants: own.size - 1 };
   }
 
   /* ---------- showing a chance ---------- */
@@ -509,7 +517,9 @@
   function describe(x) {
     if (x == null || !isFinite(x)) return { text: '–', pct: '' };
     const pct = x * 100;
-    const pctText = pct >= 99.95 && x < 1 ? 'over 99.9%' : pct >= 1 ? `${pct.toFixed(pct < 10 ? 1 : 0)}%` : pct >= 0.0001 ? `${pct.toPrecision(2)}%` : 'under 0.0001%';
+    // (a tenth of a per cent near 100%, where the chance of the opposite matters: 99.6%, not 100%; and the smallest
+    // shown is 1 in a million, which x * 100 can put a hair under 0.0001)
+    const pctText = pct >= 99.95 && x < 1 ? 'over 99.9%' : pct >= 99.5 ? `${pct.toFixed(1)}%` : pct >= 1 ? `${pct.toFixed(pct < 10 ? 1 : 0)}%` : x >= 0.999999e-6 ? `${pct.toPrecision(2)}%` : 'under 0.0001%';
     if (x === 0) return { text: '0', pct: '0%', n: 0, d: 1 };
     if (x === 1) return { text: '1', pct: '100%', n: 1, d: 1 };
     let fr = fraction(x, 1000);
@@ -527,7 +537,8 @@
     return { text: `about 1 in ${rounded.toLocaleString('en-GB')}`, pct: pctText };
   }
 
-  /* an allele frequency from a carrier frequency (2pq) */
+  /* an allele frequency from a carrier frequency among all people (2pq = c). (For the chance that an unaffected
+     person is a carrier to be c, under full penetrance, q = c / (2 − c) instead, as the Risk tab takes it.) */
   function alleleFromCarrier(c) {
     if (!(c > 0 && c < 0.5)) return null;
     return (1 - Math.sqrt(1 - 2 * c)) / 2;
