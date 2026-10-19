@@ -194,14 +194,16 @@ changed, and how to release new versions. They cover:
 - abusua2ga4gh and ga4gh2abusua, rewritten on pedigree-ga4gh;
 - studio2ped, ped2studio, hponorm and mondonorm.
 
-PedNet 2.0.0 is on PyPI, and the workbench's copy is its wheel. The commands
-the workbench runs from PedGen and PedInterp, and PedInterp's reading of
-children drawn straight under their parents, are merged but not yet released,
-so the workbench's copies are built from GitHub: PedGen's from
-[pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), which simulates a rare allele by default and
-lets cousins marry, and PedInterp's from
-[pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), which chooses how much to enlarge a picture
-and warns when lines were missed.
+PedNet 2.0.0 is on PyPI, and the workbench's copy is its wheel. What the
+workbench uses of PedGen and PedInterp is merged but not yet released: their
+commands, PedGen's rare allele by default and cousins who marry, and
+PedInterp's reading of children drawn straight under their parents, its choice
+of how much to enlarge a picture, and its warnings when lines were missed. So
+the workbench's copies are built from GitHub: PedGen's from `main`, and
+PedInterp's from
+[pedigree-interpreter#6](https://github.com/comparativechrono/pedigree-interpreter/pull/6), which measures a picture's symbols as the
+reading finds them, so that the holes in the letters of the labels aren't
+taken for symbols.
 
 ## Files
 

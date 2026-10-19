@@ -16,12 +16,12 @@
   },
   "analysis": {
     "archive": "pedigree-analysis.zip",
-    "sha256": "af2827d808991cdedfee27d0c435469ce1c1bc1bdf3797f7444c38c5e73928db",
-    "bytes": 1106930,
+    "sha256": "360d01ad7f15eb24b50f77622e4510eae545d4f9faadff36d9eae6fa8bcedfed",
+    "bytes": 1107037,
     "packages": {
       "pednet": "2.0.0",
-      "PedGen": "0.1.4.dev11+ge28baf0df",
-      "PedInterp": "0.1.8.dev12+g62e9bd0a5",
+      "PedGen": "0.1.4.dev12+g7dc59b541",
+      "PedInterp": "0.1.8.dev15+g38f31c77c",
       "networkx": "3.4.2"
     }
   }

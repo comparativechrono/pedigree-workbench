@@ -100,6 +100,11 @@ def _upscale_needed(image_path):
     The factor that makes a picture's symbols SYMBOL_PIXELS across, before any limit: the symbols are found in a copy
     of the picture 2,000 pixels across on its longer side (enlarged, or shrunk, which is quicker than measuring a large
     picture whole), and their median size is measured. None if no symbols are found there. Also the picture's size.
+
+    The symbols are looked for as the reading looks for them, and only if none are found, down to a tenth of the
+    usual size, as a small pedigree on a large page may have small ones. Looked for so small from the start, the
+    holes in the letters of the labels pass for symbols when the lines are thinner than the strokes of the text, and
+    the picture would be enlarged as much as the holes need.
     '''
     img = Image.open(image_path).convert('RGB').convert('L')
     width, height = img.size
@@ -108,8 +113,10 @@ def _upscale_needed(image_path):
     del img
     _, binary = cv2.threshold(small, 127, 255, cv2.THRESH_BINARY)
     del small
-    #(symbols are looked for down to a tenth of the usual size, as a small pedigree on a large page may have small ones)
-    symbols, _ = detect_symbols(binary, binary.shape[0]*binary.shape[1], min_share= 0.00001)
+    area = binary.shape[0]*binary.shape[1]
+    symbols, _ = detect_symbols(binary, area)
+    if not symbols:
+        symbols, _ = detect_symbols(binary, area, min_share= 0.00001)
     sizes = [max(w, h) for (_, _, w, h), _, _ in symbols]
     return (SYMBOL_PIXELS*probe/float(np.median(sizes)) if sizes else None), width, height
 
