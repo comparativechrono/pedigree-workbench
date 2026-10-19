@@ -232,7 +232,8 @@ build/                     what builds index.html, the examples, the notebook an
 python/                    the packages, their tests, and tools for the examples and checks
   vendor/                  networkx's wheel, and SOURCES.json: where PedNet, PedGen, PedInterp and networkx come from
 docs/                      ga4gh.md (the GA4GH decision), upstream.md (the packages' pull requests)
-tests/                     the help's code, command/Python equivalence, a browser test
+tests/                     the help's code, command/Python equivalence, a browser test, and (risk/) the Risk
+                           tab's sums and readers
 serve.py                   a small web server for trying it locally
 ```
 
