@@ -195,13 +195,13 @@ changed, and how to release new versions. They cover:
 - studio2ped, ped2studio, hponorm and mondonorm.
 
 PedNet 2.0.0 is on PyPI, and the workbench's copy is its wheel. The commands
-the workbench runs from PedGen and PedInterp are merged but not yet released
-([pedigree-generator#2](https://github.com/comparativechrono/pedigree-generator/pull/2),
-[pedigree-interpreter#3](https://github.com/comparativechrono/pedigree-interpreter/pull/3)),
-so the workbench's copies are built from GitHub until they are: PedGen's from
-`main`, and PedInterp's from
-[pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4),
-which fixes how it reads children drawn straight under their parents.
+the workbench runs from PedGen and PedInterp, and PedInterp's reading of
+children drawn straight under their parents, are merged but not yet released,
+so the workbench's copies are built from GitHub: PedGen's from
+[pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), which simulates a rare allele by default and
+lets cousins marry, and PedInterp's from
+[pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), which chooses how much to enlarge a picture
+and warns when lines were missed.
 
 ## Files
 

@@ -50,14 +50,22 @@ def parser():
                    help='makes the pedigree reproducible: the same seed and settings always give the same pedigree')
     p.add_argument('--partners', type=_fraction, default=0.6, metavar='CHANCE',
                    help='the chance that a child has a partner, and so children of their own (default: 0.6; the '
-                        'first child always does)')
+                        'first child always does, in every generation but the last)')
     p.add_argument('--ancestors', type=_fraction, default=0.25, metavar='CHANCE',
                    help="the chance that a partner's parents are added, and theirs in turn (default: 0.25)")
-    p.add_argument('--allele-frequency', type=_fraction, default=0.1, metavar='FREQUENCY',
+    p.add_argument('--allele-frequency', type=_fraction, default=0.001, metavar='FREQUENCY',
                    help='the frequency of the alternate allele in the population that partners come from '
-                        '(default: 0.1)')
+                        '(default: 0.001, a rare allele)')
+    p.add_argument('--cousins', type=_fraction, default=0.0, metavar='CHANCE',
+                   help='the chance that someone in the family who has a partner marries a cousin, if one has no '
+                        'partner yet, rather than someone from outside the family (default: 0). A rare recessive '
+                        'allele seldom comes together twice in a family in any other way')
+    p.add_argument('--min-affected', type=_at_least_one, default=1, metavar='N',
+                   help='make families until one has at least N affected people, as families come to notice through '
+                        'their affected members (default: 1)')
     p.add_argument('--unaffected-partners', action='store_true',
-                   help='partners and their ancestors never carry the alternate allele')
+                   help="partners never carry the alternate allele, though their parents and grandparents, if added, "
+                        "still can (--allele-frequency 0 keeps it to the founder's descendants)")
     p.add_argument('--genotypes', metavar='FILE',
                    help="also write each person's copies of the alternate allele to FILE, as a table that PedNet "
                         "reads as a candidate variant (pednet rank FAMILY.ped FILE)")
@@ -70,10 +78,15 @@ def main(argv=None):
         print(f'pedgen: the family ID {args.family!r} must be a word with no spaces, as PED files are split at spaces',
               file=sys.stderr)
         return 1
-    df = pedigree_generator(max_children=args.max_children, FamilyID=args.family, mode=args.mode,
-                            generation_count=args.generations, SpouseLikelihood=args.partners,
-                            AffectedSpouse=not args.unaffected_partners, BackpropLikelihood=args.ancestors,
-                            alt_freq=args.allele_frequency, seed=args.seed)
+    try:
+        df = pedigree_generator(max_children=args.max_children, FamilyID=args.family, mode=args.mode,
+                                generation_count=args.generations, SpouseLikelihood=args.partners,
+                                AffectedSpouse=not args.unaffected_partners, BackpropLikelihood=args.ancestors,
+                                alt_freq=args.allele_frequency, seed=args.seed, CousinLikelihood=args.cousins,
+                                min_affected=args.min_affected)
+    except ValueError as e:
+        print(f'pedgen: {e}', file=sys.stderr)
+        return 1
     affected = int((df['Phenotype'] == 2).sum())
     print(f'Family {args.family}: {len(df)} people, {affected} affected ({args.mode})')
     print(f'wrote {gen_PED_export(df, args.output_dir)}')

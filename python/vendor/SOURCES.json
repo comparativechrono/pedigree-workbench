@@ -10,20 +10,20 @@
   "pedgen": {
     "package": "PedGen",
     "folder": "PedGen",
-    "version": "0.1.4.dev6+ge298027e2",
-    "wheel": "pedgen-0.1.4.dev6+ge298027e2-py3-none-any.whl",
-    "sha256": "fe9de25abcd24e59bc897c93d644c93d2fce76fdf6ec7b96b7c0710debf26223",
+    "version": "0.1.4.dev10+g507106d9e",
+    "wheel": "pedgen-0.1.4.dev10+g507106d9e-py3-none-any.whl",
+    "sha256": "caf057f655305eff2b55cf7f567cdf4856a4de276030a241ab27b0fe257ed0ff",
     "from": "https://github.com/comparativechrono/pedigree-generator",
-    "files_sha256": "35b57d49b2865e43da0a7e8b3e85da3702c4a98fecf2b85830ab61f1d2d3e8e4"
+    "files_sha256": "d80561131d3394d67ac4c4116ddca15df8825109c5a07a67c91742861c0e0278"
   },
   "pedinterp": {
     "package": "PedInterp",
     "folder": "PedInterp",
-    "version": "0.1.8.dev8+g7e28b706f",
-    "wheel": "pedinterp-0.1.8.dev8+g7e28b706f-py3-none-any.whl",
-    "sha256": "171423f47eec494b198d359eecd6aec47788c2148af4cc5e21feed3221810dca",
+    "version": "0.1.8.dev11+g62e89e0ba",
+    "wheel": "pedinterp-0.1.8.dev11+g62e89e0ba-py3-none-any.whl",
+    "sha256": "100ede2cdb409b010b24c97cc6facd7311d254d57249f80da791df0ae1dafa1e",
     "from": "https://github.com/comparativechrono/pedigree-interpreter",
-    "files_sha256": "5e0be2c7edbf46db4308d3893e6c3bcc5a34a5e7f5c542417217b2f4594cf5c9"
+    "files_sha256": "6f4c3542f03f1452b8f80398f66f4a9da31fdd05d4d5c5690cf0bc95f485d537"
   },
   "pednet": {
     "package": "pednet",

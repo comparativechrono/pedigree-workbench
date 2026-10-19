@@ -79,12 +79,6 @@
       URL.revokeObjectURL(url);
     }
   }
-  /** how much PedInterp should enlarge a picture: so that it is about 5,000 pixels across, which reads well both for
-      a picture cut from a paper and for a scan (its own default, 10, suits a picture about 500 pixels across) */
-  async function suggestUpscale(fs, path) {
-    const size = await pictureSize(fs, path);
-    return size ? Math.min(20, Math.max(1, Math.round(5000 / size.width))) : null;
-  }
 
   /* ------------------------------------------------------------------ the tools */
   const GROUPS = [
@@ -105,6 +99,8 @@
   /** penetrances as given (0.6 0.8, or 0.6, 0.8) → as the command takes them: 0.6,0.8 */
   const penList = (x) => String(x || '').trim().split(/[\s,]+/).filter(Boolean).map(num).join(',');
   const ALL_MODES = 'AD,AR,XLR,XLD';
+  /** the enlargement given for Picture → PED file, or '' to leave it to PedInterp */
+  const upscaleOf = (v) => String(v.upscale == null ? '' : v.upscale).trim();
   /** the families of a PED file, in Python, for PedNet's tools */
   const readFamilies = (v) => `families = pednet.read_ped(${pyq(v.input)}${v.family ? `, ${pyq(v.family)}` : ''})   # {family id: pedigree}`;
   /** the file of ids for phenotk filter --id-list ('' when no ids are given) */
@@ -273,15 +269,15 @@
         { key: 'input', type: 'file', label: 'The picture', kinds: ['image'] },
         { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the PED file too.' },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
-        { key: 'upscale', type: 'number', label: 'Enlarge the picture by', def: 10, min: 1, max: 20, step: 1, autoFrom: ['input'], auto: (v, fs) => suggestUpscale(fs, v.input), help: 'PedInterp reads a picture best when the enlarged picture is about 5,000 pixels across, so this is worked out from the picture’s size: 10 for a picture 500 pixels across, 5 for one 1,000 pixels across.' }
+        { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across, which reads best, and says how much under the table. Give a number to enlarge it more or less.' }
       ],
-      check: (v) => oneWord('family id', v.family) || (!(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0.' : ''),
-      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(Number(v.upscale) !== 10, '--upscale', num(v.upscale))],
+      check: (v) => oneWord('family id', v.family) || (upscaleOf(v) && !(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0, or leave it empty.' : ''),
+      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(upscaleOf(v), '--upscale', num(v.upscale))],
       outputs: (v) => [joinPath(v.outdir, v.family + '.ped')],
       // (what it prints is the table it read, which is better kept whole than wrapped)
       stdoutIsResult: true,
       python: (v) =>
-        ['from PedInterp import pedigree_processing, PED_export', '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${Number(v.upscale) !== 10 ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`].join('\n'),
+        ['from PedInterp import pedigree_processing, PED_export', '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`].join('\n'),
       next: (res, v) => {
         const ped = joinPath(v.outdir, v.family + '.ped');
         return [
@@ -842,17 +838,19 @@
       pkg: 'PedGen',
       what: 'Make up a family with a dominant or recessive condition, by Mendelian inheritance from an affected founder, as a PED file.',
       about:
-        'PedGen starts from a founder with the condition and adds generations of children, each inheriting one of each parent’s two copies of the gene. Partners join the family from a population in which the condition’s allele has the frequency you give, and some of them come with their own parents. Who is affected follows from the genotypes: one copy is enough for a dominant condition, and a recessive one needs two. The families are good for teaching, and for trying out PedNet on families whose mode of inheritance is known. With a seed, the same settings always make the same family, here, in the terminal and in Python.',
+        'PedGen starts from a founder with the condition and adds generations of children, each inheriting one of each parent’s two copies of the gene. Partners join the family from a population in which the condition’s allele has the frequency you give, a rare one unless you change it, and some of them come with their own parents. Who is affected follows from the genotypes: one copy is enough for a dominant condition, and a recessive one needs two. A rare recessive allele seldom comes together twice in a family unless cousins marry, so for a recessive condition, cousins marry whenever they can, and PedGen makes families until one has at least two people affected, unless you change these. The families are good for teaching, and for trying out PedNet on families whose mode of inheritance is known. With a seed, the same settings always make the same family, here, in the terminal and in Python.',
       help: 'h-tool-pedgen',
       fields: [
         { key: 'mode', type: 'select', label: 'Mode of inheritance', def: 'AD', options: [['AD', 'autosomal dominant'], ['AR', 'autosomal recessive']] },
-        { key: 'generations', type: 'number', label: 'Generations', def: 3, min: 1, max: 8, step: 1 },
+        { key: 'generations', type: 'number', label: 'Generations', def: (v) => (v.mode === 'AR' ? 4 : 3), min: 1, max: 8, step: 1, help: 'Cousins are first found in the third generation, so their children in the fourth.' },
         { key: 'children', type: 'number', label: 'The most children a couple has', def: 3, min: 1, max: 10, step: 1 },
         { key: 'seed', type: 'text', label: 'Seed (optional)', def: '', placeholder: 'a whole number, e.g. 7', help: 'Leave it empty for a new family every time. Give a number to make the same family again.' },
         { key: 'family', type: 'text', label: 'Family id', def: 'FAM1', help: 'It names the PED file too.' },
         { key: 'partners', type: 'number', label: 'Chance that a child has a partner, and children', def: 0.6, min: 0, max: 1, step: 0.05, help: 'In every generation but the last, the first child of each couple always does.' },
         { key: 'ancestors', type: 'number', label: 'Chance that a partner’s parents are added', def: 0.25, min: 0, max: 1, step: 0.05 },
-        { key: 'freq', type: 'number', label: 'Frequency of the allele among partners', def: 0.1, min: 0, max: 1, step: 0.01 },
+        { key: 'freq', type: 'number', label: 'Frequency of the allele among partners', def: 0.001, min: 0, max: 1, step: 'any', help: 'A rare allele, as a rare disease’s is, unless you change it.' },
+        { key: 'cousins', type: 'number', label: 'Chance that someone marries a cousin', def: (v) => (v.mode === 'AR' ? 1 : 0), min: 0, max: 1, step: 'any', help: 'When a cousin has no partner yet: 1 is whenever one hasn’t.' },
+        { key: 'minAffected', type: 'number', label: 'At least this many affected', def: (v) => (v.mode === 'AR' ? 2 : 1), min: 1, max: 20, step: 1, help: 'PedGen makes families until one has as many, as families come to notice through their affected members.' },
         { key: 'clean', type: 'check', label: 'Partners never carry the allele', def: false, help: 'Their parents and grandparents, if they’re added, still can. A frequency of 0 keeps the allele to the founder’s descendants.' },
         { key: 'genotypes', type: 'check', label: 'Save everyone’s genotypes too, to rank as a candidate variant', def: true },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' }
@@ -863,7 +861,8 @@
         if (!whole(v.generations, 1, 8)) return 'Give between 1 and 8 generations.';
         if (!whole(v.children, 1, 10)) return 'Give the most children as a whole number from 1 to 10.';
         if ((v.seed || '').trim() && !/^-?\d+$/.test(v.seed.trim())) return 'The seed must be a whole number.';
-        if (![v.partners, v.ancestors, v.freq].every(share)) return 'Give the chances and the frequency as numbers between 0 and 1.';
+        if (![v.partners, v.ancestors, v.freq, v.cousins].every(share)) return 'Give the chances and the frequency as numbers between 0 and 1.';
+        if (!whole(v.minAffected, 1, 20)) return 'Give how many must be affected as a whole number from 1 to 20.';
         return oneWord('family id', v.family);
       },
       argv: (v) => [
@@ -871,8 +870,10 @@
         ...optArgs((v.seed || '').trim(), '-s', String(v.seed).trim()),
         ...optArgs(Number(v.partners) !== 0.6, '--partners', num(v.partners)),
         ...optArgs(Number(v.ancestors) !== 0.25, '--ancestors', num(v.ancestors)),
-        ...optArgs(Number(v.freq) !== 0.1, '--allele-frequency', num(v.freq)),
+        ...optArgs(Number(v.freq) !== 0.001, '--allele-frequency', num(v.freq)),
         ...optArgs(v.clean, '--unaffected-partners'),
+        ...optArgs(Number(v.cousins) > 0, '--cousins', num(v.cousins)),
+        ...optArgs(Number(v.minAffected) > 1, '--min-affected', num(v.minAffected)),
         ...optArgs(v.genotypes, '--genotypes', joinPath(v.outdir, v.family + '-genotypes.tsv'))
       ],
       outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.genotypes && joinPath(v.outdir, v.family + '-genotypes.tsv')].filter(Boolean),
@@ -882,7 +883,7 @@
           '',
           `df = pedigree_generator(max_children=${num(v.children)}, FamilyID=${pyq(v.family)}, mode=${pyq(v.mode)}, generation_count=${num(v.generations)},`,
           `                        SpouseLikelihood=${num(v.partners)}, AffectedSpouse=${v.clean ? 'False' : 'True'}, BackpropLikelihood=${num(v.ancestors)},`,
-          `                        alt_freq=${num(v.freq)}, seed=${/^-?\d+$/.test((v.seed || '').trim()) ? BigInt(v.seed.trim()).toString() : 'None'})`,
+          `                        alt_freq=${num(v.freq)}, seed=${/^-?\d+$/.test((v.seed || '').trim()) ? BigInt(v.seed.trim()).toString() : 'None'}${Number(v.cousins) > 0 ? `, CousinLikelihood=${num(v.cousins)}` : ''}${Number(v.minAffected) > 1 ? `, min_affected=${num(v.minAffected)}` : ''})`,
           'print(len(df), "people,", (df["Phenotype"] == 2).sum(), "affected")',
           `print("wrote", gen_PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`,
           ...(v.genotypes ? [`print("wrote", gen_genotype_export(df, ${pyq(joinPath(v.outdir, v.family + '-genotypes.tsv'))}, alt_freq=${num(v.freq)}))`] : [])
@@ -1240,28 +1241,6 @@
         v[key] = val;
         touched.add(key);
         refreshDerived(key);
-        autoFill();
-      };
-      // a value worked out from a file once it has been read (f.auto(v, fs) → a promise of it, or of null), unless it
-      // has been set by hand: how much to enlarge a picture, from its size. Worked out again when the fields it
-      // depends on (f.autoFrom) change; an answer that comes after they have changed again is dropped
-      const autoAt = {};
-      const autoFill = () => {
-        for (const f of tool.fields) {
-          if (!f.auto || touched.has(f.key)) continue;
-          const at = JSON.stringify((f.autoFrom || []).map((k) => v[k]));
-          if (autoAt[f.key] === at) continue;
-          autoAt[f.key] = at;
-          Promise.resolve()
-            .then(() => f.auto(v, this.fs))
-            .then((val) => {
-              if (val == null || touched.has(f.key) || autoAt[f.key] !== at) return;
-              v[f.key] = val;
-              if (rows[f.key] && rows[f.key].set) rows[f.key].set(val);
-              update();
-            })
-            .catch(() => {});
-        }
       };
       for (const f of tool.fields) {
         const r = fieldRow(this, f, v, onChange);
@@ -1303,7 +1282,6 @@
         }
       };
       refreshDerived(null);
-      autoFill();
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const x = full();

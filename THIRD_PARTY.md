@@ -16,8 +16,8 @@ when copying or redistributing its files.
 | pedigree-ga4gh (Tim Hearn) | 1.0.0 | MIT | the same | written for the workbench, now [its own repository](https://github.com/comparativechrono/pedigree-ga4gh) |
 | pedwb | 1.0.0 | MIT | the same | written for the workbench |
 | PedNet (Tim Hearn and Nick Taylor) | 2.0.0 | MIT | `python/pednet` (with its `LICENSE`), packed into `assets/py/pedigree-analysis.zip` | its wheel on PyPI |
-| PedGen (Nick Taylor, with changes by Tim Hearn) | 0.1.4.dev6 | MIT | `python/PedGen` (with its `LICENSE`), the same archive | built from the `main` branch of [comparativechrono/pedigree-generator](https://github.com/comparativechrono/pedigree-generator), not yet released |
-| PedInterp (Nick Taylor, with changes by Tim Hearn) | 0.1.8.dev8 | MIT | `python/PedInterp` (with its `LICENSE`), the same archive | built from [pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4), not yet released |
+| PedGen (Nick Taylor, with changes by Tim Hearn) | 0.1.4.dev10 | MIT | `python/PedGen` (with its `LICENSE`), the same archive | built from [pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), not yet released |
+| PedInterp (Nick Taylor, with changes by Tim Hearn) | 0.1.8.dev11 | MIT | `python/PedInterp` (with its `LICENSE`), the same archive | built from [pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), not yet released |
 | networkx | 3.4.2 | BSD 3-clause | its wheel in `python/vendor`, and in the same archive without its tests, with its `LICENSE.txt` | [PyPI](https://pypi.org/project/networkx/3.4.2/); `python/vendor/SOURCES.json` records the wheel's SHA-256 |
 | Mondo, nine terms (ids, names, definitions, synonyms) | release 2026-10-06 | CC BY 4.0 | `python/mondonorm/data/mondo-sample.obo`, mondonorm's offline sample | [Mondo](https://mondo.monarchinitiative.org) |
 | HPO ids and names, a small hand-built sample | – | the HPO's own terms of use | `python/hponorm/data/hpo-sample.obo`, hponorm's offline sample | [the HPO](https://hpo.jax.org) |

@@ -355,8 +355,8 @@ each copy came from.
 | Package | On PyPI | The workbench's copy |
 |---|---|---|
 | PedNet | **2.0.0**, released on 19 October 2026 | its wheel from PyPI |
-| PedGen | 0.1.3 (Nick Taylor's) | built from `main`, after [pedigree-generator#2](https://github.com/comparativechrono/pedigree-generator/pull/2) was merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw |
-| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#4](https://github.com/comparativechrono/pedigree-interpreter/pull/4), which adds to [#3](https://github.com/comparativechrono/pedigree-interpreter/pull/3) (merged): the `pedinterp` command (#3), and children drawn straight under their parents read correctly (#4). Once #4 is merged, build it again from `main` |
+| PedGen | 0.1.3 (Nick Taylor's) | built from [pedigree-generator#4](https://github.com/comparativechrono/pedigree-generator/pull/4), on top of #2 and #3 (merged): the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; and (#4) a rare allele by default, cousins who marry, and a minimum number affected. Once #4 is merged, build it again from `main` |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#5](https://github.com/comparativechrono/pedigree-interpreter/pull/5), on top of #3 and #4 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); and (#5) the enlargement chosen to suit the symbols, and warnings when lines were missed. Once #5 is merged, build it again from `main` |
 
 PedInterp's fix came from the workbench's example picture of the Lynch family:
 drawn where Pedigree Studio draws it, with each child under a parent and the
@@ -364,7 +364,11 @@ generations close together, it gave several children their grandparents.
 Hough's line detector joins lines across gaps of up to a tenth of the
 picture's width, and the blank left where a symbol is taken out is such a gap.
 Pull request #4 cuts lines where they cross a symbol, and follows a line to
-the first line it meets on the way up.
+the first line it meets on the way up. The picture was also enlarged ten times
+whatever its size, which misread pictures much smaller or larger than a few
+hundred pixels across, often without a warning: pull request #5 enlarges a
+picture so that its symbols are about 200 pixels across, and warns when
+someone has only one parent, is joined to no one, or when no one has parents.
 
 Until PedGen and PedInterp are released, `pip install` gives their earlier
 versions, without the commands. Their versions come from their git tags,
@@ -380,20 +384,18 @@ python3 python/tools/vendor_wheels.py wheels/*.whl
 python3 python/build_bundle.py && python3 build/make_page.py
 ```
 
-One thing to know when using them together: PedGen's partners carry the
-condition's allele at 0.1 unless told otherwise, so about one in five is a
-carrier, while PedNet takes a condition to be rare (an allele frequency of
-1 in 1,000 for an autosomal recessive one). PedNet therefore often calls a recessive
-family that PedGen simulated something else, or uncertain. In 60 simulated
-recessive families of four generations (seeds 1 to 60, at most three
-children a couple), the 19 with two or more affected
-people were called uncertain (12), X-linked recessive (4) or autosomal
-dominant (3), never autosomal recessive; given PedGen's frequency
-(`allele_frequency={"AR": 0.1}`), PedNet called four of them autosomal
-recessive, two X-linked recessive, and the rest uncertain, and put autosomal
-recessive first in 11 of the 19 (without it, in 2). `pednet mode` and
-`pednet rank` have no option for the frequency yet, and PedGen's default is
-far from a rare disease's: either would be worth changing.
+PedGen and PedNet used to disagree about the allele: PedGen's partners
+carried it at 0.1, so about one in five was a carrier, while PedNet takes a
+condition to be rare (1 in 1,000 for an autosomal recessive one). Of 19
+simulated recessive families of four generations with two or more people
+affected (seeds 1 to 60, at most three children a couple), PedNet called none
+autosomal recessive. Pull request #4 makes PedGen's default 0.001. With a
+rare allele, a recessive condition almost never turns up again unless
+relatives marry, so #4 also lets cousins marry (`CousinLikelihood`,
+`--cousins`) and makes families until one has enough people affected
+(`min_affected`, `--min-affected`); the workbench's form does both for a
+recessive condition. Of 30 such families of four generations, PedNet then
+called 16 autosomal recessive, and put that mode first in 25.
 
 ## 11. The lab web site
 

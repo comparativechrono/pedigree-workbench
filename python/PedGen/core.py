@@ -160,7 +160,11 @@ def plot_pedigree_tree(df, title="Pedigree (Tree Layout)"):
     return f
 
 
-def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLikelihood=0.6, AffectedSpouse= True, BackpropLikelihood= 0.25, alt_freq= 0.1, seed= None):
+# the most pedigrees made in looking for one with min_affected affected people
+MAX_TRIES = 1000
+
+
+def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLikelihood=0.6, AffectedSpouse= True, BackpropLikelihood= 0.25, alt_freq= 0.001, seed= None, CousinLikelihood= 0.0, min_affected= 1):
         '''
         Generates a pedigree by Mendelian inheritance from an affected founder, with partners and their
         ancestors drawn from a population in Hardy-Weinberg equilibrium.
@@ -171,12 +175,20 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
         FamilyID (string): the family's id in the pedigree
         mode ('AD' or 'AR'): autosomal dominant or autosomal recessive
         generation_count (int): the number of generations
-        SpouseLikelihood (float, 0-1): the chance that a child has a partner, and so children of their own (the first child always does)
+        SpouseLikelihood (float, 0-1): the chance that a child has a partner, and so children of their own (the first child always does, in every generation but the last)
         AffectedSpouse (bool): whether partners can carry the alternate allele
         BackpropLikelihood (float, 0-1): the chance that a partner's parents are added, and theirs, and so on
-        alt_freq (float, 0-1): the frequency of the alternate allele in the population
+        alt_freq (float, 0-1): the frequency of the alternate allele in the population, 0.001 unless given: a rare
+            allele, as a rare disease's is. It also sets how likely an affected founder is to have two copies of it
+            in a dominant pedigree.
         seed (int, optional): makes the pedigree reproducible: the same seed and settings always give the same pedigree.
             Without a seed, Python's shared random number generator is used, as before.
+        CousinLikelihood (float, 0-1): the chance that a descendant of the founder who has a partner marries a cousin
+            (another descendant of the founder in the same generation, not a brother or sister, who has no partner
+            yet), when there is one, rather than someone from outside the family. A rare recessive allele seldom
+            comes together twice in a family in any other way. 0 unless given.
+        min_affected (int): makes pedigrees until one has at least this many affected people, as families come to
+            notice through their affected members (1 unless given). ValueError if none of MAX_TRIES has them.
 
         RETURN:
         -------
@@ -215,7 +227,8 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
         '''
         Wrapper function that generates the primary founder of the pedigree
         By default, this individual is affected
-        If AD, 20% chance homozygous, 80% chance heterozygous.
+        If AD, heterozygous or homozygous in the proportions in which affected people are in the population (2pq to
+        q squared), so almost always heterozygous for a rare allele.
         If AR, 100% chance homozygous.
         Input:
         Output:
@@ -224,8 +237,9 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
             nonlocal family_df
 
             if mode == 'AD':
+                het, hom = 2*(1-alt_freq)*alt_freq, alt_freq**2
                 Genotype = random.choices(population= [1,2],
-                                          weights= (0.8, 0.2))[0]
+                                          weights= (het, hom))[0] if het + hom > 0 else 1
             elif mode == 'AR':
                 Genotype= 2
 
@@ -235,6 +249,8 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
                             Sex= random.randint(1,2),
                             Phenotype= 2,
                             Genotype= Genotype)
+            generation_of[1] = 0
+            descendants.add(1)
         '''
         Wrapper function that generates spouses unrelated to primary founder
         Spouse sex dependent on the relative of primary founder.
@@ -319,6 +335,21 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
                     recursive_history_backprop(current_generation-1, len(family_df))
 
         '''
+        A cousin for a descendant of the founder to marry: another descendant in the same generation, of the
+        other sex, with no partner yet, who isn't a brother or sister. One is chosen at random; None if there are none.
+        (The pedigree is built one branch at a time, so the cousins are in the branches built already.)
+        Input: RelativeAnchorID(int), current_generation(int)
+        Output: IndividualID(int) or None
+        '''
+        def cousin_of(RelativeAnchorID, current_generation):
+            me = family_df.loc[RelativeAnchorID]
+            free = [p for p in sorted(descendants)
+                    if p != RelativeAnchorID and generation_of.get(p) == current_generation and p not in partnered
+                    and family_df.loc[p]['Sex'] != me['Sex']
+                    and (family_df.loc[p]['PaternalID'], family_df.loc[p]['MaternalID']) != (me['PaternalID'], me['MaternalID'])]
+            return random.choice(free) if free else None
+
+        '''
         Function that recursively constructs pedigree in forward direction.
         Input: current_generation(int), RelativeAnchorID(int)
         Output: n/a
@@ -328,21 +359,33 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
 
             if current_generation < generation_count-1:
 
-                spouse_generator(RelativeAnchorID= RelativeAnchorID)
+                # a partner: now and then a cousin, if one is free, and otherwise someone from outside the family
+                cousin = None
+                if CousinLikelihood and current_generation > 0 and random.random() < CousinLikelihood:
+                    cousin = cousin_of(RelativeAnchorID, current_generation)
+                if cousin is None:
+                    spouse_generator(RelativeAnchorID= RelativeAnchorID)
+                    partner = len(family_df)
+                else:
+                    partner = cousin
+                partnered.update((RelativeAnchorID, partner))
 
                 #Determining Parental Sex for next generation
                 if family_df.loc[RelativeAnchorID]['Sex'] == 1:
                     PaternalID = RelativeAnchorID
-                    MaternalID = len(family_df)
+                    MaternalID = partner
                 else:
-                    PaternalID = len(family_df)
+                    PaternalID = partner
                     MaternalID = RelativeAnchorID
 
-                if BackpropLikelihood:
-                    recursive_history_backprop(current_generation, len(family_df))
+                # (a cousin's parents are in the pedigree already)
+                if BackpropLikelihood and cousin is None:
+                    recursive_history_backprop(current_generation, partner)
 
                 for child in range(random.randint(1, max_children)):
                     child_generator(PaternalID= PaternalID, MaternalID= MaternalID)
+                    generation_of[len(family_df)] = current_generation + 1
+                    descendants.add(len(family_df))
                     reproductive_rng = random.randint(1,100)/100
                     #checks if a spouse should be generated for the newly generated child
                     #spouse must be generated for at least one child (the first) to ensure generation count
@@ -350,35 +393,46 @@ def pedigree_generator(max_children, FamilyID, mode, generation_count, SpouseLik
                         recursive_pedigree_construction(current_generation+1, len(family_df))
 
 
-        #-------------------------------------
-        # 1. Construct the empty data frame
-        #-------------------------------------
-        pedigree_construction_columns = ['FamilyID', 'IndividualID', 'PaternalID', 'MaternalID', 'Sex', 'Phenotype', 'Genotype']
-        family_df = pd.DataFrame(columns= pedigree_construction_columns)
-        family_df.set_index('IndividualID', inplace=True)
-
-        #-------------------------------------
-        # 2. Generating Primary Founder
-        #-------------------------------------
-        primary_founder_generator()
-
         #--------------------------------------------
-        # 3. Construct Inheritence Pattern Dictionary
+        # Construct Inheritence Pattern Dictionary
         #--------------------------------------------
         ref_freq = 1 - alt_freq
         inheritance_patterns = calc_inheritance_weights(ref_freq, alt_freq)
+        if int(min_affected) < 1:
+            raise ValueError(f'min_affected must be 1 or more, not {min_affected}')
 
-        #----------------------------------------
-        # 4. Generating Pedigree
-        #----------------------------------------
-        recursive_pedigree_construction(current_generation= 0, RelativeAnchorID= 1)
+        # pedigrees are made until one has min_affected affected people (the founder is one)
+        for attempt in range(MAX_TRIES):
+            #-------------------------------------
+            # 1. Construct the empty data frame
+            #-------------------------------------
+            pedigree_construction_columns = ['FamilyID', 'IndividualID', 'PaternalID', 'MaternalID', 'Sex', 'Phenotype', 'Genotype']
+            family_df = pd.DataFrame(columns= pedigree_construction_columns)
+            family_df.set_index('IndividualID', inplace=True)
+            # each person's generation (the founder's is 0), the founder and their descendants, and who has a partner
+            generation_of, descendants, partnered = {}, set(), set()
 
-        #-------------------------------
-        # 5. Resetign Standard Indexing
-        # #-------------------------------
-        family_df.reset_index(inplace= True)
+            #-------------------------------------
+            # 2. Generating Primary Founder
+            #-------------------------------------
+            primary_founder_generator()
 
-        return family_df
+            #----------------------------------------
+            # 3. Generating Pedigree
+            #----------------------------------------
+            recursive_pedigree_construction(current_generation= 0, RelativeAnchorID= 1)
+
+            #-------------------------------
+            # 4. Resetign Standard Indexing
+            # #-------------------------------
+            family_df.reset_index(inplace= True)
+
+            if int((family_df['Phenotype'] == 2).sum()) >= min_affected:
+                return family_df
+
+        raise ValueError(f'none of {MAX_TRIES:,} pedigrees had {min_affected} affected people: give a higher allele '
+                         f'frequency, more generations or children, or (for a recessive condition) a chance that '
+                         f'cousins marry')
 
 def gen_PED_export(ped_df, output_dir='.'):
     '''
