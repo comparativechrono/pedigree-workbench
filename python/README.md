@@ -31,14 +31,14 @@ In the second archive:
 
 | Package | Version | Where it comes from |
 |---|---|---|
-| `pednet` (PedNet) | 2.1.0 | built from [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6), not released yet (2.0.0, on PyPI since 19 October 2026, has pedigrees as graphs, the mode of inheritance, and the co-segregation of candidate variants): GA4GH Pedigrees and Phenopackets Families read as well as PED files |
+| `pednet` (PedNet) | **2.1.0** | on PyPI since 19 October 2026 (from [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6)), after 2.0.0 that morning, which has pedigrees as graphs, the mode of inheritance, and the co-segregation of candidate variants: GA4GH Pedigrees and Phenopackets Families read as well as PED files |
 | `PedGen` | 0.1.4.dev13 | built from [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5), not released yet: the `pedgen` command, a table of genotypes for PedNet, matplotlib imported only to draw, a rare allele by default, cousins who marry, and a minimum number affected (merged); a GA4GH Pedigree as well as a PED file (#5) |
-| `PedInterp` | 0.1.8.dev17 | built from [pedigree-interpreter#7](https://github.com/comparativechrono/pedigree-interpreter/pull/7), not released yet: the `pedinterp` command, children drawn straight under their parents read correctly, the enlargement chosen to suit the symbols, warnings when lines were missed, and the symbols measured as the reading finds them (merged); a GA4GH Pedigree as well as a PED file (#7) |
+| `PedInterp` | 0.1.8.dev19 | built from [pedigree-interpreter#8](https://github.com/comparativechrono/pedigree-interpreter/pull/8), not released yet: the `pedinterp` command, children drawn straight under their parents read correctly, the enlargement chosen to suit the symbols, warnings when lines were missed, the symbols measured as the reading finds them, and a GA4GH Pedigree as well as a PED file (merged); twins, and pedigrees sketched by hand (#8) |
 | `networkx` | 3.4.2 | its wheel from PyPI, in `vendor/`; the archive has it without its tests |
 
 `tools/vendor_wheels.py` copies the four from their wheels, and records each
-wheel's name and SHA-256 in `vendor/SOURCES.json`. When PedNet 2.1.0, PedGen
-and PedInterp are released on PyPI, copy them again from the released wheels.
+wheel's name and SHA-256 in `vendor/SOURCES.json`. When PedGen and PedInterp
+are released on PyPI, copy them again from the released wheels.
 PedNet is by
 Tim Hearn and Nick Taylor, and PedGen and PedInterp by Nick Taylor, under the
 MIT licence (each package's `LICENSE`); networkx is under the 3-clause BSD

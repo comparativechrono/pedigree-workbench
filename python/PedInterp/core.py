@@ -4,9 +4,11 @@ import os
 import sys
 import warnings
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageChops
 from os import makedirs
 import pandas as pd
+from .lines import read_lines
+from .shapes import SEX, TRIANGLE, find_sketched_symbols, shape_of, twins_bar
 #pytesseract is imported only when the labels are read with Tesseract (see tesseract_words), so that PedInterp
 #works without it, as in a browser under Pyodide, which can't run the tesseract program
 
@@ -62,6 +64,37 @@ def _id(value):
         value = int(value)
     return str(value)
 
+def twin_groups(PED_df):
+    '''
+    The sets of twins (or triplets, and so on) in a dataframe read by pedigree_processing, from its attrs['twins']:
+    a list of (first, [(other, identical), ...]), with the first of each set the one listed first in the dataframe,
+    which is the one on the left, and each other twin with whether they are identical to the first. Twins joined only
+    through a third are identical only if every pair of them is, as studio2ga4gh has it.
+    '''
+    order = {_id(person): k for k, person in enumerate(PED_df['IndividualID'])}
+    pairs = [(_id(a), _id(b), str(kind).upper()) for a, b, kind in PED_df.attrs.get('twins') or []
+             if _id(a) in order and _id(b) in order and _id(a) != _id(b)]
+    root = {}
+    def find(person):
+        while root.setdefault(person, person) != person:
+            person = root[person]
+        return person
+    for a, b, _ in pairs:
+        root[find(a)] = find(b)
+    sets = {}
+    for person in list(root):
+        sets.setdefault(find(person), []).append(person)
+    found = []
+    for group in sorted(sets.values(), key= lambda group: min(order[p] for p in group)):
+        group.sort(key= order.get)
+        first, links = group[0], [(a, b, kind) for a, b, kind in pairs if a in group]
+        others = []
+        for other in group[1:]:
+            direct = [kind for a, b, kind in links if {a, b} == {first, other}]
+            others.append((other, direct[0] == 'MZ' if direct else all(kind == 'MZ' for _, _, kind in links)))
+        found.append((first, others))
+    return found
+
 def GA4GH_export(PED_df, output_dir = '.', condition = None):
     '''
     Writes a PED file-formatted dataframe as a GA4GH Pedigree, output_dir/<FamilyID>_ga4gh-pedigree.json, and returns
@@ -74,6 +107,11 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     about, as an ontology term (id, label): see ga4gh_condition. Affected people have it, unaffected people have it
     marked as excluded (looked for, and not found), and anyone whose phenotype is unknown has nothing, so that the
     PED file's phenotypes can be read back from the GA4GH file.
+
+    Twins, which a PED file can't hold, are written from the dataframe's attrs['twins'] (as pedigree_processing reads
+    them), as studio2ga4gh writes them: each twin is related to the first of their set, on the left, as an identical
+    twin (KIN:010, isMonozygoticMultipleBirthSiblingOf) or a non-identical one (KIN:011,
+    isPolyzygoticMultipleBirthSiblingOf).
     '''
     from pedigree_ga4gh import DISEASE, PHENOTYPE, Kindred, Member, Relation, Term, dumps, kin, ontology, to_ga4gh_pedigree
     from . import __version__
@@ -88,6 +126,11 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
         for parent, code in ((row.PaternalID, kin.BIOLOGICAL_FATHER), (row.MaternalID, kin.BIOLOGICAL_MOTHER)):
             if _id(parent) not in ('0', ''):
                 relations.append(Relation(_id(parent), code, person))
+    twin_sets = twin_groups(PED_df)
+    for first, others in twin_sets:
+        for other, identical in others:
+            relations.append(Relation(first, kin.MONOZYGOTIC_MULTIPLE_BIRTH_SIBLING if identical
+                                      else kin.POLYZYGOTIC_MULTIPLE_BIRTH_SIBLING, other))
     narrative = f'Read with PedInterp {__version__}'
     if PED_df.attrs.get('image'):
         narrative += f' from {PED_df.attrs["image"]}'
@@ -95,6 +138,12 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
         narrative += f', enlarged {PED_df.attrs["upscale_factor"]:g} times'
     affected = int((PED_df['Phenotype'] == 2).sum())
     narrative += f'. {len(members)} people, {affected} affected with {label} ({cid}).'
+    if twin_sets:
+        narrative += ' Twins: ' + '; '.join(
+            ', '.join([first] + [other for other, _ in others]) +
+            (' (identical)' if all(identical for _, identical in others) else
+             ' (not identical)' if not any(identical for _, identical in others) else '')
+            for first, others in twin_sets) + '.'
     doc, _ = to_ga4gh_pedigree(Kindred(FamID, members= members, relations= relations, narrative= narrative),
                                created_by= f'PedInterp {__version__}')
     makedirs(output_dir, exist_ok= True)
@@ -133,6 +182,28 @@ def image_enhance(FamID, input_dir, upscale_factor = 10):
     upscaled_img.save(output_path)
     return output_path
 
+def open_picture(image_path):
+    '''
+    A picture as an RGB image, with anything transparent made white, as a drawing is black on white: a PNG saved with
+    a transparent background would otherwise be read as black all over
+    '''
+    img = Image.open(image_path)
+    if img.mode in ('RGBA', 'LA', 'PA') or (img.mode == 'P' and 'transparency' in img.info):
+        img = img.convert('RGBA')
+        white = Image.new('RGBA', img.size, (255, 255, 255, 255))
+        white.alpha_composite(img)
+        img = white
+    return img.convert('RGB')
+
+def ink_image(img):
+    '''
+    A picture in grey, as dark as its darkest colour at each pixel (the least of red, green and blue): black and grey
+    stay as they are, and coloured ink, a red line or a symbol filled in yellow as Pedigree Studio fills them, is dark,
+    where in an ordinary grey image a yellow, orange or light grey is as light as white is taken to be
+    '''
+    red, green, blue = img.split()
+    return ImageChops.darker(ImageChops.darker(red, green), blue)
+
 def upscaled_image(image_path, upscale_factor = 10):
     '''
     Reads a pedigree image and upscales it in memory, without writing a copy next to it
@@ -141,21 +212,22 @@ def upscaled_image(image_path, upscale_factor = 10):
     -------
     the upscaled image as an OpenCV (BGR) array
     '''
-    img = Image.open(image_path).convert('RGB')
+    img = open_picture(image_path)
     new_size = (round(img.width * upscale_factor), round(img.height * upscale_factor))
     upscaled_img = img.resize(new_size, _resample_filter())
     return cv2.cvtColor(np.array(upscaled_img), cv2.COLOR_RGB2BGR)
 
 def upscaled_gray_image(image_path, upscale_factor = 10):
     '''
-    Reads a pedigree image and upscales it in memory, in grey. The image is made grey before it is enlarged rather
-    than after, which takes a third of the memory, and gives the same image for a drawing in black, white and grey
+    Reads a pedigree image and upscales it in memory, in grey (ink_image: coloured ink is dark). The image is made
+    grey before it is enlarged rather than after, which takes a third of the memory, and gives the same image for a
+    drawing in black, white and grey
 
     RETURN:
     -------
     the upscaled image as a grey OpenCV array
     '''
-    img = Image.open(image_path).convert('RGB').convert('L')
+    img = ink_image(open_picture(image_path))
     new_size = (round(img.width * upscale_factor), round(img.height * upscale_factor))
     return np.array(img.resize(new_size, _resample_filter()))
 
@@ -166,31 +238,54 @@ SYMBOL_PIXELS = 200
 #: the most pixels that an enlarged picture may have, as memory is short in a browser and the work grows with the
 #: pixels: about as many as the default of 10 used to make of a picture 1,000 pixels across
 MAX_PIXELS = 60_000_000
+#: the size, across, that the symbols of a pedigree drawn by hand are read at (hand_drawn=True): about the size that
+#: Pedigree Studio saves its pictures at, so that a sketch made with its Draw tool is read as it is
+SKETCH_PIXELS = 100
+#: how dark a pixel must be to be taken as ink, from 0 (black) to 255 (white): anything nearer white than black is
+#: white, which clears the grey haze that JPEG compression and scanning leave around lines and text. In a sketch, the
+#: lines are thin and drawn in colour, and anything darker than a light grey is ink
+INK = 127
+SKETCH_INK = 160
+#: how dark the lines of a drawing usually are, at the lightest: Pedigree Studio draws its lines and symbols in a dark
+#: blue-grey (#1a2332) and writes its numbers over the symbols in a lighter grey (#6b7a8d), and the numbers are told
+#: from the lines by it (erase_labels). Enlarging the picture makes the thin strokes of the numbers a little darker
+#: than they were, but no darker than this
+DARK = 55
+LABELS = True
+#: what a warning says when a pedigree may have been drawn by hand
+HAND_DRAWN_HINT = ("If the pedigree is drawn by hand, in whole or in part, as with Pedigree Studio's Draw tool, read "
+                   'it with hand_drawn=True, which allows for rough symbols and lines')
 
-def _upscale_needed(image_path):
+def _upscale_needed(image_path, hand_drawn= False):
     '''
-    The factor that makes a picture's symbols SYMBOL_PIXELS across, before any limit: the symbols are found in a copy
-    of the picture 2,000 pixels across on its longer side (enlarged, or shrunk, which is quicker than measuring a large
-    picture whole), and their median size is measured. None if no symbols are found there. Also the picture's size.
+    The factor that makes a picture's symbols SYMBOL_PIXELS across (SKETCH_PIXELS for a sketch), before any limit: the
+    symbols are found in a copy of the picture 2,000 pixels across on its longer side (enlarged, or shrunk, which is
+    quicker than measuring a large picture whole), and their median size is measured. None if no symbols are found
+    there. Also the picture's size.
 
     The symbols are looked for as the reading looks for them, and only if none are found, down to a tenth of the
     usual size, as a small pedigree on a large page may have small ones. Looked for so small from the start, the
     holes in the letters of the labels pass for symbols when the lines are thinner than the strokes of the text, and
     the picture would be enlarged as much as the holes need.
     '''
-    img = Image.open(image_path).convert('RGB').convert('L')
+    img = ink_image(open_picture(image_path))
     width, height = img.size
     probe = 2000 / max(width, height)
     small = np.array(img.resize((max(1, round(width*probe)), max(1, round(height*probe))), _resample_filter()))
     del img
-    _, binary = cv2.threshold(small, 127, 255, cv2.THRESH_BINARY)
+    _, binary = cv2.threshold(small, SKETCH_INK if hand_drawn else INK, 255, cv2.THRESH_BINARY)
     del small
-    area = binary.shape[0]*binary.shape[1]
-    symbols, _ = detect_symbols(binary, area)
-    if not symbols:
-        symbols, _ = detect_symbols(binary, area, min_share= 0.00001)
+    if hand_drawn:
+        symbols, _, _ = sketched_symbols(binary)
+        target = SKETCH_PIXELS
+    else:
+        area = binary.shape[0]*binary.shape[1]
+        symbols, _ = detect_symbols(binary, area)
+        if not symbols:
+            symbols, _ = detect_symbols(binary, area, min_share= 0.00001)
+        target = SYMBOL_PIXELS
     sizes = [max(w, h) for (_, _, w, h), _, _ in symbols]
-    return (SYMBOL_PIXELS*probe/float(np.median(sizes)) if sizes else None), width, height
+    return (target*probe/float(np.median(sizes)) if sizes else None), width, height
 
 def _limit_upscale(factor, width, height):
     '''A factor kept between 0.25 and 20, and so that the enlarged picture has no more than MAX_PIXELS pixels, rounded
@@ -198,21 +293,22 @@ def _limit_upscale(factor, width, height):
     factor = min(factor, 20, (MAX_PIXELS/(width*height))**0.5)
     return max(0.25, math.floor(factor*10 + 1e-9)/10)
 
-def choose_upscale(image_path):
+def choose_upscale(image_path, hand_drawn= False):
     '''
-    How many times to enlarge a picture before reading it, so that its symbols are about SYMBOL_PIXELS across.
+    How many times to enlarge a picture before reading it, so that its symbols are about SYMBOL_PIXELS across
+    (SKETCH_PIXELS, with hand_drawn).
 
     The symbols are found in a copy of the picture 2,000 pixels across on its longer side, and their median size is
-    measured. If none are found there, the picture is enlarged to 5,000 pixels across, which suits most pictures of a
-    whole pedigree. The factor is kept between 0.25 and 20, and small enough that the enlarged picture has no more
-    than MAX_PIXELS pixels.
+    measured. If none are found there, the picture is enlarged to 5,000 pixels across (2,500 for a sketch), which suits
+    most pictures of a whole pedigree. The factor is kept between 0.25 and 20, and small enough that the enlarged
+    picture has no more than MAX_PIXELS pixels.
 
     RETURN:
     -------
     the factor (a number, rounded down to one decimal place)
     '''
-    needed, width, height = _upscale_needed(image_path)
-    return _limit_upscale(needed if needed is not None else 5000/width, width, height)
+    needed, width, height = _upscale_needed(image_path, hand_drawn)
+    return _limit_upscale(needed if needed is not None else (2500 if hand_drawn else 5000)/width, width, height)
 
 def linDist(coord1, coord2):
     x1, y1 = coord1
@@ -313,8 +409,11 @@ def roman_numeral(number):
 def generation_places(boxes):
     '''
     Places symbols in the rows of the drawing, which are the generations. The middles of the symbols are taken from
-    the top down, and a gap of more than half a symbol's height from one to the next starts a new row, so a symbol
-    drawn a little higher or lower than the others in its row stays in it.
+    the top down, and a new row starts where there is a gap of more than half a symbol's height from one to the next,
+    and the symbol is more than a symbol's height below the first of the row. So a symbol drawn a little higher or
+    lower than the others in its row stays in it, and so does a row that slopes, as one drawn by hand may, and as
+    rows can in Pedigree Studio, which takes everyone up to 80 pixels below the top of a row, a symbol and a half, as
+    in it.
 
     PARAMETERS:
     -----------
@@ -327,11 +426,11 @@ def generation_places(boxes):
     if not boxes:
         return []
     middles = [y + h/2 for _, y, _, h in boxes]
-    gap = 0.5*float(np.median([h for _, _, _, h in boxes]))
+    height = float(np.median([h for _, _, _, h in boxes]))
     from_top = sorted(range(len(boxes)), key= lambda i: middles[i])
     rows = [[from_top[0]]]
     for above, i in zip(from_top, from_top[1:]):
-        if middles[i] - middles[above] > gap:
+        if middles[i] - middles[above] > 0.5*height and middles[i] - middles[rows[-1][0]] > height:
             rows.append([])
         rows[-1].append(i)
     places = [None]*len(boxes)
@@ -339,6 +438,33 @@ def generation_places(boxes):
         for place, i in enumerate(sorted(members, key= lambda i: boxes[i][0] + boxes[i][2]/2)):
             places[i] = (row, place)
     return places
+
+def number_people(boxes, labelled):
+    '''
+    IDs for the people at the symbols with the given boxes: their labels where they were read (labelled: index -> label),
+    and otherwise numbered by their place in the drawing (generation_places, generation_id). A label that was read can
+    be the same as such a number (when the drawing's own labels are numbered like this, and one was misread), so a
+    star is added to the number to keep the IDs apart.
+
+    RETURN:
+    -------
+    IDs (index -> ID), the places (row, place) of the symbols, the indices in the order people are listed (by row, and
+    from the left in each), and the IDs that were numbered
+    '''
+    IDs = dict(labelled)
+    places = generation_places(boxes)
+    in_order = sorted(range(len(boxes)), key= lambda i: places[i])
+    taken = set(IDs.values())
+    numbered = []
+    for i in in_order:
+        if i not in IDs:
+            IndvID = generation_id(*places[i])
+            while IndvID in taken:
+                IndvID += '*'
+            IDs[i] = IndvID
+            taken.add(IndvID)
+            numbered.append(IndvID)
+    return IDs, places, in_order, numbered
 
 def generation_id(row, place):
     '''The usual ID for the person at a place in a row (both counted from 0): generation, in Roman numerals, and number'''
@@ -367,20 +493,12 @@ def stroke_width(dark_mask):
 
 def symbol_sex(contour):
     '''
-    Sex from a symbol's shape: a circle is female (2), a square male (1) and a diamond of unknown sex (0).
-    A circle fills about 79% (pi/4) of the smallest rectangle around it, at any angle, where a square or a diamond
-    fills nearly all of it. A square also fills its upright bounding box, but a diamond only fills half of its box.
-    Measuring areas rather than counting corners copes with ragged outlines, as in a JPEG or a scan,
-    and with corners rounded off.
+    Sex from a symbol's shape: a circle is female (2), a square male (1), and a diamond, or the triangle of a pregnancy
+    loss, of unknown sex (0), as studio2ped writes them. The shape is read from the way the outline turns (see
+    shapes.turning), which copes with ragged outlines, as in a JPEG or a scan, with corners rounded off, and with
+    shapes drawn by hand.
     '''
-    area = cv2.contourArea(contour)
-    (_, _), (rw, rh), _ = cv2.minAreaRect(contour)
-    _, _, w, h = cv2.boundingRect(contour)
-    if not (rw and rh and w and h):
-        return 0
-    if area / (rw * rh) < 0.89:
-        return 2
-    return 1 if area / (w * h) > 0.8 else 0
+    return SEX[shape_of(contour)]
 
 def open_with_disc(mask, radius):
     '''
@@ -472,10 +590,36 @@ def detect_symbols(gray_img, img_area, min_share= 0.0001):
     filled_sizes = [c['outer'] for c in candidates if c['phenotype'] == 2]
     typical = float(np.median(filled_sizes)) if filled_sizes else float(np.percentile(sizes, 90))
     candidates = [c for c in candidates if c['outer'] >= max(3*line_width, 0.5*typical)]
-    symbols = [(c['box'], symbol_sex(c['contours'][0] if len(c['contours']) == 1
-                                     else cv2.convexHull(np.vstack(c['contours']))), c['phenotype'])
-               for c in join_overlapping(candidates)]
+    symbols = []
+    ink = None
+    for c in join_overlapping(candidates):
+        contour = c['contours'][0] if len(c['contours']) == 1 else cv2.convexHull(np.vstack(c['contours']))
+        shape = shape_of(contour)
+        if shape == TRIANGLE:
+            #the space between the lines to identical twins and the bar across them is a triangle too, and would be read
+            #as someone of unknown sex between the twins
+            if ink is None:
+                ink = cv2.compare(gray_img, 127, cv2.CMP_LT)
+            if twins_bar(contour, ink, typical):
+                continue
+        symbols.append((c['box'], SEX[shape], c['phenotype']))
     return symbols, line_width
+
+def sketched_symbols(binary_img):
+    '''
+    Finds the symbols of a pedigree drawn by hand (shapes.find_sketched_symbols), in a black and white image (0 where
+    dark) at a size where a symbol is roughly 60 to 200 pixels across.
+
+    RETURN:
+    -------
+    symbols (list of (bounding box (x, y, w, h), Sex, Phenotype)), the width of the drawing's lines in pixels, and the
+    outline of the whole of each symbol, outline and all, to blank it out with
+    '''
+    ink = (binary_img == 0).astype(np.uint8)
+    line_width = stroke_width(ink)
+    found, _ = find_sketched_symbols(ink, line_width)
+    symbols = [(cv2.boundingRect(c['outer']), SEX[c['shape']], 2 if c['filled'] else 1) for c in found]
+    return symbols, line_width, [c['outer'] for c in found]
 
 def outline_width(light_mask, box, line_width):
     '''
@@ -556,256 +700,144 @@ def erase_loose_marks(binary_img, boxes):
     binary_img[(~keep)[shapes]] = 255
     return binary_img
 
+def erase_labels(line_mask, dark, boxes, size):
+    '''
+    Takes out of the lines of a drawing the labels written just above its symbols, as Pedigree Studio writes its
+    numbers over them. A label written close under a line that passes over the symbol, as the line over a family's
+    children passes over someone who married into it, touches the line, crosses it or nearly touches it, and its
+    letters would be read as a line down to the person.
+
+    A label is a word: two or more small pieces of ink side by side, the letters, taller than a line is thick but no
+    taller than letters are, above a symbol; or one such piece that is wider than it is tall, as letters run together
+    are. A line, even a short one down to a child, is a single stroke, and is kept.
+
+    Where a label is written in a lighter colour than the lines, as Pedigree Studio writes its numbers in grey, and
+    touches a line or crosses it, the two are told apart by how dark they are: the light edge of a dark line is cut
+    away from it, so that the letters it touches stand on their own, and a line that the letters cross is kept whole
+    where they cross it. Only long dark lines count, not the darker spots of a line drawn in a lighter colour, where it
+    was drawn over twice.
+
+    PARAMETERS:
+    -----------
+    line_mask: the lines of the drawing, not 0 where there is ink, with the symbols blanked out; changed in place
+    dark: where the ink is as dark as the lines usually are (DARK), not 0
+    boxes: the symbols, as (x, y, w, h)
+    size: the typical size of a symbol, in pixels
+
+    RETURN:
+    -------
+    how many letters were taken out
+    '''
+    ink = line_mask > 0
+    if not boxes or not ink.any():
+        return 0
+    #the dark lines, with the gaps closed that the letters of a label written over a line leave in it
+    #(an odd size, so that closing keeps every pixel of the lines: OpenCV's closing with an even-sized kernel drops
+    #a row or column of them)
+    closing = max(3, int(round(0.06*size))) | 1
+    dark_ink = ink & (dark > 0)
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(
+        cv2.morphologyEx(dark_ink.astype(np.uint8), cv2.MORPH_CLOSE,
+                         cv2.getStructuringElement(cv2.MORPH_RECT, (closing, closing))), connectivity= 8)
+    long = np.zeros(count, bool)
+    long[1:] = np.maximum(stats[1:, 2], stats[1:, 3]) >= 0.5*size
+    band = long[labels]
+    del labels
+    light = ink & (dark == 0)
+    #the light edge that smoothing leaves along a dark line, straight beside its dark ink (a letter that crosses the
+    #line, where it breaks the dark ink, is not beside it there)
+    edge = max(2, int(round(0.025*size)))
+    beside = cv2.dilate((dark_ink & band).astype(np.uint8),
+                        cv2.getStructuringElement(cv2.MORPH_CROSS, (2*edge + 1, 2*edge + 1))) > 0
+    del dark_ink
+    count, labels, stats, _ = cv2.connectedComponentsWithStats((ink & ~band & ~(light & beside)).astype(np.uint8),
+                                                               connectivity= 8)
+    del beside
+    #above each symbol, where its label is written: across its top, and as far again as a label is wide to either side
+    zones = [(x - 0.8*size, y - 0.45*size, x + w + 0.8*size, y + 0.1*size) for x, y, w, h in boxes]
+    pieces = [k for k in range(1, count) if max(stats[k][2], stats[k][3]) <= 0.3*size and
+              any(left <= stats[k][0] and stats[k][0] + stats[k][2] <= right and
+                  top <= stats[k][1] and stats[k][1] + stats[k][3] <= bottom for left, top, right, bottom in zones)]
+    def joined(pairs):
+        group = {k: k for k in pieces}
+        def find(k):
+            while group[k] != k:
+                group[k] = group[group[k]]
+                k = group[k]
+            return k
+        for a, b in pairs:
+            group[find(a)] = find(b)
+        found = {}
+        for k in pieces:
+            found.setdefault(find(k), []).append(k)
+        return list(found.values())
+    def extent(members):
+        left = min(stats[k][0] for k in members)
+        top = min(stats[k][1] for k in members)
+        return (left, top, max(stats[k][0] + stats[k][2] for k in members) - left,
+                max(stats[k][1] + stats[k][3] for k in members) - top)
+    #a letter that crosses a line is cut in two by it, one piece above the other, which are one letter
+    letters = joined((a, b) for i, a in enumerate(pieces) for b in pieces[i + 1:]
+                     if min(stats[a][0] + stats[a][2], stats[b][0] + stats[b][2]) - max(stats[a][0], stats[b][0])
+                        >= 0.5*min(stats[a][2], stats[b][2])
+                     and max(stats[b][1] - (stats[a][1] + stats[a][3]), stats[a][1] - (stats[b][1] + stats[b][3]))
+                        <= 0.08*size)
+    boxes_of = [extent(members) for members in letters]
+    #letters side by side, level with each other, make words (with room between them for a hyphen, which a label written
+    #on a line, as in "III-4", loses into the line)
+    def beside_each_other(a, b):
+        ax, ay, aw, ah = boxes_of[a]
+        bx, by, bw, bh = boxes_of[b]
+        return min(ay + ah, by + bh) - max(ay, by) >= 0.5*min(ah, bh) and max(bx - (ax + aw), ax - (bx + bw)) <= 0.15*size
+    word_of = list(range(len(letters)))
+    def word(k):
+        while word_of[k] != k:
+            word_of[k] = word_of[word_of[k]]
+            k = word_of[k]
+        return k
+    for a in range(len(letters)):
+        for b in range(a + 1, len(letters)):
+            if beside_each_other(a, b):
+                word_of[word(a)] = word(b)
+    words = {}
+    for k in range(len(letters)):
+        words.setdefault(word(k), []).append(k)
+    #a letter is taller than a line is thick, and a word is no taller than a letter
+    tall = 0.06*size
+    text = np.zeros(count, bool)
+    for members in words.values():
+        _, top, _, height = extent([k for m in members for k in letters[m]])
+        high = [m for m in members if boxes_of[m][3] >= tall]
+        if height > 0.25*size:
+            continue
+        if len(high) >= 2 or (len(members) == 1 and high and boxes_of[members[0]][2] >= 1.2*boxes_of[members[0]][3]):
+            for m in members:
+                text[letters[m]] = True
+    if not text.any():
+        return 0
+    found = text[labels]
+    del labels
+    #the line where the letters cross it is kept: within the dark line, and where a letter crosses the end of a level
+    #or upright line, in line with it, as where the line runs on under the letters to a symbol and the last letter
+    #is written against the symbol, with no dark line beyond it to close the gap with
+    run = max(3, int(round(0.1*size)))
+    reach = max(2, int(round(0.08*size)))
+    keep = band.astype(np.uint8)
+    level = cv2.morphologyEx(keep, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (run, 1)))
+    upright = cv2.morphologyEx(keep, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, run)))
+    keep = band | (cv2.dilate(level, cv2.getStructuringElement(cv2.MORPH_RECT, (2*reach + 1, 1))) > 0) | \
+           (cv2.dilate(upright, cv2.getStructuringElement(cv2.MORPH_RECT, (1, 2*reach + 1))) > 0)
+    del level, upright
+    #(with the light edge of the letters, and of a light label what was cut from the line it touches)
+    disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*edge + 1, 2*edge + 1))
+    line_mask[(found | ((cv2.dilate(found.astype(np.uint8), disc) > 0) & light)) & ~keep] = 0
+    return int(np.count_nonzero(text))
+
 
 #-----------------------------
 # LINE DETECTION
 #-----------------------------
-def merge_duplicate_lines(norm_cat_lines, angle_threshold= 10, distance_threshold= 50):
-    '''
-    Joins lines that run along one another, less than distance_threshold apart, and that overlap or meet end to end:
-    Hough finds both edges of a thick line, and often finds a line in pieces. Each joined line keeps the position
-    of the longer of the two. The lines are gone over again until no more can be joined, so that the pieces of a
-    line are all joined whatever order they come in.
-    '''
-    def merge_horizontal(lines):
-        merged_horizontal_lines = []
-        for horz_line in lines:
-            a,hy1,b,hy2 = horz_line
-            for i in range(len(merged_horizontal_lines)):
-                c,mhy1,d,mhy2 = merged_horizontal_lines[i]
-                #sufficiently close vertically, and overlapping or touching
-                if abs(mhy1 - hy1) < distance_threshold and a <= d and c <= b:
-                    y = hy1 if b - a > d - c else mhy1
-                    merged_horizontal_lines[i] = (min(a, c), y, max(b, d), y)
-                    break
-            else:
-                merged_horizontal_lines.append(horz_line)
-        return merged_horizontal_lines
-
-    #vertical lines run from the bottom (the larger y) up
-    def merge_vertical(lines):
-        merged_vertical_lines = []
-        for vert_line in lines:
-            vx1,a,vx2,b = vert_line
-            for j in range(len(merged_vertical_lines)):
-                mvx1,c,mvx2,d = merged_vertical_lines[j]
-                #sufficiently close horizontally, and overlapping or touching
-                if abs(mvx1 - vx1) < distance_threshold and b <= c and d <= a:
-                    x = vx1 if a - b > c - d else mvx1
-                    merged_vertical_lines[j] = (x, max(a, c), x, min(b, d))
-                    break
-            else:
-                merged_vertical_lines.append(vert_line)
-        return merged_vertical_lines
-
-    directional_merged_lines = {}
-    for direction, merge in (('vertical', merge_vertical), ('horizontal', merge_horizontal)):
-        lines = list(norm_cat_lines[direction])
-        while True:
-            merged = merge(lines)
-            if len(merged) == len(lines):
-                break
-            lines = merged
-        directional_merged_lines[direction] = merged
-
-    return directional_merged_lines
-
-
-
-def categorize_normalize_lines(lines, img_width, img_height, tilt_threshold = 200):
-    categorized_normalized_lines = {
-    'vertical': [],
-    'horizontal': []
-    }
-
-    #HoughLinesP returns None when it finds no lines, and its array's shape is (n, 1, 4) in OpenCV 4 but (n, 4) in OpenCV 5
-    if lines is None:
-        return categorized_normalized_lines
-    uncategorized = 0
-    for line in np.asarray(lines).reshape(-1, 4):
-        x1,y1,x2,y2 = (int(v) for v in line)
-        #deleting exessively long and short duplicates/artifacts
-        if (
-            (abs(x2-x1) > 0.8*img_width or abs(y2-y1) > 0.8*img_height) or
-            (abs(x2-x1) < 0.01*img_width and abs(y2-y1) < 0.01*img_height)
-        ):
-            continue
-        if abs(x1 - x2) < tilt_threshold:
-            if y1 < y2:
-                z = y1
-                y1 = y2
-                y2 = z
-            categorized_normalized_lines['vertical'].append((x1, y1, x2, y2))
-        elif abs(y1 - y2) < tilt_threshold:
-            if x1 > x2:
-                z = x1
-                x1 = x2
-                x2 = z
-            categorized_normalized_lines['horizontal'].append((x1, y1, x2, y2))
-        else:
-            uncategorized += 1
-
-    if uncategorized:
-        warnings.warn(f'{uncategorized} line(s) were neither horizontal nor vertical and were left out')
-    return categorized_normalized_lines
-
-
-
-def cut_at_symbols(norm_cat_lines, boxes):
-    '''
-    Cuts the lines where they cross a symbol, keeping the pieces outside. No line passes through a symbol, but Hough
-    joins the pieces of a line across gaps, and the blank left where a symbol was taken out is a gap like any other.
-    Without this, the line down to a child is joined to the line above them that leads down to their parent drawn
-    straight above them, and the child is given their grandparents; and the lines from someone to partners on either
-    side of them are joined into one, which makes the partners a couple.
-    boxes: the symbols, as (left, top, right, bottom) with the margin blanked out round them
-    '''
-    def outside(start, end, cuts):
-        pieces, at = [], start
-        for a, b in sorted(cuts):
-            if b <= at or a >= end:
-                continue
-            if a > at:
-                pieces.append((at, a))
-            at = max(at, b)
-        if at < end:
-            pieces.append((at, end))
-        return pieces
-
-    cut = {'vertical': [], 'horizontal': []}
-    #a vertical line runs from the bottom (x1, y1) up to the top (x2, y2)
-    for x1, y1, x2, y2 in norm_cat_lines['vertical']:
-        x_at = lambda y: x1 if y1 == y2 else x1 + (x2 - x1)*(y1 - y)/(y1 - y2)
-        crossed = [(top, bottom) for left, top, right, bottom in boxes if left <= max(x1, x2) and min(x1, x2) <= right]
-        for top, bottom in outside(y2, y1, crossed):
-            cut['vertical'].append((int(round(x_at(bottom))), int(bottom), int(round(x_at(top))), int(top)))
-    #a horizontal line runs from the left (x1, y1) to the right (x2, y2)
-    for x1, y1, x2, y2 in norm_cat_lines['horizontal']:
-        y_at = lambda x: y1 if x1 == x2 else y1 + (y2 - y1)*(x - x1)/(x2 - x1)
-        crossed = [(left, right) for left, top, right, bottom in boxes if top <= max(y1, y2) and min(y1, y2) <= bottom]
-        for left, right in outside(x1, x2, crossed):
-            cut['horizontal'].append((int(left), int(round(y_at(left))), int(right), int(round(y_at(right)))))
-    return cut
-
-
-
-def partners_at_ends(line, IndvID, IndvDataDict, distance_threshold):
-    '''
-    The people at the two ends of a horizontal line: at each end, whoever has a side of their symbol within
-    distance_threshold of it (the closest, if several do), or None if no one does. IndvID itself is left out.
-    '''
-    x1, y1, x2, y2 = line
-    partners = []
-    for end in ((x1, y1), (x2, y2)):
-        best, best_distance = None, distance_threshold
-        for PartnerID in IndvDataDict.keys():
-            if PartnerID == IndvID:
-                continue
-            px_left, py_top, pw, ph = IndvDataDict[PartnerID]['node_coords']
-            #a line now stops at the edge of the margin blanked out round the symbol
-            ppad = IndvDataDict[PartnerID].get('pad', 0)
-            for side in ((px_left - ppad, py_top + ph/2), (px_left + pw + ppad, py_top + ph/2)):
-                distance = linDist(side, end)
-                if distance < best_distance:
-                    best, best_distance = PartnerID, distance
-        partners.append(best)
-    return partners
-
-def first_line_above(vert_line, horizontal_lines, below, distance_threshold):
-    '''
-    The horizontal line that a vertical line meets first going up from the height below: the nearest line above it
-    that the vertical line crosses or reaches (to within distance_threshold), or None. Not just the line at its top:
-    Hough can carry a line on past the line it meets, across a gap to a line further up.
-    '''
-    Vx1, Vy1, Vx2, Vy2 = vert_line
-    best, best_y = None, None
-    for horz_line in horizontal_lines:
-        Hx1, Hy1, Hx2, Hy2 = horz_line
-        Hy = (Hy1 + Hy2)/2
-        if not (Vy2 - distance_threshold < Hy < below):
-            continue
-        #where the vertical line is at that height (it may lean a little)
-        Vx = Vx1 if Vy1 == Vy2 else Vx1 + (Vx2 - Vx1)*(Vy1 - Hy)/(Vy1 - Vy2)
-        if Hx1 - distance_threshold < Vx < Hx2 + distance_threshold and (best_y is None or Hy > best_y):
-            best, best_y = horz_line, Hy
-    return best
-
-def trackRelation(normalized_categorized_lines, IndvDataDict):
-    connection_lines = []
-
-    for IndvID in IndvDataDict.keys():
-        IndvDataDict[IndvID]['PaternalID'] = 0
-        IndvDataDict[IndvID]['MaternalID'] = 0
-        inheritence_known = False
-        #finding starting coordinate (top anchor)
-        x_left, y_top, w, h = IndvDataDict[IndvID]['node_coords']
-        #the symbol was blanked out with a margin round it, so the lines meeting it now stop at the edge of the margin
-        pad = IndvDataDict[IndvID].get('pad', 0)
-        x_mid = int(x_left + w/2)
-        top_center_coord = (x_mid, y_top - pad)
-        IndvDataDict[IndvID]['lat_coords'] = [(int(x_left+w+pad), int(y_top+(h/2))), (int(x_left-pad), int(y_top+(h/2)))]
-        distance_threshold = h/2
-        #finding if there is veritcal line close to top anchor (i.e. if inheritence is known)
-        for vert_line in normalized_categorized_lines['vertical']:
-            Vx1,Vy1,Vx2,Vy2 = vert_line
-            if linDist(top_center_coord, (Vx1,Vy1)) < distance_threshold:
-                start_coord = (Vx1,Vy1)
-                current_coord = (Vx2, Vy2)
-                inheritence_known = True
-
-                break
-
-        #checking if parental relationship was found
-        #tracing back to parents if known
-        if inheritence_known:
-            horizontal = normalized_categorized_lines['horizontal']
-            #(a line that Hough makes at the foot of this one, where it meets the symbol, out of the end of the line and
-            #what is left of a slash through the symbol, isn't one it leads to: the line it leads to is further up)
-            endpoints = first_line_above(vert_line, horizontal, start_coord[1] - distance_threshold/2, distance_threshold)
-            if endpoints is None:
-                warnings.warn(f'{IndvID}: a line leaves the top of the symbol but leads to no other line, so the parents are unknown')
-                continue
-
-            #a line with someone at each end is the partners' line, which is reached straight away from an only child,
-            #or from a child drawn right under the partners' line. Otherwise this is the line over a sibship, and the
-            #partners' line is the first line that the line coming down to it meets on the way up
-            left_parent, right_parent = partners_at_ends(endpoints, IndvID, IndvDataDict, distance_threshold)
-            if left_parent is None and right_parent is None:
-                Cx1,Cy1,Cx2,Cy2 = endpoints
-                for vert_line in normalized_categorized_lines['vertical']:
-                    Vx1,Vy1,Vx2,Vy2 = vert_line
-                    #a line that crosses the sibship's line and goes on up: adding distance threshold to Vy2 leaves out
-                    #the lines that go down from it to the children. A child's line that Hough has carried on up past
-                    #it leads to no partners' line, so the lines are tried until one does
-                    if (Vy1+distance_threshold > Cy1 and Cy1 > Vy2+distance_threshold) and (Cx1-distance_threshold < Vx1 and Vx1 < Cx2+distance_threshold):
-                        above = first_line_above(vert_line, horizontal, Cy1 - distance_threshold/2, distance_threshold)
-                        if above is None:
-                            continue
-                        partners = partners_at_ends(above, IndvID, IndvDataDict, distance_threshold)
-                        if partners != [None, None]:
-                            endpoints = above
-                            left_parent, right_parent = partners
-                            break
-
-            fx1,fy1,fx2,fy2 = endpoints
-            sx, sy = start_coord
-            connection_lines = connection_lines + [(sx,sy,fx1,fy1), (sx,sy,fx2,fy2)]
-
-            #the father is the male partner, and the mother the female one, wherever they are drawn.
-            #only when their sexes don't tell is the left partner taken as the father, as pedigrees are usually drawn
-            father, mother = left_parent, right_parent
-            left_sex = IndvDataDict[left_parent].get('Sex') if left_parent is not None else None
-            right_sex = IndvDataDict[right_parent].get('Sex') if right_parent is not None else None
-            if left_sex == 2 or right_sex == 1:
-                father, mother = right_parent, left_parent
-            if father is not None:
-                IndvDataDict[IndvID]['PaternalID'] = father
-            if mother is not None:
-                IndvDataDict[IndvID]['MaternalID'] = mother
-
-    return IndvDataDict, connection_lines
-
-def missed_lines(IndvDataDict, lines, row_of):
+def missed_lines(IndvDataDict, partners, any_lines, row_of):
     '''
     What a line missed between the symbols looks like, in the people read, as sentences for warnings:
     - someone with only one parent;
@@ -818,7 +850,8 @@ def missed_lines(IndvDataDict, lines, row_of):
     PARAMETERS:
     -----------
     IndvDataDict: the people, with their PaternalID and MaternalID (0 if not found) and node_coords
-    lines: the lines found, {'horizontal': [...], 'vertical': [...]}
+    partners: the couples joined by a partners' line, as pairs of IDs
+    any_lines: whether there are any lines between the symbols
     row_of: each person's row in the drawing, from 0 at the top
     '''
     found = []
@@ -828,13 +861,7 @@ def missed_lines(IndvDataDict, lines, row_of):
                          'have been missed')
     parents = {p for person in IndvDataDict.values() for p in (person['PaternalID'], person['MaternalID']) if p}
     anyone = bool(parents)
-    #partners: the people at the two ends of a horizontal line
-    threshold = float(np.median([person['node_coords'][3] for person in IndvDataDict.values()]))/2
-    partnered = set()
-    for line in lines['horizontal']:
-        ends = partners_at_ends(line, None, IndvDataDict, threshold)
-        if None not in ends:
-            partnered.update(ends)
+    partnered = {p for pair in partners for p in pair}
     alone = [IndvID for IndvID, person in IndvDataDict.items()
              if row_of[IndvID] > 0 and not (person['PaternalID'] or person['MaternalID'])
              and IndvID not in parents and IndvID not in partnered]
@@ -861,9 +888,32 @@ def missed_lines(IndvDataDict, lines, row_of):
                      'people), so a line joining them may have been missed')
     rows = len(set(row_of.values()))
     #(with no lines at all, pedigree_processing says so)
-    if rows > 1 and (lines['vertical'] or lines['horizontal']) and not anyone:
+    if rows > 1 and any_lines and not anyone:
         found.append(f"No one's parents were found, though the symbols are in {rows} rows, so the lines between them "
                      'may not have been read')
+    return found
+
+def read_relations(line_mask, IndvDataDict, gap= 0.45):
+    '''
+    Reads who is whose partner, parent and twin from the lines between the symbols (lines.read_lines), and sets each
+    person's PaternalID and MaternalID (0 when not found).
+
+    PARAMETERS:
+    -----------
+    line_mask: the drawing with its symbols blanked out, not 0 where there are lines
+    IndvDataDict: the people, with their node_coords (x, y, w, h), pad (the margin blanked out round the symbol) and Sex
+    gap: how far a line may stop short of the line it meets, as a share of a symbol's size
+
+    RETURN:
+    -------
+    what lines.read_lines found: a dict of parents, partners, twins and notes
+    '''
+    people = {pid: {'box': d['node_coords'], 'pad': d.get('pad', 0), 'Sex': d.get('Sex')} for pid, d in IndvDataDict.items()}
+    found = read_lines(line_mask, people, gap= gap)
+    for pid, d in IndvDataDict.items():
+        father, mother = found['parents'].get(pid, (None, None))
+        d['PaternalID'] = father if father is not None else 0
+        d['MaternalID'] = mother if mother is not None else 0
     return found
 
 def pedigree_processing(FamID,
@@ -872,7 +922,8 @@ def pedigree_processing(FamID,
                         output_dir = '.',
                         image_path = None,
                         upscale_factor = None,
-                        ocr = 'tesseract'):
+                        ocr = 'auto',
+                        hand_drawn = False):
     '''
     Reads a pedigree image into a dataframe laid out like a PED file
 
@@ -886,13 +937,25 @@ def pedigree_processing(FamID,
     upscale_factor (number, optional): how many times to enlarge the image before reading it. By default, the
         factor that makes its symbols about SYMBOL_PIXELS across (choose_upscale), which the result records in its
         attrs['upscale_factor']
-    ocr: how to read the labels (default = 'tesseract')
+    ocr: how to read the labels (default = 'auto')
+        'auto': with Tesseract, unless the pedigree is hand_drawn: its labels, if it has any, are written by hand,
+            which Tesseract can't read, and it may take the strokes that fill a sketched symbol in for letters, so
+            people are numbered
         'tesseract': with Tesseract. If pytesseract isn't installed or the tesseract program can't be run,
             people are numbered instead, with a warning that says why
         None or 'none': the labels aren't read, and people are numbered
         a function: given the grey image to be read (a numpy uint8 array of the image enlarged at most 3 times),
             it returns the words in it as (text, left, top, width, height), in that image's pixels.
             This is how other OCR, such as tesseract.js in a browser, can read the labels
+    hand_drawn (bool): whether the pedigree is sketched by hand, as with Pedigree Studio's Draw tool, in part or in
+        whole (default = False). The symbols may then be of unequal sizes, their outlines may not quite close, and
+        filled ones may be scribbled in; the lines may wobble, slope, and stop short of what they join. The picture
+        is read at a size where its symbols are about SKETCH_PIXELS across, and any colour darker than a light grey
+        is taken as ink
+
+    Twins are read from the lines that join them to their parents' line at one point, and identical twins from the bar
+    between those lines; the result lists them in attrs['twins'], as [twin, twin, 'MZ' or 'DZ'], with the twin on the
+    left first. A PED file can't hold them, but GA4GH_export writes them.
 
     People are numbered the standard way: the generations are the rows of symbols from the top, in Roman numerals,
     and the people in each row are numbered from the left: I-1, I-2, II-1 and so on. When the labels are read,
@@ -903,6 +966,8 @@ def pedigree_processing(FamID,
     pandas.DataFrame with the columns FamilyID, IndividualID, PaternalID, MaternalID, Sex and Phenotype,
     with a row for each person, generation by generation, and from left to right in each
     '''
+    if isinstance(ocr, str) and ocr.lower() == 'auto':
+        ocr = None if hand_drawn else 'tesseract'
     if ocr is None or (isinstance(ocr, str) and ocr.lower() == 'none'):
         read_words = None
     elif isinstance(ocr, str) and ocr.lower() == 'tesseract':
@@ -910,7 +975,7 @@ def pedigree_processing(FamID,
     elif callable(ocr):
         read_words = ocr
     else:
-        raise ValueError(f"ocr must be 'tesseract', 'none', None or a function, not {ocr!r}")
+        raise ValueError(f"ocr must be 'auto', 'tesseract', 'none', None or a function, not {ocr!r}")
     numbering = 'numbered by generation instead (I-1, I-2, II-1 and so on)'
 
     #----------------------------------------
@@ -920,8 +985,9 @@ def pedigree_processing(FamID,
         image_path = f'{raw_image_dir}/{FamID}.png'
     needed = None
     if upscale_factor is None:
-        needed, picture_width, picture_height = _upscale_needed(image_path)
-        upscale_factor = _limit_upscale(needed if needed is not None else 5000/picture_width, picture_width, picture_height)
+        needed, picture_width, picture_height = _upscale_needed(image_path, hand_drawn)
+        upscale_factor = _limit_upscale(needed if needed is not None else (2500 if hand_drawn else 5000)/picture_width,
+                                        picture_width, picture_height)
     if needed is not None and needed > 1.5*upscale_factor:
         #(a limit kept the factor well short of what the symbols need: a picture too small, or one too large to enlarge so far)
         if upscale_factor >= 20:
@@ -936,8 +1002,11 @@ def pedigree_processing(FamID,
     img_area = img_height * img_width
 
     #the drawing is black on white, so anything nearer white than black is taken as white: this clears the grey haze
-    #that JPEG compression and scanning leave around lines and text
-    _, redacted_img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+    #that JPEG compression and scanning leave around lines and text (in a sketch, anything darker than a light grey is
+    #ink, as its lines are thin and often drawn in colour)
+    _, redacted_img = cv2.threshold(gray_img, SKETCH_INK if hand_drawn else INK, 255, cv2.THRESH_BINARY)
+    #where the ink is as dark as lines are, to tell lighter text from them (erase_labels), kept a bit a pixel
+    dark_bits = np.packbits(gray_img <= DARK)
     del gray_img
 
     #----------------------------------------
@@ -968,13 +1037,19 @@ def pedigree_processing(FamID,
     #----------------------------------------
     # PHENOTYPE AND SEX DETECTION
     #----------------------------------------
-    symbols, line_width = detect_symbols(redacted_img, img_area)
+    outlines = None
+    if hand_drawn:
+        symbols, line_width, outlines = sketched_symbols(redacted_img)
+    else:
+        symbols, line_width = detect_symbols(redacted_img, img_area)
     if not symbols:
         if upscale_factor >= 20:
             raise ValueError(f'No pedigree symbols were found in {image_path}, even enlarged {upscale_factor:g} times: '
-                             'the picture may be too small to read, and a larger copy of it would read better')
+                             'the picture may be too small to read, and a larger copy of it would read better' +
+                             ('' if hand_drawn else f'. {HAND_DRAWN_HINT}'))
         raise ValueError(f'No pedigree symbols were found in {image_path}. If the pedigree is only a small part of '
-                         'the picture, as on a page, cut the picture down to the pedigree')
+                         'the picture, as on a page, cut the picture down to the pedigree' +
+                         ('' if hand_drawn else f'. {HAND_DRAWN_HINT}'))
 
     #each symbol goes with the nearest label, and each label keeps the nearest of the symbols that chose it
     label_dict = {label: {'label_coords': box} for label, box in labels.items()}
@@ -997,18 +1072,8 @@ def pedigree_processing(FamID,
     #anyone without a label is numbered by their place in the drawing, which is also the order people are listed in.
     #A label that was read can be the same as such a number (when the drawing's own labels are numbered like this,
     #and one was misread), so a star is added to the number to keep the IDs apart
-    places = generation_places([box for box, _, _ in symbols])
-    in_order = sorted(range(len(symbols)), key= lambda i: places[i])
-    taken = set(IDs.values())
-    numbered = []
-    for i in in_order:
-        if i not in IDs:
-            IndvID = generation_id(*places[i])
-            while IndvID in taken:
-                IndvID += '*'
-            IDs[i] = IndvID
-            taken.add(IndvID)
-            numbered.append(IndvID)
+    label_IDs = dict(IDs)
+    IDs, places, in_order, numbered = number_people([box for box, _, _ in symbols], label_IDs)
     if labels and numbered:
         warnings.warn(f'{len(numbered)} symbol(s) had no label of their own near them, and are numbered by their '
                       f'place in the drawing instead: {", ".join(numbered)}.' +
@@ -1019,8 +1084,12 @@ def pedigree_processing(FamID,
         (x, y, w, h), sex, phenotype = symbols[i]
         #the margin round the symbol that is blanked out, so that only the lines between symbols are left
         #(an unfilled symbol was found by the space inside its outline, so its outline is a line's width further out)
-        pad = (2 if phenotype == 1 else 1)*line_width + int(0.05*max(w, h))
+        #(in a sketch, a symbol's outline wobbles, and a scribble may fall short of the outline round it)
+        #(a sketch's symbols are blanked out by their own outlines, which they were found with whole)
+        pad = 2 if hand_drawn else (2 if phenotype == 1 else 1)*line_width + int(0.05*max(w, h))
         IndvIDsDict[IDs[i]] = {'node_coords': (x,y,w,h), 'Phenotype': phenotype, 'Sex': sex, 'pad': pad}
+        if outlines is not None:
+            IndvIDsDict[IDs[i]]['outline'] = outlines[i]
 
     #clearing away any text left in the drawing (all of it, when the labels aren't read) and any stray marks: whatever
     #doesn't come near enough a symbol for the lines to be traced from it. A line is traced from the top of a symbol
@@ -1034,45 +1103,58 @@ def pedigree_processing(FamID,
     for person in IndvIDsDict.values():
         x, y, w, h = person['node_coords']
         pad = person['pad']
-        nodeless_img = cv2.rectangle(nodeless_img, (x-pad, y-pad), (x+w+pad, y+h+pad), (255,255,255), -1)
+        if 'outline' in person:
+            cv2.drawContours(nodeless_img, [person['outline']], -1, 255, -1)
+            cv2.drawContours(nodeless_img, [person['outline']], -1, 255, 2*pad + 1)
+        else:
+            nodeless_img = cv2.rectangle(nodeless_img, (x-pad, y-pad), (x+w+pad, y+h+pad), (255,255,255), -1)
 
 
     #----------------------------------------
     # RELATION DETECTION
     #----------------------------------------
-    edges = cv2.Canny(nodeless_img, 0, 50, apertureSize= 3)
-    raw_lines = cv2.HoughLinesP(edges,
-                            rho=1,
-                            theta= np.pi/180,
-                            threshold= 50,
-                            minLineLength= 5,
-                            maxLineGap= img_width*0.1)
-
-    line_img = np.copy(redacted_img)*0
-    cat_norm_lines = categorize_normalize_lines(raw_lines, img_width, img_height)
-    boxes = [(x - person['pad'], y - person['pad'], x + w + person['pad'], y + h + person['pad'])
-             for person in IndvIDsDict.values() for x, y, w, h in [person['node_coords']]]
-    cat_norm_lines = cut_at_symbols(cat_norm_lines, boxes)
-
-    lines = merge_duplicate_lines(cat_norm_lines)
-    if len(symbols) > 1 and not (lines['vertical'] or lines['horizontal']):
+    #the lines are read as networks of lines, one for each family (lines.read_lines): who are partners, whose children
+    #are whose, and which children are twins
+    row_of = {IDs[i]: places[i][0] for i in range(len(symbols))}
+    line_mask = cv2.threshold(nodeless_img, 127, 255, cv2.THRESH_BINARY_INV)[1]
+    del nodeless_img
+    #the numbers written over the symbols in a lighter colour than the lines, as Pedigree Studio writes them, which
+    #a line may pass close above
+    if LABELS:
+        dark = np.unpackbits(dark_bits, count= line_mask.size).reshape(line_mask.shape)
+        boxes = [person['node_coords'] for person in IndvIDsDict.values()]
+        erase_labels(line_mask, dark, boxes, float(np.median([max(w, h) for _, _, w, h in boxes])))
+        del dark
+    del dark_bits
+    any_lines = bool(line_mask.any())
+    #(a line drawn by hand may stop well short of the line it was meant to meet)
+    found = read_relations(line_mask, IndvIDsDict, gap= 0.45 if hand_drawn else 0.25)
+    del line_mask
+    partners, twins, notes = found['partners'], found['twins'], found['notes']
+    if found['junctions']:
+        #what was taken for a symbol at the point the lines to twins come from is no person: the others are
+        #numbered again without it
+        gone = set(found['junctions'])
+        keep = [i for i in range(len(symbols)) if IDs[i] not in gone]
+        new_IDs, new_places, new_order, _ = number_people([symbols[i][0] for i in keep],
+                                                          {k: label_IDs[i] for k, i in enumerate(keep) if i in label_IDs})
+        renamed = {IDs[i]: new_IDs[k] for k, i in enumerate(keep)}
+        IndvIDsDict = {renamed[IDs[keep[k]]]: IndvIDsDict[IDs[keep[k]]] for k in new_order}
+        for person in IndvIDsDict.values():
+            for parent in ('PaternalID', 'MaternalID'):
+                person[parent] = renamed.get(person[parent], 0) if person[parent] else 0
+        partners = [tuple(renamed[p] for p in pair) for pair in partners if all(p in renamed for p in pair)]
+        twins = [(renamed[a], renamed[b], kind) for a, b, kind in twins if a in renamed and b in renamed]
+        row_of = {new_IDs[k]: new_places[k][0] for k in range(len(keep))}
+    if len(symbols) > 1 and not any_lines:
         warnings.warn(f'No lines were found between the symbols in {image_path}, so no one\'s parents are known')
-    for direction in lines.keys():
-        for line in lines[direction]:
-            x1, y1, x2, y2 = line
-            line_img = cv2.line(line_img, (x1,y1), (x2,y2), (255,255,255), 5)
-
-    IndvIDsDict, connection_lines = trackRelation(lines, IndvIDsDict)
-
-    for warning in missed_lines(IndvIDsDict, lines, {IDs[i]: places[i][0] for i in range(len(symbols))}):
+    for note in notes:
+        warnings.warn(note)
+    missed = missed_lines(IndvIDsDict, partners, any_lines, row_of)
+    for warning in missed:
         warnings.warn(f'{warning}. The picture was enlarged {upscale_factor:g} times: try a little more or less')
-
-    for line in connection_lines:
-        x1, y1, x2, y2 = line
-        line_img = cv2.line(line_img, (x1,y1), (x2,y2), (255,255,255), 5)
-    for individual in IndvIDsDict.keys():
-        for coord in IndvIDsDict[individual]['lat_coords']:
-            line_img = cv2.circle(line_img, coord, radius=10, color=(255,255,255), thickness=-1)
+    if missed and not hand_drawn:
+        warnings.warn(HAND_DRAWN_HINT)
 
     #package pedigree data into dataframe structured like PED file
     PedFileDataFields = ['PaternalID', 'MaternalID', 'Sex', 'Phenotype']
@@ -1086,6 +1168,8 @@ def pedigree_processing(FamID,
     PedFileDF = PedFileDF.reindex(columns= ['FamilyID', 'IndividualID']+PedFileDataFields)
     PedFileDF.attrs['upscale_factor'] = upscale_factor
     PedFileDF.attrs['image'] = os.path.basename(str(image_path))
+    PedFileDF.attrs['twins'] = [list(t) for t in twins]
+    PedFileDF.attrs['hand_drawn'] = bool(hand_drawn)
 
     if export:
         PED_export(PedFileDF, output_dir= output_dir)

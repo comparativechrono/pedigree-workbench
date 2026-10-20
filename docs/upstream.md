@@ -354,9 +354,9 @@ each copy came from.
 
 | Package | On PyPI | The workbench's copy |
 |---|---|---|
-| PedNet | **2.0.0**, released on 19 October 2026 | 2.1.0, built from [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6): GA4GH Pedigrees and Phenopackets Families read as well as PED files, with `--condition` and `--unrecorded` |
+| PedNet | **2.1.0**, released on 19 October 2026, after 2.0.0 that morning | 2.1.0, from its wheel on PyPI: GA4GH Pedigrees and Phenopackets Families read as well as PED files, with `--condition` and `--unrecorded` ([PedNet#6](https://github.com/comparativechrono/PedNet/pull/6)) |
 | PedGen | 0.1.3 (Nick Taylor's) | built from [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5), on top of `main`, with #2, #3 and #4 merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; a rare allele by default, cousins who marry, and a minimum number affected (#4); and (#5) a GA4GH Pedigree written with `--ga4gh` |
-| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#7](https://github.com/comparativechrono/pedigree-interpreter/pull/7), on top of #3 to #6 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); the symbols measured as the reading finds them (#6); and (#7) a GA4GH Pedigree written with `--ga4gh` |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#8](https://github.com/comparativechrono/pedigree-interpreter/pull/8), on top of #3 to #7 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); the symbols measured as the reading finds them (#6); a GA4GH Pedigree written with `--ga4gh` (#7); and (#8) twins, and pedigrees sketched by hand, with `--hand-drawn` |
 
 The three pull requests of October 2026, #5 of PedGen, #7 of PedInterp and #6
 of PedNet, connect these packages to the GA4GH tools. PedGen and PedInterp
@@ -372,9 +372,29 @@ default, unaffected if no one is marked as not having it (as in the files
 studio2ga4gh writes from drawings), and not known if anyone is (as in
 PedGen's and PedInterp's). The Tools tab offers these options, and the Risk
 tab reads GA4GH files in the same way. All three now need pedigree-ga4gh, and
-Python 3.9 or later. Once PedNet 2.1.0 is on PyPI, copy its wheel from there:
-`pip download --no-deps --only-binary=:all: PedNet==2.1.0 -d wheels`, then
-`python3 python/tools/vendor_wheels.py wheels/*.whl`.
+Python 3.9 or later. PedNet 2.1.0 was released on PyPI on 19 October 2026, by
+its release workflow, and the workbench's copy is taken from that wheel, which
+holds the same files as the one built from #6.
+
+Testers in a clinic found two things that PedInterp couldn't do. It read the
+row with twins wrong: the triangle that identical twins' lines make with their
+bar is white closed in by lines, like the inside of a symbol, and was read as a
+person of unknown sex, a diamond, between the twins and their parents. And they
+sketch pedigrees quickly with Pedigree Studio's Draw tool, roughly, with
+symbols of unequal sizes, sometimes beginning with the Studio's symbols and
+finishing by hand, which PedInterp, made for drawings, couldn't read.
+Pull request #8 reads the lines afresh, as networks of lines thinned to a
+skeleton, one network to a family, with the twins as two lines from one point
+and the bar of identical twins between them, and reads sketches with
+`hand_drawn=True` (`--hand-drawn`), which finds rough symbols, filled in by
+scribbling or not, whose outlines may not close. It also takes out the grey
+numbers the Studio writes over its symbols where they touch a line. A PED file
+has no place for twins, so `df.attrs['twins']` lists them, the command prints
+them, and the GA4GH Pedigree records them. The workbench's *Picture → PED
+file* has *Drawn by hand*, and the examples have the Okafor family, with its
+identical twins, as the Studio saves it and as sketched with its Draw tool
+(`build/make_example_pictures.py`), both of which PedInterp reads as the
+people, parents and sexes of `okafor.mped`, with its twins.
 
 PedInterp's fix came from the workbench's example picture of the Lynch family:
 drawn where Pedigree Studio draws it, with each child under a parent and the
@@ -397,11 +417,15 @@ does, and only if none are found, down to a tenth of the usual size.
 
 Until PedGen and PedInterp are released, `pip install` gives their earlier
 versions, without the commands. Their versions come from their git tags,
-through hatch-vcs, and unlike PedNet they have no workflow that publishes a
-release to PyPI yet. Once Tim Hearn is an owner of the two projects on PyPI,
-a `release.yml` like PedNet's, with PyPI's trusted publishing, would let a
-GitHub release publish them; until then, an owner uploads them. Then copy the
-released wheels into the workbench:
+through hatch-vcs. [pedigree-generator#6](https://github.com/comparativechrono/pedigree-generator/pull/6)
+and [pedigree-interpreter#9](https://github.com/comparativechrono/pedigree-interpreter/pull/9)
+add a `release.yml` like PedNet's, which builds and checks a release and
+publishes it to PyPI with trusted publishing, when a GitHub release is
+published. PyPI accepts a new version only from the project's owners and
+maintainers, or from a trusted publisher one of them has added, so the two
+projects' owner must first add Tim Hearn, or the trusted publisher itself
+(owner `comparativechrono`, the repository, workflow `release.yml`,
+environment `pypi`). Then copy the released wheels into the workbench:
 
 ```bash
 pip download --no-deps --only-binary=:all: PedGen==VERSION PedInterp==VERSION -d wheels

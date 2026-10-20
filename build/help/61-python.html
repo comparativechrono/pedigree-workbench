@@ -93,8 +93,11 @@ sim = pedigree_generator(max_children=3, FamilyID="SIM1", mode="AD", generation_
 print(pednet.infer_mode(pednet.pedigree_from_rows(sim)).call)
 
 read = pedigree_processing("LYNCH", image_path="/data/examples/lynch.png", ocr=None)
-print(read.head())</code></pre>
-<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files.</p>
+print(read.head())
+
+sketch = pedigree_processing("OKAFOR", image_path="/data/examples/okafor-sketch.png", ocr=None, hand_drawn=True)
+print(sketch.attrs["twins"])</code></pre>
+<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files. PedInterp lists the twins it finds in <code>attrs["twins"]</code>, which a PED file can't hold, and <code>hand_drawn=True</code> reads a pedigree sketched by hand (<a href="#h-tool-pedinterp">Picture → PED file</a>).</p>
 
 <h2>hponorm, mondonorm: searching the ontologies</h2>
 <pre class="code" data-run="py"><code>from mondonorm.mondo import MondoIndex      # a copy of Mondo among your files (or: from mondonorm.ols import OlsClient)
