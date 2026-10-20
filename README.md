@@ -60,10 +60,12 @@ The tools in the Tools tab:
 | PED and MPED files | Summary and check · Take one condition out · Put PED files together · One file for each family · PED ⇄ MPED, and columns (mpedtools) |
 | Analyse and simulate | The pedigree as a graph · Mode of inheritance · Rank candidate variants (PedNet) · Simulate a family (PedGen) |
 
-*Picture → PED file* (PedInterp) is with the conversions. A browser can't run
-Tesseract, which PedInterp uses to read the labels under the symbols, so in
-the workbench it numbers the people by generation (I-1, I-2, II-1 …), as
-Pedigree Studio does.
+*Picture → PED file and drawing* (PedInterp) is with the conversions. It
+writes a PED file and a Pedigree Studio drawing laid out as the picture is, so
+that a sketch becomes a drawing to carry on with in the Studio. A browser
+can't run Tesseract, which PedInterp uses to read the labels under the
+symbols, so in the workbench it numbers the people by generation (I-1, I-2,
+II-1 …), as Pedigree Studio does.
 
 *Match conditions to terms* finds the HPO or Mondo term for each condition in
 a drawing's colour key, searching EBI's Ontology Lookup Service or copies of

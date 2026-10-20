@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make the example pictures for Picture -> PED file (PedInterp) with Pedigree Studio itself, in headless Chromium:
+"""Make the example pictures for Picture -> PED file and drawing (PedInterp) with Pedigree Studio itself, in headless Chromium:
 
     okafor.png          the Okafor family as Pedigree Studio saves it (its Save as image): identical twins, and
                         parents who are cousins

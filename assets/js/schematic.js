@@ -51,9 +51,10 @@
     ['ga4gh-convert', 'phenotk', 'convert', 'M650 150 L650 292', 658, 226, 'start', true, false, true],
     ['validate', 'phenotk', 'phenotk\ncheck · view\nfilter\nde-identify', 'M738 116 C796 136 796 306 738 326', 806, 196, 'start', true],
     ['export', 'phenotk', 'phenotk: GA4GH → PED', 'M580 344 C470 430 230 430 126 250', 350, 404, 'middle', true],
-    ['terms', 'hponorm', 'match terms', 'M380 196 L380 70', 372, 136, 'end', true, true],
+    ['terms', 'hponorm', 'match terms', 'M380 196 L380 70', 388, 136, 'start', true, true],
     ['normalise', 'phenotk', '', 'M496 44 C580 44 630 70 644 98', 0, 0, 'start', true, true],
-    ['pedinterp', 'PedInterp', 'pedinterp', 'M184 70 L184 194', 192, 136, 'start', true]
+    ['pedinterp', 'PedInterp', 'pedinterp', 'M184 70 L184 194', 192, 136, 'start', true],
+    ['pedinterp', 'PedInterp', '', 'M204 60 C250 70 290 120 300 194', 0, 0, 'start', true]
   ];
   const TALL = [
     ['studio2ped', 'studio2ped', 'studio2ped', 'M213 180 C195 166 175 166 156 180', 184, 152, 'middle', true],
@@ -68,7 +69,8 @@
     ['export', 'phenotk', 'phenotk: GA4GH → PED', 'M40 396 C10 340 12 262 50 220', 36, 294, 'start', true],
     ['terms', 'hponorm', 'match terms', 'M330 162 L330 66', 322, 118, 'end', true, true],
     ['normalise', 'phenotk', '', 'M447 36 C490 40 494 220 470 370', 0, 0, 'start', true, true],
-    ['pedinterp', 'PedInterp', 'pedinterp', 'M132 62 L132 162', 138, 116, 'start', true]
+    ['pedinterp', 'PedInterp', 'pedinterp', 'M132 62 L132 162', 138, 116, 'start', true],
+    ['pedinterp', 'PedInterp', '', 'M170 64 C200 86 232 118 244 162', 0, 0, 'start', true]
   ];
   const ROUTES = { wide: WIDE, tall: TALL };
   /** the layout for a width: tall below 720 pixels, where the wide one's writing would be too small */
@@ -111,7 +113,7 @@
     const svg = el('svg', { viewBox: VIEWBOX[layout], role: 'img', 'aria-labelledby': uid + 't' }, container);
     const title = el('title', { id: uid + 't' }, svg);
     title.textContent =
-      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. The drawing’s conditions are matched to HPO and Mondo terms. phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them. pedinterp reads a picture of a pedigree into a PED file.';
+      'A Pedigree Studio drawing is in the middle. studio2ped and ped2studio convert it to and from PED files, and studio2ga4gh and ga4gh2studio to and from a GA4GH Pedigree and a Phenopackets Family. The drawing’s conditions are matched to HPO and Mondo terms. phenotk converts, checks, filters and de-identifies the GA4GH files, and makes PED files from them. pedinterp reads a picture of a pedigree into a PED file and a drawing.';
     const defs = el('defs', {}, svg);
     const mk = (id, cls) => {
       const m = el('marker', { id, viewBox: '0 0 10 10', refX: 8.5, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
@@ -227,7 +229,8 @@
     ['family', 'pedigree', 'ped'],
     ['studio', 'terms'],
     ['terms', 'pedigree', 'family'],
-    ['image', 'ped']
+    ['image', 'ped'],
+    ['image', 'studio']
   ];
 
   /** the maps in help pages (<div class="pw-map"></div>), drawn the first time their page is shown */

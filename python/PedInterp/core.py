@@ -284,7 +284,7 @@ def _upscale_needed(image_path, hand_drawn= False):
         if not symbols:
             symbols, _ = detect_symbols(binary, area, min_share= 0.00001)
         target = SYMBOL_PIXELS
-    sizes = [max(w, h) for (_, _, w, h), _, _ in symbols]
+    sizes = [max(w, h) for (_, _, w, h), *_ in symbols]
     return (target*probe/float(np.median(sizes)) if sizes else None), width, height
 
 def _limit_upscale(factor, width, height):
@@ -541,7 +541,8 @@ def detect_symbols(gray_img, img_area, min_share= 0.0001):
 
     RETURN:
     -------
-    symbols (list of (bounding box (x, y, w, h), Sex, Phenotype)), and the width of the drawing's lines in pixels
+    symbols (list of (bounding box (x, y, w, h), Sex, Phenotype, shape)), with the shape 'square', 'circle', 'diamond' or
+    'triangle', and the width of the drawing's lines in pixels
     '''
     #(each mask is made only when it's needed, and let go as soon as it isn't, to save memory)
     _, threshold_dark = cv2.threshold(gray_img, 5, 255, cv2.THRESH_BINARY_INV)
@@ -602,7 +603,7 @@ def detect_symbols(gray_img, img_area, min_share= 0.0001):
                 ink = cv2.compare(gray_img, 127, cv2.CMP_LT)
             if twins_bar(contour, ink, typical):
                 continue
-        symbols.append((c['box'], SEX[shape], c['phenotype']))
+        symbols.append((c['box'], SEX[shape], c['phenotype'], shape))
     return symbols, line_width
 
 def sketched_symbols(binary_img):
@@ -612,13 +613,13 @@ def sketched_symbols(binary_img):
 
     RETURN:
     -------
-    symbols (list of (bounding box (x, y, w, h), Sex, Phenotype)), the width of the drawing's lines in pixels, and the
-    outline of the whole of each symbol, outline and all, to blank it out with
+    symbols (list of (bounding box (x, y, w, h), Sex, Phenotype, shape)), as detect_symbols gives them, the width of
+    the drawing's lines in pixels, and the outline of the whole of each symbol, outline and all, to blank it out with
     '''
     ink = (binary_img == 0).astype(np.uint8)
     line_width = stroke_width(ink)
     found, _ = find_sketched_symbols(ink, line_width)
-    symbols = [(cv2.boundingRect(c['outer']), SEX[c['shape']], 2 if c['filled'] else 1) for c in found]
+    symbols = [(cv2.boundingRect(c['outer']), SEX[c['shape']], 2 if c['filled'] else 1, c['shape']) for c in found]
     return symbols, line_width, [c['outer'] for c in found]
 
 def outline_width(light_mask, box, line_width):
@@ -955,7 +956,11 @@ def pedigree_processing(FamID,
 
     Twins are read from the lines that join them to their parents' line at one point, and identical twins from the bar
     between those lines; the result lists them in attrs['twins'], as [twin, twin, 'MZ' or 'DZ'], with the twin on the
-    left first. A PED file can't hold them, but GA4GH_export writes them.
+    left first. A PED file can't hold them, and PED_export leaves them out, but GA4GH_export and Studio_export write
+    them. So do the couples joined by a line, with children or without (attrs['partners'], as [partner, partner]), and
+    where each person was drawn (attrs['layout']: id -> {'box': [x, y, width, height] in the picture's pixels, 'row':
+    the row of symbols from the top, counted from 0, 'shape': 'square', 'circle', 'diamond' or 'triangle'}), which
+    Studio_export lays the drawing out by.
 
     People are numbered the standard way: the generations are the rows of symbols from the top, in Roman numerals,
     and the people in each row are numbered from the left: I-1, I-2, II-1 and so on. When the labels are read,
@@ -1054,7 +1059,7 @@ def pedigree_processing(FamID,
     #each symbol goes with the nearest label, and each label keeps the nearest of the symbols that chose it
     label_dict = {label: {'label_coords': box} for label, box in labels.items()}
     nearest = {}
-    for i, ((x, y, w, h), _, _) in enumerate(symbols):
+    for i, ((x, y, w, h), *_) in enumerate(symbols):
         if not label_dict:
             break
         center_coords = ((x + w/2), y + h/2)
@@ -1073,7 +1078,7 @@ def pedigree_processing(FamID,
     #A label that was read can be the same as such a number (when the drawing's own labels are numbered like this,
     #and one was misread), so a star is added to the number to keep the IDs apart
     label_IDs = dict(IDs)
-    IDs, places, in_order, numbered = number_people([box for box, _, _ in symbols], label_IDs)
+    IDs, places, in_order, numbered = number_people([symbol[0] for symbol in symbols], label_IDs)
     if labels and numbered:
         warnings.warn(f'{len(numbered)} symbol(s) had no label of their own near them, and are numbered by their '
                       f'place in the drawing instead: {", ".join(numbered)}.' +
@@ -1081,13 +1086,13 @@ def pedigree_processing(FamID,
 
     IndvIDsDict = {}
     for i in in_order:
-        (x, y, w, h), sex, phenotype = symbols[i]
+        (x, y, w, h), sex, phenotype, shape = symbols[i]
         #the margin round the symbol that is blanked out, so that only the lines between symbols are left
         #(an unfilled symbol was found by the space inside its outline, so its outline is a line's width further out)
         #(in a sketch, a symbol's outline wobbles, and a scribble may fall short of the outline round it)
         #(a sketch's symbols are blanked out by their own outlines, which they were found with whole)
         pad = 2 if hand_drawn else (2 if phenotype == 1 else 1)*line_width + int(0.05*max(w, h))
-        IndvIDsDict[IDs[i]] = {'node_coords': (x,y,w,h), 'Phenotype': phenotype, 'Sex': sex, 'pad': pad}
+        IndvIDsDict[IDs[i]] = {'node_coords': (x,y,w,h), 'Phenotype': phenotype, 'Sex': sex, 'pad': pad, 'shape': shape}
         if outlines is not None:
             IndvIDsDict[IDs[i]]['outline'] = outlines[i]
 
@@ -1170,6 +1175,13 @@ def pedigree_processing(FamID,
     PedFileDF.attrs['image'] = os.path.basename(str(image_path))
     PedFileDF.attrs['twins'] = [list(t) for t in twins]
     PedFileDF.attrs['hand_drawn'] = bool(hand_drawn)
+    #what a PED file can't hold, for a drawing made from the table (Studio_export): the couples joined by a line, with
+    #children or without, and where each person was drawn, in the picture's own pixels, with their row and the shape
+    #of their symbol
+    PedFileDF.attrs['partners'] = [list(pair) for pair in partners]
+    PedFileDF.attrs['layout'] = {person: {'box': [round(v/upscale_factor, 1) for v in data['node_coords']],
+                                          'row': int(row_of[person]), 'shape': data['shape']}
+                                 for person, data in IndvIDsDict.items()}
 
     if export:
         PED_export(PedFileDF, output_dir= output_dir)

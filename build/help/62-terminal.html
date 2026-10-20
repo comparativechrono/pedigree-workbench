@@ -15,7 +15,7 @@
 <tr><td><code>hponorm</code>, <code>mondonorm</code></td><td>match the names in a GA4GH file to HPO or Mondo terms (see below)</td></tr>
 <tr><td><code>pednet</code></td><td>a PED file as a graph: <code>graph</code> (loops, kinship, inbreeding, the closest affected relatives), <code>mode</code> (the mode of inheritance), <code>rank</code> (candidate variants by co-segregation), <code>check</code></td></tr>
 <tr><td><code>pedgen</code></td><td>simulate a family with a dominant or recessive condition, as a PED file</td></tr>
-<tr><td><code>pedinterp</code></td><td>a picture of a pedigree, or a sketch of one (<code>--hand-drawn</code>) → a PED file, with any twins</td></tr>
+<tr><td><code>pedinterp</code></td><td>a picture of a pedigree, or a sketch of one (<code>--hand-drawn</code>) → a PED file, and a Pedigree Studio drawing with any twins (<code>--studio</code>)</td></tr>
 <tr><td><code>studio FILE</code></td><td>open a drawing in the Studio tab (<code>--tidy</code> lays it out from scratch)</td></tr>
 </table>
 <p><code>man NAME</code> shows examples and the options, and <code>NAME --help</code> shows just the options, from the program itself. Each program also runs as <code>python -m pedwb NAME …</code>. The first time <code>pednet</code>, <code>pedgen</code> or <code>pedinterp</code> runs, Python downloads it, with NumPy and whatever else it needs, and says so: from about 4 MB for pednet to about 21 MB in all.</p>

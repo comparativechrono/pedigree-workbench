@@ -147,7 +147,7 @@ async () => {
     };
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
-    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
+    check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText) && MG.app.fs.exists('/home/user/results/lynch.studio.json'), 'Tools: Picture → PED file and drawing reads the Lynch picture as lynch.ped, enlarged as its symbols need, and makes its drawing');
     // the Okafor family sketched by hand, from the help's button, which ticks Drawn by hand
     MG.app.showHelp('h-tool-pedinterp');
     await sleep(200);
@@ -158,7 +158,18 @@ async () => {
     await wait(() => document.querySelector('.tl-done'), 300000);
     res = document.querySelector('.tl-result');
     const sketched = MG.app.fs.exists('/home/user/results/okafor-sketch.ped') ? (await ped('/home/user/results/okafor-sketch.ped')).split('\n') : [];
-    check(res.querySelector('.tl-done.ok') && /twins: IV-3 and IV-4 \(identical\)/.test(res.innerText) && sketched.length === 16 && sketched.filter((l) => / 2$/.test(l)).length === 3, 'Tools: Picture → PED file reads the Okafor family sketched by hand, from the help, with its identical twins');
+    // (what is printed is the PED file's table, and nothing more: the twins are in the drawing)
+    const printed = res.querySelector('.tl-main-out') ? res.querySelector('.tl-main-out').innerText : '';
+    check(res.querySelector('.tl-done.ok') && /IV-5/.test(printed) && !/twin|identical/i.test(printed) && sketched.length === 16 && sketched.filter((l) => / 2$/.test(l)).length === 3, 'Tools: Picture → PED file and drawing reads the Okafor family sketched by hand, from the help, and prints just the PED file\'s table');
+    const drawn = MG.app.fs.exists('/home/user/results/okafor-sketch.studio.json') ? JSON.parse(await MG.app.fs.readText('/home/user/results/okafor-sketch.studio.json')) : { persons: [], twinLinks: [] };
+    check(drawn.persons.length === 16 && drawn.twinLinks.length === 1 && drawn.twinLinks[0].type === 'identical', 'Tools: Picture → PED file and drawing makes a drawing of the sketch, with its identical twins');
+    // the drawing, from the next step, in the Studio tab (going on without saving any changes to the drawing there)
+    Array.from(res.querySelectorAll('.tl-next button')).find((b) => /Open the drawing/.test(b.textContent)).click();
+    await wait(() => MG.app.studio && MG.app.studio.path === '/home/user/results/okafor-sketch.studio.json' || document.querySelector('.prompt-actions [data-x="yes"]'), 60000);
+    if (document.querySelector('.prompt-actions [data-x="yes"]')) document.querySelector('.prompt-actions [data-x="yes"]').click();
+    await wait(() => MG.app.studio && MG.app.studio.path === '/home/user/results/okafor-sketch.studio.json', 60000);
+    const shown = MG.app.studio.api.data();
+    check(shown.persons.length === 16 && shown.twinLinks.length === 1 && shown.twinLinks[0].type === 'identical' && Object.values(shown.legendLabels || {}).includes('Affected'), 'Studio: the drawing opens from the next step, with its people, its identical twins and its colour key');
     res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' });
     const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
     const simulated = '/home/user/results/FAM1_ga4gh-pedigree.json';
@@ -186,7 +197,7 @@ async () => {
     const v2 = MG.app.nbApp.view;
     await v2.runAll();
     const errs2 = v2.cells.filter((c) => c.type === 'code' && /Traceback|Error|couldn’t/.test(c.el.innerText)).length;
-    check(errs2 === 0 && /the same as lynch.ped: True/.test(v2.el ? v2.el.innerText : document.body.innerText) && /twins: \[\['IV-3', 'IV-4', 'MZ'\]\]/.test(v2.el ? v2.el.innerText : document.body.innerText), 'Notebook: the analysis notebook runs without errors, and reads the sketch\'s twins');
+    check(errs2 === 0 && /the same as lynch.ped: True/.test(v2.el ? v2.el.innerText : document.body.innerText) && /16 people; the twins are identical/.test(v2.el ? v2.el.innerText : document.body.innerText), 'Notebook: the analysis notebook runs without errors, and draws the sketch with its twins');
   } catch (e) {
     out.push('FAIL  ' + (e && e.stack || e));
   }
