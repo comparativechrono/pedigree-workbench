@@ -148,6 +148,17 @@ async () => {
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
     check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText), 'Tools: Picture → PED file reads the Lynch picture as lynch.ped, enlarged as its symbols need');
+    // the Okafor family sketched by hand, from the help's button, which ticks Drawn by hand
+    MG.app.showHelp('h-tool-pedinterp');
+    await sleep(200);
+    document.querySelector('#h-tool-pedinterp button[data-input="/data/examples/okafor-sketch.png"]').click();
+    await wait(() => document.querySelector('.tl-title') && /Picture/.test(document.querySelector('.tl-title').textContent), 20000);
+    await sleep(400);
+    document.querySelector('.tl-run').click();
+    await wait(() => document.querySelector('.tl-done'), 300000);
+    res = document.querySelector('.tl-result');
+    const sketched = MG.app.fs.exists('/home/user/results/okafor-sketch.ped') ? (await ped('/home/user/results/okafor-sketch.ped')).split('\n') : [];
+    check(res.querySelector('.tl-done.ok') && /twins: IV-3 and IV-4 \(identical\)/.test(res.innerText) && sketched.length === 16 && sketched.filter((l) => / 2$/.test(l)).length === 3, 'Tools: Picture → PED file reads the Okafor family sketched by hand, from the help, with its identical twins');
     res = await tool('pedgen', { mode: 'AR', generations: 4, seed: '7', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' });
     const affected = (await MG.app.fs.readText('/home/user/results/FAM1.ped')).trim().split('\n').filter((l) => l.split('\t')[5] === '2').length;
     const simulated = '/home/user/results/FAM1_ga4gh-pedigree.json';
@@ -175,7 +186,7 @@ async () => {
     const v2 = MG.app.nbApp.view;
     await v2.runAll();
     const errs2 = v2.cells.filter((c) => c.type === 'code' && /Traceback|Error|couldn’t/.test(c.el.innerText)).length;
-    check(errs2 === 0 && /the same as lynch.ped: True/.test(v2.el ? v2.el.innerText : document.body.innerText), 'Notebook: the analysis notebook runs without errors');
+    check(errs2 === 0 && /the same as lynch.ped: True/.test(v2.el ? v2.el.innerText : document.body.innerText) && /twins: \[\['IV-3', 'IV-4', 'MZ'\]\]/.test(v2.el ? v2.el.innerText : document.body.innerText), 'Notebook: the analysis notebook runs without errors, and reads the sketch\'s twins');
   } catch (e) {
     out.push('FAIL  ' + (e && e.stack || e));
   }

@@ -19,19 +19,19 @@
   "pedinterp": {
     "package": "PedInterp",
     "folder": "PedInterp",
-    "version": "0.1.8.dev17+g60fa22be7",
-    "wheel": "pedinterp-0.1.8.dev17+g60fa22be7-py3-none-any.whl",
-    "sha256": "32aeb9dc3613842ed7134008f3110efa8273aa42aef1eddf22da33cc9de197b6",
-    "from": "https://github.com/comparativechrono/pedigree-interpreter/pull/7",
-    "files_sha256": "a5aa0bed466e1a4d6d0510b1b30e1403c5b2227089dee20f3008b80a7702c372"
+    "version": "0.1.8.dev19+ge53f7f807",
+    "wheel": "pedinterp-0.1.8.dev19+ge53f7f807-py3-none-any.whl",
+    "sha256": "ac682ec301c520bc180b8710b22185ed35294558015065463cdb52d7b9e32014",
+    "from": "https://github.com/comparativechrono/pedigree-interpreter/pull/8",
+    "files_sha256": "495a099edc1ff8d6f2abfde77609cb8f64ebb99775880a05e07ad17348a4cbe0"
   },
   "pednet": {
     "package": "pednet",
     "folder": "pednet",
     "version": "2.1.0",
     "wheel": "pednet-2.1.0-py3-none-any.whl",
-    "sha256": "b1017cac5257d51b5bd3c2ed4e929a3827514c7a02598a9f4d7b40bfabad835e",
-    "from": "https://github.com/comparativechrono/PedNet/pull/6",
+    "sha256": "49fecb878c00cc833a83019efb9885675fe2b7a933e6fd12b59f96cf3f8d0169",
+    "from": "https://pypi.org/project/PedNet/",
     "files_sha256": "a973c35c68bd6fe6ad546ba6400ae35a4a3fa062996c47e0db2598599e505023"
   }
 }

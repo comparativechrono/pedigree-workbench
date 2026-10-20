@@ -298,7 +298,8 @@
      ▶ buttons of the help pages
      data-example="okafor.studio.json"   copy an example into ~/examples
      data-studio="/data/examples/x"      open a drawing in Studio
-     data-tool="studio2ga4gh"            open a tool (data-input="…" fills in its input)
+     data-tool="studio2ga4gh"            open a tool (data-input="…" fills in its input; data-hand-drawn="true"
+                                         or "false" ticks Drawn by hand, or not, for Picture → PED file)
      data-new-nb / data-open-nb          a new notebook / open a notebook
      ------------------------------------------------------------------ */
   MG.actions.example = async (rel) => {
@@ -323,6 +324,8 @@
     if (btn && btn.dataset.mapping) values.mapping = btn.dataset.mapping.replace(/^~(?=\/|$)/, HOME);
     // (the variants to rank, for Rank candidate variants)
     if (btn && btn.dataset.variants) values.variants = btn.dataset.variants.replace(/^~(?=\/|$)/, HOME);
+    // (a picture drawn by hand, or not, for Picture → PED file, whatever was ticked last)
+    if (btn && btn.dataset.handDrawn != null) values.handDrawn = btn.dataset.handDrawn === 'true';
     return MG.app.useTool(id, values);
   };
   MG.actions.newNb = async () => {

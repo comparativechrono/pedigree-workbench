@@ -179,6 +179,21 @@ def test_pedinterp_reads_the_example_picture():
             assert code == 0 and "--labels none" in err
 
 
+def test_pedinterp_reads_the_okafor_pictures_and_their_twins():
+    # the Okafor family as Pedigree Studio saves it, and sketched roughly with its Draw tool (read --hand-drawn): the
+    # people, parents and sexes of its MPED file, with those who have either condition affected, and the identical
+    # twins, which a PED file can't hold, listed under the table
+    needs("numpy", "pandas", "cv2", "PIL")
+    want = [r[1:5] + ["2" if "2" in r[5:] else "1"] for r in read_ped(os.path.join(EXAMPLES, "okafor.mped"))]
+    for picture, options in (("okafor.png", []), ("okafor-sketch.png", ["--hand-drawn"])):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, out, err = run(["pedinterp", os.path.join(EXAMPLES, picture), "--labels", "none", "-f", "OKAFOR",
+                                  "-d", tmp] + options)
+            assert code == 0, err
+            assert [r[1:] for r in read_ped(os.path.join(tmp, "OKAFOR.ped"))] == want, picture
+            assert "twins: IV-3 and IV-4 (identical)" in out, out
+
+
 def test_pednet_reads_what_pedgen_and_pedinterp_make():
     # in Python, their tables go straight to PedNet
     needs("numpy", "pandas", "cv2", "PIL")

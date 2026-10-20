@@ -293,29 +293,33 @@
       pkg: 'PedInterp',
       what: 'Read a picture of a pedigree, such as one in a paper or a clinic letter, and write it as a PED file.',
       about:
-        'PedInterp finds the symbols and the lines between them, and so who is male or female, who is affected (a filled symbol), and who are partners, parents and children. It reads pictures drawn in the usual way, in black on white, with each generation in a row of its own. The labels under the symbols can’t be read here, because that needs the Tesseract program, which can’t run in a browser. Instead, the people are numbered by generation, from the top, and from the left in each: I-1, I-2, II-1 and so on, as Pedigree Studio numbers them. Half-filled or shaded symbols, and lines that slope, as for twins, aren’t read yet, so compare the PED file with the picture, or draw it, before you use it.',
+        'PedInterp finds the symbols and the lines between them, and so who is male or female, who is affected (a filled symbol), who are partners, parents and children, and which children are twins, and whether they are identical. It reads pictures drawn in the usual way, dark on white, with each generation in a row of its own, such as those Pedigree Studio saves, and, if you tick Drawn by hand, pedigrees sketched roughly, as with the Studio’s Draw tool, or begun with its symbols and finished by hand. The labels by the symbols can’t be read here, because that needs the Tesseract program, which can’t run in a browser. Instead, the people are numbered by generation, from the top, and from the left in each: I-1, I-2, II-1 and so on, as Pedigree Studio numbers them. A PED file can’t hold twins, so they are listed under the table, and a GA4GH Pedigree records them. Half-filled or shaded symbols aren’t read yet, and a sketch may be misread, so compare the PED file with the picture, or draw it, before you use it.',
       help: 'h-tool-pedinterp',
       fields: [
         { key: 'input', type: 'file', label: 'The picture', kinds: ['image'] },
+        { key: 'handDrawn', type: 'check', label: 'Drawn by hand', def: false, help: 'For a pedigree sketched by hand, in whole or in part, as with Pedigree Studio’s Draw tool: symbols of unequal sizes, outlines that don’t quite close, filled symbols scribbled in, and lines that wobble and stop short of what they join. Leave it unticked for a picture drawn with software, such as one Pedigree Studio saves.' },
         { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the PED file too.' },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
-        { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across, which reads best, and says how much under the table. Give a number to enlarge it more or less.' },
+        { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across (100 for a sketch), which reads best, and says how much under the table. Give a number to enlarge it more or less.' },
         { key: 'ga4gh', type: 'check', label: 'Write a GA4GH Pedigree too', def: false, help: 'FAMILY_ga4gh-pedigree.json, which the GA4GH tools read: ga4gh2studio, phenopacket-toolkit and PedNet, and the Risk tab. The affected have the condition, and the unaffected have it marked as looked for and not found.' },
         ...CONDITION_FIELDS
       ],
       check: (v) => oneWord('family id', v.family) || (upscaleOf(v) && !(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0, or leave it empty.' : '') || checkCondition(v),
-      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(upscaleOf(v), '--upscale', num(v.upscale)), ...optArgs(v.ga4gh, '--ga4gh'), ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])],
+      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(v.handDrawn, '--hand-drawn'), ...optArgs(upscaleOf(v), '--upscale', num(v.upscale)), ...optArgs(v.ga4gh, '--ga4gh'), ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])],
       outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json')].filter(Boolean),
       // (what it prints is the table it read, which is better kept whole than wrapped)
       stdoutIsResult: true,
       python: (v) =>
-        [`from PedInterp import pedigree_processing, PED_export${v.ga4gh ? ', GA4GH_export' : ''}`, '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`, ...(v.ga4gh ? [`print("wrote", GA4GH_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}${conditionPy(v)}))`] : [])].join('\n'),
+        [`from PedInterp import pedigree_processing, PED_export${v.ga4gh ? ', GA4GH_export' : ''}`, '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${v.handDrawn ? ', hand_drawn=True' : ''}${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', 'for twin, other, kind in df.attrs["twins"]:   # [twin, twin, "MZ" (identical) or "DZ"]', '    print("twins:", twin, "and", other, "(identical)" if kind == "MZ" else "(not identical)")', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`, ...(v.ga4gh ? [`print("wrote", GA4GH_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}${conditionPy(v)}))`] : [])].join('\n'),
       next: (res, v) => {
         const ped = joinPath(v.outdir, v.family + '.ped');
+        const ga4gh = joinPath(v.outdir, v.family + '_ga4gh-pedigree.json');
         return [
-          ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
+          // (a GA4GH Pedigree holds the twins, which a PED file can't, so the drawing made from it has them too)
+          v.ga4gh ? ['pedigree', 'Draw it, with any twins (GA4GH → drawing)', () => MG.app.useTool('ga4gh2studio', { input: ga4gh })]
+            : ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
           ['network', 'Look at it with PedNet', () => MG.app.useTool('pednet-graph', { input: ped })],
-          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? joinPath(v.outdir, v.family + '_ga4gh-pedigree.json') : ped })]
+          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? ga4gh : ped })]
         ];
       }
     },
@@ -1092,7 +1096,7 @@
         'Python for the tools',
         `<p>The tools run in Python ${esc((K.versions && K.versions.python) || '')} (Pyodide${K.versions && K.versions.pyodide ? ' ' + esc(K.versions.pyodide) : ''}) here in your browser. Nothing is sent anywhere, except the names you choose to look up on EBI’s Ontology Lookup Service. The Notebook and Terminal tabs use the same Python, and so does the Risk tab, to read GA4GH files.</p>
          <table class="table small"><tr><th>Package</th><th>Version</th></tr>${rows}</table>
-         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedNet 2.1.0, PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
+         <p class="muted small">These are the versions released on PyPI, so <code>pip install</code> gives you the same code on your own computer, except PedGen and PedInterp, whose changes for the workbench aren’t released yet (see the help: Reference → Versions, and how to cite).</p>
          <div class="prompt-actions"><button class="btn" data-x="start" type="button">${K.state === 'ready' ? 'Restart Python' : 'Start Python now'}</button></div>`
       );
       m.box.querySelector('[data-x="start"]').addEventListener('click', () => {

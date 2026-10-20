@@ -88,6 +88,9 @@ const CASES = [
   ['pedgen', { mode: 'AR', generations: 4, seed: '7', family: 'SIMG', ga4gh: true, condId: 'MONDO:0009061', condLabel: 'cystic fibrosis' }],
   ['pedgen', { mode: 'AD', seed: '3', family: 'SIMG2', genotypes: false, ga4gh: true }],
   ['pedinterp', { input: EX + 'lynch.png', family: 'LYNG', ga4gh: true, condId: 'MONDO:0007254', condLabel: 'breast cancer' }],
+  // twins, in a picture Pedigree Studio saved and in a sketch read as one drawn by hand, which the GA4GH Pedigree records
+  ['pedinterp', { input: EX + 'okafor.png', family: 'OKA', ga4gh: true }],
+  ['pedinterp', { input: EX + 'okafor-sketch.png', family: 'OKAS', handDrawn: true, ga4gh: true, condId: 'HP:0000365', condLabel: 'Hearing impairment' }],
   ['pednet-graph', { input: EX + 'okafor_ga4gh-pedigree.json' }],
   ['pednet-mode', { input: EX + 'okafor_ga4gh-pedigree.json', condition: 'HP:0000365' }],
   ['pednet-mode', { input: EX + 'okafor_phenopackets-family.json', condition: 'Hearing impairment', unrecorded: 'unknown' }],

@@ -57,6 +57,7 @@ def test_analysis_notebook_runs():
     assert "a loop, from consanguinity" in text
     assert "autosomal dominant" in text
     assert "the same as lynch.ped: True" in text
+    assert "twins: [['IV-3', 'IV-4', 'MZ']]" in text
     assert "results/SIM1.ped" in files
 
 
