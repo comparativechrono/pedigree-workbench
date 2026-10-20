@@ -44,8 +44,10 @@ def norm(rel, data):
     return data
 # the exit status 1 of these is an answer (the files differ; the MPED file has something to note), not a failure
 ANSWER_CODES = {'diff', 'mped-info'}
-# what these print is their result, and the Python prints the same as the command
-SAME_OUTPUT = {'pednet-mode'}
+# what these print is their result, and the Python prints the same as the command, apart from the home folder
+SAME_OUTPUT = {'pednet-mode', 'pedinterp'}
+def printed_as(out, home):
+    return sub(out, home).replace(home, '~').rstrip()
 ok = bad = 0
 for line in open(CASES):
     c = json.loads(line)
@@ -86,7 +88,7 @@ for line in open(CASES):
     same_names = set(new_a) == set(new_b)
     diffs = [k for k in new_a if k in new_b and norm(k, new_a[k]) != norm(k, new_b[k])]
     allowed = (0, 1) if c['id'] in ANSWER_CODES else (0,)
-    printed = c['id'] not in SAME_OUTPUT or sub(out_a.getvalue(), HA).rstrip() == sub(out_b.getvalue(), HB).rstrip()
+    printed = c['id'] not in SAME_OUTPUT or printed_as(out_a.getvalue(), HA) == printed_as(out_b.getvalue(), HB)
     if c.get('fails'):
         good = any(x != 0 for x in codes) and bool(err_b) and not new_a and not new_b
     else:

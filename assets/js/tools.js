@@ -101,7 +101,7 @@
   /** penetrances as given (0.6 0.8, or 0.6, 0.8) → as the command takes them: 0.6,0.8 */
   const penList = (x) => String(x || '').trim().split(/[\s,]+/).filter(Boolean).map(num).join(',');
   const ALL_MODES = 'AD,AR,XLR,XLD';
-  /** the enlargement given for Picture → PED file, or '' to leave it to PedInterp */
+  /** the enlargement given for Picture → PED file and drawing, or '' to leave it to PedInterp */
   const upscaleOf = (v) => String(v.upscale == null ? '' : v.upscale).trim();
   /** the families of a PED file, in Python, for PedNet's tools */
   /** a GA4GH Pedigree or Phenopackets Family, which PedNet reads as well as PED files */
@@ -117,12 +117,14 @@
     { key: 'condition', type: 'text', label: 'Condition (optional)', def: '', placeholder: 'any of the file’s conditions', show: (v) => isGA4GHFile(v.input), help: 'For a GA4GH file that names several conditions, the one that makes someone affected, by its ontology id or its name, such as HP:0000365 or Hearing impairment. Without one, anyone with any of them is affected, and a Phenopackets Family’s own record of who is affected is used.' },
     { key: 'unrecorded', type: 'select', label: 'People with no record of the condition', def: '', options: [['', 'as the file suggests'], ['unaffected', 'unaffected'], ['unknown', 'not known']], show: (v) => isGA4GHFile(v.input), help: 'A GA4GH Pedigree records who has a condition, but only sometimes who doesn’t. As the file suggests: unaffected if no one in it is recorded as not having it, as in the files studio2ga4gh writes, and not known if anyone is, as in those PedGen and PedInterp write.' }
   ];
-  /** a GA4GH file's condition, for PedGen and PedInterp: an ontology term and its name, or both left empty */
-  const CONDITION_FIELDS = [
-    { key: 'condId', type: 'text', label: 'The condition’s ontology term (optional)', def: '', placeholder: 'e.g. MONDO:0007739', show: (v) => v.ga4gh, help: 'Without one, the GA4GH Pedigree names the condition MONDO:0000001, disease.' },
-    { key: 'condLabel', type: 'text', label: 'Its name', def: '', placeholder: 'e.g. Huntington disease', show: (v) => v.ga4gh && (v.condId || '').trim() }
+  /** the condition of a GA4GH file that PedGen or PedInterp writes, and of the drawing PedInterp makes: an ontology
+      term and its name, or both left empty */
+  const wantsCondition = (v) => !!(v.ga4gh || v.studio);
+  const conditionFields = (help) => [
+    { key: 'condId', type: 'text', label: 'The condition’s ontology term (optional)', def: '', placeholder: 'e.g. MONDO:0007739', show: wantsCondition, help },
+    { key: 'condLabel', type: 'text', label: 'Its name', def: '', placeholder: 'e.g. Huntington disease', show: (v) => wantsCondition(v) && (v.condId || '').trim() }
   ];
-  const conditionOf = (v) => (v.ga4gh && (v.condId || '').trim() ? [v.condId.trim(), (v.condLabel || '').trim()] : null);
+  const conditionOf = (v) => (wantsCondition(v) && (v.condId || '').trim() ? [v.condId.trim(), (v.condLabel || '').trim()] : null);
   const checkCondition = (v) => {
     const c = conditionOf(v);
     if (!c) return '';
@@ -289,37 +291,52 @@
     {
       id: 'pedinterp',
       group: 'convert',
-      title: 'Picture → PED file',
+      title: 'Picture → PED file and drawing',
       pkg: 'PedInterp',
-      what: 'Read a picture of a pedigree, such as one in a paper or a clinic letter, and write it as a PED file.',
+      what: 'Read a picture of a pedigree, such as one in a paper or a clinic letter, or a sketch of one, and write it as a PED file and a Pedigree Studio drawing.',
       about:
-        'PedInterp finds the symbols and the lines between them, and so who is male or female, who is affected (a filled symbol), who are partners, parents and children, and which children are twins, and whether they are identical. It reads pictures drawn in the usual way, dark on white, with each generation in a row of its own, such as those Pedigree Studio saves, and, if you tick Drawn by hand, pedigrees sketched roughly, as with the Studio’s Draw tool, or begun with its symbols and finished by hand. The labels by the symbols can’t be read here, because that needs the Tesseract program, which can’t run in a browser. Instead, the people are numbered by generation, from the top, and from the left in each: I-1, I-2, II-1 and so on, as Pedigree Studio numbers them. A PED file can’t hold twins, so they are listed under the table, and a GA4GH Pedigree records them. Half-filled or shaded symbols aren’t read yet, and a sketch may be misread, so compare the PED file with the picture, or draw it, before you use it.',
+        'PedInterp finds the symbols and the lines between them, and so who is male or female, who is affected (a filled symbol), who are partners, parents and children, and which children are twins, and whether they are identical. It reads pictures drawn in the usual way, dark on white, with each generation in a row of its own, such as those Pedigree Studio saves, and, if you tick Drawn by hand, pedigrees sketched roughly, as with the Studio’s Draw tool, or begun with its symbols and finished by hand. It writes the pedigree as a PED file and, unless you untick it, as a Pedigree Studio drawing laid out as the picture is, so that a sketch becomes a drawing you can carry on with in the Studio tab. The labels by the symbols can’t be read here, because that needs the Tesseract program, which can’t run in a browser. Instead, the people are numbered by generation, from the top, and from the left in each: I-1, I-2, II-1 and so on, as Pedigree Studio numbers them. The table shown when it has run is the PED file’s. A PED file can’t hold twins, so neither the file nor the table has them, but the drawing and a GA4GH Pedigree do. Half-filled or shaded symbols aren’t read yet, and a sketch may be misread, so compare the drawing with the picture before you use it.',
       help: 'h-tool-pedinterp',
       fields: [
         { key: 'input', type: 'file', label: 'The picture', kinds: ['image'] },
         { key: 'handDrawn', type: 'check', label: 'Drawn by hand', def: false, help: 'For a pedigree sketched by hand, in whole or in part, as with Pedigree Studio’s Draw tool: symbols of unequal sizes, outlines that don’t quite close, filled symbols scribbled in, and lines that wobble and stop short of what they join. Leave it unticked for a picture drawn with software, such as one Pedigree Studio saves.' },
-        { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the PED file too.' },
+        { key: 'family', type: 'text', label: 'Family id', def: (v) => stemOf(v.input).replace(/\s+/g, '_'), help: 'It names the files too.' },
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' },
         { key: 'upscale', type: 'number', label: 'Enlarge the picture by (optional)', def: '', min: 0.25, max: 20, step: 'any', placeholder: 'as much as its symbols need', help: 'PedInterp enlarges the picture so that its symbols are about 200 pixels across (100 for a sketch), which reads best, and says how much under the table. Give a number to enlarge it more or less.' },
+        { key: 'studio', type: 'check', label: 'Make a Pedigree Studio drawing too', def: true, help: 'FAMILY.studio.json, to open in the Studio tab and carry on with. It is laid out as the picture is, a row of symbols to a generation, and it has the twins and any couples who have no children, which a PED file can’t hold. The Studio’s Tidy lays it out afresh.' },
         { key: 'ga4gh', type: 'check', label: 'Write a GA4GH Pedigree too', def: false, help: 'FAMILY_ga4gh-pedigree.json, which the GA4GH tools read: ga4gh2studio, phenopacket-toolkit and PedNet, and the Risk tab. The affected have the condition, and the unaffected have it marked as looked for and not found.' },
-        ...CONDITION_FIELDS
+        ...conditionFields('Without one, the GA4GH Pedigree names the condition MONDO:0000001, disease, and the drawing’s colour key says Affected. With one, the key names it with its term, as in “Huntington disease [MONDO:0007739]”, so that the drawing converts back to the same term.')
       ],
       check: (v) => oneWord('family id', v.family) || (upscaleOf(v) && !(Number(v.upscale) > 0) ? 'Enlarge the picture by a number above 0, or leave it empty.' : '') || checkCondition(v),
-      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(v.handDrawn, '--hand-drawn'), ...optArgs(upscaleOf(v), '--upscale', num(v.upscale)), ...optArgs(v.ga4gh, '--ga4gh'), ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])],
-      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json')].filter(Boolean),
-      // (what it prints is the table it read, which is better kept whole than wrapped)
+      argv: (v) => ['pedinterp', v.input, '-f', v.family, '-d', v.outdir, '--labels', 'none', ...optArgs(v.handDrawn, '--hand-drawn'), ...optArgs(upscaleOf(v), '--upscale', num(v.upscale)), ...optArgs(v.studio, '--studio'), ...optArgs(v.ga4gh, '--ga4gh'), ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])],
+      outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json'), v.studio && joinPath(v.outdir, v.family + '.studio.json')].filter(Boolean),
+      // (what it prints is the PED file's table, which is better kept whole than wrapped)
       stdoutIsResult: true,
-      python: (v) =>
-        [`from PedInterp import pedigree_processing, PED_export${v.ga4gh ? ', GA4GH_export' : ''}`, '', `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${v.handDrawn ? ', hand_drawn=True' : ''}${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`, 'print(df.to_string(index=False))', 'for twin, other, kind in df.attrs["twins"]:   # [twin, twin, "MZ" (identical) or "DZ"]', '    print("twins:", twin, "and", other, "(identical)" if kind == "MZ" else "(not identical)")', `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`, `print("wrote", PED_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}))`, ...(v.ga4gh ? [`print("wrote", GA4GH_export(df, ${pyq(expand(v.outdir).replace(/\/+$/, ''))}${conditionPy(v)}))`] : [])].join('\n'),
+      python: (v) => {
+        const dir = pyq(expand(v.outdir).replace(/\/+$/, ''));
+        return [
+          `from PedInterp import ${['pedigree_processing', 'PED_export', ...(v.ga4gh ? ['GA4GH_export'] : []), ...(v.studio ? ['Studio_export'] : [])].join(', ')}`,
+          '',
+          `df = pedigree_processing(${pyq(v.family)}, image_path=${pyq(v.input)}, ocr=None${v.handDrawn ? ', hand_drawn=True' : ''}${upscaleOf(v) ? `, upscale_factor=${num(v.upscale)}` : ''})`,
+          'print(df.to_string(index=False))',
+          `print(f"(the picture was read enlarged {df.attrs['upscale_factor']:g} times)")`,
+          `print("wrote", PED_export(df, ${dir}))`,
+          ...(v.ga4gh ? [`print("wrote", GA4GH_export(df, ${dir}${conditionPy(v)}))`] : []),
+          ...(v.studio ? [`print("wrote", Studio_export(df, ${dir}${conditionPy(v)}))`] : [])
+        ].join('\n');
+      },
       next: (res, v) => {
         const ped = joinPath(v.outdir, v.family + '.ped');
         const ga4gh = joinPath(v.outdir, v.family + '_ga4gh-pedigree.json');
+        const drawing = joinPath(v.outdir, v.family + '.studio.json');
         return [
-          // (a GA4GH Pedigree holds the twins, which a PED file can't, so the drawing made from it has them too)
-          v.ga4gh ? ['pedigree', 'Draw it, with any twins (GA4GH → drawing)', () => MG.app.useTool('ga4gh2studio', { input: ga4gh })]
+          // (PedInterp's drawing, laid out as the picture is; or one made from the GA4GH Pedigree, which holds the
+          // twins, as a PED file can't, so the drawing made from it has them too; or from the PED file)
+          v.studio ? ['pedigree', 'Open the drawing in Studio', () => MG.app.studioOpen(drawing)]
+            : v.ga4gh ? ['pedigree', 'Draw it, with any twins (GA4GH → drawing)', () => MG.app.useTool('ga4gh2studio', { input: ga4gh })]
             : ['pedigree', 'Draw it (PED → drawing)', () => MG.app.useTool('ped2studio', { input: ped })],
           ['network', 'Look at it with PedNet', () => MG.app.useTool('pednet-graph', { input: ped })],
-          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? ga4gh : ped })]
+          ['percent', 'Work out its risks', () => MG.app.riskOpen({ source: v.ga4gh ? ga4gh : v.studio ? drawing : ped })]
         ];
       }
     },
@@ -894,7 +911,7 @@
         { key: 'clean', type: 'check', label: 'Partners never carry the allele', def: false, help: 'Their parents and grandparents, if they’re added, still can. A frequency of 0 keeps the allele to the founder’s descendants.' },
         { key: 'genotypes', type: 'check', label: 'Save everyone’s genotypes too, to rank as a candidate variant', def: true },
         { key: 'ga4gh', type: 'check', label: 'Write a GA4GH Pedigree too', def: false, help: 'FAMILY_ga4gh-pedigree.json, which the GA4GH tools read: ga4gh2studio, phenopacket-toolkit and PedNet, and the Risk tab. The affected have the condition, and the unaffected have it marked as looked for and not found.' },
-        ...CONDITION_FIELDS,
+        ...conditionFields('Without one, the GA4GH Pedigree names the condition MONDO:0000001, disease.'),
         { key: 'outdir', type: 'folder', label: 'Save in', def: '~/results' }
       ],
       check: (v) => {
@@ -956,7 +973,7 @@
     ['pedigree', 'Draw a GA4GH or Phenopackets file', ['ga4gh2studio'], 'h-walk-draw-ga4gh'],
     ['badgeCheck', 'Check a GA4GH file, or update an old one', ['validate', 'upgrade'], 'h-walk-check'],
     ['tag', 'Give the conditions ontology terms', ['terms', 'normalise'], 'h-walk-terms'],
-    ['image', 'Turn a picture of a pedigree into a PED file and a drawing', ['pedinterp', 'ped2studio'], 'h-walk-picture'],
+    ['image', 'Turn a picture of a pedigree into a PED file and a drawing', ['pedinterp', 'studio2ped'], 'h-walk-picture'],
     ['network', 'Weigh up the mode of inheritance, and rank candidate variants', ['pednet-graph', 'pednet-mode', 'pednet-rank'], 'h-walk-pednet']
   ];
 
@@ -1147,7 +1164,7 @@
         grid.appendChild(card);
       }
       M.appendChild(grid);
-      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. The tools for analysing and simulating, and Picture → PED file, need more, which Python downloads the first time one of them runs: about 4 MB for PedNet’s tools, and about 21 MB in all. Your files never leave this computer.'));
+      M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. The tools for analysing and simulating, and Picture → PED file and drawing, need more, which Python downloads the first time one of them runs: about 4 MB for PedNet’s tools, and about 21 MB in all. Your files never leave this computer.'));
     }
     /** under the map: what can be done with a kind of file */
     _kindPanel(kind, panel) {

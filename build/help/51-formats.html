@@ -13,7 +13,7 @@
 <tr><td><b>PED file</b>, <b>MPED file</b></td><td><code>*.ped</code>, <code>*.fam</code>; <code>*.mped</code></td><td>The pedigree as a table for linkage programs. An MPED file has a column for each of several conditions (<a href="#h-ped">PED and MPED</a>).</td></tr>
 <tr><td><b>Terms file</b></td><td><code>*-terms.json</code></td><td>Condition names and their ontology terms (<a href="#h-terms">terms files</a>).</td></tr>
 <tr><td><b>Ontology</b></td><td><code>hp.obo</code>, <code>mondo.obo</code></td><td>A copy of the HPO or Mondo, to search without the internet.</td></tr>
-<tr><td><b>Picture</b></td><td><code>*.png</code>, <code>*.jpg</code></td><td>A picture of a pedigree, which <a href="#h-tool-pedinterp">Picture → PED file</a> reads.</td></tr>
+<tr><td><b>Picture</b></td><td><code>*.png</code>, <code>*.jpg</code></td><td>A picture of a pedigree, which <a href="#h-tool-pedinterp">Picture → PED file and drawing</a> reads.</td></tr>
 <tr><td><b>VCF file</b></td><td><code>*.vcf</code>, <code>*.vcf.gz</code></td><td>Variants found by sequencing, with each person's genotypes, for <a href="#h-tool-pednet">Rank candidate variants</a>.</td></tr>
 <tr><td><b>Table of genotypes</b></td><td><code>*-genotypes.tsv</code></td><td>A row for each variant and a column for each person, as <a href="#h-tool-pedgen">Simulate a family</a> writes it. The workbench recognises one by its name, or by a first column called <code>variant</code>.</td></tr>
 <tr><td>Other</td><td><code>*.tsv</code>, <code>*.yaml</code>, <code>*.jsonl</code>, <code>*.log.json</code>, <code>*.graphml</code></td><td>What the tools export: a table (such as PedNet's kinship coefficients or its variants' scores), YAML, JSON Lines, a log of decisions, or a graph for network tools.</td></tr>

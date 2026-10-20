@@ -57,8 +57,8 @@ def test_analysis_notebook_runs():
     assert "a loop, from consanguinity" in text
     assert "autosomal dominant" in text
     assert "the same as lynch.ped: True" in text
-    assert "twins: [['IV-3', 'IV-4', 'MZ']]" in text
-    assert "results/SIM1.ped" in files
+    assert "16 people; the twins are identical" in text
+    assert {"results/SIM1.ped", "results/OKAFOR.studio.json", "results/lynch.studio.json"} <= files
 
 
 def test_starter_notebook_runs():

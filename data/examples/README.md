@@ -22,9 +22,9 @@ by a program that imitates a hand, from where the people are in the drawing.
 | `okafor-later_phenopackets-family.json` | The same Family a visit later: the twins' hearing loss is found to be sensorineural (for *Compare two files*). |
 | `okafor.mped`, `cf-cousins.mped` | MPED files made by studio2ped: their ids are the people's pedigree numbers. |
 | `lynch.ped` | A plain PED file of the Lynch family, as other programs write them: pedigree numbers as ids, one status column. |
-| `lynch.png` | The Lynch family as a picture, in black and white as pedigrees are drawn in papers, with each person where the Studio draws them: for *Picture → PED file* (PedInterp), which reads it as `lynch.ped`, apart from the family's id. |
+| `lynch.png` | The Lynch family as a picture, in black and white as pedigrees are drawn in papers, with each person where the Studio draws them: for *Picture → PED file and drawing* (PedInterp), which reads it as `lynch.ped`, apart from the family's id. |
 | `okafor.png` | The Okafor family as Pedigree Studio saves it as a picture (its *Save as image*), numbers, names and colour key and all. PedInterp reads it as the people, parents and sexes of `okafor.mped`, with those who have either condition affected, and finds the identical twins. |
-| `okafor-sketch.png` | The same family sketched roughly with the Studio's Draw tool, as testers in a clinic sketch: symbols of unequal sizes, some scribbled in, slashes for those who have died, and wobbly lines that stop short or run on. PedInterp reads it as it reads `okafor.png`, with *Drawn by hand*. |
+| `okafor-sketch.png` | The same family sketched roughly with the Studio's Draw tool, as testers in a clinic sketch: symbols of unequal sizes, some scribbled in, slashes for those who have died, and wobbly lines that stop short or run on. PedInterp reads it as it reads `okafor.png`, with *Drawn by hand*, and turns it into a Studio drawing, twins and all. |
 | `pednet/` | PedNet's own example families, from its repository (version 2.0.0): `dominant.ped` and `recessive.ped`, each with a VCF file of candidate variants, and `consanguineous.ped`, two affected children of first cousins. |
 | `older/` | GA4GH files as studio2ga4gh 0.3 and abusua2ga4gh 0.2 wrote them, which the tools now refuse and upgrade. |
 

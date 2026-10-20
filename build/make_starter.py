@@ -122,8 +122,8 @@ with what it needs: about 4 MB for PedNet, and about 21 MB in all once PedGen an
 browser keeps them for next time.
 
 Run the cells in order from the top: click a cell and press **Shift+Enter**. The same work is in the **Tools** tab,
-under *Analyse and simulate* (with *Picture → PED file* under *Convert*), and in the terminal, as the commands
-`pednet`, `pedgen` and `pedinterp`."""),
+under *Analyse and simulate* (with *Picture → PED file and drawing* under *Convert*), and in the terminal, as the
+commands `pednet`, `pedgen` and `pedinterp`."""),
     ("md", """## A family as a graph
 
 PedNet reads a PED file into a pedigree for each family. A pedigree is a directed acyclic graph, with an edge from
@@ -209,12 +209,26 @@ print(read.head(6).to_string(index=False))
 columns = ["FamilyID", "IndividualID", "PaternalID", "MaternalID", "Sex", "Phenotype"]
 ped = pd.read_csv("/data/examples/lynch.ped", sep="\\t", header=None, names=columns, dtype=str)
 print("the same as lynch.ped:", read[columns[1:]].astype(str).values.tolist() == ped[columns[1:]].values.tolist())"""),
+    ("md", """With `hand_drawn=True`, PedInterp reads pedigrees sketched by hand, as with Pedigree Studio's Draw tool: here the
+Okafor family, sketched roughly. `Studio_export` writes what it reads as a Pedigree Studio drawing, laid out as the
+sketch is, to open in the **Studio** tab and carry on with. The drawing has what a PED file can't hold: the twins,
+which PedInterp also lists in `attrs["twins"]` (`MZ` for identical twins, `DZ` for twins who aren't), and any couples
+who have no children."""),
+    ("code", """import json
+from PedInterp import Studio_export
+
+sketch = pedigree_processing("OKAFOR", image_path="/data/examples/okafor-sketch.png", ocr=None, hand_drawn=True)
+print(sketch.tail(5).to_string(index=False))
+path = Studio_export(sketch, "/home/user/results")
+drawing = json.load(open(path))
+print("wrote", path)
+print(len(drawing["persons"]), "people; the twins are", ", ".join(t["type"] for t in drawing["twinLinks"]))"""),
     ("md", """## The commands, from a cell
 
 The same work as commands: a line that starts with `!` runs one, as the terminal would."""),
     ("code", """!pednet mode /data/examples/okafor.mped --method patterns
 !pedgen --mode AD --generations 3 --seed 5 --family SIM3 -d ~/results
-!pedinterp /data/examples/lynch.png --labels none -q -d ~/results"""),
+!pedinterp /data/examples/lynch.png --labels none --studio -q -d ~/results"""),
 ]
 
 NOTEBOOKS = {"pedigree-tools.ipynb": CELLS, "pedigree-analysis.ipynb": ANALYSIS}

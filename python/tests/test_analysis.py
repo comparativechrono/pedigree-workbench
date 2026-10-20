@@ -181,17 +181,28 @@ def test_pedinterp_reads_the_example_picture():
 
 def test_pedinterp_reads_the_okafor_pictures_and_their_twins():
     # the Okafor family as Pedigree Studio saves it, and sketched roughly with its Draw tool (read --hand-drawn): the
-    # people, parents and sexes of its MPED file, with those who have either condition affected, and the identical
-    # twins, which a PED file can't hold, listed under the table
+    # people, parents and sexes of its MPED file, with those who have either condition affected. What is printed is
+    # the PED file's table, and nothing more. The identical twins, which a PED file can't hold, are in the Pedigree
+    # Studio drawing (--studio), which studio2ped reads back as the same family
     needs("numpy", "pandas", "cv2", "PIL")
+    import studio2ped
     want = [r[1:5] + ["2" if "2" in r[5:] else "1"] for r in read_ped(os.path.join(EXAMPLES, "okafor.mped"))]
     for picture, options in (("okafor.png", []), ("okafor-sketch.png", ["--hand-drawn"])):
         with tempfile.TemporaryDirectory() as tmp:
             code, out, err = run(["pedinterp", os.path.join(EXAMPLES, picture), "--labels", "none", "-f", "OKAFOR",
-                                  "-d", tmp] + options)
+                                  "-d", tmp, "--studio"] + options)
             assert code == 0, err
             assert [r[1:] for r in read_ped(os.path.join(tmp, "OKAFOR.ped"))] == want, picture
-            assert "twins: IV-3 and IV-4 (identical)" in out, out
+            assert "twin" not in out.lower() and "identical" not in out, out
+            # (the drawing's people are the table's, in its order)
+            read = read_ped(os.path.join(tmp, "OKAFOR.ped"))
+            drawing = json.load(open(os.path.join(tmp, "OKAFOR.studio.json"), encoding="utf-8"))
+            who = {p["id"]: read[k][1] for k, p in enumerate(drawing["persons"])}
+            (twins,) = drawing["twinLinks"]
+            assert (who[twins["child1Id"]], who[twins["child2Id"]], twins["type"]) == ("IV-3", "IV-4", "identical")
+            (_, content), = studio2ped.convert(drawing, "BACK").files
+            rows = [line.split("\t")[1:] for line in content.splitlines() if line and not line.startswith("#")]
+            assert rows == [r[1:] for r in read], picture
 
 
 def test_pednet_reads_what_pedgen_and_pedinterp_make():

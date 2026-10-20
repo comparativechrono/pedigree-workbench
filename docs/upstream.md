@@ -356,7 +356,7 @@ each copy came from.
 |---|---|---|
 | PedNet | **2.1.0**, released on 19 October 2026, after 2.0.0 that morning | 2.1.0, from its wheel on PyPI: GA4GH Pedigrees and Phenopackets Families read as well as PED files, with `--condition` and `--unrecorded` ([PedNet#6](https://github.com/comparativechrono/PedNet/pull/6)) |
 | PedGen | 0.1.3 (Nick Taylor's) | built from [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5), on top of `main`, with #2, #3 and #4 merged: the `pedgen` command; `gen_genotype_export`, which writes everyone's genotypes as a table PedNet reads; matplotlib imported only to draw; a rare allele by default, cousins who marry, and a minimum number affected (#4); and (#5) a GA4GH Pedigree written with `--ga4gh` |
-| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#8](https://github.com/comparativechrono/pedigree-interpreter/pull/8), on top of #3 to #7 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); the symbols measured as the reading finds them (#6); a GA4GH Pedigree written with `--ga4gh` (#7); and (#8) twins, and pedigrees sketched by hand, with `--hand-drawn` |
+| PedInterp | 0.1.7 (Nick Taylor's) | built from [pedigree-interpreter#10](https://github.com/comparativechrono/pedigree-interpreter/pull/10), on top of #3 to #9 (merged): the `pedinterp` command (#3); children drawn straight under their parents read correctly (#4); the enlargement chosen to suit the symbols, and warnings when lines were missed (#5); the symbols measured as the reading finds them (#6); a GA4GH Pedigree written with `--ga4gh` (#7); twins, and pedigrees sketched by hand, with `--hand-drawn` (#8); a release workflow (#9); and (#10) a Pedigree Studio drawing, laid out as the picture is, written with `--studio`, and the PED file's table printed as it is |
 
 The three pull requests of October 2026, #5 of PedGen, #7 of PedInterp and #6
 of PedNet, connect these packages to the GA4GH tools. PedGen and PedInterp
@@ -376,6 +376,21 @@ Python 3.9 or later. PedNet 2.1.0 was released on PyPI on 19 October 2026, by
 its release workflow, and the workbench's copy is taken from that wheel, which
 holds the same files as the one built from #6.
 
+The testers then asked for two more things, which pull request #10 does.
+Nothing is to be added to what PedInterp gives as a PED file, so the table
+`pedinterp` prints is just the PED file's, as it is in the file, without the
+twins that #8 listed under it (the file itself never had them); the GA4GH
+Pedigree still records them. And many people will want PedInterp simply to
+turn a sketch into a Pedigree Studio drawing, so `Studio_export` (`--studio`)
+writes the family as one, laid out as the picture is, a row of symbols to a
+generation at the Studio's spacing. The drawing has what a PED file can't
+hold, the twins and any couples without children, and names the condition in
+its colour key as ga4gh2studio does, so that studio2ga4gh reads the term back.
+`pedigree_processing` keeps what the drawing is laid out from in
+`attrs['partners']` and `attrs['layout']`. The workbench's tool is now
+*Picture → PED file and drawing*: it makes the drawing unless that is
+unticked, and opens it in the Studio from under the result.
+
 Testers in a clinic found two things that PedInterp couldn't do. It read the
 row with twins wrong: the triangle that identical twins' lines make with their
 bar is white closed in by lines, like the inside of a symbol, and was read as a
@@ -389,12 +404,13 @@ and the bar of identical twins between them, and reads sketches with
 `hand_drawn=True` (`--hand-drawn`), which finds rough symbols, filled in by
 scribbling or not, whose outlines may not close. It also takes out the grey
 numbers the Studio writes over its symbols where they touch a line. A PED file
-has no place for twins, so `df.attrs['twins']` lists them, the command prints
-them, and the GA4GH Pedigree records them. The workbench's *Picture → PED
-file* has *Drawn by hand*, and the examples have the Okafor family, with its
-identical twins, as the Studio saves it and as sketched with its Draw tool
-(`build/make_example_pictures.py`), both of which PedInterp reads as the
-people, parents and sexes of `okafor.mped`, with its twins.
+has no place for twins, so `df.attrs['twins']` lists them, and the GA4GH
+Pedigree records them (until #10, the command printed them under the table
+too). The workbench's *Picture → PED file* got *Drawn by hand*, and the
+examples got the Okafor family, with its identical twins, as the Studio saves
+it and as sketched with its Draw tool (`build/make_example_pictures.py`), both
+of which PedInterp reads as the people, parents and sexes of `okafor.mped`,
+with its twins.
 
 PedInterp's fix came from the workbench's example picture of the Lynch family:
 drawn where Pedigree Studio draws it, with each child under a parent and the
