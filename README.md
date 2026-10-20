@@ -43,7 +43,7 @@ tabs:
 | Tab | What it is for |
 |---|---|
 | **Studio** | Pedigree Studio itself, with a bar that keeps the drawing among the user's files: New, Open, Save, Save as, Tidy, and *Convert or check…*, which takes the drawing to the Tools tab. |
-| **Tools** | The packages behind forms, for people who would rather point and click: each tool runs one command of one package, exactly as the terminal would, and shows that command, and the same work in Python, so that it can be done again without the form. The first page is the map and the common tasks. |
+| **Tools** | The packages behind forms, for people who would rather point and click: each tool runs one command of one package, exactly as the terminal would, and shows that command, and the same work in Python, so that it can be done again without the form. The first page is the map and the common tasks. *Workflows* chains the tools together and runs them in one go. |
 | **Risk** | Genetic risks from a whole pedigree: the chance that each person carries the family's variant or will be affected, and that a couple's child will be, under a single-gene model (dominant, recessive or X-linked, with penetrance, phenocopies and new mutations), with the Bayesian table behind each chance. The family comes from the drawing in the Studio, or from a drawing, PED, MPED, GA4GH Pedigree or Phenopackets Family file. Below, *By hand*: a couple's four children as chromosomes, and chances multiplied together, as in the pedigree practical. |
 | **Files** | The user's files and the examples: look at them, edit them, upload and download. |
 | **Notebook** | Python notebooks (Jupyter's `.ipynb`), with all the packages, starting with a welcome notebook that walks through them. |
@@ -72,6 +72,22 @@ a drawing's colour key, searching EBI's Ontology Lookup Service or copies of
 the ontologies in the browser, and keeps the choices in a terms file. It and
 *Fill in missing terms* are the only places where anything leaves the
 computer: if the user chooses EBI's service, the words searched for go to EBI.
+
+**Workflows**, beside *All tools*, chains the tools together, after the
+workflows of the Galaxy emulator in the lab's Bioinformatics workbench. Each
+step reads the files the steps before it wrote, and runs exactly as the tool
+does on its own, in the browser's Python. A run puts its files in a folder of
+its own (`~/results/WORKFLOW/INPUT`), with a record of the run
+(`workflow-run.json`) and its commands as a script (`commands.sh`), and can be
+opened as a notebook. Workflows are drawn in an editor of boxes and
+connections, in which only files of a kind an input takes can be connected,
+made from tools the user has run (as Galaxy extracts a workflow from a
+history), or started from the examples in `data/examples/workflows/`. Each is a
+file, `~/workflows/NAME.workflow.json`, to download and send. Every tool can be
+a step except *Match conditions to terms*, which asks as it goes, so its terms
+file is given to a workflow as an input. What each tool reads and writes in a
+workflow is beside it in `tools.js` (its `wf`); the engine and the pages are in
+`workflows.js`.
 
 ## The GA4GH files
 
@@ -136,6 +152,7 @@ python3 serve.py          # then open http://localhost:8000/
 | the help (`build/help/*.html`), the template, `build/citations.json` | `python3 build/make_page.py` |
 | the notebooks to start from | `python3 build/make_starter.py` |
 | the example files | `python3 build/make_example_data.py`, then `python3 build/make_page.py` |
+| the example workflows | `node build/make_example_workflows.js`, then `python3 build/make_page.py` |
 | Pedigree Studio | `python3 build/update_studio.py --git ../PedigreeStudio`, then `python3 build/make_page.py` |
 
 - **Pedigree Studio** is a copy of `index.html` from the PedigreeStudio
@@ -157,7 +174,9 @@ python3 serve.py          # then open http://localhost:8000/
 - **The framework** – the page, the help, the shell, the notebook and the
   editor – comes from the lab's Bioinformatics workbench (`assets/js`,
   `assets/css`), with what this workbench does not need taken out. The Studio
-  tab (`studio-tab.js`), the Tools tab (`tools.js`), the map (`schematic.js`),
+  tab (`studio-tab.js`), the Tools tab (`tools.js`), its workflows
+  (`workflows.js`, whose editor borrows the look of the Galaxy emulator's
+  canvas), the map (`schematic.js`),
   the Risk tab (`risk-tab.js`, with its sums in `risk-engine.js` and its
   readers of drawings and PED files in `risk-read.js`), the text tools of the
   terminal (`shell-text.js`) and the page's set-up (`page-wb.js`) are its own.
@@ -174,6 +193,8 @@ python3 tests/help_code.py            # every code box of the help, run as a rea
 node tests/equivalence/gen.js assets/js/tools.js > /tmp/cases.jsonl && \
   python3 tests/equivalence/run_equiv.py /tmp/cases.jsonl
                                       # each tool's command and its Python write the same files
+node tests/workflows/engine.js        # the workflow engine, and each example workflow run for real in Python
+                                      # (--quick: without the runs)
 node tests/risk/textbook.js           # the Risk tab's sums on textbook examples, whose answers are known
 node tests/risk/brute.js              # ... and on hundreds of random pedigrees, against brute force
 python3 tests/risk/readers.py         # the Risk tab reads the examples as studio2ped, mpedtools and PedNet do
@@ -227,15 +248,15 @@ assets/
                            pedigree-analysis.zip (PedNet, PedGen, PedInterp), loaded when first used
   vendor/                  CodeMirror, marked, DOMPurify, JSZip
 data/
-  examples/                example families, and files made from them (README.md)
+  examples/                example families, and files made from them (README.md); workflows/, the example workflows
   starter/                 the notebooks to start from
-build/                     what builds index.html, the examples, the notebook and the Studio copy
+build/                     what builds index.html, the examples, the example workflows, the notebook and the Studio copy
   help/                    the help pages
 python/                    the packages, their tests, and tools for the examples and checks
   vendor/                  networkx's wheel, and SOURCES.json: where PedNet, PedGen, PedInterp and networkx come from
 docs/                      ga4gh.md (the GA4GH decision), upstream.md (the packages' pull requests)
-tests/                     the help's code, command/Python equivalence, a browser test, and (risk/) the Risk
-                           tab's sums and readers
+tests/                     the help's code, command/Python equivalence, a browser test, (workflows/) the workflow
+                           engine, and (risk/) the Risk tab's sums and readers
 serve.py                   a small web server for trying it locally
 ```
 

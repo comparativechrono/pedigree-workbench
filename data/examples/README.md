@@ -27,6 +27,7 @@ by a program that imitates a hand, from where the people are in the drawing.
 | `okafor-sketch.png` | The same family sketched roughly with the Studio's Draw tool, as testers in a clinic sketch: symbols of unequal sizes, some scribbled in, slashes for those who have died, and wobbly lines that stop short or run on. PedInterp reads it as it reads `okafor.png`, with *Drawn by hand*, and turns it into a Studio drawing, twins and all. |
 | `pednet/` | PedNet's own example families, from its repository (version 2.0.0): `dominant.ped` and `recessive.ped`, each with a VCF file of candidate variants, and `consanguineous.ped`, two affected children of first cousins. |
 | `older/` | GA4GH files as studio2ga4gh 0.3 and abusua2ga4gh 0.2 wrote them, which the tools now refuse and upgrade. |
+| `workflows/` | The example workflows of the Tools tab, made with the workflow engine by `build/make_example_workflows.js`: `share-a-drawing` (a drawing → the GA4GH files, checked, and the Family de-identified), `sketch-to-drawing` (`okafor-sketch.png` → a PED file, a drawing and a GA4GH Pedigree, which is checked, and the family's mode of inheritance), `simulate-and-test` (a family simulated by PedGen, its mode of inheritance and candidate variants weighed by PedNet, and a drawing of it), and `update-an-old-file` (a file from `older/` upgraded, its missing terms filled in from a terms file, and checked). |
 
 Dates in the made files are fixed (17 October 2026), so that making them again
 gives the same files.

@@ -1,0 +1,65 @@
+{
+  "pedigree_workbench_workflow": 1,
+  "name": "From a sketch to a drawing, and its mode of inheritance",
+  "annotation": "A pedigree sketched by hand becomes a PED file, a Pedigree Studio drawing and a GA4GH Pedigree (PedInterp). The GA4GH Pedigree is checked against the standard, and PedNet weighs up the family’s mode of inheritance.",
+  "steps": [
+    {
+      "id": "s1",
+      "type": "input",
+      "label": "The sketch",
+      "kinds": [
+        "image"
+      ],
+      "x": 16,
+      "y": 16,
+      "default": "/data/examples/okafor-sketch.png"
+    },
+    {
+      "id": "s2",
+      "type": "tool",
+      "tool": "pedinterp",
+      "params": {
+        "handDrawn": true,
+        "ga4gh": true
+      },
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "file"
+        }
+      },
+      "x": 286,
+      "y": 16
+    },
+    {
+      "id": "s3",
+      "type": "tool",
+      "tool": "validate",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s2",
+          "output": "pedigree"
+        }
+      },
+      "x": 556,
+      "y": 16
+    },
+    {
+      "id": "s4",
+      "type": "tool",
+      "tool": "pednet-mode",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s2",
+          "output": "ped"
+        }
+      },
+      "x": 556,
+      "y": 145
+    }
+  ],
+  "created": "2026-10-20T12:00:00.000Z",
+  "updated": "2026-10-20T12:00:00.000Z"
+}

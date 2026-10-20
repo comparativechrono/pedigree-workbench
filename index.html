@@ -71,11 +71,13 @@
 <li><a href="#h-walk-picture">Turn a picture of a pedigree into a PED file and a drawing<small>Read it with PedInterp, check it, and carry on with the drawing in the Studio</small></a></li>
 <li><a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants<small>PedNet: a family&#x27;s loops and kinship, its mode of inheritance, and the variants that co-segregate with its condition</small></a></li>
 <li><a href="#h-walk-risk">Work out the risk to a pregnancy<small>The Risk tab: a couple&#x27;s chance of an affected child, a Bayesian table with reduced penetrance, and why the mode of inheritance matters</small></a></li>
+<li><a href="#h-walk-workflow">Run the same steps for several families, with a workflow<small>Run an example workflow for two families, make a workflow of your own, and make one from tools you&#x27;ve run</small></a></li>
 </ul></section>
 <section><h2><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>Pedigree Studio</h2><ul>
 <li><a href="#h-studio">The Studio tab<small>Pedigree Studio in the workbench: drawing, opening and saving</small></a></li>
 </ul></section>
 <section><h2><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.8-.6-.6-2.8z"/></svg><a href="#h-tools">Tools</a></h2><ul>
+<li><a href="#h-workflows">Workflows<small>Chain the tools together, and run them in one go</small></a></li>
 <li><a href="#h-tool-studio2ga4gh">Drawing → GA4GH Pedigree and Phenopackets<small>studio2ga4gh: a drawing as the two GA4GH files</small></a></li>
 <li><a href="#h-tool-ga4gh2studio">GA4GH or Phenopackets → drawing<small>ga4gh2studio: a GA4GH file drawn in Pedigree Studio</small></a></li>
 <li><a href="#h-tool-studio2ped">Drawing → PED or MPED<small>studio2ped: a drawing as a PED or MPED file</small></a></li>
@@ -207,6 +209,7 @@
 <li><a href="#h-walk-picture">Turn a picture of a pedigree into a PED file and a drawing<small>Read it with PedInterp, check it, and carry on with the drawing in the Studio</small></a></li>
 <li><a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants<small>PedNet: a family&#x27;s loops and kinship, its mode of inheritance, and the variants that co-segregate with its condition</small></a></li>
 <li><a href="#h-walk-risk">Work out the risk to a pregnancy<small>The Risk tab: a couple&#x27;s chance of an affected child, a Bayesian table with reduced penetrance, and why the mode of inheritance matters</small></a></li>
+<li><a href="#h-walk-workflow">Run the same steps for several families, with a workflow<small>Run an example workflow for two families, make a workflow of your own, and make one from tools you&#x27;ve run</small></a></li>
 </ul>
 <p>You'll also find these jobs on the first page of the Tools tab, under <b>Common tasks</b>. There, each job links to its tools in the order you need them.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="start">Open the Tools tab's first page</button></div>
@@ -565,6 +568,62 @@ pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vc
 <p><b>Save as a table</b> writes everyone's chances to <code>~/results</code>, as a TSV file with a row for each person. In a notebook, pandas reads it: <code>pd.read_csv("/home/user/results/cf-cousins_risks.tsv", sep="\t")</code>.</p>
 <p><a href="#h-risk">The Risk tab</a> describes everything on the tab, and <a href="#h-risk-how">How the chances are worked out</a> explains the sums.</p>
 </article>
+<article class="help-page" id="h-walk-workflow" data-title="Run the same steps for several families, with a workflow" data-group="Walkthroughs" data-group-page="h-walks" data-keys="workflow workflows chain pipeline galaxy steps run again batch editor connect okafor lynch price share ga4gh mode inheritance pednet extract walkthrough" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><rect x="15" y="3" width="6" height="5" rx="1"/><path d="M9 5.5h6M18 8v8M9 5.5c3 0 3 13 6 13"/></svg>Run the same steps for several families, with a workflow</h1>
+<p class="lede">When you do the same job for one family after another, such as making the GA4GH files from each drawing, checking them and de-identifying them, a workflow does all the steps in one go. In this walkthrough you run an example for two families, make a workflow that weighs up a family's mode of inheritance from its drawing, and make another from tools you've run one at a time.</p>
+
+<h2>1 · Run an example</h2>
+<p>The example <i>Share a drawing in the GA4GH standard</i> does what <a href="#h-walk-ga4gh">Share a family's pedigree in the GA4GH standard</a> does by hand. It makes a GA4GH Pedigree and a Phenopackets Family from a drawing, checks both, de-identifies the Family, then checks that too. It has two input files: the drawing, which is the Okafor family's to begin with, and a terms file for the conditions, which is the examples' terms file. Press <b>Run</b>.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json">Run it for the Okafor family</button></div>
+<p>The steps run one after another, and each says what it did: <i>Wrote 2 files</i>, or for a check, <i>Valid: a correct GA4GH Pedigree</i>. Open <b>What it did</b> under a step to see what the program printed, the files it wrote, with buttons to open or check them, and its command. The files are all in one folder, <code>~/results/share-a-drawing-in-the-ga4gh-standard/okafor</code>, with the record of the run, <code>workflow-run.json</code>, and its commands, <code>commands.sh</code>.</p>
+
+<h2>2 · Run it for another family</h2>
+<p>Now run it for the Lynch family. Choose <code>lynch.studio.json</code> as the drawing (the button below does this for you), and leave the terms file as it is, because it has terms for the Lynch family's conditions too. This run's files go in a folder of their own, <code>…/lynch</code>, beside the Okafor family's.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json" data-input="/data/examples/lynch.studio.json">Run it for the Lynch family</button></div>
+<p>The Workflows page lists both runs under <b>Runs</b>, and <b>View</b> shows either of them again. For a drawing of your own, choose it instead. If the examples' terms file doesn't have its conditions, make a terms file for them first with <a href="#h-tool-terms">Match conditions to terms</a>, and choose that file as well.</p>
+
+<h2>3 · Make a workflow of your own</h2>
+<p>This workflow makes a PED file from a drawing, then weighs up the family's mode of inheritance from it with PedNet.</p>
+<ol>
+  <li>On the Workflows page, press <b>New workflow</b>. The editor opens, on an empty workflow.</li>
+  <li>Press <b>+ Input file</b>. The box it adds takes a Pedigree Studio drawing, which is what this workflow needs. If you click the box, you can give it a name, such as <i>The drawing</i>, or choose another kind of file.</li>
+  <li>Press the <b>+</b> by <i>Pedigree Studio drawing</i>, on the right of the box. It lists the tools that read a drawing: choose <b>Drawing → PED or MPED</b>. Its box appears to the right, already reading the drawing.</li>
+  <li>Press the <b>+</b> by <i>PED or MPED file</i>, on the new box, and choose <b>Mode of inheritance</b>.</li>
+  <li>Click the background. Under <b>Checks</b>, it says <i>Ready to run</i>. Give the workflow a name at the top, such as <i>Drawing to mode of inheritance</i>, and a description under <b>What it does</b>.</li>
+</ol>
+<p>Instead of using the <b>+</b>, you can add each step with <b>+ Add a step</b>, then drag from the dot by <i>PED or MPED file</i> to the input of <b>Mode of inheritance</b>. Either way, the editor saves the workflow as you go, in <code>~/workflows</code>.</p>
+<p>Press <b>Run</b>, choose <code>lynch.studio.json</code> as the input file, and press <b>Run</b> again. The last step says <i>Family FAM1: autosomal dominant</i>, and under it are PedNet's probabilities for each mode of inheritance. <a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants</a> explains them.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="list">Open the Workflows page</button></div>
+
+<h2>4 · Make one from tools you've run</h2>
+<p>If you've already done a job once, tool by tool, the Workflows page can turn what you did into a workflow.</p>
+<ol>
+  <li>Make the GA4GH files from the Price family's drawing: the button below opens <b>Drawing → GA4GH Pedigree and Phenopackets</b> with the drawing and the terms file filled in. Press <b>Run</b>.</li>
+  <li>Under the result, press <b>Check</b> beside the GA4GH Pedigree, then <b>Run</b>.</li>
+  <li>Open the Workflows page, and press <b>Make one from the tools you've run</b>. The two tools you've just run are ticked. Untick any others, give the workflow a name, and press <b>Make the workflow</b>.</li>
+</ol>
+<div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/price.studio.json" data-terms="/data/examples/example-terms.json">Make the GA4GH files for the Price family</button> <button class="do" type="button" data-workflows="extract">Make one from the tools you've run</button></div>
+<p>The workflow opens in the editor. The drawing and the terms file are its inputs, and the Check reads the GA4GH Pedigree that the first step writes, as it did when you ran the tools. Run it for any other drawing, as you did in step 2.</p>
+
+<h2>The same in the terminal</h2>
+<p>Each run's <code>commands.sh</code> holds the commands its steps ran. This runs the steps of the Lynch family's run again:</p>
+<pre class="code"><code>bash ~/results/share-a-drawing-in-the-ga4gh-standard/lynch/commands.sh</code></pre>
+<p>More about workflows: <a href="#h-workflows">Workflows</a>.</p>
+<h2 data-anchor="cite">References</h2>
+<p>If you use these programs in your work, cite the papers below, and give the versions you used (<a href="#h-versions">Versions, and how to cite</a>):</p>
+<dl class="cite-list">
+<dt>studio2ga4gh</dt>
+<dd>Hearn TJ. studio2ga4gh [software]. <a href="https://github.com/comparativechrono/studio2ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/studio2ga4gh</a></dd>
+<dt>pedigree-ga4gh</dt>
+<dd>Hearn TJ. pedigree-ga4gh [software]. <a href="https://github.com/comparativechrono/pedigree-ga4gh" target="_blank" rel="noopener">github.com/comparativechrono/pedigree-ga4gh</a></dd>
+<dt>phenopacket-toolkit (phenotk)</dt>
+<dd>Hearn TJ. phenopacket-toolkit [software]. <a href="https://pypi.org/project/phenopacket-toolkit/" target="_blank" rel="noopener">pypi.org/project/phenopacket-toolkit</a></dd>
+<dt>studio2ped</dt>
+<dd>Hearn TJ. studio2ped [software]. <a href="https://github.com/comparativechrono/studio2ped" target="_blank" rel="noopener">github.com/comparativechrono/studio2ped</a></dd>
+<dt>PedNet</dt>
+<dd>Hearn TJ, Taylor N. PedNet [software]. <a href="https://github.com/comparativechrono/PedNet" target="_blank" rel="noopener">github.com/comparativechrono/PedNet</a></dd>
+</dl>
+</article>
 <article class="help-page" id="h-studio" data-title="The Studio tab" data-group="Pedigree Studio" data-group-page="h-studio" data-keys="studio pedigree studio draw drawing open save save as new tidy layout convert check file bar symbols key colour legend proband carrier twins consanguineous adoption export png svg picture" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="6" rx="0.5"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M12 6v5.5M7 11.5h10M7 11.5V15M17 11.5V15"/><rect x="4.5" y="15" width="5" height="5" rx="0.5"/><circle cx="17" cy="17.5" r="2.5"/></svg>The Studio tab</h1>
 <p class="lede">The Studio tab is Pedigree Studio, our program for drawing pedigrees in the standard nomenclature, running inside the workbench. The bar above it connects the Studio to your files. It shows which file the drawing you're working on belongs to, saves the drawing there and takes it to the Tools tab.</p>
@@ -621,7 +680,7 @@ pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vc
 <dd>Bennett RL, French KS, Resta RG, Austin J (2022) Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>Journal of Genetic Counseling</i> 31(6): 1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a></dd>
 </dl>
 </article>
-<article class="help-page" id="h-tools" data-title="The Tools tab" data-group="Tools" data-group-page="h-tools" data-keys="tools tab gui point and click form run result convert python packages command same terminal python map tasks file page" hidden>
+<article class="help-page" id="h-tools" data-title="The Tools tab" data-group="Tools" data-group-page="h-tools" data-keys="tools tab gui point and click form run result convert python packages command same terminal python map tasks file page workflows" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.8-.6-.6-2.8z"/></svg>The Tools tab</h1>
 <p class="lede">The Tools tab gives you simple forms for our Python packages. Choose a file, set any options and press <b>Run</b>. The tool runs exactly the command you would type in the terminal, then shows you what it printed and the files it wrote. Under every form you'll find that command too, and the same job written in Python, so you can always see what the tab is doing.</p>
 
@@ -641,6 +700,10 @@ pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vc
   <li><b>The same in the terminal, and in Python</b> shows the command and the code, with buttons to run them in the Terminal tab or add them to a notebook.</li>
 </ol>
 <p><b>More about this tool</b>, under the title, explains what the tool does and doesn't do, and links to its page in this help. At the top right, the Python pill shows whether Python is running. Click it to see the versions of the packages.</p>
+
+<h2>Several tools in one go</h2>
+<p><b>Workflows</b>, next to <b>All tools</b>, chains tools together, so that the files one tool writes go straight into the next, and runs them all in one go, on the same files again or on new ones. You can start from an example, draw your own in an editor, or turn tools you've run into a workflow (<a href="#h-workflows">Workflows</a>).</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="list">Open the Workflows page</button></div>
 
 <h2>The tools</h2>
 <h3>Convert</h3>
@@ -684,6 +747,67 @@ pednet rank /data/examples/pednet/dominant.ped /data/examples/pednet/dominant.vc
 </ul>
 
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>What the tab does not do</div><p>Each tool runs a package's own command, exactly as the package provides it, and the tab adds no conversions of its own. Match conditions to terms works differently, because it has no command. Instead, it searches using the packages' Python code and writes a terms file. A few commands have options that the forms leave out, such as the options for variants in <code>phenotk add</code>. In the terminal, <code>man</code> and <code>--help</code> describe them.</p></div>
+</article>
+<article class="help-page" id="h-workflows" data-title="Workflows" data-group="Tools" data-group-page="h-tools" data-keys="workflow workflows chain chained pipeline galaxy steps step run again batch editor canvas boxes connect connection input output record workflow-run.json commands.sh notebook extract made from tools run share download send example" hidden>
+<h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><rect x="15" y="3" width="6" height="5" rx="1"/><path d="M9 5.5h6M18 8v8M9 5.5c3 0 3 13 6 13"/></svg>Workflows</h1>
+<p class="lede">A workflow chains the tools of the Tools tab together, so that the files one step writes go straight into the next. You choose its input files and press <b>Run</b>, and the steps run one after another, exactly as they would if you ran each tool yourself. Each run keeps its files in a folder of its own, with a record of how they were made. If you've used workflows in Galaxy, these will look familiar.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="list">Open the Workflows page</button></div>
+
+<h2>The Workflows page</h2>
+<p>Open it with <b>Workflows</b>, next to <b>All tools</b> at the top of the Tools tab. It lists:</p>
+<ul>
+  <li><b>Your workflows</b>, the ones you've made or copied, each a file in <code>~/workflows</code>, with buttons to run, edit, download or delete it.</li>
+  <li><b>Examples</b>, ready to run. <b>Edit a copy</b> makes one yours to change.</li>
+  <li><b>Runs</b>, the newest first. <b>View</b> shows what a run did, step by step, and <b>Folder</b> opens its folder in the Files tab.</li>
+</ul>
+<p>At the top, <b>New workflow</b> opens the editor on an empty workflow, <b>Make one from the tools you've run</b> turns tools you've run into a workflow, and <b>Add a workflow file…</b> adds one from your computer, such as one someone has sent you.</p>
+
+<h2>Running a workflow</h2>
+<p><b>Run</b> opens a form with a box for each of the workflow's input files, numbered as they are in the editor. Each starts with the file you gave it last time, or else the one the workflow suggests, or else the first file that fits, from your own files or the examples. An optional input, such as a terms file, can be left as <i>none</i>. Under the inputs:</p>
+<ul>
+  <li><b>Put the results in</b> is the run's folder. It is named after the workflow and the first input file, such as <code>~/results/share-a-drawing-in-the-ga4gh-standard/okafor</code>, with <code>-2</code>, <code>-3</code> and so on added if that folder is taken. You can choose another, anywhere in your home folder.</li>
+  <li><b>The steps</b> lists the tools in the order they run, with any settings of their own.</li>
+</ul>
+<p>Press <b>Run</b>, and each step shows <i>waiting</i>, <i>running</i>, then <i>done</i> or <i>failed</i>, with a line on what it did: the files it wrote, or what a check found. Python starts the first time, as it does for a tool. You can go to another tab while the steps run, and a message tells you when they have finished. <b>Stop</b> stops the run after the step that is running. Only one workflow runs at a time.</p>
+<p>If a step fails, the steps that read its files don't run, and the others still do. <b>What went wrong</b>, under a step that failed, says why, with what the program printed. Under a step that worked, <b>What it did</b> has what the program printed, the files it wrote, with the same buttons as under a tool's result, and its command. When the run has finished, you can open its folder in the Files tab, open its steps as a notebook, run it again (on another file, perhaps), or edit the workflow.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json">Run an example: Share a drawing in the GA4GH standard</button></div>
+
+<h3>What each run keeps</h3>
+<ul>
+  <li><b>The files its steps write</b>, named as the tools name them. The GA4GH Pedigree made from <code>okafor.studio.json</code> is <code>okafor_ga4gh-pedigree.json</code>, just as it is when you run the tool yourself. A tool that writes a set of files, such as <b>One file for each person</b>, puts them in a folder inside the run's folder. If a step would write a file with the same name as one an earlier step wrote, its files go in a folder of their own, named after the step, such as <code>4-fill-in-missing-terms</code>.</li>
+  <li><b>A record of the run</b>, <code>workflow-run.json</code>. It holds the workflow as it was, the input files, and for each step its settings, its command, what it printed and the files it wrote. Open it in the Files tab to see the run again.</li>
+  <li><b>Its commands</b>, <code>commands.sh</code>. <code>bash commands.sh</code> in the Terminal tab runs the steps again. On your own computer, with the packages installed, it does the same, once any paths that begin <code>/data/examples</code> point to your copies of the examples.</li>
+</ul>
+<p><b>Open the steps as a notebook</b> writes a notebook in <code>~/notebooks</code> with each step's Python, as the Tools tab shows it under each tool, and opens it in the Notebook tab.</p>
+
+<h2>The editor</h2>
+<p><b>New workflow</b>, <b>Edit</b> on one of yours and <b>Edit a copy</b> on an example all open the editor, which takes up the whole width of the Tools tab. Each input file and each step is a box, numbered in the order they run. A step's input files are on the left of its box, and the files it writes are on the right, each with a dot.</p>
+<ul>
+  <li><b>+ Input file</b> adds a file the workflow is given when it runs. Click its box to name it, to say what kind of file it is, and to choose a file to suggest. Tick <b>Optional</b> for a file that the steps can do without, such as a terms file.</li>
+  <li><b>+ Add a step</b> adds a tool. If a box is selected, the new step goes to its right, and reads one of its files if it can.</li>
+  <li>The <b>+</b> by a file lists the tools that read that kind of file. The step you choose reads it.</li>
+  <li><b>Drag from a dot</b> on the right of a box to an input on the left of another to connect them. While you drag, the inputs that can take the file grow and turn green, and the others fade: a file can only go into an input that takes its kind. Click a line to take that connection away.</li>
+  <li><b>Click a box</b> for its settings, in the column beside the boxes (below them on a narrow screen). For a step, you choose where each of its input files comes from, or press <b>Make it an input of the workflow</b>, and you set the tool's options, as in its form. Where its files go isn't one of them, because each run decides that. A setting that the tool works out from the name of a file, such as PedInterp's family id, is worked out when the workflow runs, unless you fill it in. A choice that a tool makes from the kind of file it's given, such as what <b>GA4GH Pedigree ⇄ Phenopackets Family</b> makes, is made here instead, so that the step always writes the kind of file its box shows.</li>
+  <li><b>Click the background</b> for the workflow's description and its <b>Checks</b>, which list what stops it running, such as an input that isn't connected. Click a check to go to its step. When nothing does, it says <i>Ready to run</i>.</li>
+  <li><b>Tidy</b> arranges the boxes in columns, with the inputs on the left. To move a box, drag it. On a touch screen, drag it by its title.</li>
+</ul>
+<p>Your changes are saved as you go, and <i>Saved</i>, beside the name, tells you when they have been. Change the name at the top left, and the workflow's file is renamed to match. The download button, beside <b>Run</b>, saves the file, <code>NAME.workflow.json</code>, to your computer, to keep or to send to someone. They add it with <b>Add a workflow file…</b>, which puts it in their <code>~/workflows</code> under a name of its own, so that a workflow of theirs with the same name is kept.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/sketch-to-drawing.workflow.json" data-view="edit">Edit a copy of an example</button></div>
+
+<h2>A workflow from the tools you've run</h2>
+<p><b>Make one from the tools you've run</b> does what Galaxy's <i>Extract workflow</i> does. Run the tools in the Tools tab one after another, each on a file the one before wrote, then come to this page. Tick the tools to use (the ones that worked in the last three hours are ticked already), give the workflow a name, and press <b>Make the workflow</b>. A file that one of them wrote and a later one read becomes a connection between their steps. Any other file they read becomes an input of the workflow, which suggests the file you used, and the settings you chose are kept. The page lists the last 40 tools you ran.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="extract">Make one from the tools you've run</button></div>
+
+<h2>What can be a step</h2>
+<ul>
+  <li>Every tool of the Tools tab, except <a href="#h-tool-terms">Match conditions to terms</a>, which asks you questions as it goes. Make the terms file with it first, then give the file to the workflow as an input, as the example <i>Share a drawing in the GA4GH standard</i> does.</li>
+  <li>The checks, and the tools that only report, such as <b>Check against the standard</b>, <b>Compare two files</b> and <b>Mode of inheritance</b>, write no files. What they found is in the run's record, under the step.</li>
+  <li>A set of files, such as the Phenopackets that <b>One file for each person</b> writes, can only go into a tool that reads several files at once: <b>Put files together</b>, or <b>Put PED files together</b>.</li>
+</ul>
+
+<h2>How they differ from Galaxy's</h2>
+<p>These workflows run in your browser, in the same Python as the tools, and nothing is sent anywhere. Each step is a package's own command, so a run's <code>commands.sh</code> does the same job in a terminal. There are no collections: to run a workflow on several families, run it once for each of them, and each run gets a folder of its own. Galaxy's workflow files can't be opened here, because the tools are different.</p>
+<p>A workflow file is JSON. It holds the workflow's name and description, and its steps: each input, and each tool with its settings and the files it reads (<a href="#h-formats">Which file is which</a>).</p>
 </article>
 <article class="help-page" id="h-tool-studio2ga4gh" data-title="Drawing → GA4GH Pedigree and Phenopackets" data-group="Tools" data-group-page="h-tools" data-keys="studio2ga4gh convert drawing ga4gh pedigree phenopackets family export terms ids pedigree numbers kin relationships narrative" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>Drawing → GA4GH Pedigree and Phenopackets</h1>
@@ -1835,7 +1959,8 @@ print("wrote", gen_GA4GH_export(df, "/home/user/results", condition=("MONDO:0009
 <table>
 <tr><th>Folder</th><th>What goes in it</th></tr>
 <tr><td><code>~/pedigrees</code></td><td>drawings (<code>.studio.json</code>) saved with the Studio's Save as…, and drawings the tools make</td></tr>
-<tr><td><code>~/results</code></td><td>what the tools write, unless you choose another folder</td></tr>
+<tr><td><code>~/results</code></td><td>what the tools write, unless you choose another folder, and a folder for each run of a workflow</td></tr>
+<tr><td><code>~/workflows</code></td><td>your workflows (<code>.workflow.json</code>), from the Workflows page of the Tools tab</td></tr>
 <tr><td><code>~/terms</code></td><td>terms files, from Match conditions to terms</td></tr>
 <tr><td><code>~/ontologies</code></td><td>copies of the HPO and Mondo, for searching without the internet</td></tr>
 <tr><td><code>~/notebooks</code></td><td>notebooks, starting with <code>pedigree-tools.ipynb</code></td></tr>
@@ -1891,11 +2016,13 @@ print("wrote", gen_GA4GH_export(df, "/home/user/results", condition=("MONDO:0009
 <tr><td><b>Picture</b></td><td><code>*.png</code>, <code>*.jpg</code></td><td>A picture of a pedigree, which <a href="#h-tool-pedinterp">Picture → PED file and drawing</a> reads.</td></tr>
 <tr><td><b>VCF file</b></td><td><code>*.vcf</code>, <code>*.vcf.gz</code></td><td>Variants found by sequencing, with each person's genotypes, for <a href="#h-tool-pednet">Rank candidate variants</a>.</td></tr>
 <tr><td><b>Table of genotypes</b></td><td><code>*-genotypes.tsv</code></td><td>A row for each variant and a column for each person, as <a href="#h-tool-pedgen">Simulate a family</a> writes it. The workbench recognises one by its name, or by a first column called <code>variant</code>.</td></tr>
+<tr><td><b>Workflow</b></td><td><code>*.workflow.json</code></td><td>Tools chained together: the files the workflow is given, its steps, the settings of each, and which files each reads (<a href="#h-workflows">Workflows</a>).</td></tr>
+<tr><td><b>Record of a workflow's run</b></td><td><code>workflow-run.json</code></td><td>What one run of a workflow did: its input files, and each step's settings, command and output. It is in the run's folder, beside <code>commands.sh</code>.</td></tr>
 <tr><td>Other</td><td><code>*.tsv</code>, <code>*.yaml</code>, <code>*.jsonl</code>, <code>*.log.json</code>, <code>*.graphml</code></td><td>What the tools export: a table (such as PedNet's kinship coefficients or its variants' scores), YAML, JSON Lines, a log of decisions, or a graph for network tools.</td></tr>
 </table>
 
 <h2>How the workbench tells them apart</h2>
-<p>The workbench looks at the name first. Then, for a JSON file, it looks at what's inside: a drawing has <code>persons</code> and <code>partnerships</code>, a GA4GH Pedigree has <code>individuals</code> and <code>relationships</code>, a Family has a <code>proband</code>, a Cohort has <code>members</code> and a Phenopacket has a <code>subject</code>. If the workbench doesn't recognise a file, it shows it as plain JSON or text. In the Tools tab, a file's page shows its kind, with a summary of what's in it.</p>
+<p>The workbench looks at the name first. Then, for a JSON file, it looks at what's inside: a drawing has <code>persons</code> and <code>partnerships</code>, a GA4GH Pedigree has <code>individuals</code> and <code>relationships</code>, a Family has a <code>proband</code>, a Cohort has <code>members</code> and a Phenopacket has a <code>subject</code>. A workflow, and the record of a run, begin with a key of their own (<code>pedigree_workbench_workflow</code>, <code>pedigree_workbench_workflow_run</code>). If the workbench doesn't recognise a file, it shows it as plain JSON or text. In the Tools tab, a file's page shows its kind, with a summary of what's in it.</p>
 <div class="callout info"><div class="co-t"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>Older GA4GH files</div><p>Files made by studio2ga4gh 0.3 or abusua2ga4gh 0.2 are recognised as GA4GH files, but in an older form that the standard doesn't accept. A file like this has <i>Older form</i> on its page, and <a href="#h-tool-upgrade">Upgrade a file from an older tool</a> rewrites it.</p></div>
 </article>
 <article class="help-page" id="h-studio-format" data-title="The Pedigree Studio file" data-group="Files and standards" data-group-page="h-files" data-keys="studio json format drawing session persons partnerships childlinks twinlinks legendlabels colour key fill quarters halves shading text numbering" hidden>
@@ -2645,7 +2772,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
   <li>On a shared computer, download your work and use <b>My files → Start afresh</b> when you finish.</li>
 </ul>
 </article>
-<article class="help-page" id="h-troubleshoot" data-title="When something goes wrong" data-group="Reference" data-group-page="h-versions" data-keys="troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug" hidden>
+<article class="help-page" id="h-troubleshoot" data-title="When something goes wrong" data-group="Reference" data-group-page="h-versions" data-keys="troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug workflow step failed stopped" hidden>
 <h1><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>When something goes wrong</h1>
 <p class="lede">These are the common problems, and what to do about each one.</p>
 
@@ -2691,6 +2818,12 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
   <dt>Simulate a family takes a long time, or says that none of 1,000 families had enough affected</dt>
   <dd>A rare recessive condition seldom turns up twice in a family, so PedGen may have to make many families to find one with as many affected people as you asked for. Let cousins marry (1 is whenever they can), give more generations or children, or ask for fewer affected people.</dd>
+
+  <dt>A workflow can't run, or one of its steps failed</dt>
+  <dd>If the workflow can't run, its Run page lists why, such as an input that isn't connected. Open it in the editor, where <b>Checks</b> lists the same things and takes you to each step. If a step failed, open <i>What went wrong</i> under it. It shows the tool's own error, the one you'd see if you ran the tool yourself, and the steps that read its files didn't run. Put right the step's settings in the editor, or choose another input file, and run it again (<a href="#h-workflows">Workflows</a>).</dd>
+
+  <dt>A workflow's run says <i>stopped</i></dt>
+  <dd>A workflow runs in this page, so closing or reloading the page stops it, and the steps that hadn't run are marked <i>stopped</i>. The files of the steps that had finished are in the run's folder. Run the workflow again.</dd>
 
   <dt>hponorm or mondonorm stops straight away in the terminal</dt>
   <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>
@@ -2802,7 +2935,7 @@ python -m pedwb pedigree-ga4gh validate results/okafor_ga4gh-pedigree.json</code
 
 <noscript><p style="padding:20px">This page needs JavaScript.</p></noscript>
 
-<script>window.WB_EXAMPLES = [{"p":"README.md","s":3389},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.png","s":10428},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor-sketch.png","s":170154},{"p":"okafor.mped","s":523},{"p":"okafor.png","s":109447},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224},{"p":"pednet/consanguineous.ped","s":425},{"p":"pednet/dominant.ped","s":439},{"p":"pednet/dominant.vcf","s":920},{"p":"pednet/recessive.ped","s":170},{"p":"pednet/recessive.vcf","s":732}];
+<script>window.WB_EXAMPLES = [{"p":"README.md","s":4009},{"p":"cf-cousins.mped","s":425},{"p":"cf-cousins.studio.json","s":10172},{"p":"example-terms.json","s":824},{"p":"features.studio.json","s":17537},{"p":"lynch.ped","s":452},{"p":"lynch.png","s":10428},{"p":"lynch.studio.json","s":14415},{"p":"okafor-later_phenopackets-family.json","s":6698},{"p":"okafor-sketch.png","s":170154},{"p":"okafor.mped","s":523},{"p":"okafor.png","s":109447},{"p":"okafor.studio.json","s":11997},{"p":"okafor_ga4gh-pedigree.json","s":11339},{"p":"okafor_phenopackets-family.json","s":6406},{"p":"price.studio.json","s":11871},{"p":"older/abusua2ga4gh-0.2-no-names_phenopackets-family.json","s":4003},{"p":"older/abusua2ga4gh-0.2_ga4gh-pedigree.json","s":3353},{"p":"older/abusua2ga4gh-0.2_phenopackets-family.json","s":4273},{"p":"older/studio2ga4gh-0.3_ga4gh-pedigree.json","s":5416},{"p":"older/studio2ga4gh-0.3_phenopackets-family.json","s":4224},{"p":"pednet/consanguineous.ped","s":425},{"p":"pednet/dominant.ped","s":439},{"p":"pednet/dominant.vcf","s":920},{"p":"pednet/recessive.ped","s":170},{"p":"pednet/recessive.vcf","s":732},{"p":"workflows/share-a-drawing.workflow.json","s":2156},{"p":"workflows/simulate-and-test.workflow.json","s":1468},{"p":"workflows/sketch-to-drawing.workflow.json","s":1437},{"p":"workflows/update-an-old-file.workflow.json","s":1768}];
 window.WB_STARTERS = [{"p":"notebooks/pedigree-analysis.ipynb"},{"p":"notebooks/pedigree-tools.ipynb"}];
 window.WB_BUNDLE = {"archive":"pedigree-tools.zip","sha256":"b2d243482347171fc57b2a9acf5db7cc7d5a667e4c9ba760a990d0eb7e396231","bytes":215588,"packages":{"studio2ped":"0.2.0","ped2studio":"0.2.2","studio2ga4gh":"0.4.0","ga4gh2studio":"0.4.0","mpedtools":"0.1.0","hponorm":"1.1.0","mondonorm":"1.1.0","phenopacket_toolkit":"0.4.0","pedigree_ga4gh":"1.0.0","pedwb":"1.0.0"},"analysis":{"archive":"pedigree-analysis.zip","sha256":"0823acafe013ac44580f0984277f402db25d73de6a0835ff391108fa7c2b3b9a","bytes":1151102,"packages":{"pednet":"2.1.0","PedGen":"0.1.4.dev13+g93a642d20","PedInterp":"0.1.8.dev23+g89d496dcc","networkx":"3.4.2"}}};
 window.WB_STUDIO = "81dbf796c56b";
@@ -2837,6 +2970,7 @@ window.WB_CITATIONS = {"phenopackets2022":"Jacobsen JOB, Baudis M, Baynam GS, Be
 <script src="assets/js/studio-tab.js"></script>
 <script src="assets/js/schematic.js"></script>
 <script src="assets/js/tools.js"></script>
+<script src="assets/js/workflows.js"></script>
 <script src="assets/js/risk-engine.js"></script>
 <script src="assets/js/risk-read.js"></script>
 <script src="assets/js/risk-tab.js"></script>

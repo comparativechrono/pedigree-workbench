@@ -160,12 +160,17 @@
     vcf: 'VCF file',
     variants: 'table of genotypes',
     notebook: 'notebook',
+    workflow: 'workflow',
+    workflowrun: 'record of a workflow’s run',
     json: 'JSON file',
     other: 'file'
   };
   MG.app.kindNames = KIND_NAMES;
   function sniffJson(text) {
     const head = text.slice(0, 20000);
+    // (the workflows of the Tools tab, and the records of their runs: workflows.js)
+    if (/^\s*\{\s*"pedigree_workbench_workflow_run"\s*:/.test(head)) return 'workflowrun';
+    if (/^\s*\{\s*"pedigree_workbench_workflow"\s*:/.test(head)) return 'workflow';
     if (/"persons"\s*:/.test(head) && /"(partnerships|childLinks)"\s*:/.test(text)) return 'studio';
     if (/"(relationships|indexPatients|index_patients)"\s*:/.test(head) || (/"individuals"\s*:/.test(head) && !/"proband"\s*:/.test(head))) return 'pedigree';
     if (/"proband"\s*:/.test(head) || (/"pedigree"\s*:/.test(head) && /"persons"\s*:/.test(head))) return 'family';
@@ -181,10 +186,12 @@
     return !!(e && e.kind === 'text' && /^\s*variant[\t,]/i.test(e.text.slice(0, 200)));
   };
   /** → studio | pedigree | family | cohort | phenopacket | ped | mped | terms | obo | image | vcf | variants | notebook |
-      json | other */
+      workflow | workflowrun | json | other */
   MG.app.pedKind = (path) => {
     const n = path.toLowerCase();
     if (n.endsWith('.ipynb')) return 'notebook';
+    if (n.endsWith('.workflow.json')) return 'workflow';
+    if (/(^|\/)workflow-run\.json$/.test(n)) return 'workflowrun';
     if (/\.(png|jpe?g|gif|bmp|tiff?|webp)$/.test(n)) return 'image';
     if (/\.vcf(\.b?gz)?$/.test(n)) return 'vcf';
     if (/\.(tsv|csv|txt)$/.test(n) && isGenotypeTable(path, n)) return 'variants';
@@ -228,6 +235,11 @@
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'image') {
       out.push(['table', 'Read it into a PED file and a drawing', 'Read the pedigree in this picture, and write it as a PED file and a Pedigree Studio drawing (PedInterp)', tool('pedinterp')]);
+    } else if (k === 'workflow') {
+      out.push(['play', 'Run', 'Run this workflow (Tools tab)', () => MG.app.workflowOpen(path, 'run')]);
+      out.push(['workflow', path.startsWith(HOME + '/') ? 'Edit' : 'Edit a copy', 'Open this workflow in the editor (Tools tab)', () => MG.app.workflowOpen(path, 'edit')]);
+    } else if (k === 'workflowrun') {
+      out.push(['workflow', 'View the run', 'What this run of a workflow did, step by step (Tools tab)', () => MG.app.workflowOpen(path, 'record')]);
     } else if (k === 'vcf' || k === 'variants') {
       out.push(['dna', 'Rank the variants', 'Rank these candidate variants by how well each co-segregates with the condition (PedNet)', () => MG.app.useTool('pednet-rank', { variants: path })]);
     } else if (k === 'terms') {
@@ -255,6 +267,8 @@
       return MG.app.nbApp.open(p);
     }
     if (!opts.edit && MG.app.pedKind(p) === 'studio') return MG.app.studioOpen(p);
+    if (!opts.edit && MG.app.pedKind(p) === 'workflow') return MG.app.workflowOpen(p, p.startsWith(HOME + '/') ? 'edit' : 'run');
+    if (!opts.edit && MG.app.pedKind(p) === 'workflowrun') return MG.app.workflowOpen(p, 'record');
     return MG.app.editFile(p, opts);
   };
   /** show a folder or file in the Files tab */
@@ -276,6 +290,14 @@
     await MG.app.showWorkbench('tools');
     const T = await waitFor(() => MG.app.tools, 8000);
     if (T) T.choose(id, values || {});
+  };
+  /** a workflow in the Tools tab: view 'run', 'edit' (an example: a copy of it) or 'record' (a run's record), or the
+      Workflows page itself (view 'list', or 'extract': a workflow from the tools run). extra.input: a file to run it
+      on (its first input that takes a file of that kind) */
+  MG.app.workflowOpen = async (path, view = 'edit', extra = {}) => {
+    await MG.app.showWorkbench('tools');
+    const T = await waitFor(() => MG.app.tools, 8000);
+    if (T) T.go(Object.assign({ page: 'workflows', view, path: path ? MG.app.fs.resolve(path) : null }, extra.input ? { input: MG.app.fs.resolve(extra.input) } : {}));
   };
   /** the Tools tab, showing what can be done with a file */
   MG.app.toolsFor = async (path) => {
@@ -328,6 +350,13 @@
     if (btn && btn.dataset.handDrawn != null) values.handDrawn = btn.dataset.handDrawn === 'true';
     return MG.app.useTool(id, values);
   };
+  /* data-workflow="~/workflows/x.workflow.json" (data-view="edit" or "run", the default; data-input="…" a file to run
+     it on); data-workflows="list" or "extract": the Workflows page */
+  MG.actions.workflow = async (path, btn) => {
+    const ds = (btn && btn.dataset) || {};
+    return MG.app.workflowOpen(path.replace(/^~(?=\/|$)/, HOME), ds.view || 'run', { input: ds.input ? ds.input.replace(/^~(?=\/|$)/, HOME) : null });
+  };
+  MG.actions.workflows = async (view) => MG.app.workflowOpen(null, view || 'list');
   MG.actions.newNb = async () => {
     await MG.app.showWorkbench('notebook');
     await MG.app.nbApp.newNotebook('python');

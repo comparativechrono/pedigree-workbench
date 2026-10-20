@@ -1,0 +1,60 @@
+<!-- id: h-workflows | title: Workflows | group: Tools | summary: Chain the tools together, and run them in one go | keys: workflow workflows chain chained pipeline galaxy steps step run again batch editor canvas boxes connect connection input output record workflow-run.json commands.sh notebook extract made from tools run share download send example -->
+<h1><!--ICON:workflow-->Workflows</h1>
+<p class="lede">A workflow chains the tools of the Tools tab together, so that the files one step writes go straight into the next. You choose its input files and press <b>Run</b>, and the steps run one after another, exactly as they would if you ran each tool yourself. Each run keeps its files in a folder of its own, with a record of how they were made. If you've used workflows in Galaxy, these will look familiar.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="list">Open the Workflows page</button></div>
+
+<h2>The Workflows page</h2>
+<p>Open it with <b>Workflows</b>, next to <b>All tools</b> at the top of the Tools tab. It lists:</p>
+<ul>
+  <li><b>Your workflows</b>, the ones you've made or copied, each a file in <code>~/workflows</code>, with buttons to run, edit, download or delete it.</li>
+  <li><b>Examples</b>, ready to run. <b>Edit a copy</b> makes one yours to change.</li>
+  <li><b>Runs</b>, the newest first. <b>View</b> shows what a run did, step by step, and <b>Folder</b> opens its folder in the Files tab.</li>
+</ul>
+<p>At the top, <b>New workflow</b> opens the editor on an empty workflow, <b>Make one from the tools you've run</b> turns tools you've run into a workflow, and <b>Add a workflow file…</b> adds one from your computer, such as one someone has sent you.</p>
+
+<h2>Running a workflow</h2>
+<p><b>Run</b> opens a form with a box for each of the workflow's input files, numbered as they are in the editor. Each starts with the file you gave it last time, or else the one the workflow suggests, or else the first file that fits, from your own files or the examples. An optional input, such as a terms file, can be left as <i>none</i>. Under the inputs:</p>
+<ul>
+  <li><b>Put the results in</b> is the run's folder. It is named after the workflow and the first input file, such as <code>~/results/share-a-drawing-in-the-ga4gh-standard/okafor</code>, with <code>-2</code>, <code>-3</code> and so on added if that folder is taken. You can choose another, anywhere in your home folder.</li>
+  <li><b>The steps</b> lists the tools in the order they run, with any settings of their own.</li>
+</ul>
+<p>Press <b>Run</b>, and each step shows <i>waiting</i>, <i>running</i>, then <i>done</i> or <i>failed</i>, with a line on what it did: the files it wrote, or what a check found. Python starts the first time, as it does for a tool. You can go to another tab while the steps run, and a message tells you when they have finished. <b>Stop</b> stops the run after the step that is running. Only one workflow runs at a time.</p>
+<p>If a step fails, the steps that read its files don't run, and the others still do. <b>What went wrong</b>, under a step that failed, says why, with what the program printed. Under a step that worked, <b>What it did</b> has what the program printed, the files it wrote, with the same buttons as under a tool's result, and its command. When the run has finished, you can open its folder in the Files tab, open its steps as a notebook, run it again (on another file, perhaps), or edit the workflow.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json">Run an example: Share a drawing in the GA4GH standard</button></div>
+
+<h3>What each run keeps</h3>
+<ul>
+  <li><b>The files its steps write</b>, named as the tools name them. The GA4GH Pedigree made from <code>okafor.studio.json</code> is <code>okafor_ga4gh-pedigree.json</code>, just as it is when you run the tool yourself. A tool that writes a set of files, such as <b>One file for each person</b>, puts them in a folder inside the run's folder. If a step would write a file with the same name as one an earlier step wrote, its files go in a folder of their own, named after the step, such as <code>4-fill-in-missing-terms</code>.</li>
+  <li><b>A record of the run</b>, <code>workflow-run.json</code>. It holds the workflow as it was, the input files, and for each step its settings, its command, what it printed and the files it wrote. Open it in the Files tab to see the run again.</li>
+  <li><b>Its commands</b>, <code>commands.sh</code>. <code>bash commands.sh</code> in the Terminal tab runs the steps again. On your own computer, with the packages installed, it does the same, once any paths that begin <code>/data/examples</code> point to your copies of the examples.</li>
+</ul>
+<p><b>Open the steps as a notebook</b> writes a notebook in <code>~/notebooks</code> with each step's Python, as the Tools tab shows it under each tool, and opens it in the Notebook tab.</p>
+
+<h2>The editor</h2>
+<p><b>New workflow</b>, <b>Edit</b> on one of yours and <b>Edit a copy</b> on an example all open the editor, which takes up the whole width of the Tools tab. Each input file and each step is a box, numbered in the order they run. A step's input files are on the left of its box, and the files it writes are on the right, each with a dot.</p>
+<ul>
+  <li><b>+ Input file</b> adds a file the workflow is given when it runs. Click its box to name it, to say what kind of file it is, and to choose a file to suggest. Tick <b>Optional</b> for a file that the steps can do without, such as a terms file.</li>
+  <li><b>+ Add a step</b> adds a tool. If a box is selected, the new step goes to its right, and reads one of its files if it can.</li>
+  <li>The <b>+</b> by a file lists the tools that read that kind of file. The step you choose reads it.</li>
+  <li><b>Drag from a dot</b> on the right of a box to an input on the left of another to connect them. While you drag, the inputs that can take the file grow and turn green, and the others fade: a file can only go into an input that takes its kind. Click a line to take that connection away.</li>
+  <li><b>Click a box</b> for its settings, in the column beside the boxes (below them on a narrow screen). For a step, you choose where each of its input files comes from, or press <b>Make it an input of the workflow</b>, and you set the tool's options, as in its form. Where its files go isn't one of them, because each run decides that. A setting that the tool works out from the name of a file, such as PedInterp's family id, is worked out when the workflow runs, unless you fill it in. A choice that a tool makes from the kind of file it's given, such as what <b>GA4GH Pedigree ⇄ Phenopackets Family</b> makes, is made here instead, so that the step always writes the kind of file its box shows.</li>
+  <li><b>Click the background</b> for the workflow's description and its <b>Checks</b>, which list what stops it running, such as an input that isn't connected. Click a check to go to its step. When nothing does, it says <i>Ready to run</i>.</li>
+  <li><b>Tidy</b> arranges the boxes in columns, with the inputs on the left. To move a box, drag it. On a touch screen, drag it by its title.</li>
+</ul>
+<p>Your changes are saved as you go, and <i>Saved</i>, beside the name, tells you when they have been. Change the name at the top left, and the workflow's file is renamed to match. The download button, beside <b>Run</b>, saves the file, <code>NAME.workflow.json</code>, to your computer, to keep or to send to someone. They add it with <b>Add a workflow file…</b>, which puts it in their <code>~/workflows</code> under a name of its own, so that a workflow of theirs with the same name is kept.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/sketch-to-drawing.workflow.json" data-view="edit">Edit a copy of an example</button></div>
+
+<h2>A workflow from the tools you've run</h2>
+<p><b>Make one from the tools you've run</b> does what Galaxy's <i>Extract workflow</i> does. Run the tools in the Tools tab one after another, each on a file the one before wrote, then come to this page. Tick the tools to use (the ones that worked in the last three hours are ticked already), give the workflow a name, and press <b>Make the workflow</b>. A file that one of them wrote and a later one read becomes a connection between their steps. Any other file they read becomes an input of the workflow, which suggests the file you used, and the settings you chose are kept. The page lists the last 40 tools you ran.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="extract">Make one from the tools you've run</button></div>
+
+<h2>What can be a step</h2>
+<ul>
+  <li>Every tool of the Tools tab, except <a href="#h-tool-terms">Match conditions to terms</a>, which asks you questions as it goes. Make the terms file with it first, then give the file to the workflow as an input, as the example <i>Share a drawing in the GA4GH standard</i> does.</li>
+  <li>The checks, and the tools that only report, such as <b>Check against the standard</b>, <b>Compare two files</b> and <b>Mode of inheritance</b>, write no files. What they found is in the run's record, under the step.</li>
+  <li>A set of files, such as the Phenopackets that <b>One file for each person</b> writes, can only go into a tool that reads several files at once: <b>Put files together</b>, or <b>Put PED files together</b>.</li>
+</ul>
+
+<h2>How they differ from Galaxy's</h2>
+<p>These workflows run in your browser, in the same Python as the tools, and nothing is sent anywhere. Each step is a package's own command, so a run's <code>commands.sh</code> does the same job in a terminal. There are no collections: to run a workflow on several families, run it once for each of them, and each run gets a folder of its own. Galaxy's workflow files can't be opened here, because the tools are different.</p>
+<p>A workflow file is JSON. It holds the workflow's name and description, and its steps: each input, and each tool with its settings and the files it reads (<a href="#h-formats">Which file is which</a>).</p>
