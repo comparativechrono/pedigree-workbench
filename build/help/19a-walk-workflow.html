@@ -1,0 +1,42 @@
+<!-- id: h-walk-workflow | title: Run the same steps for several families, with a workflow | group: Walkthroughs | summary: Run an example workflow for two families, make a workflow of your own, and make one from tools you've run | keys: workflow workflows chain pipeline galaxy steps run again batch editor connect okafor lynch price share ga4gh mode inheritance pednet extract walkthrough -->
+<h1><!--ICON:workflow-->Run the same steps for several families, with a workflow</h1>
+<p class="lede">When you do the same job for one family after another, such as making the GA4GH files from each drawing, checking them and de-identifying them, a workflow does all the steps in one go. In this walkthrough you run an example for two families, make a workflow that weighs up a family's mode of inheritance from its drawing, and make another from tools you've run one at a time.</p>
+
+<h2>1 · Run an example</h2>
+<p>The example <i>Share a drawing in the GA4GH standard</i> does what <a href="#h-walk-ga4gh">Share a family's pedigree in the GA4GH standard</a> does by hand. It makes a GA4GH Pedigree and a Phenopackets Family from a drawing, checks both, de-identifies the Family, then checks that too. It has two input files: the drawing, which is the Okafor family's to begin with, and a terms file for the conditions, which is the examples' terms file. Press <b>Run</b>.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json">Run it for the Okafor family</button></div>
+<p>The steps run one after another, and each says what it did: <i>Wrote 2 files</i>, or for a check, <i>Valid: a correct GA4GH Pedigree</i>. Open <b>What it did</b> under a step to see what the program printed, the files it wrote, with buttons to open or check them, and its command. The files are all in one folder, <code>~/results/share-a-drawing-in-the-ga4gh-standard/okafor</code>, with the record of the run, <code>workflow-run.json</code>, and its commands, <code>commands.sh</code>.</p>
+
+<h2>2 · Run it for another family</h2>
+<p>Now run it for the Lynch family. Choose <code>lynch.studio.json</code> as the drawing (the button below does this for you), and leave the terms file as it is, because it has terms for the Lynch family's conditions too. This run's files go in a folder of their own, <code>…/lynch</code>, beside the Okafor family's.</p>
+<div class="tryrow"><button class="do" type="button" data-workflow="/data/examples/workflows/share-a-drawing.workflow.json" data-input="/data/examples/lynch.studio.json">Run it for the Lynch family</button></div>
+<p>The Workflows page lists both runs under <b>Runs</b>, and <b>View</b> shows either of them again. For a drawing of your own, choose it instead. If the examples' terms file doesn't have its conditions, make a terms file for them first with <a href="#h-tool-terms">Match conditions to terms</a>, and choose that file as well.</p>
+
+<h2>3 · Make a workflow of your own</h2>
+<p>This workflow makes a PED file from a drawing, then weighs up the family's mode of inheritance from it with PedNet.</p>
+<ol>
+  <li>On the Workflows page, press <b>New workflow</b>. The editor opens, on an empty workflow.</li>
+  <li>Press <b>+ Input file</b>. The box it adds takes a Pedigree Studio drawing, which is what this workflow needs. If you click the box, you can give it a name, such as <i>The drawing</i>, or choose another kind of file.</li>
+  <li>Press the <b>+</b> by <i>Pedigree Studio drawing</i>, on the right of the box. It lists the tools that read a drawing: choose <b>Drawing → PED or MPED</b>. Its box appears to the right, already reading the drawing.</li>
+  <li>Press the <b>+</b> by <i>PED or MPED file</i>, on the new box, and choose <b>Mode of inheritance</b>.</li>
+  <li>Click the background. Under <b>Checks</b>, it says <i>Ready to run</i>. Give the workflow a name at the top, such as <i>Drawing to mode of inheritance</i>, and a description under <b>What it does</b>.</li>
+</ol>
+<p>Instead of using the <b>+</b>, you can add each step with <b>+ Add a step</b>, then drag from the dot by <i>PED or MPED file</i> to the input of <b>Mode of inheritance</b>. Either way, the editor saves the workflow as you go, in <code>~/workflows</code>.</p>
+<p>Press <b>Run</b>, choose <code>lynch.studio.json</code> as the input file, and press <b>Run</b> again. The last step says <i>Family FAM1: autosomal dominant</i>, and under it are PedNet's probabilities for each mode of inheritance. <a href="#h-walk-pednet">Weigh up the mode of inheritance, and rank candidate variants</a> explains them.</p>
+<div class="tryrow"><button class="do" type="button" data-workflows="list">Open the Workflows page</button></div>
+
+<h2>4 · Make one from tools you've run</h2>
+<p>If you've already done a job once, tool by tool, the Workflows page can turn what you did into a workflow.</p>
+<ol>
+  <li>Make the GA4GH files from the Price family's drawing: the button below opens <b>Drawing → GA4GH Pedigree and Phenopackets</b> with the drawing and the terms file filled in. Press <b>Run</b>.</li>
+  <li>Under the result, press <b>Check</b> beside the GA4GH Pedigree, then <b>Run</b>.</li>
+  <li>Open the Workflows page, and press <b>Make one from the tools you've run</b>. The two tools you've just run are ticked. Untick any others, give the workflow a name, and press <b>Make the workflow</b>.</li>
+</ol>
+<div class="tryrow"><button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/price.studio.json" data-terms="/data/examples/example-terms.json">Make the GA4GH files for the Price family</button> <button class="do" type="button" data-workflows="extract">Make one from the tools you've run</button></div>
+<p>The workflow opens in the editor. The drawing and the terms file are its inputs, and the Check reads the GA4GH Pedigree that the first step writes, as it did when you ran the tools. Run it for any other drawing, as you did in step 2.</p>
+
+<h2>The same in the terminal</h2>
+<p>Each run's <code>commands.sh</code> holds the commands its steps ran. This runs the steps of the Lynch family's run again:</p>
+<pre class="code"><code>bash ~/results/share-a-drawing-in-the-ga4gh-standard/lynch/commands.sh</code></pre>
+<p>More about workflows: <a href="#h-workflows">Workflows</a>.</p>
+<!--CITE: studio2ga4gh pedigree-ga4gh phenotk studio2ped pednet-->

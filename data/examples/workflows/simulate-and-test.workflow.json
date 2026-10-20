@@ -1,0 +1,68 @@
+{
+  "pedigree_workbench_workflow": 1,
+  "name": "Simulate a family, and test PedNet on it",
+  "annotation": "PedGen makes up a family with a recessive condition (the same family each time, with its seed). PedNet weighs up its mode of inheritance and ranks the simulated variant, and the family is drawn for the Studio.",
+  "steps": [
+    {
+      "id": "s1",
+      "type": "tool",
+      "tool": "pedgen",
+      "params": {
+        "mode": "AR",
+        "seed": "7",
+        "family": "SIMAR"
+      },
+      "connections": {},
+      "x": 286,
+      "y": 16
+    },
+    {
+      "id": "s2",
+      "type": "tool",
+      "tool": "pednet-mode",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "ped"
+        }
+      },
+      "x": 556,
+      "y": 16
+    },
+    {
+      "id": "s3",
+      "type": "tool",
+      "tool": "pednet-rank",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "ped"
+        },
+        "variants": {
+          "step": "s1",
+          "output": "genotypes"
+        }
+      },
+      "x": 556,
+      "y": 127
+    },
+    {
+      "id": "s4",
+      "type": "tool",
+      "tool": "ped2studio",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "ped"
+        }
+      },
+      "x": 556,
+      "y": 284
+    }
+  ],
+  "created": "2026-10-20T12:00:00.000Z",
+  "updated": "2026-10-20T12:00:00.000Z"
+}

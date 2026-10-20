@@ -1,4 +1,4 @@
-<!-- id: h-troubleshoot | title: When something goes wrong | group: Reference | summary: The common problems, and what to do | keys: troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug -->
+<!-- id: h-troubleshoot | title: When something goes wrong | group: Reference | summary: The common problems, and what to do | keys: troubleshoot problem error fails wrong help python start slow older file refused left out condition term ols not answering duplicate ids empty studio storage full private window two tabs report bug workflow step failed stopped -->
 <h1><!--ICON:warning-->When something goes wrong</h1>
 <p class="lede">These are the common problems, and what to do about each one.</p>
 
@@ -44,6 +44,12 @@
 
   <dt>Simulate a family takes a long time, or says that none of 1,000 families had enough affected</dt>
   <dd>A rare recessive condition seldom turns up twice in a family, so PedGen may have to make many families to find one with as many affected people as you asked for. Let cousins marry (1 is whenever they can), give more generations or children, or ask for fewer affected people.</dd>
+
+  <dt>A workflow can't run, or one of its steps failed</dt>
+  <dd>If the workflow can't run, its Run page lists why, such as an input that isn't connected. Open it in the editor, where <b>Checks</b> lists the same things and takes you to each step. If a step failed, open <i>What went wrong</i> under it. It shows the tool's own error, the one you'd see if you ran the tool yourself, and the steps that read its files didn't run. Put right the step's settings in the editor, or choose another input file, and run it again (<a href="#h-workflows">Workflows</a>).</dd>
+
+  <dt>A workflow's run says <i>stopped</i></dt>
+  <dd>A workflow runs in this page, so closing or reloading the page stops it, and the steps that hadn't run are marked <i>stopped</i>. The files of the steps that had finished are in the run's folder. Run the workflow again.</dd>
 
   <dt>hponorm or mondonorm stops straight away in the terminal</dt>
   <dd>They ask you questions as they go, and this terminal can't pass your answers to them. Give them the answers in a file, or use Fill in missing terms or Match conditions to terms instead (<a href="#h-terminal">The Terminal</a>).</dd>

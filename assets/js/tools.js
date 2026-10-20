@@ -160,6 +160,15 @@
       ],
       argv: (v) => ['studio2ga4gh', v.input, '-d', v.outdir, '-o', v.prefix, ...optArgs(v.terms, '-t', v.terms), ...optArgs(v.ids !== 'numbers', '--ids', v.ids), ...optArgs(v.family && v.family !== 'FAM', '--family-id', v.family), ...optArgs(v.only, '--only', v.only)],
       outputs: (v) => [v.only !== 'family' && joinPath(v.outdir, v.prefix + '_ga4gh-pedigree.json'), v.only !== 'pedigree' && joinPath(v.outdir, v.prefix + '_phenopackets-family.json')].filter(Boolean),
+      // (in a workflow: what it reads and writes; the folder and the start of the names are chosen for the run)
+      wf: {
+        auto: ['prefix'],
+        // (a drawing of several families gives each its own files, PREFIX_1_…, PREFIX_2_…: found by their endings)
+        outputs: (v) => [
+          v.only !== 'family' && { name: 'pedigree', label: 'GA4GH Pedigree', kinds: ['pedigree'], find: /_ga4gh-pedigree\.json$/i, guess: [joinPath(v.outdir, v.prefix + '_ga4gh-pedigree.json')] },
+          v.only !== 'pedigree' && { name: 'family', label: 'Phenopackets Family', kinds: ['family'], find: /_phenopackets-family\.json$/i, guess: [joinPath(v.outdir, v.prefix + '_phenopackets-family.json')] }
+        ]
+      },
       python: (v) =>
         [
           'import json',
@@ -191,6 +200,7 @@
       ],
       argv: (v) => ['ga4gh2studio', v.input, '-o', v.out],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'drawing', label: 'drawing', kinds: ['studio'], path: v.out }] },
       python: (v) => ['from ga4gh2studio import convert_file', '', `result = convert_file(${pyq(v.input)}, None, ${pyq(v.out)})`, 'print(result.summary)', 'for note in result.warnings:', '    print("note:", note)'].join('\n'),
       next: (res, v) => [['pedigree', 'Open the drawing in Studio', () => MG.app.studioOpen(v.out, { tidy: v.tidy })]]
     },
@@ -210,6 +220,8 @@
         { key: 'ids', type: 'select', label: 'People are named by', def: 'numbers', options: [['numbers', 'pedigree numbers, such as II-3'], ['drawing', 'the labels in the drawing (these may be names)'], ['studio', 'Pedigree Studio’s own ids'], ['text', 'the text under the symbols, as version 0.1 did (often names)']] }
       ],
       argv: (v) => ['studio2ped', v.input, '-d', v.outdir, '-o', v.prefix, ...optArgs(v.ids && v.ids !== 'numbers', '--ids', v.ids)],
+      // (a PED file, or an MPED file if the drawing shows several conditions or carriers: one for each family in it)
+      wf: { auto: ['prefix'], outputs: (v) => [{ name: 'ped', label: 'PED or MPED file', kinds: ['ped', 'mped'], find: /\.m?ped$/i, guess: [joinPath(v.outdir, v.prefix + '.ped'), joinPath(v.outdir, v.prefix + '.mped')] }] },
       python: (v) => ['from studio2ped import convert_file', '', `result = convert_file(${pyq(v.input)}, output_prefix=${pyq(v.prefix)}, output_dir=${pyq(v.outdir)}${v.ids && v.ids !== 'numbers' ? `, ids=${pyq(v.ids)}` : ''})`, 'print(result.summary)', 'for path, _ in result.files:', '    print("wrote", path)', 'for note in result.notes:', '    print("note:", note)'].join('\n'),
       after: async (res, v, out) => {
         // the PED files it wrote, checked with mpedtools
@@ -241,6 +253,7 @@
       ],
       argv: (v) => ['ped2studio', v.input, v.out, ...optArgs(v.colour && v.colour.toLowerCase() !== '#1a2332', '--colour', v.colour), ...optArgs(v.shading, '--shading'), ...optArgs(v.shading && v.pattern !== 'stripes', '--pattern', v.pattern), ...optArgs(v.fill !== 'full', '--fill', v.fill)],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'drawing', label: 'drawing', kinds: ['studio'], path: v.out }] },
       python: (v) =>
         ['from ped2studio import convert_file', '', `session = convert_file(${pyq(v.input)}, ${pyq(v.out)},`, `                       affected_color=${pyq(v.colour || '#1a2332')}, use_shading=${v.shading ? 'True' : 'False'},`, `                       shading_pattern=${pyq(v.pattern || 'stripes')}, fill_type=${pyq(v.fill || 'full')})`, 'print(len(session["persons"]), "people")'].join('\n'),
       next: (res, v) => [['pedigree', 'Open the drawing in Studio', () => MG.app.studioOpen(v.out, { tidy: v.tidy })]]
@@ -262,6 +275,7 @@
       ],
       argv: (v) => ['phenotk', 'convert', v.input, '--to', v.to, '-o', v.out, ...optArgs(v.to === 'family' && v.proband, '--proband', v.proband)],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: v.to === 'pedigree' ? 'GA4GH Pedigree' : 'Phenopackets Family', kinds: [v.to === 'pedigree' ? 'pedigree' : 'family'], path: v.out }] },
       python: (v) =>
         ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import to_kind', '', `doc = ptk.read(${pyq(v.input)})`, `new, notes = to_kind(doc, ${pyq(v.to)}${v.to === 'family' && v.proband ? `, proband_id=${pyq(v.proband)}` : ''})`, `ptk.write(new, ${pyq(v.out)})`, 'for note in notes:', '    print("note:", note)'].join('\n')
     },
@@ -281,6 +295,7 @@
       ],
       argv: (v) => ['phenotk', 'convert', v.input, '--to', v.fmt, '-o', v.out],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: { ped: 'PED file', tsv: 'table (TSV)', yaml: 'YAML', jsonl: 'JSON Lines' }[v.fmt] || 'file', kinds: [v.fmt === 'ped' ? 'ped' : v.fmt], path: v.out }] },
       python: (v) => {
         const head = ['import phenopacket_toolkit as ptk', '', `doc = ptk.read(${pyq(v.input)})`];
         if (v.fmt === 'yaml') return head.concat([`ptk.write(doc, ${pyq(v.out)}, fmt="yaml")`]).join('\n');
@@ -312,6 +327,13 @@
       outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json'), v.studio && joinPath(v.outdir, v.family + '.studio.json')].filter(Boolean),
       // (what it prints is the PED file's table, which is better kept whole than wrapped)
       stdoutIsResult: true,
+      wf: {
+        outputs: (v) => [
+          { name: 'ped', label: 'PED file', kinds: ['ped'], path: joinPath(v.outdir, v.family + '.ped') },
+          v.studio && { name: 'drawing', label: 'drawing', kinds: ['studio'], path: joinPath(v.outdir, v.family + '.studio.json') },
+          v.ga4gh && { name: 'pedigree', label: 'GA4GH Pedigree', kinds: ['pedigree'], path: joinPath(v.outdir, v.family + '_ga4gh-pedigree.json') }
+        ]
+      },
       python: (v) => {
         const dir = pyq(expand(v.outdir).replace(/\/+$/, ''));
         return [
@@ -372,6 +394,8 @@
       ],
       argv: (v) => ['phenotk', 'normalise', v.input, '-o', v.out, '--log', v.out.replace(/\.json$/, '') + '.log.json', ...optArgs(v.mapping, '--mapping', v.mapping), ...(v.lookup === 'no' ? ['--no-online'] : ['--backend', v.lookup, '--threshold', String(v.threshold)]), ...optArgs(v.lookup === 'local' && v.hpo, '--hpo-file', v.hpo), ...optArgs(v.lookup === 'local' && v.mondo, '--mondo-file', v.mondo)],
       outputs: (v) => [v.out, v.out.replace(/\.json$/, '') + '.log.json'],
+      // (the same kind of file as it read)
+      wf: { outputs: (v) => [{ name: 'out', label: 'with its terms', from: 'input', path: v.out }] },
       python: (v) =>
         [
           'import json',
@@ -401,6 +425,7 @@
       fields: [{ key: 'input', type: 'file', label: 'The file', kinds: GA4GH }],
       argv: (v) => ['pedigree-ga4gh', 'validate', v.input],
       call: { fn: 'pedwb.gui.validate', args: (v) => ({ path: v.input }) },
+      wf: { outputs: () => [], summary: (res) => res.result && (res.result.valid ? `Valid: a correct ${res.result.name}.` : `Not valid: ${res.result.errors} error${res.result.errors === 1 ? '' : 's'}.`) },
       python: (v) => ['import pedigree_ga4gh as pg', '', `doc = pg.load(${pyq(v.input)})`, 'findings = pg.validate(doc)', 'print(pg.render_findings(findings))', 'print("valid" if pg.is_valid(findings) else "not valid")'].join('\n'),
       render: (r, v, out) => renderFindings(r.result, v, out)
     },
@@ -419,6 +444,7 @@
       ],
       argv: (v) => ['pedigree-ga4gh', 'upgrade', v.input, '-o', v.out],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: 'upgraded file', from: 'input', map: { json: ['pedigree', 'family', 'cohort', 'phenopacket'] }, path: v.out }] },
       python: (v) => ['import pedigree_ga4gh as pg', '', `doc = pg.load(${pyq(v.input)})`, 'new, changes, todo = pg.upgrade(doc)', `pg.dump(new, ${pyq(v.out)})`, 'for c in changes:', '    print("changed:", c)', 'for t in todo:', '    print("to do:", t)'].join('\n'),
       next: (res, v) => [['badgeCheck', 'Check the upgraded file', () => MG.app.useTool('validate', { input: v.out })]]
     },
@@ -435,6 +461,7 @@
         { key: 'what', type: 'select', label: 'Show', def: 'view', options: [['view', 'a table of the people and their terms'], ['stats', 'counts: people, terms, relationships']] }
       ],
       argv: (v) => ['phenotk', v.what, v.input],
+      wf: { outputs: () => [] },
       python: (v) => (v.what === 'stats' ? ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import stats, render_stats', '', `doc = ptk.read(${pyq(v.input)})`, 'print(render_stats(stats(doc)))'] : ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import render', '', `doc = ptk.read(${pyq(v.input)})`, 'print(render(doc))']).join('\n'),
       stdoutIsResult: true
     },
@@ -452,6 +479,7 @@
         { key: 'strict', type: 'check', label: 'Count differences of order and of provenance too', def: false }
       ],
       argv: (v) => ['phenotk', 'diff', v.input, v.input2, ...optArgs(v.strict, '--strict')],
+      wf: { outputs: () => [] },
       python: (v) => ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import diff, render_diff', '', `a = ptk.read(${pyq(v.input)})`, `b = ptk.read(${pyq(v.input2)})`, `print(render_diff(diff(a, b${v.strict ? ', ignore=[]' : ''})))`].join('\n'),
       stdoutIsResult: true,
       okCodes: [0, 1]
@@ -480,6 +508,7 @@
       ],
       argv: (v) => ['phenotk', 'deidentify', v.input, '-o', v.out, ...(v.remap === 'keep' ? ['--keep-ids'] : optArgs(v.remap !== 'seq', '--remap-ids', v.remap)), ...optArgs(v.remap === 'hash' && v.salt, '--salt', v.salt), ...optArgs(v.keepDob, '--keep-dob'), ...optArgs(v.binAge, '--bin-age', v.binAge), ...optArgs(v.keepNames, '--keep-names'), ...optArgs(v.dropProv, '--drop-provenance'), ...optArgs(v.remap !== 'keep' && v.keyfile, '--keyfile', v.keyfile)],
       outputs: (v) => [v.out, v.remap !== 'keep' && v.keyfile].filter(Boolean),
+      wf: { outputs: (v) => [{ name: 'out', label: 'de-identified', from: 'input', path: v.out }, v.remap !== 'keep' && v.keyfile && { name: 'key', label: 'key (old id → new)', kinds: ['json'], path: v.keyfile }] },
       python: (v) =>
         [
           'import json',
@@ -524,6 +553,7 @@
         return ['phenotk', 'filter', v.input, '-o', v.out, ...terms.flatMap((t) => ['--term', t]), ...optArgs(v.who === 'proband', '--proband-only'), ...optArgs(v.who === 'affected', '--affected'), ...optArgs(v.sex, '--sex', v.sex), ...optArgs(idFile(v), '--id-list', idFile(v)), ...optArgs(v.observed === 'observed', '--observed'), ...optArgs(v.observed === 'excluded', '--excluded'), ...optArgs(v.invert, '--invert'), ...optArgs(v.prune, '--prune-pedigree')];
       },
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: 'smaller file', from: 'input', path: v.out }] },
       python: (v) => {
         const terms = (v.terms || '').split(/\s*[\n,]\s*/).filter(Boolean);
         const ids = (v.ids || '').split(/\s*[\n,]\s*/).filter(Boolean);
@@ -551,6 +581,7 @@
         { key: 'outdir', type: 'folder', label: 'Save in the folder', def: (v) => `~/results/${stemOf(v.input)}-people` }
       ],
       argv: (v) => ['phenotk', 'split', v.input, '--out-dir', v.outdir, ...optArgs(v.affected, '--affected-only')],
+      wf: { outputs: (v) => [{ name: 'people', label: 'a Phenopacket for each', kinds: ['phenopacket'], many: true, find: /\.json$/i }] },
       python: (v) =>
         ['import os', 'import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import split', '', `doc = ptk.read(${pyq(v.input)})`, `os.makedirs(${pyq(v.outdir)}, exist_ok=True)`, `for packet in split(doc${v.affected ? ', affected_only=True' : ''}):`, '    sid = packet.proband().subject.id', `    ptk.write(packet, os.path.join(${pyq(v.outdir)}, sid + ".json"))`].join('\n')
     },
@@ -571,6 +602,7 @@
       ],
       argv: (v) => ['phenotk', 'merge', ...v.inputs, '--into', v.into, '--id', v.cid || 'cohort', '-o', v.out],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: v.into === 'family' ? 'Phenopackets Family' : 'Phenopackets Cohort', kinds: [v.into === 'family' ? 'family' : 'cohort'], path: v.out }] },
       python: (v) =>
         ['import phenopacket_toolkit as ptk', 'from phenopacket_toolkit.ops import merge', '', `docs = [ptk.read(p) for p in ${JSON.stringify(v.inputs || [])}]`, 'notes = []', `new = merge(docs, into=${pyq(v.into)}, cohort_id=${pyq(v.cid || 'cohort')}, notes=notes)`, `ptk.write(new, ${pyq(v.out)})`, 'for note in notes:', '    print("note:", note)'].join('\n')
     },
@@ -599,6 +631,7 @@
         return ['phenotk', 'add', v.input, '--target', v.target || 'proband', ...lines(v.phenotypes).flatMap((t) => ['--phenotype', t]), ...optArgs(v.excluded && lines(v.phenotypes).length, '--excluded'), ...lines(v.diseases).flatMap((t) => ['--disease', t]), ...optArgs(v.onset, '--onset', v.onset), ...optArgs(v.vital, '--vital-status', v.vital), '-o', v.out];
       },
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: 'with the findings', from: 'input', path: v.out }] },
       python: (v) => {
         const lines = (s) => (s || '').split('\n').map((x) => x.trim()).filter(Boolean);
         const item = (spec, extra) => {
@@ -634,6 +667,7 @@
         ['mpedtools', 'info', v.input],
         ['mpedtools', 'validate', v.input]
       ],
+      wf: { outputs: () => [] },
       python: (v) => ['import mpedtools', '', `ped = mpedtools.read(${pyq(v.input)})`, 'print(mpedtools.summarise(ped))', 'for issue in mpedtools.validate(ped):', '    print(issue.level, issue.message)'].join('\n'),
       stdoutIsResult: true,
       okCodes: [0, 1]
@@ -653,6 +687,12 @@
         { key: 'prefix', type: 'text', label: 'Start of the file names', def: (v) => stemOf(v.input) }
       ],
       argv: (v) => (v.which ? ['mpedtools', 'extract', v.input, v.which, '-o', joinPath(v.outdir, `${v.prefix}_${v.which}.ped`)] : ['mpedtools', 'extract-all', v.input, '-d', v.outdir, '-p', v.prefix]),
+      // (every condition: a folder of PED files, one for each)
+      wf: {
+        auto: ['prefix'],
+        subdir: (v) => (v.which ? '' : v.prefix + '-conditions'),
+        outputs: (v) => [v.which ? { name: 'ped', label: 'PED file', kinds: ['ped'], path: joinPath(v.outdir, `${v.prefix}_${v.which}.ped`) } : { name: 'peds', label: 'a PED file for each', kinds: ['ped'], many: true, find: /\.ped$/i }]
+      },
       python: (v) =>
         v.which
           ? ['import mpedtools', '', `ped = mpedtools.read(${pyq(v.input)})`, `one = mpedtools.extract_phenotype(ped, ${pyq(v.which)})`, `mpedtools.write(one, ${pyq(joinPath(v.outdir, `${v.prefix}_${v.which}.ped`))}, force_format="ped")`].join('\n')
@@ -673,6 +713,7 @@
       ],
       argv: (v) => ['mpedtools', 'merge', ...v.inputs, '-o', v.out, ...((v.names || '').trim() ? ['-n', ...v.names.trim().split(/[\s,]+/)] : [])],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: 'MPED file', kinds: ['mped'], path: v.out }] },
       python: (v) => ['import mpedtools', '', `peds = [mpedtools.read(p) for p in ${JSON.stringify(v.inputs || [])}]`, `merged = mpedtools.merge(peds${(v.names || '').trim() ? `, ${JSON.stringify(v.names.trim().split(/[\s,]+/))}` : ''})`, `mpedtools.write(merged, ${pyq(v.out)}, force_format="mped")`].join('\n')
     },
     {
@@ -689,6 +730,7 @@
         { key: 'prefix', type: 'text', label: 'Start of the file names', def: (v) => stemOf(v.input) }
       ],
       argv: (v) => ['mpedtools', 'split', v.input, '-d', v.outdir, '-p', v.prefix],
+      wf: { auto: ['prefix'], subdir: (v) => v.prefix + '-families', outputs: () => [{ name: 'files', label: 'a file for each family', kinds: ['ped', 'mped'], many: true, find: /\.m?ped$/i }] },
       python: (v) => ['import mpedtools', '', `ped = mpedtools.read(${pyq(v.input)})`, 'for fam in mpedtools.split_families(ped):', `    path = f"${expand(v.outdir).replace(/\/+$/, '')}/${v.prefix}_{fam.families[0]}" + (".mped" if ped.is_mped else ".ped")`, '    mpedtools.write(fam, path)', '    print("wrote", path)'].join('\n')
     },
     {
@@ -714,6 +756,7 @@
             ? ['mpedtools', 'remove-phenotype', v.input, v.column, '-o', v.out]
             : ['mpedtools', 'convert', v.input, '-o', v.out, '-f', v.action === 'to-ped' ? 'ped' : 'mped', ...optArgs(v.column, '--phenotype', v.column)],
       outputs: (v) => [v.out],
+      wf: { outputs: (v) => [{ name: 'out', label: v.action === 'to-ped' ? 'PED file' : 'MPED file', kinds: [v.action === 'to-ped' ? 'ped' : 'mped'], path: v.out }] },
       python: (v) => {
         const head = ['import mpedtools', '', `ped = mpedtools.read(${pyq(v.input)})`];
         if (v.action === 'add') return head.concat([`new = mpedtools.add_phenotype(ped, ${pyq(v.column)}, ${Number(v.value) || 0})`, `mpedtools.write(new, ${pyq(v.out)})`]).join('\n');
@@ -747,6 +790,7 @@
       argv: (v) => ['pednet', 'graph', v.input, ...ga4ghArgs(v), ...optArgs(v.family, '--family', v.family), ...(v.kinship ? ['--kinship', v.kinout, ...optArgs(v.xlinked, '--x')] : []), ...(v.graphml ? ['--graphml', v.gout, ...optArgs(v.mating, '--mating')] : [])],
       outputs: (v) => [v.kinship && v.kinout, v.graphml && v.gout].filter(Boolean),
       stdoutIsResult: true,
+      wf: { outputs: (v) => [v.kinship && { name: 'kinship', label: 'kinship table', kinds: ['tsv'], path: v.kinout }, v.graphml && { name: 'graph', label: 'graph (GraphML)', kinds: ['graphml'], path: v.gout }] },
       python: (v) =>
         [
           ...(v.kinship ? ['import csv'] : []),
@@ -816,6 +860,7 @@
         return ['pednet', 'mode', v.input, ...ga4ghArgs(v), ...optArgs(!lik, '--method', v.method), ...optArgs(v.family, '--family', v.family), ...optArgs(lik && v.together, '--together'), ...optArgs(lik && v.proband, '--proband', v.proband), ...optArgs(lik && penList(v.penetrance) !== PENETRANCE, '--penetrance', penList(v.penetrance)), ...optArgs(lik && Number(v.phenocopy) !== 0.001, '--phenocopy', num(v.phenocopy)), ...optArgs(v.method !== 'metrics' && Number(v.threshold) !== 0.8, '--threshold', num(v.threshold))];
       },
       stdoutIsResult: true,
+      wf: { outputs: () => [] },
       python: (v) => {
         const lik = v.method === 'likelihood';
         const pen = (v.penetrance || PENETRANCE).split(/[\s,]+/).filter(Boolean).map(num).join(', ');
@@ -855,6 +900,7 @@
       },
       outputs: (v) => [v.out].filter(Boolean),
       stdoutIsResult: true,
+      wf: { outputs: (v) => [v.out && { name: 'scores', label: 'every variant’s scores', kinds: ['tsv'], path: v.out }] },
       python: (v) => {
         const vcf = MG.app.pedKind(v.variants || '') === 'vcf';
         const modes = v.modes !== ALL_MODES ? `modes=${JSON.stringify(v.modes.split(','))}` : '';
@@ -938,6 +984,13 @@
         ...(conditionOf(v) ? ['--condition', ...conditionOf(v)] : [])
       ],
       outputs: (v) => [joinPath(v.outdir, v.family + '.ped'), v.genotypes && joinPath(v.outdir, v.family + '-genotypes.tsv'), v.ga4gh && joinPath(v.outdir, v.family + '_ga4gh-pedigree.json')].filter(Boolean),
+      wf: {
+        outputs: (v) => [
+          { name: 'ped', label: 'PED file', kinds: ['ped'], path: joinPath(v.outdir, v.family + '.ped') },
+          v.genotypes && { name: 'genotypes', label: 'genotypes', kinds: ['variants'], path: joinPath(v.outdir, v.family + '-genotypes.tsv') },
+          v.ga4gh && { name: 'pedigree', label: 'GA4GH Pedigree', kinds: ['pedigree'], path: joinPath(v.outdir, v.family + '_ga4gh-pedigree.json') }
+        ]
+      },
       python: (v) =>
         [
           `from PedGen import pedigree_generator, gen_PED_export${v.genotypes ? ', gen_genotype_export' : ''}${v.ga4gh ? ', gen_GA4GH_export' : ''}`,
@@ -1031,7 +1084,10 @@
       this.pill.addEventListener('click', () => this._pyMenu());
       this.navBtn = h('button.tbtn.tl-navbtn', { type: 'button', html: icon('list') + '<span>All tools</span>', 'aria-expanded': 'false' });
       this.navBtn.addEventListener('click', () => this._toggleNav());
-      const head = h('div.tl-head', this.navBtn, h('span.tl-crumb'), h('span.grow'), this.pill);
+      // (workflows: tools chained together, run in one go – workflows.js)
+      this.wfBtn = h('button.tbtn.tl-wfbtn', { type: 'button', title: 'Chain tools together into a workflow, and run it in one go', html: icon('workflow') + '<span>Workflows</span>' });
+      this.wfBtn.addEventListener('click', () => this.go({ page: 'workflows' }));
+      const head = h('div.tl-head', this.navBtn, this.wfBtn, h('span.tl-crumb'), h('span.grow'), this.pill);
       this.crumb = head.querySelector('.tl-crumb');
       this.root.append(h('div.tl-wrap', head, h('div.tl-body', this.nav, this.main)));
       for (const [g, label, ic] of GROUPS) {
@@ -1039,7 +1095,9 @@
         if (g === 'start') {
           const b = h('button.tl-item', { type: 'button', dataset: { page: 'start' } }, h('span', 'The map, and where to begin'));
           b.addEventListener('click', () => this.go({ page: 'start' }));
-          sec.appendChild(b);
+          const wb = h('button.tl-item', { type: 'button', dataset: { page: 'workflows' } }, h('span', 'Workflows'), h('small', 'tools chained together'));
+          wb.addEventListener('click', () => this.go({ page: 'workflows' }));
+          sec.append(b, wb);
         }
         for (const t of TOOLS.filter((x) => x.group === g)) {
           const b = h('button.tl-item', { type: 'button', dataset: { tool: t.id } }, h('span', t.title), h('small', t.pkg));
@@ -1056,18 +1114,29 @@
     }
     shown() {
       this._refreshPickers();
+      // (the workflow editor's wires are drawn where its boxes are now)
+      if (this.wf && this.where && this.where.page === 'workflows') this.wf.shown();
     }
     _mark(sel) {
       this.nav.querySelectorAll('.tl-item').forEach((b) => b.classList.toggle('on', b.matches(sel)));
     }
-    /** show a page: {page: 'start'} | {page: 'tool', id, values} | {page: 'file', path} */
+    /** show a page: {page: 'start'} | {page: 'tool', id, values} | {page: 'file', path} |
+        {page: 'workflows', view: 'list' | 'edit' | 'run' | 'record' | 'extract', path} (workflows.js) */
     go(where) {
       this._toggleNav(false);
       this.where = where;
-      store.set('toolsPage', where.page === 'tool' ? { page: 'tool', id: where.id } : where.page === 'file' ? where : { page: 'start' });
+      store.set('toolsPage', where.page === 'tool' ? { page: 'tool', id: where.id } : where.page === 'file' ? where : where.page === 'workflows' ? { page: 'workflows', view: where.view || 'list', path: where.path || null } : { page: 'start' });
+      if (this.wf) this.wf.leave();
+      this.root.classList.remove('wf-wide');
+      this.wfBtn.classList.toggle('on', where.page === 'workflows');
       this.main.innerHTML = '';
       this.main.scrollTop = 0;
       this.pickers = [];
+      if (where.page === 'workflows' && MG.WorkflowsUI) {
+        this._mark('[data-page="workflows"]');
+        this.wf = this.wf || new MG.WorkflowsUI(this);
+        return this.wf.show(where);
+      }
       if (where.page === 'tool' && TOOL[where.id]) return this._toolPage(TOOL[where.id], where.values || {});
       if (where.page === 'file' && where.path && this.fs.exists(where.path)) return this._filePage(where.path);
       return this._startPage(where.kind);
@@ -1164,6 +1233,13 @@
         grid.appendChild(card);
       }
       M.appendChild(grid);
+      // (the same steps in one go: workflows.js)
+      const wfOpen = h('button.btn', { type: 'button', html: icon('workflow') + '<span>Workflows</span>' });
+      wfOpen.addEventListener('click', () => this.go({ page: 'workflows' }));
+      M.appendChild(h('div.tl-wfnote',
+        h('div.tl-task-h', { html: icon('workflow') + '<b>Doing the same steps again and again?</b>' }),
+        h('p', 'Chain the tools together into a workflow, so that the files one tool writes go straight into the next. You choose the files once and press Run, and every step runs in turn, with its results in a folder of their own. Start from one of the examples, or make one from the tools you’ve just run.'),
+        wfOpen));
       M.appendChild(h('p.tl-foot.muted', 'Python starts in your browser the first time you run a tool on each visit. The very first time, it downloads about 10 MB, which your browser then keeps. The tools for analysing and simulating, and Picture → PED file and drawing, need more, which Python downloads the first time one of them runs: about 4 MB for PedNet’s tools, and about 21 MB in all. Your files never leave this computer.'));
     }
     /** under the map: what can be done with a kind of file */
@@ -1384,27 +1460,10 @@
       const onStatus = (text) => (status.lastChild.textContent = text || 'Running…');
       const t0 = performance.now();
       try {
-        let res;
-        if (tool.call) {
-          const r = await pyCall(tool.call.fn, tool.call.args(x), onStatus);
-          if (!r.ok && r.kind === 'LoadError') throw new Error(r.error);
-          res = { ok: r.ok, code: r.ok ? 0 : 1, stdout: r.stdout || '', stderr: r.stderr || '', files: r.files, result: r.result, error: r.error, traceback: r.traceback };
-        } else {
-          const list = Array.isArray(tool.argv(x)[0]) ? tool.argv(x) : [tool.argv(x)];
-          res = { ok: true, code: 0, stdout: '', stderr: '', files: [] };
-          for (const argv of list) {
-            const r = await runArgv(argv, onStatus);
-            res.stdout += r.stdout;
-            res.stderr += r.stderr;
-            res.files = res.files.concat(r.files || []);
-            res.code = Math.max(res.code, r.code);
-            if (r.error) res.error = r.error;
-            if (r.traceback) res.traceback = r.traceback;
-          }
-          res.ok = (tool.okCodes || [0]).includes(res.code) && !res.error;
-        }
+        const res = await runTool(tool, x, onStatus);
         const secs = (performance.now() - t0) / 1000;
         status.remove();
+        logRun(tool, x, res);
         await this._result(tool, x, res, result, secs);
       } catch (e) {
         status.remove();
@@ -1453,6 +1512,37 @@
     _refreshPickers() {
       (this.pickers || []).forEach((p) => p.refresh && p.refresh());
     }
+  }
+
+  /** run a tool with its values (as a form gives them, paths in full) → {ok, code, stdout, stderr, files, result, error,
+      traceback}, as the Tools tab and a workflow run it. onStatus(text): what Python is loading for it, if anything */
+  async function runTool(tool, x, onStatus) {
+    if (tool.call) {
+      const r = await pyCall(tool.call.fn, tool.call.args(x), onStatus);
+      if (!r.ok && r.kind === 'LoadError') throw new Error(r.error);
+      return { ok: r.ok, code: r.ok ? 0 : 1, stdout: r.stdout || '', stderr: r.stderr || '', files: r.files, result: r.result, error: r.error, traceback: r.traceback };
+    }
+    const list = Array.isArray(tool.argv(x)[0]) ? tool.argv(x) : [tool.argv(x)];
+    const res = { ok: true, code: 0, stdout: '', stderr: '', files: [] };
+    for (const argv of list) {
+      const r = await runArgv(argv, onStatus);
+      res.stdout += r.stdout;
+      res.stderr += r.stderr;
+      res.files = res.files.concat(r.files || []);
+      res.code = Math.max(res.code, r.code);
+      if (r.error) res.error = r.error;
+      if (r.traceback) res.traceback = r.traceback;
+    }
+    res.ok = (tool.okCodes || [0]).includes(res.code) && !res.error;
+    return res;
+  }
+  /** the tools run here, newest last, for a workflow made from them (Workflows → Make one from the tools you've run) */
+  const LOG_KEY = 'toolsLog';
+  function logRun(tool, x, res) {
+    if (!tool.wf) return;
+    const log = store.get(LOG_KEY, []);
+    log.push({ tool: tool.id, values: x, files: Array.from(new Set(res.files || [])), ok: !!res.ok, time: Date.now() });
+    store.set(LOG_KEY, log.slice(-40));
   }
 
   /* ------------------------------------------------------------------ a field of a form */
@@ -1650,7 +1740,7 @@
   /** a file the tool wrote: its name, and buttons to open it where it belongs */
   function fileChip(p) {
     const kind = MG.app.pedKind(p);
-    const chip = h('div.tl-filechip', h('span.tl-fname', { html: icon(kind === 'studio' ? 'pedigree' : kind === 'ped' || kind === 'mped' ? 'table' : kind === 'image' ? 'image' : kind === 'vcf' || kind === 'variants' ? 'dna' : 'file') + `<code>${esc(tilde(p))}</code>` }), h('span.tl-fkind', KIND()[kind] || ''));
+    const chip = h('div.tl-filechip', h('span.tl-fname', { html: icon(kind === 'studio' ? 'pedigree' : kind === 'ped' || kind === 'mped' ? 'table' : kind === 'image' ? 'image' : kind === 'vcf' || kind === 'variants' ? 'dna' : kind === 'workflow' || kind === 'workflowrun' ? 'workflow' : 'file') + `<code>${esc(tilde(p))}</code>` }), h('span.tl-fkind', KIND()[kind] || ''));
     const acts = h('span.tl-facts');
     const add = (ic, label, fn) => {
       const b = h('button.linkbtn', { type: 'button', html: icon(ic) + `<span>${esc(label)}</span>` });
@@ -1772,8 +1862,10 @@
     const t = h('table.tl-findings', h('tr', h('th', ''), h('th', 'What'), h('th', 'Where'), h('th', 'How to fix it')));
     const SEV = { error: ['warning', 'Error'], warning: ['info', 'Warning'], info: ['info', 'Note'] };
     res.findings.forEach((f) => {
-      const [ic, word] = SEV[f.severity] || ['info', f.severity];
-      t.appendChild(h('tr.' + f.severity, h('td', { html: icon(ic) + `<span class="sr-only">${word}</span>`, title: word }), h('td', f.message, h('small.muted', ' ' + f.code)), h('td', h('code', f.path || '')), h('td', f.fix || '')));
+      // (a check's findings can come from a file – a workflow's record of a run – so its words are text, not HTML)
+      const known = Object.prototype.hasOwnProperty.call(SEV, f.severity);
+      const [ic, word] = known ? SEV[f.severity] : ['info', String(f.severity || '')];
+      t.appendChild(h('tr.' + (known ? f.severity : 'info'), h('td', { html: icon(ic) + `<span class="sr-only">${esc(word)}</span>`, title: word }), h('td', String(f.message || ''), h('small.muted', ' ' + String(f.code || ''))), h('td', h('code', String(f.path || ''))), h('td', String(f.fix || ''))));
     });
     out.appendChild(h('div.table-scroll', t));
   }
@@ -2158,4 +2250,10 @@
   }
 
   MG.ToolsTab = ToolsTab;
+  /* what workflows.js shares with the Tools tab: the tools, their forms, and running them */
+  MG.toolsKit = {
+    TOOLS, TOOL, GROUPS, GA4GH, LOG_KEY, KIND, HOME,
+    fieldRow, filePicker, missing, fileChip, runTool, filesOfKinds, uploadDir, downloadFile,
+    expand, tilde, joinPath, stemOf, base, dirOf, shArg, pyq, icon, kernel
+  };
 })();

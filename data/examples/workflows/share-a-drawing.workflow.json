@@ -1,0 +1,106 @@
+{
+  "pedigree_workbench_workflow": 1,
+  "name": "Share a drawing in the GA4GH standard",
+  "annotation": "A drawing and the terms of its conditions become a GA4GH Pedigree and a Phenopackets Family, each checked against the standard, and a de-identified copy of the Family to share, checked too.",
+  "steps": [
+    {
+      "id": "s1",
+      "type": "input",
+      "label": "The drawing",
+      "kinds": [
+        "studio"
+      ],
+      "x": 16,
+      "y": 16,
+      "default": "/data/examples/okafor.studio.json"
+    },
+    {
+      "id": "s2",
+      "type": "input",
+      "label": "Terms for its conditions",
+      "kinds": [
+        "terms"
+      ],
+      "x": 16,
+      "y": 127,
+      "default": "/data/examples/example-terms.json",
+      "optional": true
+    },
+    {
+      "id": "s3",
+      "type": "tool",
+      "tool": "studio2ga4gh",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "file"
+        },
+        "terms": {
+          "step": "s2",
+          "output": "file"
+        }
+      },
+      "x": 286,
+      "y": 16
+    },
+    {
+      "id": "s4",
+      "type": "tool",
+      "tool": "validate",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s3",
+          "output": "pedigree"
+        }
+      },
+      "x": 556,
+      "y": 16
+    },
+    {
+      "id": "s5",
+      "type": "tool",
+      "tool": "validate",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s3",
+          "output": "family"
+        }
+      },
+      "x": 556,
+      "y": 145
+    },
+    {
+      "id": "s6",
+      "type": "tool",
+      "tool": "deidentify",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s3",
+          "output": "family"
+        }
+      },
+      "x": 556,
+      "y": 274
+    },
+    {
+      "id": "s7",
+      "type": "tool",
+      "tool": "validate",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s6",
+          "output": "out"
+        }
+      },
+      "x": 826,
+      "y": 16
+    }
+  ],
+  "created": "2026-10-20T12:00:00.000Z",
+  "updated": "2026-10-20T12:00:00.000Z"
+}

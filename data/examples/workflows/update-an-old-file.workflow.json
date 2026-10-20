@@ -1,0 +1,81 @@
+{
+  "pedigree_workbench_workflow": 1,
+  "name": "Bring a file from an older tool up to date",
+  "annotation": "A GA4GH file made by an older version of our tools is upgraded to the standard form, its findings that have a name but no term are given terms from a terms file, and the result is checked against the standard.",
+  "steps": [
+    {
+      "id": "s1",
+      "type": "input",
+      "label": "The file from an older tool",
+      "kinds": [
+        "pedigree",
+        "family",
+        "cohort",
+        "phenopacket",
+        "json"
+      ],
+      "x": 16,
+      "y": 16,
+      "default": "/data/examples/older/studio2ga4gh-0.3_phenopackets-family.json"
+    },
+    {
+      "id": "s2",
+      "type": "input",
+      "label": "Terms file",
+      "kinds": [
+        "terms"
+      ],
+      "x": 16,
+      "y": 145,
+      "default": "/data/examples/example-terms.json"
+    },
+    {
+      "id": "s3",
+      "type": "tool",
+      "tool": "upgrade",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s1",
+          "output": "file"
+        }
+      },
+      "x": 286,
+      "y": 16
+    },
+    {
+      "id": "s4",
+      "type": "tool",
+      "tool": "normalise",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s3",
+          "output": "out"
+        },
+        "mapping": {
+          "step": "s2",
+          "output": "file"
+        }
+      },
+      "x": 556,
+      "y": 16
+    },
+    {
+      "id": "s5",
+      "type": "tool",
+      "tool": "validate",
+      "params": {},
+      "connections": {
+        "input": {
+          "step": "s4",
+          "output": "out"
+        }
+      },
+      "x": 826,
+      "y": 16
+    }
+  ],
+  "created": "2026-10-20T12:00:00.000Z",
+  "updated": "2026-10-20T12:00:00.000Z"
+}
