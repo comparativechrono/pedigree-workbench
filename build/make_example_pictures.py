@@ -5,12 +5,13 @@
                         parents who are cousins
     okafor-sketch.png   the same family sketched roughly with the Studio's Draw tool, as it might be in a clinic:
                         symbols of unequal sizes, drawn in one stroke or two that don't quite close or run on past
-                        where they began, filled ones scribbled in, slashes for those who have died, and wobbly lines
-                        that stop short of what they join or run a little past it
+                        where they began, filled ones scribbled in, slashes for those who have died, an arrow at the
+                        proband, and wobbly lines that stop short of what they join or run a little past it
 
 The sketch's strokes are made by a program that imitates a hand, from the people's places in okafor.studio.json, with
-a fixed seed, so that making them again gives the same picture. PedInterp reads both pictures as the Okafor family,
-with its twins: the sketch with --hand-drawn (the tests check it).
+a fixed seed, so that making them again gives the same picture, with the pen the Draw tool starts with: black, 4 pixels
+wide. PedInterp reads both pictures as the Okafor family, with its twins, and with --marks, who has died and the
+proband: the sketch with --hand-drawn (the tests check it).
 
 It needs Playwright and its Chromium (pip install playwright; playwright install chromium), numpy and Pillow, which
 saves the pictures again, compressed as far as PNG goes without changing a pixel. Nothing is fetched from the network:
@@ -30,9 +31,9 @@ ROOT = os.path.dirname(HERE)
 EXAMPLES = os.path.join(ROOT, "data", "examples")
 STUDIO = os.path.join(ROOT, "assets", "studio", "index.html")
 #: the seed of the sketch, one that PedInterp reads right: not every sketch is read right, as the help says
-SEED = 7
-#: the Draw tool's first pen, and a line two pixels wide, as the Studio draws with at first
-PEN, WIDTH = "#c0392b", 2
+SEED = 3
+#: the pen the Draw tool starts with: black, the colour of the Studio's own lines, and 4 pixels wide
+PEN, WIDTH = "#1a2332", 4
 HALF = 26   # half the Studio's symbol, in its canvas pixels
 
 
@@ -119,13 +120,27 @@ def scribble(poly, rng):
     return wobble(densify([(cx + x * c - y * s, cy + x * s + y * c) for x, y in path], rng, (2.0, 5.0)), rng, 0.6)
 
 
+def arrow(cx, cy, size, rng):
+    """a proband's arrow drawn by hand: a line up from below on the left to just off the symbol, and a head of two
+    strokes drawn in one, in to the tip and out again"""
+    angle = math.radians(float(rng.uniform(38, 52)))
+    d = (-math.cos(angle), math.sin(angle))
+    tip_at = size * float(rng.uniform(0.78, 0.88))
+    tip = (cx + d[0] * tip_at, cy + d[1] * tip_at)
+    tail = (tip[0] + d[0] * 0.6 * size, tip[1] + d[1] * 0.6 * size)
+    ends = [(tip[0] + 0.2 * size * math.cos(math.atan2(d[1], d[0]) + turn),
+             tip[1] + 0.2 * size * math.sin(math.atan2(d[1], d[0]) + turn)) for turn in (0.6, -0.6)]
+    return [rough_line(tail, tip, rng), rough_line(ends[0], tip, rng) + rough_line(tip, ends[1], rng)[1:]]
+
+
 def sketch(doc, rng):
     """the strokes of a drawing's family, sketched by hand where its people are"""
     people = {}
     for p in doc["persons"]:
         size = 52 * float(rng.uniform(0.75, 1.25)) * (0.85 if p["shape"] == "miscarriage" else 1.0)
         people[p["id"]] = {"x": p["x"] + HALF, "y": p["y"] + HALF, "size": size, "shape": p["shape"],
-                           "filled": p.get("fillMode") == "solid", "deceased": p.get("deceased")}
+                           "filled": p.get("fillMode") == "solid", "deceased": p.get("deceased"),
+                           "proband": p.get("proband")}
     strokes = []
     for pid, p in people.items():
         outline, poly = rough_symbol(p["x"], p["y"], p["size"], p["shape"], rng)
@@ -135,6 +150,8 @@ def sketch(doc, rng):
         if p["deceased"]:
             r = p["size"] * float(rng.uniform(0.55, 0.7))
             strokes.append(rough_line((p["x"] - r, p["y"] + r), (p["x"] + r, p["y"] - r), rng))
+        if p["proband"]:
+            strokes += arrow(p["x"], p["y"], p["size"], rng)
     gap = lambda: float(rng.uniform(-2, 6))
     twin_of = {}
     for t in doc.get("twinLinks") or []:

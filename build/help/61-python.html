@@ -97,8 +97,12 @@ print(read.head())
 
 sketch = pedigree_processing("OKAFOR", image_path="/data/examples/okafor-sketch.png", ocr=None, hand_drawn=True)
 print(sketch.attrs["twins"])
-print("wrote", Studio_export(sketch, "/home/user/results"))</code></pre>
-<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files. PedInterp lists the twins it finds in <code>attrs["twins"]</code>, as a PED file can't hold them, and <code>Studio_export</code> writes what it read as a Pedigree Studio drawing, laid out as the picture is, twins and all. <code>hand_drawn=True</code> reads a pedigree sketched by hand (<a href="#h-tool-pedinterp">Picture → PED file and drawing</a>).</p>
+print("wrote", Studio_export(sketch, "/home/user/results"))
+
+marked = pedigree_processing("OKAFOR", image_path="/data/examples/okafor-sketch.png", ocr=None, hand_drawn=True,
+                             marks=True)
+print(marked[["IndividualID", "Deceased", "Proband", "Carrier"]].tail(5))</code></pre>
+<p>Both make pandas tables with the PED columns. <code>gen_PED_export</code> and <code>PED_export</code> write them as PED files. PedInterp lists the twins it finds in <code>attrs["twins"]</code>, as a PED file can't hold them, and <code>Studio_export</code> writes what it read as a Pedigree Studio drawing, laid out as the picture is, twins and all. <code>hand_drawn=True</code> reads a pedigree sketched by hand, and <code>marks=True</code> who has died, the proband and carriers, which a PED file can't hold (<a href="#h-tool-pedinterp">Picture → PED file and drawing</a>).</p>
 
 <h2>hponorm, mondonorm: searching the ontologies</h2>
 <pre class="code" data-run="py"><code>from mondonorm.mondo import MondoIndex      # a copy of Mondo among your files (or: from mondonorm.ols import OlsClient)

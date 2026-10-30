@@ -223,6 +223,13 @@ path = Studio_export(sketch, "/home/user/results")
 drawing = json.load(open(path))
 print("wrote", path)
 print(len(drawing["persons"]), "people; the twins are", ", ".join(t["type"] for t in drawing["twinLinks"]))"""),
+    ("md", """With `marks=True`, PedInterp reads the marks on the symbols too: a slash through the symbol of someone who has
+died, an arrow at the proband, and a dot in a carrier's symbol, in the columns `Deceased`, `Proband` and `Carrier`. A
+PED file can't hold them, so `PED_export` refuses such a table, but the drawing and the GA4GH Pedigree hold them."""),
+    ("code", """marked = pedigree_processing("OKAFOR", image_path="/data/examples/okafor-sketch.png", ocr=None, hand_drawn=True,
+                             marks=True)
+print("died:", ", ".join(marked.loc[marked["Deceased"], "IndividualID"]))
+print("proband:", ", ".join(marked.loc[marked["Proband"], "IndividualID"]))"""),
     ("md", """## The commands, from a cell
 
 The same work as commands: a line that starts with `!` runs one, as the terminal would."""),

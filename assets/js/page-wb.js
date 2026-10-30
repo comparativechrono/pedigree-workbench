@@ -234,7 +234,8 @@
       out.push(risk);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'image') {
-      out.push(['table', 'Read it into a PED file and a drawing', 'Read the pedigree in this picture, and write it as a PED file and a Pedigree Studio drawing (PedInterp)', tool('pedinterp')]);
+      // (a PED file, as it says, whatever was ticked last: not with the marks read, as then none is written)
+      out.push(['table', 'Read it into a PED file and a drawing', 'Read the pedigree in this picture, and write it as a PED file and a Pedigree Studio drawing (PedInterp)', () => MG.app.useTool('pedinterp', { input: path, marks: false })]);
     } else if (k === 'workflow') {
       out.push(['play', 'Run', 'Run this workflow (Tools tab)', () => MG.app.workflowOpen(path, 'run')]);
       out.push(['workflow', path.startsWith(HOME + '/') ? 'Edit' : 'Edit a copy', 'Open this workflow in the editor (Tools tab)', () => MG.app.workflowOpen(path, 'edit')]);
@@ -321,7 +322,9 @@
      data-example="okafor.studio.json"   copy an example into ~/examples
      data-studio="/data/examples/x"      open a drawing in Studio
      data-tool="studio2ga4gh"            open a tool (data-input="…" fills in its input; data-hand-drawn="true"
-                                         or "false" ticks Drawn by hand, or not, for Picture → PED file and drawing)
+                                         or "false" ticks Drawn by hand, or not, for Picture → PED file and drawing,
+                                         and data-marks="true" or "false" ticks Read who has died, the proband
+                                         and carriers, or not)
      data-new-nb / data-open-nb          a new notebook / open a notebook
      ------------------------------------------------------------------ */
   MG.actions.example = async (rel) => {
@@ -348,6 +351,11 @@
     if (btn && btn.dataset.variants) values.variants = btn.dataset.variants.replace(/^~(?=\/|$)/, HOME);
     // (a picture drawn by hand, or not, for Picture → PED file and drawing, whatever was ticked last)
     if (btn && btn.dataset.handDrawn != null) values.handDrawn = btn.dataset.handDrawn === 'true';
+    // (and whether to read who has died, the proband and carriers, with the drawing to hold them)
+    if (btn && btn.dataset.marks != null) {
+      values.marks = btn.dataset.marks === 'true';
+      if (values.marks) values.studio = true;
+    }
     return MG.app.useTool(id, values);
   };
   /* data-workflow="~/workflows/x.workflow.json" (data-view="edit" or "run", the default; data-input="…" a file to run
