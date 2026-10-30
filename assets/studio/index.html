@@ -2,6 +2,8 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
+<!-- Everything the Studio needs is in this file, so the browser is told not to let the page load or send anything. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pedigree Studio</title>
 <meta name="description" content="Draw clinical pedigrees with the standard symbols. Pedigree Studio runs in your browser and sends nothing anywhere.">
@@ -1105,6 +1107,96 @@ let drawLineWidth = 4;          // current draw line width
 const DRAW_COLORS = ['#1a2332','#c0392b','#2980b9','#27ae60','#e67e22','#8e44ad','#7f8c8d','#d35400'];
 let drawEraser = false;          // eraser sub-mode within draw tool
 
+// ── What a drawing may contain ──
+// A file opened in the Studio, the drawing it keeps in this browser and each step of Undo all go through
+// restoreSession(), which first passes them through cleanSession(): text stays text, colours must be colours,
+// numbers must be numbers and settings must be ones the Studio knows. Wherever the Studio writes a drawing's
+// values into the page or into an SVG file, it escapes them as well. So a file cannot add to the page, run
+// code or make the browser fetch anything.
+function escapeXML(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+// #rgb to #rrggbbaa, a colour's name, or rgb() and hsl() with numbers: nothing that could point to a file
+const SAFE_COLOR = /^(#[0-9a-f]{3,8}|[a-z]{1,30}|(rgb|hsl)a?\([\d\s.,%/+-]{1,60}\))$/i;
+function safeColor(c, fallback) {
+  return typeof c === 'string' && SAFE_COLOR.test(c.trim()) ? c.trim() : fallback;
+}
+function svgPaint(c) { return escapeXML(safeColor(c, '#ffffff')); }
+function safeNumber(v, fallback, min = -1e7, max = 1e7) {
+  const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+}
+
+function cleanSession(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('it is not a Pedigree Studio drawing');
+  const items = v => Array.isArray(v) ? v.filter(o => o && typeof o === 'object' && !Array.isArray(o)) : [];
+  const text = (v, max) => typeof v === 'string' ? v.slice(0, max) : (typeof v === 'number' && Number.isFinite(v) ? String(v) : '');
+  const id = v => text(v, 200);
+  const name = (v, max) => typeof v === 'string' ? v.slice(0, max) : undefined;  // a setting the Studio only compares
+  const oneOf = (v, allowed, fallback) => allowed.includes(v) ? v : fallback;
+  const colours = (v, n) => Array.from({ length: n }, (_, i) => Array.isArray(v) ? safeColor(v[i], null) : null);
+  const coord = v => safeNumber(v, undefined, -1e6, 1e6);
+  const count = v => Math.floor(safeNumber(v, 0, 0, 1e9));
+
+  const persons = items(data.persons).filter(pd => id(pd.id)).map(pd => ({
+    id: id(pd.id), shape: name(pd.shape, 40), x: coord(pd.x), y: coord(pd.y),
+    text: text(pd.text, 5000), deceased: !!pd.deceased, proband: !!pd.proband, affected: !!pd.affected,
+    fillMode: oneOf(pd.fillMode, ['none', 'solid', 'half', 'quartered', 'shading'], undefined),
+    fillColor: safeColor(pd.fillColor, undefined),
+    quarters: colours(pd.quarters, 4), halves: colours(pd.halves, 2),
+    shadingPattern: oneOf(pd.shadingPattern, ['stripes', 'dots'], 'stripes'),
+    shadingCoverage: oneOf(pd.shadingCoverage, ['full', 'half-left', 'half-right'], 'full'),
+    centerText: text(pd.centerText, 8),
+    miscarriageSex: oneOf(pd.miscarriageSex, ['unknown', 'male', 'female'], 'unknown'),
+    noSnap: !!pd.noSnap, siblingFixed: !!pd.siblingFixed,
+    customLabel: pd.customLabel == null ? undefined : text(pd.customLabel, 200)
+  }));
+  const labels = items(data.labels).filter(ld => id(ld.id)).map(ld => ({
+    id: id(ld.id), x: coord(ld.x), y: coord(ld.y), text: text(ld.text, 5000),
+    size: safeNumber(ld.size, undefined, 4, 200), bordered: !!ld.bordered
+  }));
+  const partnerships = items(data.partnerships).filter(pd => id(pd.id)).map(pd => ({
+    id: id(pd.id), fromId: id(pd.fromId), toId: id(pd.toId), type: name(pd.type, 40)
+  }));
+  const childLinks = items(data.childLinks).filter(cd => id(cd.id)).map(cd => ({
+    id: id(cd.id), partnershipId: id(cd.partnershipId), childId: id(cd.childId),
+    branchYOffset: safeNumber(cd.branchYOffset, 0, -1e4, 1e4), dashed: !!cd.dashed
+  }));
+  const twinLinks = items(data.twinLinks).filter(td => id(td.id)).map(td => ({
+    id: id(td.id), child1Id: id(td.child1Id), child2Id: id(td.child2Id), type: name(td.type, 40),
+    partnershipId: id(td.partnershipId)
+  }));
+  // the key's entries: its colours and shadings, each with the meaning someone typed
+  const legendLabels = {};
+  const ll = data.legendLabels;
+  if (ll && typeof ll === 'object' && !Array.isArray(ll)) {
+    Object.keys(ll).slice(0, 1000).forEach(k => {
+      if (k.length > 200 || k === '__proto__' || k === 'constructor' || k === 'prototype') return;
+      if (typeof ll[k] === 'string' || typeof ll[k] === 'number') legendLabels[k] = text(ll[k], 2000);
+    });
+  }
+  const drawStrokes = items(data.drawStrokes).map(sd => ({
+    points: (Array.isArray(sd.points) ? sd.points.slice(0, 100000) : [])
+      .filter(pt => pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)).map(pt => ({ x: pt.x, y: pt.y })),
+    color: safeColor(sd.color, '#1a2332'), width: safeNumber(sd.width, 4, 0.5, 100)
+  }));
+
+  return {
+    version: safeNumber(data.version, 5),
+    personIdCounter: count(data.personIdCounter), labelIdCounter: count(data.labelIdCounter), lineIdCounter: count(data.lineIdCounter),
+    persons, labels, partnerships, childLinks, twinLinks, legendLabels,
+    legendVisible: !!data.legendVisible,
+    legendX: safeNumber(data.legendX, undefined, -1e6, 1e6), legendY: safeNumber(data.legendY, undefined, -1e6, 1e6),
+    legendFit: data.legendFit === 'wrap' ? 'wrap' : 'widen', legendWidth: safeNumber(data.legendWidth, undefined),
+    zoom: safeNumber(data.zoom, undefined, 0.1, 3), panX: safeNumber(data.panX, undefined), panY: safeNumber(data.panY, undefined),
+    numberingMode: oneOf(data.numberingMode, ['numbers', 'letters', 'lettersonly', 'freetext', 'off'], undefined),
+    showNumbering: data.showNumbering === false ? false : undefined,
+    partnerGapMultiplier: safeNumber(data.partnerGapMultiplier, undefined, 1, 5),
+    childHeightMultiplier: safeNumber(data.childHeightMultiplier, undefined, 2, 6),
+    drawStrokes
+  };
+}
+
 // ── Dynamic canvas sizing ──
 // Canvas starts at 6000×6000 and auto-expands when content nears the edge.
 let canvasWidth = 6000, canvasHeight = 6000;
@@ -1268,9 +1360,9 @@ function setDrawWidth(val) {
 
 function buildStrokePathD(points) {
   if (points.length < 2) return '';
-  let d = `M ${points[0].x} ${points[0].y}`;
+  let d = `M ${Number(points[0].x)} ${Number(points[0].y)}`;
   for (let i = 1; i < points.length; i++) {
-    d += ` L ${points[i].x} ${points[i].y}`;
+    d += ` L ${Number(points[i].x)} ${Number(points[i].y)}`;
   }
   return d;
 }
@@ -1279,8 +1371,8 @@ function createStrokeSVG(stroke) {
   const svg = document.getElementById('draw-layer');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', buildStrokePathD(stroke.points));
-  path.setAttribute('stroke', stroke.color);
-  path.setAttribute('stroke-width', stroke.width);
+  path.setAttribute('stroke', safeColor(stroke.color, '#1a2332'));
+  path.setAttribute('stroke-width', safeNumber(stroke.width, 4, 0.5, 100));
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke-linecap', 'round');
   path.setAttribute('stroke-linejoin', 'round');
@@ -1954,14 +2046,14 @@ function makeShapeSVG(shape, deceased, fillMode, fillColor, quarters, centerText
       const dl = halfDividerCoords(shape);
       extra = `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${tc}" stroke-width="${STROKE_W}"/>`;
     } else {
-      extra = `<text x="26" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="${tc}" font-family="-apple-system,sans-serif">${centerText}</text>`;
+      extra = `<text x="26" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="${tc}" font-family="-apple-system,sans-serif">${escapeXML(centerText)}</text>`;
     }
   }
   return `<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">${fills}${border}${brackets}${deathLine}${extra}</svg>`;
 }
 
 function makeSolidFill(shape, color) {
-  return `<path d="${shapePathD(shape)}" fill="${color}" stroke="none"/>`;
+  return `<path d="${shapePathD(shape)}" fill="${svgPaint(color)}" stroke="none"/>`;
 }
 
 function makeHalfFill(shape, halves) {
@@ -1970,7 +2062,7 @@ function makeHalfFill(shape, halves) {
   let svg = '';
   paths.forEach((d, i) => {
     const c = halves[i] || '#ffffff';
-    svg += `<path d="${d}" fill="${c}" stroke="none"/>`;
+    svg += `<path d="${d}" fill="${svgPaint(c)}" stroke="none"/>`;
   });
   svg += `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${STROKE_COLOR}" stroke-width="1" opacity="0.3"/>`;
   return svg;
@@ -1982,7 +2074,7 @@ function makeQuarteredFill(shape, quarters) {
   let svg = '';
   paths.forEach((d, i) => {
     const c = quarters[i] || '#ffffff';
-    svg += `<path d="${d}" fill="${c}" stroke="none"/>`;
+    svg += `<path d="${d}" fill="${svgPaint(c)}" stroke="none"/>`;
   });
   dividers.forEach(dl => {
     svg += `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${STROKE_COLOR}" stroke-width="1" opacity="0.3"/>`;
@@ -6327,7 +6419,7 @@ function buildLegendBox() {
       row.className = 'legend-row';
       const swatch = document.createElement('div');
       swatch.className = 'legend-swatch';
-      swatch.style.background = color;
+      swatch.style.background = safeColor(color, '#ffffff');
       row.appendChild(swatch);
       row.appendChild(legendField(color));
       box.appendChild(row);
@@ -6340,7 +6432,7 @@ function buildLegendBox() {
       swatch.style.overflow = 'hidden';
       swatch.style.position = 'relative';
       // Build mini SVG pattern swatch
-      const pid = 'leg-' + sh.key.replace(/:/g, '-');
+      const pid = 'leg-' + sh.key.replace(/[^A-Za-z0-9-]/g, '-');
       let patDef = '';
       if (sh.pattern === 'dots') {
         patDef = `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="6" height="6"><circle cx="3" cy="3" r="1.2" fill="${STROKE_COLOR}"/></pattern>`;
@@ -6604,6 +6696,7 @@ function buildSessionData() {
 }
 
 function restoreSession(data) {
+  data = cleanSession(data);  // (before anything is cleared: a file that is not a drawing leaves this one as it is)
   deselectAll();
   document.getElementById('canvas').querySelectorAll('.person, .label, .legend-box').forEach(el => el.remove());
   document.getElementById('lines-layer').innerHTML = '';
@@ -7160,7 +7253,7 @@ function saveAsImage() {
   // ── Draw legend ──
   const totalLegendItems = legendColors.length + legendShadings.length;
   if (legendVisible && totalLegendItems > 0) {
-    const lx = legendX, ly = legendY, lw = legendLayout.lw;
+    const lx = safeNumber(legendX, 100), ly = safeNumber(legendY, 100), lw = legendLayout.lw;
     const totalH = legendLayout.lh;
     const rowTop = (entry) => { let y = ly + 28; for (const r of legendLayout.rows) { if (r.entry === entry) return y; y += r.h; } return y; };
     const rowLines = (entry) => legendLayout.rows.find(r => r.entry === entry).lines;
@@ -7255,7 +7348,7 @@ function saveAsSVG() {
   const els = [];
 
   // Helper: escape text for SVG
-  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  const esc = escapeXML;
 
   // Helper: SVG line element
   function svgLine(x1,y1,x2,y2,stroke,sw,opacity) {
@@ -7373,21 +7466,21 @@ function saveAsSVG() {
 
     // Fill
     if (p.fillMode === 'solid' && p.fillColor) {
-      g.push(`<path d="${shapePathD(p.shape)}" fill="${p.fillColor}" stroke="none" transform="translate(${x},${y})"/>`);
+      g.push(`<path d="${shapePathD(p.shape)}" fill="${svgPaint(p.fillColor)}" stroke="none" transform="translate(${x},${y})"/>`);
     } else if (p.fillMode === 'half') {
       const hDs = halfPathDs(p.shape);
       hDs.forEach((hd, i) => {
-        g.push(`<path d="${hd}" fill="${p.halves[i] || '#ffffff'}" stroke="none" transform="translate(${x},${y})"/>`);
+        g.push(`<path d="${hd}" fill="${svgPaint(p.halves[i] || '#ffffff')}" stroke="none" transform="translate(${x},${y})"/>`);
       });
     } else if (p.fillMode === 'quartered') {
       const qDs = quarterPathDs(p.shape);
       qDs.forEach((qd, i) => {
-        g.push(`<path d="${qd}" fill="${p.quarters[i] || '#ffffff'}" stroke="none" transform="translate(${x},${y})"/>`);
+        g.push(`<path d="${qd}" fill="${svgPaint(p.quarters[i] || '#ffffff')}" stroke="none" transform="translate(${x},${y})"/>`);
       });
     } else if (p.fillMode === 'shading') {
       const sPat = p.shadingPattern || 'stripes';
       const sCov = p.shadingCoverage || 'full';
-      const patId = 'exp-pat-' + p.id;
+      const patId = 'exp-pat-' + String(p.id).replace(/[^A-Za-z0-9_-]/g, '_');
       let patDef = '';
       if (sPat === 'dots') {
         patDef = `<pattern id="${patId}" patternUnits="userSpaceOnUse" width="8" height="8"><circle cx="4" cy="4" r="1.6" fill="${STROKE_COLOR}"/></pattern>`;
@@ -7539,7 +7632,7 @@ function saveAsSVG() {
   // ── Legend ──
   const totalSvgLegendItems = legendColors.length + legendShadings.length;
   if (legendVisible && totalSvgLegendItems > 0) {
-    const lx = legendX, ly = legendY, lw = legendLayout.lw;
+    const lx = safeNumber(legendX, 100), ly = safeNumber(legendY, 100), lw = legendLayout.lw;
     const totalH = legendLayout.lh;
     const rowTop = (entry) => { let y = ly + 28; for (const r of legendLayout.rows) { if (r.entry === entry) return y; y += r.h; } return y; };
     const rowText = (entry, ry) => legendLayout.rows.find(r => r.entry === entry).lines.map((line, k) =>
@@ -7549,7 +7642,7 @@ function saveAsSVG() {
     let svgLegIdx = 0;
     legendColors.forEach((lc) => {
       const ry = rowTop(lc);
-      els.push(`<rect x="${lx + 12}" y="${ry}" width="16" height="16" fill="${lc.color}" stroke="#dde1e6" stroke-width="1"/>`);
+      els.push(`<rect x="${lx + 12}" y="${ry}" width="16" height="16" fill="${svgPaint(lc.color)}" stroke="#dde1e6" stroke-width="1"/>`);
       els.push(rowText(lc, ry));
       svgLegIdx++;
     });
@@ -7581,7 +7674,7 @@ function saveAsSVG() {
   // ── Freehand draw strokes (on top of everything) ──
   drawStrokes.forEach(s => {
     if (s.points.length < 2) return;
-    els.push(`<path d="${buildStrokePathD(s.points)}" stroke="${esc(s.color)}" stroke-width="${s.width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+    els.push(`<path d="${buildStrokePathD(s.points)}" stroke="${esc(safeColor(s.color, '#1a2332'))}" stroke-width="${safeNumber(s.width, 4, 0.5, 100)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
   });
 
   // ── Assemble SVG document ──
