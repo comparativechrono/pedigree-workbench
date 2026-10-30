@@ -168,6 +168,11 @@ async () => {
     await wait(() => document.querySelector('.tl-title') && /Picture/.test(document.querySelector('.tl-title').textContent), 20000);
     await sleep(400);
     document.querySelector('.tl-run').click();
+    // (it asks before it replaces the drawing made with the marks, and only that: there was no PED file)
+    await wait(() => document.querySelector('.modal .prompt-actions [data-x="yes"]'), 20000);
+    const asked = document.querySelector('.modal').innerText;
+    check(/Replace these files/.test(asked) && /okafor-sketch\.studio\.json/.test(asked) && !/okafor-sketch\.ped/.test(asked), 'Tools: reading the sketch again asks before it replaces the drawing made with the marks');
+    document.querySelector('.modal .prompt-actions [data-x="yes"]').click();
     await wait(() => document.querySelector('.tl-done'), 300000);
     res = document.querySelector('.tl-result');
     const sketched = MG.app.fs.exists('/home/user/results/okafor-sketch.ped') ? (await ped('/home/user/results/okafor-sketch.ped')).split('\n') : [];
