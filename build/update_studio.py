@@ -2,7 +2,7 @@
 """Copy Pedigree Studio into the workbench: assets/studio/index.html.
 
 The Studio tab shows Pedigree Studio (github.com/comparativechrono/PedigreeStudio)
-in a frame. Its page is copied here unchanged except for three things:
+in a frame. Its page is copied here unchanged except for four things:
 
 1. it keeps its drawing in the browser under the name ``pedwb:studio-session``
    rather than ``pedigree-studio-session``, so that the workbench's drawing and
@@ -12,7 +12,11 @@ in a frame. Its page is copied here unchanged except for three things:
    opens files in it, saves its drawing and runs Tidy;
 3. its Content Security Policy, which lets the page run only the code written
    into it, also lets it run bridge.js from beside it ('self'). It still lets
-   the page load nothing else and send no request.
+   the page load nothing else and send no request;
+4. it does not offer to be installed: on its own website the Studio names a
+   manifest and starts a service worker, which keeps a copy of it for use
+   without a connection (INSTALLABLE). In the workbench it is a frame, and
+   the workbench has neither file, so INSTALLABLE is set to false.
 
 To take a newer Pedigree Studio, run one of
 
@@ -39,6 +43,8 @@ NEW_KEY = "'pedwb:studio-session'"
 BRIDGE = '<script src="bridge.js"></script>\n'
 CSP_SCRIPTS = "script-src 'unsafe-inline'"
 CSP_SCRIPTS_WITH_BRIDGE = "script-src 'self' 'unsafe-inline'"
+INSTALLABLE = "const INSTALLABLE = true;"
+NOT_INSTALLABLE = "const INSTALLABLE = false;"
 
 
 def from_git(repo, ref):
@@ -68,12 +74,22 @@ def patch(text):
             raise SystemExit("Pedigree Studio's Content Security Policy no longer says {} once – look at it, and change "
                              "this script so that the policy still lets bridge.js run".format(CSP_SCRIPTS))
         text = text.replace(CSP_SCRIPTS, CSP_SCRIPTS_WITH_BRIDGE)
+    # no manifest and no service worker: the Studio's offer to install itself is for its own website
+    installable = INSTALLABLE in text
+    if installable:
+        if text.count(INSTALLABLE) != 1:
+            raise SystemExit("Pedigree Studio says {} more than once – look at how it offers to be installed, and "
+                             "change this script to match".format(INSTALLABLE))
+        text = text.replace(INSTALLABLE, NOT_INSTALLABLE)
+    elif "serviceWorker" in text:
+        raise SystemExit("Pedigree Studio starts a service worker but has no {} – look at how it offers to be "
+                         "installed, and change this script so that the copy here does not".format(INSTALLABLE))
     # the functions bridge.js uses must still be there
     for fn in ("buildSessionData", "restoreSession", "runManagedPedigreeLayout", "fitToView", "scheduleSave",
                "pushUndo", "deselectAll"):
         if not re.search(r"function\s+{}\s*\(".format(fn), text):
             raise SystemExit("Pedigree Studio has no function {}() any more: bridge.js needs it".format(fn))
-    return text, n, csp
+    return text, n, csp, installable
 
 
 def main():
@@ -89,7 +105,7 @@ def main():
         text = open(a.file, encoding="utf-8").read()
         source = {"file": os.path.basename(a.file)}
     source["sha256_of_original"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    text, n, csp = patch(text)
+    text, n, csp, installable = patch(text)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as fh:
         fh.write(text)
@@ -99,6 +115,9 @@ def main():
     if csp:
         source["changes"].append("its Content Security Policy lets it run bridge.js too ({} became {})".format(
             CSP_SCRIPTS, CSP_SCRIPTS_WITH_BRIDGE))
+    if installable:
+        source["changes"].append("it does not offer to be installed or start a service worker ({} became {})".format(
+            INSTALLABLE, NOT_INSTALLABLE))
     with open(os.path.join(OUT, "SOURCE.json"), "w", encoding="utf-8") as fh:
         json.dump(source, fh, indent=2)
         fh.write("\n")

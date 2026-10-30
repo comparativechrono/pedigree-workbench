@@ -211,7 +211,7 @@
       pkg: 'studio2ped',
       what: 'Write a drawing as a PED file for linkage and association programs (an MPED file when it shows several conditions or carriers).',
       about:
-        'A PED file has one line per person, giving their family, their id, their father and mother, their sex and whether they are affected. The father and mother are the genetic parents, so an adopted child, or a child carried by a surrogate, gets 0 in place of those parents. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but these are often names, so check them before you share the file. If an id would be empty, 0 or shared by two people, the pedigree number is used instead. The “no children” and “infertility” bars are left out, as they aren’t people.',
+        'A PED file has one line per person, giving their family, their id, their father and mother, their sex and whether they are affected. The father and mother are the genetic parents, so an adopted child, or a child carried by a gestational carrier (G), gets 0 in place of those parents. studio2ped names people by their pedigree numbers (II-3), as the GA4GH files do. It can use the drawing’s labels or the text under the symbols instead, but these are often names, so check them before you share the file. If an id would be empty, 0 or shared by two people, the pedigree number is used instead. The “no children” and “infertility” bars are left out, as they aren’t people.',
       help: 'h-tool-studio2ped',
       fields: [
         { key: 'input', type: 'file', label: 'The drawing', kinds: ['studio'], studio: true },

@@ -16,13 +16,13 @@ NumPy, pandas, OpenCV and Pillow with pip.
 
 | Package | Version | Where it comes from |
 |---|---|---|
-| `studio2ped` | **0.2.0** | on PyPI (was 0.1.0); people named by pedigree numbers, the markers left out, and only genetic parents in the parent columns |
+| `studio2ped` | **0.2.1** | built from [studio2ped#2](https://github.com/comparativechrono/studio2ped/pull/2), not released yet (0.2.0 is on PyPI): a parent marked G, the 2025 nomenclature's gestational carrier, is not a genetic parent, as S has been. 0.2.0: people named by pedigree numbers, the markers left out, and only genetic parents in the parent columns |
 | `ped2studio` | **0.2.2** | on PyPI (was 0.2.1); families that reuse ids kept apart |
 | `mpedtools` | 0.1.0 | the release on PyPI, unchanged |
 | `hponorm` | **1.1.0** | on PyPI (was 1.0.0); results scored by how well they match, opposites (hypo- and hyper-) and different subtypes never scored as close spellings, and a faster local search |
 | `mondonorm` | **1.1.0** | on PyPI (was 1.0.0); the same changes as hponorm |
-| `studio2ga4gh` | **0.4.0** | on PyPI (was 0.3.0); rewritten to write through `pedigree_ga4gh` |
-| `ga4gh2studio` | **0.4.0** | on PyPI (was 0.3.0); changed to read through `pedigree_ga4gh` |
+| `studio2ga4gh` | **0.4.1** | built from [studio2ga4gh#2](https://github.com/comparativechrono/studio2ga4gh/pull/2), not released yet (0.4.0 is on PyPI): G read as a gestational carrier, twins of unknown zygosity as `isMultipleBirthSiblingOf`, and a consultand noted in the narrative. 0.4.0: rewritten to write through `pedigree_ga4gh` |
+| `ga4gh2studio` | **0.4.1** | built from [ga4gh2studio#2](https://github.com/comparativechrono/ga4gh2studio/pull/2), not released yet (0.4.0 is on PyPI): a gestational carrier drawn with G, a surrogate who gave the egg with D, `isMultipleBirthSiblingOf` as twins of unknown zygosity, and a consultand from the narrative. 0.4.0: changed to read through `pedigree_ga4gh` |
 | `phenopacket_toolkit` (phenotk) | **0.4.0** | on PyPI (was 0.3.0); without its “dialects”, reading and writing through `pedigree_ga4gh`, with faults fixed, and accepting only exact matches by default when it looks terms up |
 | `pedigree_ga4gh` | **1.0.0** | on PyPI, new: the one GA4GH implementation the others share |
 | `pedwb` | 1.0.0 | new: runs the programs for the terminal (`python -m pedwb NAME …`), and holds the small functions the Tools tab calls (`pedwb.gui`) and the Risk tab's reader of GA4GH files (`pedwb.risk`) |
@@ -44,10 +44,14 @@ Tim Hearn and Nick Taylor, and PedGen and PedInterp by Nick Taylor, under the
 MIT licence (each package's `LICENSE`); networkx is under the 3-clause BSD
 licence (in its wheel, and in the archive as `networkx/LICENSE.txt`).
 
-The versions in bold in the first table were released on PyPI on 18 October
-2026, from the pull requests listed in `docs/upstream.md`. The copies here are
-taken from those releases' wheels, so they are exactly what `pip install`
-gives.
+The other versions in bold in the first table were released on PyPI on 18
+October 2026, from the pull requests listed in `docs/upstream.md`. The copies
+here are taken from those releases' wheels, so they are exactly what `pip
+install` gives. studio2ped 0.2.1, studio2ga4gh 0.4.1 and ga4gh2studio 0.4.1
+are copied from their open pull requests, which read and write the symbols that
+Pedigree Studio has drawn since the 2025 correction to the pedigree
+nomenclature (`docs/upstream.md`, section 12). Once they are released, copy
+them again from the released wheels.
 
 The other packages are by Tim Hearn, under the MIT licence (`LICENSE`).
 `pedigree_ga4gh/kin.py` holds the terms of KIN, the Kinship Ontology of the

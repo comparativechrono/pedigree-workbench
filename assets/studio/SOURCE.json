@@ -1,13 +1,14 @@
 {
   "repository": "https://github.com/comparativechrono/pedigreestudio",
-  "ref": "safe-files",
-  "commit": "91ccf4e7a2b2f63c7a82b8ac1a336175d791a3af",
-  "committed": "2026-10-30T20:38:52+00:00",
-  "sha256_of_original": "8a11fe7cb82057385e8a2ee87ed38f1dc6e2744ef341cf0343e3673629a3c9bc",
+  "ref": "check-fixes",
+  "commit": "94fb07eea25f59bd773de2929f0ca7bcc7c188d0",
+  "committed": "2026-10-30T22:04:35+00:00",
+  "sha256_of_original": "0150785d2609d5dec83f6c747ee960f28ddaf67839d5f14a42480f46ddab3abc",
   "copied": "2026-10-30",
   "changes": [
     "the browser-storage key 'pedigree-studio-session' became 'pedwb:studio-session' (3 places)",
     "loads bridge.js before </body>",
-    "its Content Security Policy lets it run bridge.js too (script-src 'unsafe-inline' became script-src 'self' 'unsafe-inline')"
+    "its Content Security Policy lets it run bridge.js too (script-src 'unsafe-inline' became script-src 'self' 'unsafe-inline')",
+    "it does not offer to be installed or start a service worker (const INSTALLABLE = true; became const INSTALLABLE = false;)"
   ]
 }

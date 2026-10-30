@@ -2,8 +2,10 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
-<!-- Everything the Studio needs is in this file, so the browser is told not to let the page load anything or send any request. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; base-uri 'none'; form-action 'none'">
+<!-- Everything the Studio needs is in this file, so the browser is told not to let the page load anything or send any request.
+     The one exception is on the Studio's website: there the page may use the site's manifest and service worker, which let it be
+     installed and opened without a connection (see offerOffline). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pedigree Studio</title>
 <meta name="description" content="Draw clinical pedigrees with the standard symbols. Pedigree Studio runs in your browser and sends nothing anywhere.">
@@ -253,10 +255,10 @@
     font-size: 9px; font-weight: 600; color: var(--text-muted);
     white-space: nowrap; pointer-events: none; text-transform: uppercase; letter-spacing: 0.5px;
   }
-  /* proband arrow, below left of the symbol */
+  /* the proband's or a consultand's arrow, below left of the symbol, with the proband's P beside it */
   .proband-arrow {
-    position: absolute; top: 54px; left: -18px;
-    width: 18px; height: 18px; pointer-events: none;
+    position: absolute; top: 54px; left: -30px;
+    width: 30px; height: 22px; pointer-events: none;
   }
 
   /* ── Free-text labels ── */
@@ -345,7 +347,7 @@
     /* keep the banner clear of the selection panel */
     .canvas-area.insp-open .mode-banner { left: calc(50% - 150px); max-width: calc(100% - 330px); }
   }
-  .empty-hint { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; z-index: 5; padding: 20px; }
+  .empty-hint { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: grid; place-items: center; text-align: center; pointer-events: none; z-index: 5; padding: 20px; }
   .empty-hint svg { width: 120px; height: 70px; fill: none; stroke: #b9c3cf; stroke-width: 2; margin-bottom: 10px; }
   .empty-hint p { color: var(--text-muted); font-size: 13.5px; line-height: 1.5; max-width: 340px; margin: 0 auto; }
   .empty-hint b { color: var(--text); }
@@ -487,7 +489,7 @@
   }
 
   /* ── Help ── */
-  .help-back { position: fixed; inset: 0; z-index: 900; background: rgba(15,23,32,0.45); display: grid; place-items: center; padding: 16px; }
+  .help-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 900; background: rgba(15,23,32,0.45); display: grid; place-items: center; padding: 16px; }
   .help-card {
     position: relative; background: #fff; border-radius: 12px; width: min(780px, 100%);
     height: min(820px, calc(100vh - 32px)); height: min(820px, calc(100dvh - 32px));
@@ -498,6 +500,7 @@
   .help-head h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 400; margin: 0 34px 8px 0; }
   .help-head h2 span { color: var(--accent); }
   .help-tabs { display: flex; gap: 2px; overflow-x: auto; touch-action: pan-x; scrollbar-width: none; }
+  .help-tabs::-webkit-scrollbar { display: none; }
   .help-tab {
     border: 0; background: none; padding: 8px 12px 9px; font-size: 13px; font-weight: 600; color: var(--text-muted);
     border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
@@ -539,6 +542,25 @@
     .sym-table td.sym { padding-right: 10px; }
     .sym-table td.sym svg { max-width: 96px; height: auto; }
   }
+
+  /* Browsers from before the spring of 2021 (Chrome 83, Safari 14.0 and older) leave out the gap
+     between the things in a flex box. The page marks them with no-flex-gap (see markOldFlexbox)
+     and these margins put the same spaces in. */
+  .no-flex-gap .st-bar > * + * { margin-left: 4px; }
+  .no-flex-gap .st-group > * + * { margin-left: 2px; }
+  .no-flex-gap .st-btn > * + * { margin-top: 1px; }
+  .no-flex-gap .qa-btn > svg { margin-bottom: 1px; }
+  .no-flex-gap .st-pop > button > svg { margin-right: 10px; }
+  .no-flex-gap .pop-row > * + *, .no-flex-gap .draw-settings-row > * + *, .no-flex-gap .insp-h > * + * { margin-left: 6px; }
+  .no-flex-gap .pop-row > *, .no-flex-gap .draw-settings-row > * { margin-bottom: 6px; }
+  .no-flex-gap .size-row > * + *, .no-flex-gap .toggle-row > * + *, .no-flex-gap .legend-row > * + *, .no-flex-gap .tk-item > * + * { margin-left: 8px; }
+  .no-flex-gap .zoom-controls > * + *, .no-flex-gap .sib-move > * + *, .no-flex-gap .shading-option-row > * + *, .no-flex-gap .fill-colors > * + * { margin-left: 4px; }
+  .no-flex-gap .fill-colors > * { margin-bottom: 4px; }
+  .no-flex-gap .ct-row > * + * { margin-left: 3px; }
+  .no-flex-gap .ct-row > * { margin-bottom: 3px; }
+  .no-flex-gap .help-tabs > * + * { margin-left: 2px; }
+  @media (max-width: 820px) { .no-flex-gap .st-bar > * + * { margin-left: 2px; } }
+  @media (max-width: 699px) { .no-flex-gap .st-bar > * + * { margin-left: 1px; } }
 </style>
 </head>
 <body>
@@ -711,6 +733,10 @@
         <label for="probandToggle">Proband</label>
         <button class="toggle-switch" type="button" role="switch" aria-checked="false" id="probandToggle" onclick="toggleProband()" aria-label="Proband"></button>
       </div>
+      <div class="toggle-row not-line">
+        <label for="consultandToggle">Consultand</label>
+        <button class="toggle-switch" type="button" role="switch" aria-checked="false" id="consultandToggle" onclick="toggleConsultand()" aria-label="Consultand"></button>
+      </div>
 
       <div class="not-line">
       <div class="lbl">Shading</div>
@@ -768,7 +794,7 @@
         <button class="ct-btn" type="button" data-ct="line" onclick="setCenterText('line')">│ Presymptomatic</button>
         <button class="ct-btn" type="button" data-ct="P" onclick="setCenterText('P')" title="Pregnancy">P</button>
         <button class="ct-btn" type="button" data-ct="D" onclick="setCenterText('D')" title="Donor">D</button>
-        <button class="ct-btn" type="button" data-ct="S" onclick="setCenterText('S')" title="Surrogate">S</button>
+        <button class="ct-btn" type="button" data-ct="G" onclick="setCenterText('G')" title="Gestational carrier">G</button>
         <span class="ct-num"><input type="text" id="ctNumber" maxlength="2" placeholder="3" inputmode="text" autocomplete="off" aria-label="How many people"><button class="ct-btn" type="button" id="ctNumberBtn" title="Number of people">Number</button></span>
       </div>
 
@@ -929,9 +955,10 @@
     <!-- Twins (while the Twins tool is on) -->
     <section class="panel-section" id="twinPanel">
       <h3 class="insp-h">Twins</h3>
-      <div class="seg2">
+      <div class="seg3">
         <button class="pbtn active" type="button" data-tt="identical" onclick="setTwinType('identical')">Identical (MZ)</button>
         <button class="pbtn" type="button" data-tt="nonidentical" onclick="setTwinType('nonidentical')">Non-identical (DZ)</button>
+        <button class="pbtn" type="button" data-tt="unknown" onclick="setTwinType('unknown')" title="Zygosity not known">Not known (?)</button>
       </div>
     </section>
 
@@ -974,7 +1001,7 @@
           <li><b>Add the first person</b> with <b>Male</b>, <b>Female</b> or <b>Unknown</b> on the toolbar. This is usually the person the pedigree is for, so switch on <b>Proband</b> in the panel that opens.</li>
           <li><b>Build out from them.</b> With someone selected, <b>Add a relative</b> puts in a partner, son, daughter, parents, brother or sister, already joined up, and lays the pedigree out again to make room. <b>Older</b> and <b>Younger</b> move a person, with their family, along their row of brothers and sisters, which runs from the oldest on the left.</li>
           <li><b>Join people yourself</b> with <b>Partners</b>, <b>Child</b> and <b>Twins</b> on the toolbar. <b>Partners</b>: click two people. <b>Child</b>: click a relationship line, then the child. <b>Twins</b>: choose identical or non-identical in the panel, then click two children of the same couple.</li>
-          <li><b>Describe each person</b> in the panel: notes under the symbol (name, age, diagnoses and the age at diagnosis), deceased, shading for anyone affected, and a mark inside the symbol for carriers, pregnancies, donors, surrogates or a number of people.</li>
+          <li><b>Describe each person</b> in the panel: notes under the symbol (name, age, diagnoses and the age at diagnosis), deceased, shading for anyone affected, and a mark inside the symbol for carriers, pregnancies, donors, gestational carriers or a number of people.</li>
           <li><b>Click a line to change it.</b> A relationship line can be marked consanguineous or separated, and you can add the couple's children from there, including a pregnancy loss, no children or infertility. A line of descent can be dashed for adoption.</li>
           <li><b>Tidy</b> lays the whole pedigree out again: generations in rows, couples side by side, brothers and sisters together under their parents in the order you drew them, and as few crossing lines as possible. <b>Undo</b> puts your own layout back.</li>
           <li><b>Save and export</b> from <b>File</b>: a picture (PNG, or SVG for documents and posters) or a pedigree file (.json) that you can open again later. The pedigree you are working on is also kept in this browser until you clear it.</li>
@@ -1011,8 +1038,10 @@
       </section>
 
       <section class="help-pane" id="helpPane-about" role="tabpanel" aria-labelledby="helpTab-about" hidden>
+        <h3>Without a connection</h3>
+        <p>Open Pedigree Studio once from its website, <a href="https://pedigreestudio.xyz" target="_blank" rel="noopener">pedigreestudio.xyz</a>, and it will open there again without a connection. To keep it as an app, install it: choose <b>Install</b> in the browser's menu (Chrome, Edge) or <b>Add to Home Screen</b> (Safari on an iPhone or iPad, Chrome on Android). Or save the page itself: it is one file, which opens in a browser from your computer or a USB stick.</p>
         <h3>Your data</h3>
-        <p>Pedigree Studio runs entirely in your browser and makes no network requests: nothing you draw is sent anywhere. The pedigree you are working on is kept in this browser's own storage so that it is still here next time; <b>Clear the canvas</b> under <b>File</b> removes it. Exported pictures and pedigree files are made on this device.</p>
+        <p>Pedigree Studio runs entirely in your browser: nothing you draw is sent anywhere, and the page itself makes no network requests. Opened from its website, the browser also keeps a copy of the Studio so that it opens without a connection, and fetches a newer copy when there is one; those requests fetch only the Studio's own files. The pedigree you are working on is kept in this browser's own storage so that it is still here next time; <b>Clear the canvas</b> under <b>File</b> removes it, from Undo as well, so it cannot be brought back. Exported pictures and pedigree files are made on this device.</p>
         <h3>Citing Pedigree Studio</h3>
         <p>Hearn TJ. PedigreeStudio [software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.20209376" target="_blank" rel="noopener">doi:10.5281/zenodo.20209376</a>. Source code and issues: <a href="https://github.com/comparativechrono/PedigreeStudio" target="_blank" rel="noopener">github.com/comparativechrono/PedigreeStudio</a> (MIT licence).</p>
         <h3>Pedigree nomenclature</h3>
@@ -1020,11 +1049,12 @@
           <li>Bennett RL, Steinhaus KA, Uhrich SB, O'Sullivan CK, Resta RG, Lochner-Doyle D, Markel DS, Vincent V, Hamanishi J. Recommendations for standardized human pedigree nomenclature. <i>Am J Hum Genet</i>. 1995;56(3):745–752. <a href="https://pubmed.ncbi.nlm.nih.gov/7887430/" target="_blank" rel="noopener">PMID 7887430</a>.</li>
           <li>Bennett RL, French KS, Resta RG, Doyle DL. Standardized human pedigree nomenclature: update and assessment of the recommendations of the National Society of Genetic Counselors. <i>J Genet Couns</i>. 2008;17(5):424–433. <a href="https://doi.org/10.1007/s10897-008-9169-9" target="_blank" rel="noopener">doi:10.1007/s10897-008-9169-9</a>.</li>
           <li>Bennett RL, French KS, Resta RG, Austin J. Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>J Genet Couns</i>. 2022;31(6):1238–1248. <a href="https://doi.org/10.1002/jgc4.1621" target="_blank" rel="noopener">doi:10.1002/jgc4.1621</a>.</li>
+          <li>Steinhaus French K, Bennett R, Resta R. Correction to: Practice resource-focused revision: Standardized pedigree nomenclature update centered on sex and gender inclusivity: a practice resource of the National Society of Genetic Counselors. <i>J Genet Couns</i>. 2025;34(2):e2020. <a href="https://doi.org/10.1002/jgc4.2020" target="_blank" rel="noopener">doi:10.1002/jgc4.2020</a>.</li>
           <li>Resta RG, French KS, Bennett RL, Austin J. Both sides now: changing a long-standing pedigree tradition of men on the left and women on the right. <i>J Genet Couns</i>. 2023;32(3):530–531. <a href="https://doi.org/10.1002/jgc4.1662" target="_blank" rel="noopener">doi:10.1002/jgc4.1662</a>.</li>
         </ol>
         <h3>How Tidy works</h3>
         <p>Tidy treats the pedigree as a layered drawing, the approach introduced by Sugiyama et al. (1981). It puts each person in a generation by the network simplex method of Gansner et al. (1993). It orders each row to keep families together with as few crossing lines as possible, using the barycentre method of Sugiyama et al. and sifting (Matuszewski et al., 1999). It then finds the positions that centre children under their parents and keep lines straight, by solving a small optimisation problem with FISTA (Beck and Teboulle, 2009), using the adaptive restarts of O'Donoghue and Candès (2015).</p>
-        <ol class="help-refs" start="5">
+        <ol class="help-refs" start="6">
           <li>Sugiyama K, Tagawa S, Toda M. Methods for visual understanding of hierarchical system structures. <i>IEEE Trans Syst Man Cybern</i>. 1981;11(2):109–125. <a href="https://doi.org/10.1109/TSMC.1981.4308636" target="_blank" rel="noopener">doi:10.1109/TSMC.1981.4308636</a>.</li>
           <li>Gansner ER, Koutsofios E, North SC, Vo KP. A technique for drawing directed graphs. <i>IEEE Trans Softw Eng</i>. 1993;19(3):214–230. <a href="https://doi.org/10.1109/32.221135" target="_blank" rel="noopener">doi:10.1109/32.221135</a>.</li>
           <li>Matuszewski C, Schönfeld R, Molitor P. Using sifting for <i>k</i>-layer straightline crossing minimization. In: <i>Graph Drawing (GD 1999)</i>. Lecture Notes in Computer Science, vol 1731. Springer; 1999. p. 217–224. <a href="https://doi.org/10.1007/3-540-46648-7_22" target="_blank" rel="noopener">doi:10.1007/3-540-46648-7_22</a>.</li>
@@ -1047,6 +1077,20 @@ function getPointerPos(e) {
   if (e.changedTouches && e.changedTouches.length > 0) return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
   return { clientX: e.clientX, clientY: e.clientY };
 }
+
+// Browsers from before the spring of 2021 (Chrome 83, Safari 14.0 and older) lay out flex boxes
+// without the gap between their items. Two empty boxes 1px apart show whether this one does;
+// if not, html gets no-flex-gap and the CSS puts margins in the gaps' place.
+function markOldFlexbox() {
+  const box = document.createElement('div');
+  box.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';
+  box.appendChild(document.createElement('div'));
+  box.appendChild(document.createElement('div'));
+  document.body.appendChild(box);
+  if (box.scrollHeight !== 1) document.documentElement.classList.add('no-flex-gap');
+  box.remove();
+}
+markOldFlexbox();
 
 // ── State ──
 let currentTool = 'move';
@@ -1171,7 +1215,8 @@ function cleanSession(data) {
     const pid = own(pd.id);
     if (pid) persons.push({
       id: pid, shape: name(pd.shape, 40), x: coord(pd.x), y: coord(pd.y),
-      text: text(pd.text, 5000), deceased: !!pd.deceased, proband: !!pd.proband, affected: !!pd.affected,
+      text: text(pd.text, 5000), deceased: !!pd.deceased, proband: !!pd.proband, consultand: !!pd.consultand,
+      affected: !!pd.affected,
       fillMode: oneOf(pd.fillMode, ['none', 'solid', 'half', 'quartered', 'shading'], undefined),
       fillColor: safeColor(pd.fillColor, undefined),
       quarters: colours(pd.quarters, 4), halves: colours(pd.halves, 2),
@@ -2062,10 +2107,18 @@ function computeTwinBarD(type, forkX, branchY, cc1x, cc2x, c1Top, c2Top) {
   const b2x = forkX + (cc2x - forkX) * f, b2y = branchY + (c2Top - branchY) * f;
   return `M ${b1x} ${b1y} L ${b2x} ${b2y}`;
 }
+// Twins whose zygosity is not known have a question mark where identical twins' bar would be
+function twinMarkPos(forkX, branchY, c1Top, c2Top) {
+  return { x: forkX, y: branchY + ((c1Top + c2Top) / 2 - branchY) * 0.5 };
+}
 
 // ── Proband arrow path d-string (in viewBox 0 0 18 18) ──
 
 const PROBAND_ARROW_D = 'M2 16L16 2 M16 2L9 2 M16 2L16 9';
+// The proband's P, to the left of the arrow's tail: its centre and baseline relative to the symbol's top left
+// (the arrow's box starts 18 px left of the symbol and 54 px below its top)
+const PROBAND_P = { x: -24, y: 74, size: 11 };
+function hasArrow(p) { return !!(p.proband || p.consultand); }
 
 // ══════════════════════════════════════════
 // SHAPE SVG RENDERING (uses shared geometry)
@@ -2236,7 +2289,7 @@ function addPerson(customId, customX, customY, customShape, customText, customDe
     el.appendChild(msEl);
   }
 
-  if (customProband) { el.classList.add('proband'); addProbandArrow(el); }
+  if (customProband) { el.classList.add('proband'); addProbandArrow(el, true); }
 
   // Delete
   const del = document.createElement('button');
@@ -2303,14 +2356,21 @@ function addPerson(customId, customX, customY, customShape, customText, customDe
   return personData;
 }
 
-function addProbandArrow(el) {
+// The arrow at the lower left: with a P for the proband, alone for a consultand
+function addProbandArrow(el, withP) {
   const existing = el.querySelector('.proband-arrow');
   if (existing) existing.remove();
   const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   arrow.setAttribute('class', 'proband-arrow');
-  arrow.setAttribute('viewBox', '0 0 18 18');
-  arrow.innerHTML = `<path d="${PROBAND_ARROW_D}" stroke="${STROKE_COLOR}" stroke-width="1.8" fill="none"/>`;
+  arrow.setAttribute('viewBox', '-12 0 30 22');
+  arrow.innerHTML = `<path d="${PROBAND_ARROW_D}" stroke="${STROKE_COLOR}" stroke-width="1.8" fill="none"/>` + (withP ?
+    `<text x="${PROBAND_P.x + 18}" y="${PROBAND_P.y - 54}" text-anchor="middle" font-size="${PROBAND_P.size}" font-weight="700" fill="${STROKE_COLOR}" font-family="-apple-system,sans-serif">P</text>` : '');
   el.appendChild(arrow);
+}
+function refreshArrow(p) {
+  p.el.classList.toggle('proband', !!p.proband);
+  if (hasArrow(p)) addProbandArrow(p.el, !!p.proband);
+  else { const arr = p.el.querySelector('.proband-arrow'); if (arr) arr.remove(); }
 }
 
 function removePerson(id) {
@@ -2449,6 +2509,7 @@ function showProps(p) {
   document.getElementById('personText').value = p.text || '';
   document.getElementById('deceasedToggle').className = 'toggle-switch' + (p.deceased ? ' on' : '');
   document.getElementById('probandToggle').className = 'toggle-switch' + (p.proband ? ' on' : '');
+  document.getElementById('consultandToggle').className = 'toggle-switch' + (p.consultand ? ' on' : '');
   document.getElementById('noSnapToggle').className = 'toggle-switch' + (p.noSnap ? ' on' : '');
 
   // Center text buttons
@@ -2625,15 +2686,25 @@ function toggleProband() {
   const p = persons.get(selectedPerson);
   if (!p) return;
   persons.forEach(op => {
-    if (op.id !== p.id && op.proband) {
-      op.proband = false; op.el.classList.remove('proband');
-      const arr = op.el.querySelector('.proband-arrow'); if (arr) arr.remove();
-    }
+    if (op.id !== p.id && op.proband) { op.proband = false; refreshArrow(op); }
   });
   p.proband = !p.proband;
   document.getElementById('probandToggle').className = 'toggle-switch' + (p.proband ? ' on' : '');
-  if (p.proband) { p.el.classList.add('proband'); addProbandArrow(p.el); }
-  else { p.el.classList.remove('proband'); const arr = p.el.querySelector('.proband-arrow'); if (arr) arr.remove(); }
+  refreshArrow(p);
+  updateTextWrapping();
+  scheduleSave();
+}
+
+// A consultand (someone seeking advice or testing) has the arrow without the P; there may be several
+function toggleConsultand() {
+  if (!selectedPerson) return;
+  pushUndo();
+  const p = persons.get(selectedPerson);
+  if (!p) return;
+  p.consultand = !p.consultand;
+  document.getElementById('consultandToggle').className = 'toggle-switch' + (p.consultand ? ' on' : '');
+  refreshArrow(p);
+  updateTextWrapping();
   scheduleSave();
 }
 
@@ -2664,7 +2735,7 @@ function refreshPersonShape(p) {
   const delBtn = shapeDiv.querySelector('.delete-btn');
   shapeDiv.innerHTML = makeShapeSVG(p.shape, p.deceased, p.fillMode, p.fillColor, p.quarters, p.centerText, p.halves, p.shadingPattern, p.shadingCoverage);
   if (delBtn) shapeDiv.appendChild(delBtn);
-  if (p.proband) addProbandArrow(p.el);
+  if (hasArrow(p)) addProbandArrow(p.el, !!p.proband);
   // Manage miscarriage sex label
   let msEl = p.el.querySelector('.miscarriage-sex');
   if (p.shape === 'miscarriage') {
@@ -5440,13 +5511,26 @@ function addTwinLink(child1Id, child2Id, type, customId) {
 
   svg.appendChild(twinPath);
   const tl = { id, child1Id, child2Id, type: type || 'identical', partnershipId: sharedPship, els: [twinPath] };
+  if (tl.type === 'unknown') {  // (zygosity not known: a question mark where the bar would be)
+    const mark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    mark.setAttribute('class', 'twin-mark');
+    mark.setAttribute('text-anchor', 'middle');
+    mark.setAttribute('dominant-baseline', 'central');
+    mark.setAttribute('font-size', '14');
+    mark.setAttribute('font-weight', '700');
+    mark.setAttribute('fill', STROKE_COLOR);
+    mark.style.pointerEvents = 'none';
+    mark.textContent = '?';
+    svg.appendChild(mark);
+    tl.els.push(mark);
+  }
   twinLinks.push(tl);
   updateTwinLinkPos(tl);
   // Re-render the child links for both twins to show diagonal paths
   childLinks.filter(cl => cl.childId === child1Id || cl.childId === child2Id).forEach(cl => updateChildLinkPos(cl));
   if (!loadingDrawing) updateNumbering();  // (restoreSession() numbers everyone once, at the end)
   scheduleSave();
-  document.getElementById('statusBar').textContent = (type === 'identical' ? 'Identical' : 'Non-identical') + ' twins linked!';
+  document.getElementById('statusBar').textContent = tl.type === 'unknown' ? 'Twins linked (zygosity not known)!' : (type === 'identical' ? 'Identical' : 'Non-identical') + ' twins linked!';
 }
 
 function removeTwinLink(id) {
@@ -5477,6 +5561,11 @@ function updateTwinLinkPos(tl) {
   const branchY = Math.max(midY + 4, (c1Top + c2Top) / 2 - SHAPE_HALF);
 
   tl.els[0].setAttribute('d', computeTwinBarD(tl.type, forkX, branchY, cc1.x, cc2.x, c1Top, c2Top));
+  if (tl.els[1]) {
+    const m = twinMarkPos(forkX, branchY, c1Top, c2Top);
+    tl.els[1].setAttribute('x', m.x);
+    tl.els[1].setAttribute('y', m.y);
+  }
 }
 
 // ══════════════════════
@@ -6087,10 +6176,10 @@ function contentBounds(withoutKey) {
     const t = p.el.querySelector('.person-text');
     const tw = t && p.text ? t.offsetWidth : 0, th = t && p.text ? t.offsetHeight : 0;
     const textLeft = !!t && t.classList.contains('text-left');
-    minX = Math.min(minX, x - 24, textLeft ? x + 22 - tw : Infinity);
+    minX = Math.min(minX, x - (p.proband ? 32 : 24), textLeft ? x + 22 - tw : Infinity);
     maxX = Math.max(maxX, x + SHAPE_SIZE + 10, textLeft ? -Infinity : x + 30 + tw);
     minY = Math.min(minY, y - 24);
-    maxY = Math.max(maxY, y + 58 + th + (p.proband ? 18 : 0));
+    maxY = Math.max(maxY, y + 58 + th + (hasArrow(p) ? 18 : 0));
   });
   labels.forEach(l => {
     const x = parseFloat(l.el.style.left), y = parseFloat(l.el.style.top);
@@ -6155,7 +6244,7 @@ function updateTextWrapping() {
 
     if (isLeftPartner) {
       textEl.classList.add('text-left');
-      textEl.classList.toggle('proband-left', !!p.proband);
+      textEl.classList.toggle('proband-left', hasArrow(p));
     } else {
       textEl.classList.remove('text-left', 'proband-left');
     }
@@ -6686,8 +6775,7 @@ document.addEventListener('keydown', (e) => {
 // ══════════════════════
 
 function clearAll() {
-  if (!confirm('Remove everything from the canvas?')) return;
-  pushUndo();
+  if (!confirm('Remove everything from the canvas? This cannot be undone.')) return;
   document.getElementById('canvas').querySelectorAll('.person, .label, .legend-box').forEach(el => el.remove());
   document.getElementById('lines-layer').innerHTML = '';
   document.getElementById('draw-layer').innerHTML = '';
@@ -6710,6 +6798,10 @@ function clearAll() {
   document.getElementById('multiPartnershipPanel').classList.remove('visible');
   document.getElementById('multiChildLinkPanel').classList.remove('visible');
   try { localStorage.removeItem('pedwb:studio-session'); } catch(e) {}
+  // Clearing is final: the pedigree goes from Undo and Redo too, so that no one who uses
+  // this browser afterwards can bring it back
+  undoStack.length = 0; redoStack.length = 0;
+  updateUndoRedoUI();
   document.getElementById('statusBar').textContent = 'Canvas cleared';
   deselectAll();
   refreshChrome();
@@ -6733,7 +6825,7 @@ function buildSessionData() {
     personArr.push({
       id: p.id, shape: p.shape,
       x: parseFloat(p.el.style.left), y: parseFloat(p.el.style.top),
-      text: p.text, deceased: p.deceased, proband: p.proband,
+      text: p.text, deceased: p.deceased, proband: p.proband, consultand: !!p.consultand,
       fillMode: p.fillMode, fillColor: p.fillColor, quarters: [...p.quarters],
       halves: [...(p.halves || [null, null])],
       shadingPattern: p.shadingPattern || 'stripes',
@@ -6812,6 +6904,7 @@ function restoreSession(data) {
       if (pd.noSnap) { const pp = persons.get(pd.id); if (pp) pp.noSnap = true; }
       if (pd.siblingFixed) { const pp = persons.get(pd.id); if (pp) pp.siblingFixed = true; }
       if (pd.customLabel) { const pp = persons.get(pd.id); if (pp) pp.customLabel = pd.customLabel; }
+      if (pd.consultand) { const pp = persons.get(pd.id); if (pp) { pp.consultand = true; refreshArrow(pp); } }
       const n = parseInt(pd.id.split('-')[1]) || 0; if (n < 1e9 && n > personIdCounter) personIdCounter = n;
     });
     (data.labels || []).forEach(ld => {
@@ -7125,6 +7218,13 @@ function saveAsImage() {
     const branchY = Math.max(midY + 4, (c1Top + c2Top) / 2 - SHAPE_HALF);
     const d = computeTwinBarD(tl.type, forkX, branchY, cc1.x, cc2.x, c1Top, c2Top);
     if (d) strokePathD(d);
+    if (tl.type === 'unknown') {
+      const m = twinMarkPos(forkX, branchY, c1Top, c2Top);
+      ctx.save(); ctx.fillStyle = STROKE_COLOR; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = "700 14px -apple-system, 'Segoe UI', system-ui, Helvetica, sans-serif";
+      ctx.fillText('?', m.x, m.y);
+      ctx.restore();
+    }
   });
 
   // ── Draw persons (uses shared shape geometry via Path2D) ──
@@ -7244,12 +7344,17 @@ function saveAsImage() {
     }
     ctx.restore();
 
-    // Proband arrow
-    if (p.proband) {
+    // Proband's or consultand's arrow, and the proband's P
+    if (hasArrow(p)) {
       ctx.save(); ctx.strokeStyle = STROKE_COLOR; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(x - 16, y + 70); ctx.lineTo(x - 2, y + 56); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x - 2, y + 56); ctx.lineTo(x - 9, y + 56); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x - 2, y + 56); ctx.lineTo(x - 2, y + 63); ctx.stroke();
+      if (p.proband) {
+        ctx.fillStyle = STROKE_COLOR; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.font = `700 ${PROBAND_P.size}px -apple-system, 'Segoe UI', system-ui, Helvetica, sans-serif`;
+        ctx.fillText('P', x + PROBAND_P.x, y + PROBAND_P.y);
+      }
       ctx.restore();
     }
 
@@ -7288,7 +7393,7 @@ function saveAsImage() {
       if (isLeftPartner) {
         // Mirrors the default x + 30: ends 30px in from the shape's right edge (matches .text-left).
         ctx.textAlign = 'right';
-        const textY = p.proband ? y + 74 : y + 56;
+        const textY = hasArrow(p) ? y + 74 : y + 56;
         p.text.split('\n').forEach((line, i) => { ctx.fillText(line, x + SHAPE_SIZE - 30, textY + i * 15); });
       } else {
         ctx.textAlign = 'left';
@@ -7539,6 +7644,10 @@ function saveAsSVG() {
     const branchY = Math.max(midY + 4, (c1Top + c2Top) / 2 - SHAPE_HALF);
     const d = computeTwinBarD(tl.type, forkX, branchY, cc1.x, cc2.x, c1Top, c2Top);
     if (d) els.push(`<path d="${d}" stroke="${STROKE_COLOR}" stroke-width="${STROKE_W}" fill="none"/>`);
+    if (tl.type === 'unknown') {
+      const m = twinMarkPos(forkX, branchY, c1Top, c2Top);
+      els.push(`<text x="${m.x}" y="${m.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${STROKE_COLOR}" font-family="${FONT}">?</text>`);
+    }
   });
 
   // ── Persons ──
@@ -7631,9 +7740,10 @@ function saveAsSVG() {
       }
     }
 
-    // Proband arrow
-    if (p.proband) {
+    // Proband's or consultand's arrow, and the proband's P
+    if (hasArrow(p)) {
       g.push(`<path d="M${x-16} ${y+70}L${x-2} ${y+56} M${x-2} ${y+56}L${x-9} ${y+56} M${x-2} ${y+56}L${x-2} ${y+63}" stroke="${STROKE_COLOR}" stroke-width="1.8" fill="none"/>`);
+      if (p.proband) g.push(`<text x="${x + PROBAND_P.x}" y="${y + PROBAND_P.y}" text-anchor="middle" font-size="${PROBAND_P.size}" font-weight="700" fill="${STROKE_COLOR}" font-family="${FONT}">P</text>`);
     }
 
     // Number label
@@ -7667,7 +7777,7 @@ function saveAsSVG() {
       const lines = p.text.split('\n');
       if (isLeftPartner) {
         // Mirrors the default x + 30: ends 30px in from the shape's right edge (matches .text-left).
-        const baseY = p.proband ? y + 74 : y + 56;
+        const baseY = hasArrow(p) ? y + 74 : y + 56;
         lines.forEach((line, i) => {
           g.push(`<text x="${x + SHAPE_SIZE - 30}" y="${baseY + i * 15}" text-anchor="end" dominant-baseline="hanging" font-size="11" fill="${STROKE_COLOR}" font-family="${FONT}">${esc(line)}</text>`);
         });
@@ -7893,6 +8003,7 @@ const PSL = (() => {
         sex: sexOf(p.shape),
         pinned: !!p.noSnap,
         proband: !!p.proband,
+        arrow: hasArrow(p),
         textW: tm.w, textH: tm.h,
         origin: null,          // couple id this person is a child of
         couples: [],           // couple ids this person is a partner in
@@ -9397,7 +9508,7 @@ const PSL = (() => {
       let h = 0;
       rows[r].forEach(it => it.seq.forEach(m => {
         const p = people.get(m);
-        if (p && p.textH) h = Math.max(h, p.textH + (p.proband && p.textLeft ? 18 : 0));
+        if (p && p.textH) h = Math.max(h, p.textH + (p.arrow && p.textLeft ? 18 : 0));
       }));
       const need = 56 + h + 12 + SHAPE_HALF + levels[r + 1] * cfg.busStep;
       rowY.push(rowY[r] + Math.max(cfg.rowGap, need));
@@ -10191,7 +10302,8 @@ function buildSymbolTable() {
   const P = (x, y, shape, o) => `<g transform="translate(${x} ${y}) scale(${K})">${shapeInner(shape, o || {})}</g>`;
   const L = (x1, y1, x2, y2, dash) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ink}" stroke-width="${sw}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
   const T = (x, y, t) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="9" fill="${ink}" font-family="-apple-system,'Segoe UI',sans-serif">${t}</text>`;
-  const arrow = (x, y) => `<g transform="translate(${x} ${y}) scale(${K})"><path d="${PROBAND_ARROW_D}" transform="translate(-18 54)" fill="none" stroke="${ink}" stroke-width="1.8"/></g>`;
+  const arrow = (x, y, withP) => `<g transform="translate(${x} ${y}) scale(${K})"><path d="${PROBAND_ARROW_D}" transform="translate(-18 54)" fill="none" stroke="${ink}" stroke-width="1.8"/>` +
+    (withP ? `<text x="${PROBAND_P.x}" y="${PROBAND_P.y}" text-anchor="middle" font-size="${PROBAND_P.size}" font-weight="700" fill="${ink}" font-family="-apple-system,'Segoe UI',sans-serif">P</text>` : '') + '</g>';
   const pic = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${body}</svg>`;
   const row = (y) => [2, 2 + S + 8, 2 + 2 * (S + 8)].map(x => [x, y]);
   const [a, b, c] = row(2);
@@ -10204,11 +10316,13 @@ function buildSymbolTable() {
     const fx = x + S + gap, ly = y + H;
     return P(x, y, 'male') + P(fx, y, 'female') + L(x + e1, ly - 1.4, fx + e0, ly - 1.4) + L(x + e1, ly + 1.4, fx + e0, ly + 1.4);
   };
-  const twins = (identical) => {
+  // twins(true): identical; twins(false): non-identical; twins('unknown'): zygosity not known
+  const twins = (kind) => {
     const fork = 22, kidTop = 46, c1 = 34, c2 = 90, end = kidTop + e0;
     let d = L(62, 2, 62, fork) + L(62, fork, c1, end) + L(62, fork, c2, end);
-    if (identical) d += L((62 + c1) / 2, (fork + end) / 2, (62 + c2) / 2, (fork + end) / 2);
-    return pic(124, kidTop + S + 2, d + P(c1 - H, kidTop, 'male') + P(c2 - H, kidTop, identical ? 'male' : 'female'));
+    if (kind === true) d += L((62 + c1) / 2, (fork + end) / 2, (62 + c2) / 2, (fork + end) / 2);
+    if (kind === 'unknown') d += `<text x="62" y="${(fork + end) / 2}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="${ink}" font-family="-apple-system,'Segoe UI',sans-serif">?</text>`;
+    return pic(124, kidTop + S + 2, d + P(c1 - H, kidTop, 'male') + P(c2 - H, kidTop, kind === false ? 'female' : 'male'));
   };
   const children = () => {
     const kids = [6, 54, 102], kidTop = 66, bar = 52, gap = 32;
@@ -10243,9 +10357,9 @@ function buildSymbolTable() {
     ['Deceased', pic(84, 41, P(...a, 'male', { dead: 1 }) + P(...b, 'female', { dead: 1 })),
       'A diagonal line through the symbol. Write the age at death underneath (for example d. 62y), with the cause if it is known.',
       'Deceased in the panel; the age and cause go in Notes.'],
-    ['Proband', pic(60, 56, arrow(18, 2) + P(18, 2, 'male')),
-      'An arrow at the lower left. Strictly, an arrow with a P marks the proband (the affected person through whom the family came to attention) and an arrow alone marks the consultand (the person seeking advice).',
-      'Proband in the panel.'],
+    ['Proband, consultand', pic(134, 58, arrow(24, 2, true) + P(24, 2, 'male', { fill: 1 }) + arrow(96, 2) + P(96, 2, 'female')),
+      'An arrow at the lower left. With a P, it marks the proband: the affected person through whom the family came to attention. On its own, it marks a consultand: someone seeking advice or testing.',
+      'Proband or Consultand in the panel.'],
     ['Carrier', pic(84, 41, P(...a, 'female', { ct: 'dot' }) + P(...b, 'male', { ct: 'dot' })),
       'A dot: carries a variant but is not expected to develop the condition, for example a carrier of a recessive condition.',
       'Inside the symbol: Carrier.'],
@@ -10255,15 +10369,16 @@ function buildSymbolTable() {
     ['Pregnancy', pic(84, 41, P(...a, 'unknown', { ct: 'P' }) + P(...b, 'female', { ct: 'P' })),
       'P inside the symbol, with the gestational age underneath. Use a square or circle once the sex is known.',
       'Inside the symbol: P.'],
-    ['Pregnancy loss', pic(126, 41, P(...a, 'miscarriage') + P(...b, 'miscarriage', { fill: 1 }) + P(...c, 'miscarriage', { dead: 1 })),
-      'A small triangle, shaded if affected, with the gestational age (and sex, if known) underneath. A termination of pregnancy adds a diagonal line. An ectopic pregnancy is written ECT underneath.',
-      'Loss on the toolbar, or Add a child on the couple’s relationship line; Deceased adds the line for a termination.'],
+    ['Pregnancy loss', pic(172, 54, P(...a, 'miscarriage') + P(...b, 'miscarriage', { fill: 1 }) + P(...c, 'miscarriage', { dead: 1 }) +
+        P(2 + 3 * (S + 8), 2, 'miscarriage', { dead: 1 }) + T(2 + 3 * (S + 8) + H, S + 12, 'ECT')),
+      'A small triangle, shaded if affected, with the gestational age (and sex, if known) underneath. A termination of pregnancy adds a diagonal line, and so does an ectopic pregnancy, with ECT written underneath.',
+      'Loss on the toolbar, or Add a child on the couple’s relationship line; Deceased adds the diagonal line, and ECT goes in Notes.'],
     ['Stillbirth', pic(60, 54, P(10, 2, 'male', { dead: 1 }) + T(10 + H, S + 13, 'SB 28 wk')),
       'The baby’s symbol with a diagonal line, and SB with the gestational age underneath.',
       'Add the symbol, switch on Deceased and write SB in Notes.'],
-    ['Donor, surrogate', pic(84, 41, P(...a, 'male', { ct: 'D' }) + P(...b, 'female', { ct: 'S' })),
-      'D marks an egg or sperm donor, and S a surrogate (gestational carrier).',
-      'Inside the symbol: D or S.'],
+    ['Donor, gestational carrier', pic(84, 41, P(...a, 'male', { ct: 'D' }) + P(...b, 'female', { ct: 'G' })),
+      'D marks an egg or sperm donor, and G a gestational carrier: someone who carries a pregnancy to which they have no genetic link. Since the nomenclature’s 2025 correction, S (for surrogate) is no longer used.',
+      'Inside the symbol: D or G.'],
     ['Adopted', pic(84, 41, P(...a, 'adopted-male') + P(...b, 'adopted-female')),
       'Brackets around the symbol.',
       'More on the toolbar, or Change symbol in the panel.']
@@ -10287,6 +10402,9 @@ function buildSymbolTable() {
     ['Non-identical twins', twins(false),
       'The lines start from one point, without a bar.',
       'Twins on the toolbar: choose Non-identical, then click both children.'],
+    ['Twins, zygosity not known', twins('unknown'),
+      'The lines start from one point, with a question mark between them when it is not known whether the twins are identical.',
+      'Twins on the toolbar: choose Not known, then click both children.'],
     ['Adopted in, adopted out', adoption(),
       'A dashed line of descent joins an adopted child to the adoptive parents; a solid line joins a child to the birth parents.',
       'Click a line of descent, then Dashed (adopted).'],
@@ -10439,6 +10557,23 @@ document.addEventListener('keydown', e => {
   if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTyping()) { e.preventDefault(); openHelp(); }
 });
 
+// ── Opening without a connection ──
+// Opened from its website (over https, and not inside another page), the Studio can be installed
+// like an app and opened without a connection: the site's manifest names it and gives its icons,
+// and the site's service worker (sw.js) keeps a copy of this page. The worker only fetches the
+// Studio's own files; nothing drawn here goes to it. Opened from a file, none of this happens.
+// Copies that are not on the website (the workbench's) set INSTALLABLE to false.
+const INSTALLABLE = false;
+function offerOffline() {
+  if (!INSTALLABLE || !('serviceWorker' in navigator) || !window.isSecureContext || window.top !== window ||
+      !/^https?:$/.test(location.protocol)) return;
+  // (iPhones and iPads find the home-screen icon by its usual name, apple-touch-icon.png, beside the page)
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = 'manifest.webmanifest';
+  document.head.appendChild(link);
+  navigator.serviceWorker.register('sw.js').catch(() => {}); // a site without sw.js: the Studio works as before
+}
+
 // ── Init ──
 applyCanvasSize();
 initColorPickers();
@@ -10450,6 +10585,7 @@ if (tryAutoRestore()) fitToView();
 updateUndoRedoUI();
 refreshChrome();
 if (location.hash === '#help') openHelp();
+window.addEventListener('load', offerOffline);
 </script>
 <script src="bridge.js"></script>
 </body>

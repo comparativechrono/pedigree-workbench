@@ -40,6 +40,11 @@ async () => {
     // the Studio: an example
     await MG.app.studioOpen('/data/examples/okafor.studio.json');
     check(MG.app.studio && !MG.app.studio.api.isEmpty(), 'Studio: the Okafor example opens');
+    // the Studio offers to be installed only on its own website: here it names no manifest and starts no worker
+    const studioDoc = document.querySelector('iframe.st-frame').contentDocument;
+    const workers = navigator.serviceWorker ? await navigator.serviceWorker.getRegistrations() : [];
+    check(!studioDoc.querySelector('link[rel=manifest]') && workers.length === 0,
+      'Studio: the copy here offers no install and starts no service worker');
     // the Tools tab: Drawing → GA4GH
     await MG.app.useTool('studio2ga4gh', { input: '/data/examples/okafor.studio.json', terms: '/data/examples/example-terms.json' });
     await sleep(300);

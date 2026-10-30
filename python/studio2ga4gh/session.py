@@ -35,13 +35,14 @@ class StudioPerson:
     text: str = ""
     deceased: bool = False
     proband: bool = False
+    consultand: bool = False         # an arrow without a P: the person seeking advice
     fill_mode: str = "none"
     fill_color: Optional[str] = None
     halves: List[Optional[str]] = field(default_factory=lambda: [None, None])
     quarters: List[Optional[str]] = field(default_factory=lambda: [None] * 4)
     shading_pattern: str = "stripes"
     shading_coverage: str = "full"
-    centre: str = ""                 # "", "dot", "line", "P", "D", "S" or a number
+    centre: str = ""                 # "", "dot", "line", "P", "D", "G" (or "S", in older files) or a number
     loss_sex: str = "unknown"        # for pregnancy losses
     custom_label: str = ""
 
@@ -118,6 +119,11 @@ class TwinLink:
     a: str
     b: str
     identical: bool
+    zygosity: Optional[str] = None   # "identical", "nonidentical" or "unknown" (the Studio's "Not known (?)")
+
+    def __post_init__(self):
+        if self.zygosity is None:
+            self.zygosity = "identical" if self.identical else "nonidentical"
 
 
 @dataclass
@@ -211,6 +217,12 @@ class Session:
         return out
 
 
+def _zygosity(t: dict) -> str:
+    """A twin line's zygosity: identical (the default, as in the Studio), unknown ("?"), or non-identical."""
+    kind = t.get("type") or "identical"
+    return kind if kind in ("identical", "unknown") else "nonidentical"
+
+
 def parse(data: dict) -> Session:
     """Read a Pedigree Studio session (any version from 3 to 5)."""
     if not isinstance(data, dict) or "persons" not in data:
@@ -226,6 +238,7 @@ def parse(data: dict) -> Session:
             id=pid, shape=pd.get("shape") or "unknown",
             x=float(pd.get("x") or 0), y=float(pd.get("y") or 0),
             text=pd.get("text") or "", deceased=bool(pd.get("deceased")), proband=bool(pd.get("proband")),
+            consultand=bool(pd.get("consultand")),
             fill_mode=fill_mode, fill_color=fill_color,
             halves=list(pd.get("halves") or [None, None]), quarters=list(pd.get("quarters") or [None] * 4),
             shading_pattern=pd.get("shadingPattern") or "stripes",
@@ -239,7 +252,7 @@ def parse(data: dict) -> Session:
     child_links = [ChildLink(str(c["id"]), str(c["partnershipId"]), str(c["childId"]), bool(c.get("dashed")))
                    for c in data.get("childLinks") or []
                    if str(c.get("partnershipId")) in partnerships and c.get("childId") in persons]
-    twin_links = [TwinLink(str(t["id"]), t["child1Id"], t["child2Id"], (t.get("type") or "identical") == "identical")
+    twin_links = [TwinLink(str(t["id"]), t["child1Id"], t["child2Id"], _zygosity(t) == "identical", _zygosity(t))
                   for t in data.get("twinLinks") or []
                   if t.get("child1Id") in persons and t.get("child2Id") in persons]
     return Session(persons, partnerships, child_links, twin_links,

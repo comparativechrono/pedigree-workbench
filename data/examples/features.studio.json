@@ -2,7 +2,7 @@
  "version": 5,
  "personIdCounter": 0,
  "labelIdCounter": 0,
- "lineIdCounter": 30,
+ "lineIdCounter": 32,
  "persons": [
   {
    "id": "gf",
@@ -138,7 +138,7 @@
    ],
    "shadingPattern": "stripes",
    "shadingCoverage": "full",
-   "centerText": "S",
+   "centerText": "G",
    "miscarriageSex": "unknown",
    "noSnap": false,
    "siblingFixed": false,
@@ -170,7 +170,8 @@
    "miscarriageSex": "unknown",
    "noSnap": false,
    "siblingFixed": false,
-   "customLabel": "Lbl"
+   "customLabel": "Lbl",
+   "consultand": true
   },
   {
    "id": "p7",
@@ -705,6 +706,34 @@
    "customLabel": "Lbl"
   },
   {
+   "id": "c12",
+   "shape": "female",
+   "x": 1046,
+   "y": 420,
+   "text": "",
+   "deceased": false,
+   "proband": false,
+   "fillMode": "none",
+   "fillColor": "#1a2332",
+   "quarters": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "halves": [
+    null,
+    null
+   ],
+   "shadingPattern": "stripes",
+   "shadingCoverage": "full",
+   "centerText": "",
+   "miscarriageSex": "unknown",
+   "noSnap": false,
+   "siblingFixed": false,
+   "customLabel": "Lbl"
+  },
+  {
    "id": "c8",
    "shape": "female",
    "x": 1150,
@@ -1008,6 +1037,13 @@
    "childId": "m2",
    "branchYOffset": 0,
    "dashed": false
+  },
+  {
+   "id": "child-31",
+   "partnershipId": "pship-12",
+   "childId": "c12",
+   "branchYOffset": 0,
+   "dashed": false
   }
  ],
  "twinLinks": [
@@ -1024,6 +1060,13 @@
    "child2Id": "c4",
    "type": "nonidentical",
    "partnershipId": "pship-1"
+  },
+  {
+   "id": "twin-32",
+   "child1Id": "c12",
+   "child2Id": "c8",
+   "type": "unknown",
+   "partnershipId": "pship-12"
   }
  ],
  "legendLabels": {

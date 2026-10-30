@@ -22,6 +22,17 @@ from their wheels, so `pip install` now gives exactly what the workbench runs.
 | mondonorm | 1.0.0 | [mondonorm#1](https://github.com/comparativechrono/mondonorm/pull/1) | **1.1.0**, the same as hponorm |
 | mpedtools | 0.1.0 | – | 0.1.0, unchanged |
 
+Three more pull requests are open and not released yet. They are for the
+symbols Pedigree Studio has drawn since the 2025 correction to the pedigree
+nomenclature (section 12), and the workbench carries them from their branches
+until they are released:
+
+| Package | On PyPI | Pull request | To be released |
+|---|---|---|---|
+| studio2ped | 0.2.0 | [studio2ped#2](https://github.com/comparativechrono/studio2ped/pull/2) | **0.2.1**, G read as a gestational carrier |
+| studio2ga4gh | 0.4.0 | [studio2ga4gh#2](https://github.com/comparativechrono/studio2ga4gh/pull/2) | **0.4.1**, G; twins of unknown zygosity; consultands |
+| ga4gh2studio | 0.4.0 | [ga4gh2studio#2](https://github.com/comparativechrono/ga4gh2studio/pull/2) | **0.4.1**, G; D for a surrogate; twins of unknown zygosity; consultands |
+
 `docs/ga4gh.md` says what the correct form is and why.
 
 ## Releasing a new version
@@ -470,3 +481,40 @@ packages.
 adds pedigree-ga4gh, abusua2ga4gh, ga4gh2abusua and phenopacket-toolkit, puts
 Abusua Pedigree Studio and pedigree-ga4gh on the map of formats, and links the
 workbench.
+
+## 12. The 2025 nomenclature: studio2ped 0.2.1, studio2ga4gh 0.4.1, ga4gh2studio 0.4.1
+
+Pedigree Studio now follows the pedigree nomenclature as corrected in 2025
+(Steinhaus French, Bennett and Resta, *J Genet Couns* 2025;34(2):e2020;
+[PedigreeStudio#8](https://github.com/comparativechrono/PedigreeStudio/pull/8)):
+G marks a gestational carrier, where S was used before; an arrow without a P
+marks a consultand; and twins can be drawn with a ? when their zygosity isn't
+known. The three converters that read or write drawings had to follow, or a
+gestational carrier marked G would have been written as the child's genetic
+mother. What each pull request does:
+
+* **studio2ped 0.2.1** ([#2](https://github.com/comparativechrono/studio2ped/pull/2)):
+  a parent marked G is not written as a genetic parent, as S has been; S still
+  means the same. The note says "gestational carrier", not "surrogate", which
+  the corrected nomenclature keeps for a woman who gives the egg as well.
+* **studio2ga4gh 0.4.1** ([#2](https://github.com/comparativechrono/studio2ga4gh/pull/2)):
+  G (or S) is `isGestationalCarrierOf`. Twins of unknown zygosity are
+  `isMultipleBirthSiblingOf` (0.4.0 would have written them as
+  `isPolyzygoticMultipleBirthSiblingOf`). Twins joined only through a third get
+  the zygosity of the chain of twin lines between them, so identical twins
+  joined through a third are identical even when another twin in the set is
+  not. A consultand is noted in the narrative, as a carrier is.
+* **ga4gh2studio 0.4.1** ([#2](https://github.com/comparativechrono/ga4gh2studio/pull/2)):
+  a gestational carrier is drawn with G. A surrogate who gave the egg
+  (`isSurrogateOvumDonorOf`) is drawn with D, as an egg donor. 0.4.0 gave her
+  S, which the other tools read as a carrier who is not a genetic parent, so a
+  round trip lost the fact that she is the child's genetic mother; a warning
+  now says the drawing does not show that she carried the pregnancy.
+  `isMultipleBirthSiblingOf` is drawn as twins of unknown zygosity, not as
+  non-identical twins, and a consultand in the narrative gets the consultand's
+  arrow.
+
+Release them in this order: studio2ped, then studio2ga4gh, then ga4gh2studio,
+whose round-trip test needs studio2ga4gh 0.4.1 to read G back. Then copy the
+three into `python/` again from their wheels (`python/build_bundle.py`
+afterwards).
