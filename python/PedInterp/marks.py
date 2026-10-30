@@ -80,10 +80,12 @@ def _slashed(ink, symbol, line_width):
     whether a piece of line runs out of its upper right, as the end of a slash would (see _proband).
 
     In a symbol left empty, a line through the inside of it, at a slope in SLASH_SLOPES and a little to either side of
-    the middle, runs along ink nearly all the way on both sides of the middle, where a carrier's dot may be (ink close to
-    the line counts, as a slash drawn by hand wobbles); but a symbol hatched or shaded with lines is not slashed, as
-    much ink is left inside it away from the line. A symbol filled in hides the slash, but for where it runs out past
-    the symbol: a short line out of its upper right and one out of its lower left, in line with each other (_stubs)
+    the middle, runs along ink nearly all the way on both sides of the middle, where a carrier's dot may be: ink close to
+    the line counts, as a slash drawn by hand wobbles, but only ink across the line from each point of it, so that a
+    row of dots, as in a symbol that Pedigree Studio shades with them, or of specks, doesn't run along ink between them.
+    A symbol hatched or shaded with lines is not slashed, as much ink is left inside it away from the line. A symbol
+    filled in hides the slash, but for where it runs out past the symbol: a short line out of its upper right and one
+    out of its lower left, in line with each other (_stubs)
     '''
     size = symbol['size']
     margin = int(0.5 * size) + 2 * line_width + 4
@@ -116,8 +118,22 @@ def _slashed(ink, symbol, line_width):
                               0.0))
     lengths = (inside & (np.abs(t) > clear)).sum(axis=2)
     cover = np.where(lengths >= 0.15 * size, np.minimum(sides[0], sides[1]), 0.0)
-    best = np.unravel_index(int(np.argmax(cover)), cover.shape)
-    if cover[best] < SLASH_INSIDE:
+    # (the lines near enough ink for it, looked at again with only the ink across each line from each point of it)
+    best, best_cover = None, 0.0
+    steps = np.arange(-near, near + 0.5, 1.0)
+    for k, m in np.argwhere(cover >= SLASH_INSIDE):
+        line_x = cx + across[k, 0] * offsets[m] + along[k, 0] * t
+        line_y = cy + across[k, 1] * offsets[m] + along[k, 1] * t
+        sx = np.clip(np.round(line_x[:, None] + across[k, 0] * steps[None, :]).astype(np.int64), 0, window.shape[1] - 1)
+        sy = np.clip(np.round(line_y[:, None] + across[k, 1] * steps[None, :]).astype(np.int64), 0, window.shape[0] - 1)
+        on = (window[sy, sx] > 0).any(axis=1)
+        sides = []
+        for part in (inside[k, m] & (t < -clear), inside[k, m] & (t > clear)):
+            chord = int(part.sum())
+            sides.append(float(on[part].sum()) / chord if chord >= 0.05 * size else 0.0)
+        if min(sides) > best_cover:
+            best, best_cover = (k, m), min(sides)
+    if best_cover < SLASH_INSIDE:
         return False, False
     # (hatching or shading: much ink inside away from the line, and from the middle, where a carrier's dot is)
     k, m = best
@@ -355,6 +371,31 @@ def _arcs(ink, x, y, radius):
     return arcs
 
 
+def _three_ways(ink, xs, ys, radii):
+    '''
+    Of the points (xs, ys), those round which ink runs three ways, as from the tip of an arrow's head: where circles at
+    two of the radii next to each other each cross the ink in three arcs, as _arcs finds them. The others can't be the
+    tip, and are looked at no further, which saves looking round each point of the ink, one by one, in a drawing with
+    much writing in it
+    '''
+    if len(radii) < 2 or not len(xs):
+        return []
+    angles = np.radians(np.arange(0, 360, 3))
+    three = []
+    for radius in radii:
+        sx = np.round(xs[:, None] + radius * np.cos(angles)[None, :]).astype(np.int64)
+        sy = np.round(ys[:, None] - radius * np.sin(angles)[None, :]).astype(np.int64)
+        inside = (sx >= 0) & (sy >= 0) & (sx < ink.shape[1]) & (sy < ink.shape[0])
+        on = np.zeros(sx.shape, bool)
+        on[inside] = ink[sy[inside], sx[inside]] > 0
+        # (the arcs, each counted where it starts, going round)
+        three.append((on & ~np.roll(on, 1, axis=1)).sum(axis=1) == 3)
+    keep = np.zeros(len(xs), bool)
+    for near, far in zip(three, three[1:]):
+        keep |= near & far
+    return list(zip(xs[keep], ys[keep]))
+
+
 def _runs_straight(ink, x, y, angle, start, end, line_width):
     '''
     Whether ink runs in a straight line from start to end pixels away from (x, y), about the way angle points (in
@@ -414,20 +455,20 @@ def _arrowhead(free, origin, symbol, line_width):
     contour = symbol['contour'].reshape(-1, 1, 2).astype(np.float32)
     # (looked round in the whole of the part below on the left, as the arrow's line runs on out of this window)
     thick = cv2.dilate(free, _disc(1))
-    for x, y in zip(xs[::2] + (x0 - ox), ys[::2] + (y0 - oy)):
+    # the three strokes are seen at two distances from the point next to each other: far enough from it to see them
+    # apart, however thick the pen, and near enough not to pass the end of a short head, as Pedigree Studio draws it
+    radii = [radius for radius in (r * size for r in (0.06, 0.08, 0.1, 0.12, 0.14)) if radius >= 1.8 * line_width + 2]
+    points = _three_ways(thick, xs[::2] + (x0 - ox), ys[::2] + (y0 - oy), radii)
+    for x, y in points:
         px, py = float(x + ox), float(y + oy)
         away = math.degrees(math.atan2(-(py - cy), px - cx))
         if not -170 <= away <= -100:
             continue
         if -cv2.pointPolygonTest(contour, (px, py), True) > 0.5 * size:
             continue
-        # the three strokes, seen at two distances from the point next to each other: straight, so the same ways at
-        # both. The distances are far enough from the point to see the strokes apart, however thick the pen, and near
-        # enough not to pass the end of a short head, as Pedigree Studio draws it
+        # the three strokes, at each distance: straight, so the same ways at both
         seen = []
-        for radius in (r * size for r in (0.06, 0.08, 0.1, 0.12, 0.14)):
-            if radius < 1.8 * line_width + 2:
-                continue
+        for radius in radii:
             arcs = _arcs(thick, x, y, radius)
             if len(arcs) != 3 or any(w * math.pi / 180 * radius > 3 * line_width + 4 for _, w in arcs):
                 seen.append(None)

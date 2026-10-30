@@ -80,12 +80,14 @@ def _id(value):
     return str(value)
 
 def _marked(row, column):
-    '''Whether a row of a dataframe has a mark: True in its column, or 1, or the like'''
+    '''Whether a row of a dataframe has a mark: True in its column, or 1, or the like, and not a missing value'''
     value = getattr(row, column, False)
     try:
-        return bool(value) and not pd.isna(value)
+        if pd.isna(value):
+            return False
     except (TypeError, ValueError):
-        return bool(value)
+        pass
+    return bool(value)
 
 def twin_groups(PED_df):
     '''
@@ -137,8 +139,11 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     isPolyzygoticMultipleBirthSiblingOf).
 
     The marks of a dataframe read with marks=True are written as studio2ga4gh writes them from a Pedigree Studio
-    drawing: each person's vital status is DECEASED if they have died, and ALIVE if not; the proband is an index
-    patient; and the narrative says who is a carrier, as a Phenopacket has no place for it.
+    drawing: the proband is an index patient, and the narrative says who is a carrier, as a Phenopacket has no place
+    for it. Each person's vital status is DECEASED if a slash was read through their symbol, or if it is a triangle, for
+    a pregnancy lost (which the narrative says, as studio2ga4gh does); ALIVE if their symbol is left empty with no slash
+    through it; and, for a symbol filled in with no slash read, not given, as the fill may hide one (as it hides the
+    Studio's slash through a filled square).
     '''
     from pedigree_ga4gh import DISEASE, PHENOTYPE, Kindred, Member, Relation, Term, dumps, kin, ontology, to_ga4gh_pedigree
     from . import __version__
@@ -147,18 +152,26 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     FamID = _id(PED_df['FamilyID'].iloc[0])
     members, relations = [], []
     marked = has_marks(PED_df)
-    probands, carriers = [], []
+    layout = PED_df.attrs.get('layout') or {}
+    probands, notes = [], []
     for row in PED_df.itertuples(index= False):
         person, phenotype = _id(row.IndividualID), int(row.Phenotype)
         terms = [Term(label, cid, kind= kind, excluded= phenotype == 1)] if phenotype in (1, 2) else []
         member = Member(person, sex= {1: 'MALE', 2: 'FEMALE'}.get(int(row.Sex), 'UNKNOWN_SEX'), terms= terms)
         if marked:
-            member.vital_status = 'DECEASED' if _marked(row, 'Deceased') else 'ALIVE'
+            lost = (layout.get(person) or {}).get('shape') == TRIANGLE
+            if lost or _marked(row, 'Deceased'):
+                member.vital_status = 'DECEASED'
+            elif phenotype != 2:
+                member.vital_status = 'ALIVE'
             member.index = _marked(row, 'Proband')
             if member.index:
                 probands.append(person)
+            # (each note starts with a person's id, as studio2ga4gh writes them)
+            if lost:
+                notes.append(f'{person} is a pregnancy loss.')
             if _marked(row, 'Carrier'):
-                carriers.append(person)
+                notes.append(f'{person} is a carrier.')
         members.append(member)
         for parent, code in ((row.PaternalID, kin.BIOLOGICAL_FATHER), (row.MaternalID, kin.BIOLOGICAL_MOTHER)):
             if _id(parent) not in ('0', ''):
@@ -185,9 +198,9 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
              ' (not identical)' if not any(identical for _, identical in others) else '')
             for first, others in twin_sets) + '.'
     if marked:
-        narrative += ' Deaths, probands and carriers were read from the marks drawn on the symbols.'
-        # (each note starts with a person's id, as studio2ga4gh writes them)
-        narrative += ''.join(f' {person} is a carrier.' for person in carriers)
+        narrative += (' Deaths, probands and carriers were read from the marks drawn on the symbols. A filled symbol '
+                      'may hide a slash, so the affected have no vital status unless one was seen.')
+        narrative += ''.join(f' {note}' for note in notes)
     doc, _ = to_ga4gh_pedigree(Kindred(FamID, members= members, relations= relations, narrative= narrative),
                                created_by= f'PedInterp {__version__}')
     makedirs(output_dir, exist_ok= True)

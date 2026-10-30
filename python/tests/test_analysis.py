@@ -222,10 +222,13 @@ def test_pedinterp_reads_who_has_died_and_the_proband():
             assert out.splitlines()[0].split()[-3:] == ["Deceased", "Proband", "Carrier"], out
             assert not os.path.exists(os.path.join(tmp, "OKAFOR.ped")), picture
             doc = json.load(open(os.path.join(tmp, "OKAFOR_ga4gh-pedigree.json"), encoding="utf-8"))
-            status = {p["subject"]["id"]: p["subject"]["vitalStatus"]["status"] for p in doc["individuals"]}
-            assert {who for who, s in status.items() if s == "DECEASED"} == died, picture
+            status = {p["subject"]["id"]: p["subject"].get("vitalStatus", {}).get("status") for p in doc["individuals"]}
+            # (and IV-2, a pregnancy lost, has died too; the affected, whose symbols are filled in and so might hide a
+            # slash, have no vital status)
+            assert {who for who, s in status.items() if s == "DECEASED"} == died | {"IV-2"}, picture
+            assert {who for who, s in status.items() if s is None} == {"II-3", "IV-3", "IV-4"}, picture
             assert doc["indexPatients"] == ["IV-3"], picture
-            assert "is a carrier" not in doc["narrative"], picture
+            assert "IV-2 is a pregnancy loss." in doc["narrative"] and "is a carrier" not in doc["narrative"], picture
             drawing = json.load(open(os.path.join(tmp, "OKAFOR.studio.json"), encoding="utf-8"))
             assert sum(p["deceased"] for p in drawing["persons"]) == len(died), picture
             assert sum(p["proband"] for p in drawing["persons"]) == 1, picture

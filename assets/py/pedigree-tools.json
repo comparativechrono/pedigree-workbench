@@ -1,7 +1,7 @@
 {
   "archive": "pedigree-tools.zip",
-  "sha256": "fdfea009f1a174829625d3f7b4969a6edc9930f60ec99bd500c27c8f13ee4536",
-  "bytes": 215606,
+  "sha256": "1eb9c7e1e34a58bfcac2c2b62a6f4c7cc16f8015052d727051b616c492dcc1db",
+  "bytes": 215605,
   "packages": {
     "studio2ped": "0.2.0",
     "ped2studio": "0.2.2",
@@ -16,12 +16,12 @@
   },
   "analysis": {
     "archive": "pedigree-analysis.zip",
-    "sha256": "bd65469498a279538de2765fd5a62c9746e0d0d3e590e137f02d6b1ca0f9b953",
-    "bytes": 1161375,
+    "sha256": "fe3087ad97873be73914f143c82900495541d176159057b90e75ddf1a2b821ce",
+    "bytes": 1162242,
     "packages": {
       "pednet": "2.1.0",
       "PedGen": "0.1.4.dev13+g93a642d20",
-      "PedInterp": "0.1.8.dev27+g316486350",
+      "PedInterp": "0.1.8.dev29+g7ac577d36",
       "networkx": "3.4.2"
     }
   }

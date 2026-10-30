@@ -234,7 +234,8 @@
       out.push(risk);
       out.push(['convert', 'More…', 'Everything the Tools tab can do with this file', () => MG.app.toolsFor(path)]);
     } else if (k === 'image') {
-      out.push(['table', 'Read it into a PED file and a drawing', 'Read the pedigree in this picture, and write it as a PED file and a Pedigree Studio drawing (PedInterp)', tool('pedinterp')]);
+      // (a PED file, as it says, whatever was ticked last: not with the marks read, as then none is written)
+      out.push(['table', 'Read it into a PED file and a drawing', 'Read the pedigree in this picture, and write it as a PED file and a Pedigree Studio drawing (PedInterp)', () => MG.app.useTool('pedinterp', { input: path, marks: false })]);
     } else if (k === 'workflow') {
       out.push(['play', 'Run', 'Run this workflow (Tools tab)', () => MG.app.workflowOpen(path, 'run')]);
       out.push(['workflow', path.startsWith(HOME + '/') ? 'Edit' : 'Edit a copy', 'Open this workflow in the editor (Tools tab)', () => MG.app.workflowOpen(path, 'edit')]);
