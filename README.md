@@ -156,10 +156,12 @@ python3 serve.py          # then open http://localhost:8000/
 | Pedigree Studio | `python3 build/update_studio.py --git ../PedigreeStudio`, then `python3 build/make_page.py` |
 
 - **Pedigree Studio** is a copy of `index.html` from the PedigreeStudio
-  repository (`assets/studio/`), changed in two small ways that
+  repository (`assets/studio/`), changed in three small ways that
   `build/update_studio.py` makes and `assets/studio/SOURCE.json` records: it
-  keeps its drawing in the browser under a name of its own, and it loads
-  `bridge.js`, through which the bar above it opens and saves drawings.
+  keeps its drawing in the browser under a name of its own; it loads
+  `bridge.js`, through which the bar above it opens and saves drawings; and
+  its Content Security Policy, which lets it load nothing and send no
+  request, lets it run `bridge.js` too.
 - **The Python packages** in `python/` are the workbench's copies;
   [python/README.md](python/README.md) says where each comes from and which
   are changed. They are zipped into `assets/py/pedigree-tools.zip`, which the

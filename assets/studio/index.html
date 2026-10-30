@@ -2,6 +2,8 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
+<!-- Everything the Studio needs is in this file, so the browser is told not to let the page load anything or send any request. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pedigree Studio</title>
 <meta name="description" content="Draw clinical pedigrees with the standard symbols. Pedigree Studio runs in your browser and sends nothing anywhere.">
@@ -1105,6 +1107,150 @@ let drawLineWidth = 4;          // current draw line width
 const DRAW_COLORS = ['#1a2332','#c0392b','#2980b9','#27ae60','#e67e22','#8e44ad','#7f8c8d','#d35400'];
 let drawEraser = false;          // eraser sub-mode within draw tool
 
+// ── What a drawing may contain ──
+// A file opened in the Studio, the drawing it keeps in this browser and each step of Undo all go through
+// restoreSession(), which first passes them through cleanSession(): text stays text, colours must be colours,
+// numbers must be numbers, each part of the drawing must have an id of its own, lines must join people who are
+// there, and settings must be ones the Studio knows. Wherever the Studio writes a drawing's values into the page
+// or into an SVG file, it escapes them as well. So a file cannot add to the page, run code in it or make it
+// fetch anything.
+function escapeXML(v) {
+  return String(v).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F￾￿]/g, '')  // (characters XML does not allow)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+// A colour as CSS writes one (#hex, a name, rgb(), hsl(), oklch(), color-mix() and so on), with nothing in it
+// that could point to a file. SAFE_COLOR is what is accepted if the browser cannot say what a colour is.
+const SAFE_COLOR = /^(#[0-9a-f]{3,8}|[a-z]{1,30}|(rgb|hsl)a?\([\d\s.,%/+-]{1,60}\))$/i;
+function safeColor(c, fallback) {
+  if (typeof c !== 'string') return fallback;
+  c = c.trim();
+  if (!c || c.length > 100 || !/^[#a-z0-9\s.,%()/+-]+$/i.test(c) || /(url|var|env|attr)\s*\(/i.test(c)) return fallback;
+  const isColour = window.CSS && CSS.supports ? CSS.supports('color', c) : SAFE_COLOR.test(c);
+  return isColour ? c : fallback;
+}
+function svgPaint(c) { return escapeXML(safeColor(c, '#ffffff')); }
+function safeNumber(v, fallback, min = -1e7, max = 1e7) {
+  const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+}
+// the ids the page itself uses (its panels, buttons and layers, the key, and the patterns inside symbols)
+const PAGE_IDS = new Set(Array.from(document.querySelectorAll('[id]'), el => el.id).concat(['legend-box']));
+const PAGE_ID_PREFIXES = /^(shpat|leg)-/;
+// the most a drawing may hold: far more than any family, and few enough that no file can make the Studio stall
+const MOST = { persons: 1000, labels: 500, lines: 2000, strokes: 1000, points: 100000 };  // (lines: couples, children's lines and twins together)
+let loadingDrawing = false;  // while restoreSession() adds a drawing's people: it numbers them once, at the end
+
+function cleanSession(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data) || !Array.isArray(data.persons))
+    throw new Error('it is not a Pedigree Studio drawing (it has no list of persons)');
+  const lines = ['partnerships', 'childLinks', 'twinLinks'].reduce((n, k) => n + (Array.isArray(data[k]) ? data[k].length : 0), 0);
+  if (lines > MOST.lines) throw new Error(`it has more lines than the Studio draws (${MOST.lines})`);
+  const items = (v, most, what) => {
+    if (!Array.isArray(v)) return [];
+    if (v.length > most) throw new Error(`it has more ${what} than the Studio draws (${most})`);
+    return v.filter(o => o && typeof o === 'object' && !Array.isArray(o));
+  };
+  const text = (v, max) => typeof v === 'string' ? v.slice(0, max) : (typeof v === 'number' && Number.isFinite(v) ? String(v) : '');
+  const id = v => { const s = text(v, 201); return s.length > 200 ? '' : s; };
+  // an item's own id: one no other item and nothing on the page has (an item without one is left out)
+  const taken = new Set();
+  const own = v => {
+    const s = id(v);
+    if (!s || taken.has(s) || PAGE_IDS.has(s) || PAGE_ID_PREFIXES.test(s)) return '';
+    taken.add(s);
+    return s;
+  };
+  const name = (v, max) => typeof v === 'string' ? v.slice(0, max) : undefined;  // a setting the Studio only compares
+  const oneOf = (v, allowed, fallback) => allowed.includes(v) ? v : fallback;
+  const colours = (v, n) => Array.from({ length: n }, (_, i) => Array.isArray(v) ? safeColor(v[i], null) : null);
+  const coord = (v, fallback) => safeNumber(v, fallback, -1e6, 1e6);
+  const count = v => Math.floor(safeNumber(v, 0, 0, 1e9));
+
+  const persons = [];
+  items(data.persons, MOST.persons, 'people').forEach(pd => {
+    const pid = own(pd.id);
+    if (pid) persons.push({
+      id: pid, shape: name(pd.shape, 40), x: coord(pd.x), y: coord(pd.y),
+      text: text(pd.text, 5000), deceased: !!pd.deceased, proband: !!pd.proband, affected: !!pd.affected,
+      fillMode: oneOf(pd.fillMode, ['none', 'solid', 'half', 'quartered', 'shading'], undefined),
+      fillColor: safeColor(pd.fillColor, undefined),
+      quarters: colours(pd.quarters, 4), halves: colours(pd.halves, 2),
+      shadingPattern: oneOf(pd.shadingPattern, ['stripes', 'dots'], 'stripes'),
+      shadingCoverage: oneOf(pd.shadingCoverage, ['full', 'half-left', 'half-right'], 'full'),
+      centerText: text(pd.centerText, 8),
+      miscarriageSex: oneOf(pd.miscarriageSex, ['unknown', 'male', 'female'], 'unknown'),
+      noSnap: !!pd.noSnap, siblingFixed: !!pd.siblingFixed,
+      customLabel: pd.customLabel == null ? undefined : text(pd.customLabel, 200)
+    });
+  });
+  // someone without a place goes on a grid below everyone else (finding each a free place among all the
+  // others, as adding one person by hand does, would take minutes for a few hundred)
+  const unplaced = persons.filter(p => p.x === undefined || p.y === undefined);
+  const bottom = Math.max(0, ...persons.filter(p => p.y !== undefined).map(p => p.y));
+  unplaced.forEach((p, k) => { p.x = 100 + (k % 20) * 110; p.y = bottom + 200 + Math.floor(k / 20) * 160; });
+  const people = new Set(persons.map(p => p.id));
+  const labels = [];
+  items(data.labels, MOST.labels, 'labels').forEach(ld => {
+    const lid = own(ld.id);
+    if (lid) labels.push({ id: lid, x: coord(ld.x, 0), y: coord(ld.y, 0), text: text(ld.text, 5000),
+                           size: safeNumber(ld.size, undefined, 4, 200), bordered: !!ld.bordered });
+  });
+  // lines join people (and a child's line, a couple) who are in the drawing
+  const partnerships = [];
+  items(data.partnerships, MOST.lines, 'couples').forEach(pd => {
+    const fromId = id(pd.fromId), toId = id(pd.toId);
+    const lid = people.has(fromId) && people.has(toId) ? own(pd.id) : '';
+    if (lid) partnerships.push({ id: lid, fromId, toId, type: name(pd.type, 40) });
+  });
+  const couples = new Set(partnerships.map(p => p.id));
+  const childLinks = [];
+  items(data.childLinks, MOST.lines, "children's lines").forEach(cd => {
+    const partnershipId = id(cd.partnershipId), childId = id(cd.childId);
+    const lid = couples.has(partnershipId) && people.has(childId) ? own(cd.id) : '';
+    if (lid) childLinks.push({ id: lid, partnershipId, childId,
+                               branchYOffset: safeNumber(cd.branchYOffset, 0, -1e4, 1e4), dashed: !!cd.dashed });
+  });
+  const twinLinks = [];
+  items(data.twinLinks, MOST.lines, 'twins').forEach(td => {
+    const child1Id = id(td.child1Id), child2Id = id(td.child2Id);
+    const lid = people.has(child1Id) && people.has(child2Id) ? own(td.id) : '';
+    if (lid) twinLinks.push({ id: lid, child1Id, child2Id, type: name(td.type, 40), partnershipId: id(td.partnershipId) });
+  });
+  // the key's entries: its colours and shadings, each with the meaning someone typed
+  const legendLabels = Object.create(null);
+  const ll = data.legendLabels;
+  if (ll && typeof ll === 'object' && !Array.isArray(ll)) {
+    Object.keys(ll).slice(0, 1000).forEach(k => {
+      if (k.length > 200 || k === '__proto__' || k === 'constructor' || k === 'prototype') return;
+      if (typeof ll[k] === 'string' || typeof ll[k] === 'number') legendLabels[k] = text(ll[k], 2000);
+    });
+  }
+  const strokes = items(data.drawStrokes, MOST.strokes, 'drawn lines');
+  if (strokes.reduce((n, sd) => n + (Array.isArray(sd.points) ? sd.points.length : 0), 0) > MOST.points)
+    throw new Error(`its drawn lines have more points than the Studio draws (${MOST.points})`);
+  const drawStrokes = strokes.map(sd => ({
+    points: (Array.isArray(sd.points) ? sd.points : [])
+      .map(pt => pt && typeof pt === 'object' ? { x: coord(pt.x, NaN), y: coord(pt.y, NaN) } : null)
+      .filter(pt => pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)),
+    color: safeColor(sd.color, '#1a2332'), width: safeNumber(sd.width, 4, 0.5, 100)
+  }));
+
+  return {
+    version: safeNumber(data.version, 5),
+    personIdCounter: count(data.personIdCounter), labelIdCounter: count(data.labelIdCounter), lineIdCounter: count(data.lineIdCounter),
+    persons, labels, partnerships, childLinks, twinLinks, legendLabels,
+    legendVisible: !!data.legendVisible,
+    legendX: coord(data.legendX), legendY: coord(data.legendY),
+    legendFit: data.legendFit === 'wrap' ? 'wrap' : 'widen', legendWidth: safeNumber(data.legendWidth, undefined),
+    zoom: safeNumber(data.zoom, undefined, 0.1, 3), panX: safeNumber(data.panX, undefined), panY: safeNumber(data.panY, undefined),
+    numberingMode: oneOf(data.numberingMode, ['numbers', 'letters', 'lettersonly', 'freetext', 'off'], undefined),
+    showNumbering: data.showNumbering === false ? false : undefined,
+    partnerGapMultiplier: safeNumber(data.partnerGapMultiplier, undefined, 1, 5),
+    childHeightMultiplier: safeNumber(data.childHeightMultiplier, undefined, 2, 6),
+    drawStrokes
+  };
+}
+
 // ── Dynamic canvas sizing ──
 // Canvas starts at 6000×6000 and auto-expands when content nears the edge.
 let canvasWidth = 6000, canvasHeight = 6000;
@@ -1268,9 +1414,9 @@ function setDrawWidth(val) {
 
 function buildStrokePathD(points) {
   if (points.length < 2) return '';
-  let d = `M ${points[0].x} ${points[0].y}`;
+  let d = `M ${Number(points[0].x)} ${Number(points[0].y)}`;
   for (let i = 1; i < points.length; i++) {
-    d += ` L ${points[i].x} ${points[i].y}`;
+    d += ` L ${Number(points[i].x)} ${Number(points[i].y)}`;
   }
   return d;
 }
@@ -1279,8 +1425,8 @@ function createStrokeSVG(stroke) {
   const svg = document.getElementById('draw-layer');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', buildStrokePathD(stroke.points));
-  path.setAttribute('stroke', stroke.color);
-  path.setAttribute('stroke-width', stroke.width);
+  path.setAttribute('stroke', safeColor(stroke.color, '#1a2332'));
+  path.setAttribute('stroke-width', safeNumber(stroke.width, 4, 0.5, 100));
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke-linecap', 'round');
   path.setAttribute('stroke-linejoin', 'round');
@@ -1954,14 +2100,14 @@ function makeShapeSVG(shape, deceased, fillMode, fillColor, quarters, centerText
       const dl = halfDividerCoords(shape);
       extra = `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${tc}" stroke-width="${STROKE_W}"/>`;
     } else {
-      extra = `<text x="26" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="${tc}" font-family="-apple-system,sans-serif">${centerText}</text>`;
+      extra = `<text x="26" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="${tc}" font-family="-apple-system,sans-serif">${escapeXML(centerText)}</text>`;
     }
   }
   return `<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">${fills}${border}${brackets}${deathLine}${extra}</svg>`;
 }
 
 function makeSolidFill(shape, color) {
-  return `<path d="${shapePathD(shape)}" fill="${color}" stroke="none"/>`;
+  return `<path d="${shapePathD(shape)}" fill="${svgPaint(color)}" stroke="none"/>`;
 }
 
 function makeHalfFill(shape, halves) {
@@ -1970,7 +2116,7 @@ function makeHalfFill(shape, halves) {
   let svg = '';
   paths.forEach((d, i) => {
     const c = halves[i] || '#ffffff';
-    svg += `<path d="${d}" fill="${c}" stroke="none"/>`;
+    svg += `<path d="${d}" fill="${svgPaint(c)}" stroke="none"/>`;
   });
   svg += `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${STROKE_COLOR}" stroke-width="1" opacity="0.3"/>`;
   return svg;
@@ -1982,7 +2128,7 @@ function makeQuarteredFill(shape, quarters) {
   let svg = '';
   paths.forEach((d, i) => {
     const c = quarters[i] || '#ffffff';
-    svg += `<path d="${d}" fill="${c}" stroke="none"/>`;
+    svg += `<path d="${d}" fill="${svgPaint(c)}" stroke="none"/>`;
   });
   dividers.forEach(dl => {
     svg += `<line x1="${dl.x1}" y1="${dl.y1}" x2="${dl.x2}" y2="${dl.y2}" stroke="${STROKE_COLOR}" stroke-width="1" opacity="0.3"/>`;
@@ -2042,7 +2188,7 @@ function addPerson(customId, customX, customY, customShape, customText, customDe
   if (!customId) pushUndo();
   const id = customId || 'person-' + (++personIdCounter);
   if (!customId) { const n = parseInt(id.split('-')[1]) || 0; if (n > personIdCounter) personIdCounter = n; }
-  else { const n = parseInt(id.split('-')[1]) || 0; if (n >= personIdCounter) personIdCounter = n; }
+  else { const n = parseInt(id.split('-')[1]) || 0; if (n < 1e9 && n >= personIdCounter) personIdCounter = n; }
 
   const shape = customShape || currentShape;
   const area = document.getElementById('canvasArea');
@@ -2145,9 +2291,11 @@ function addPerson(customId, customX, customY, customShape, customText, customDe
   };
   persons.set(id, personData);
 
-  updateNumbering();
-  updateTextWrapping();
-  expandCanvasIfNeeded();
+  if (!loadingDrawing) {  // (when a drawing is opened, restoreSession() does these once, after its last person)
+    updateNumbering();
+    updateTextWrapping();
+    expandCanvasIfNeeded();
+  }
   scheduleSave();
   if (!customId) {
     document.getElementById('statusBar').textContent = `Added ${shape}`;
@@ -3002,7 +3150,7 @@ function createLabel(x, y, customId, customText, customSize, customBordered) {
   if (!customId) pushUndo();
   const id = customId || 'label-' + (++labelIdCounter);
   if (!customId) { const n = parseInt(id.split('-')[1]) || 0; if (n > labelIdCounter) labelIdCounter = n; }
-  else { const n = parseInt(id.split('-')[1]) || 0; if (n >= labelIdCounter) labelIdCounter = n; }
+  else { const n = parseInt(id.split('-')[1]) || 0; if (n < 1e9 && n >= labelIdCounter) labelIdCounter = n; }
 
   const size = customSize || currentLabelSize;
   const bordered = customBordered !== undefined ? customBordered : false;
@@ -4138,7 +4286,7 @@ function addPartnership(fromId, toId, customId, type) {
     updatePartnershipPos(pship);
   }
 
-  syncAfterDefaultPlacement();
+  if (!loadingDrawing) syncAfterDefaultPlacement();  // (restoreSession() does it once, after its last line)
   scheduleSave();
   return pship;
 }
@@ -4404,7 +4552,7 @@ function addChildLink(partnershipId, childId, customId) {
   }
 
   updateChildLinkPos(cl);
-  syncAfterDefaultPlacement();
+  if (!loadingDrawing) syncAfterDefaultPlacement();  // (restoreSession() does it once, after its last line)
   scheduleSave();
   return cl;
 }
@@ -5217,7 +5365,7 @@ function alignConnectedPersons() {
   });
 
   // 2. Align siblings: children of the same partnership snap to leftmost sibling's Y
-  const childrenByPartnership = {};
+  const childrenByPartnership = Object.create(null);  // (keyed by ids, which may be any text)
   childLinks.forEach(cl => {
     if (!childrenByPartnership[cl.partnershipId]) childrenByPartnership[cl.partnershipId] = [];
     childrenByPartnership[cl.partnershipId].push(cl.childId);
@@ -5296,7 +5444,7 @@ function addTwinLink(child1Id, child2Id, type, customId) {
   updateTwinLinkPos(tl);
   // Re-render the child links for both twins to show diagonal paths
   childLinks.filter(cl => cl.childId === child1Id || cl.childId === child2Id).forEach(cl => updateChildLinkPos(cl));
-  updateNumbering();
+  if (!loadingDrawing) updateNumbering();  // (restoreSession() numbers everyone once, at the end)
   scheduleSave();
   document.getElementById('statusBar').textContent = (type === 'identical' ? 'Identical' : 'Non-identical') + ' twins linked!';
 }
@@ -5364,31 +5512,37 @@ function getConnectedGroupExcludingPartnership(startId, excludePartnershipId) {
   // child links removed. This lets us ask: "were these two people already
   // connected before this partnership existed?" If yes, the line is an
   // internal/consanguineous relationship for default-layout purposes.
+  // The partnerships and child links are put into tables once per walk, rather than gone through again for each
+  // person reached: in a drawing with a few thousand lines that took seconds for each new line.
+  const byPerson = new Map(), childrenOf = new Map(), parentLinksOf = new Map(), firstPship = new Map();
+  const add = (m, k, v) => { if (!m.has(k)) m.set(k, []); m.get(k).push(v); };
+  partnerships.forEach(p => {
+    if (!firstPship.has(p.id)) firstPship.set(p.id, p);
+    if (p.id === excludePartnershipId) return;
+    add(byPerson, p.fromId, p);
+    if (p.toId !== p.fromId) add(byPerson, p.toId, p);
+  });
+  childLinks.forEach(cl => {
+    if (cl.partnershipId === excludePartnershipId) return;
+    add(childrenOf, cl.partnershipId, cl.childId);
+    add(parentLinksOf, cl.childId, cl.partnershipId);
+  });
   const visited = new Set();
   const queue = [startId];
-  while (queue.length) {
-    const id = queue.shift();
+  for (let i = 0; i < queue.length; i++) {
+    const id = queue[i];
     if (visited.has(id) || !persons.has(id)) continue;
     visited.add(id);
-    partnerships.forEach(p => {
-      if (p.id === excludePartnershipId) return;
+    (byPerson.get(id) || []).forEach(p => {
       if (p.fromId === id && !visited.has(p.toId)) queue.push(p.toId);
       if (p.toId === id && !visited.has(p.fromId)) queue.push(p.fromId);
-      if (p.fromId === id || p.toId === id) {
-        childLinks.forEach(cl => {
-          if (cl.partnershipId === excludePartnershipId) return;
-          if (cl.partnershipId === p.id && !visited.has(cl.childId)) queue.push(cl.childId);
-        });
-      }
+      (childrenOf.get(p.id) || []).forEach(childId => { if (!visited.has(childId)) queue.push(childId); });
     });
-    childLinks.forEach(cl => {
-      if (cl.partnershipId === excludePartnershipId) return;
-      if (cl.childId === id) {
-        const ps = partnerships.find(p => p.id === cl.partnershipId);
-        if (ps && ps.id !== excludePartnershipId) {
-          if (!visited.has(ps.fromId)) queue.push(ps.fromId);
-          if (!visited.has(ps.toId)) queue.push(ps.toId);
-        }
+    (parentLinksOf.get(id) || []).forEach(pshipId => {
+      const ps = firstPship.get(pshipId);
+      if (ps && ps.id !== excludePartnershipId) {
+        if (!visited.has(ps.fromId)) queue.push(ps.fromId);
+        if (!visited.has(ps.toId)) queue.push(ps.toId);
       }
     });
   }
@@ -5417,13 +5571,27 @@ function getAncestorIdsForPerson(personId) {
   // Upward-only parent traversal. This is deliberately not the same as
   // getConnectedGroup(): spouses/partners are not traversed, and a co-parent
   // is not treated as a blood relative merely because they share a child.
+  // Each person's parents are looked up from a table made once per walk (as getParentIdsForPerson() finds them),
+  // not by going through every child's line again for each ancestor: in a drawing whose people are all related
+  // that took minutes.
+  const pshipById = new Map();
+  partnerships.forEach(p => { if (!pshipById.has(p.id)) pshipById.set(p.id, p); });
+  const parentsOf = new Map();
+  childLinks.forEach(cl => {
+    const ps = pshipById.get(cl.partnershipId);
+    if (!ps) return;
+    if (!parentsOf.has(cl.childId)) parentsOf.set(cl.childId, []);
+    const list = parentsOf.get(cl.childId);
+    if (persons.has(ps.fromId) && ps.fromId !== cl.childId) list.push(ps.fromId);
+    if (persons.has(ps.toId) && ps.toId !== cl.childId) list.push(ps.toId);
+  });
   const out = new Set();
-  const queue = getParentIdsForPerson(personId);
-  while (queue.length) {
-    const id = queue.shift();
+  const queue = (parentsOf.get(personId) || []).slice();
+  for (let i = 0; i < queue.length; i++) {
+    const id = queue[i];
     if (out.has(id) || !persons.has(id)) continue;
     out.add(id);
-    getParentIdsForPerson(id).forEach(pid => { if (!out.has(pid)) queue.push(pid); });
+    (parentsOf.get(id) || []).forEach(pid => { if (!out.has(pid)) queue.push(pid); });
   }
   return out;
 }
@@ -6327,7 +6495,7 @@ function buildLegendBox() {
       row.className = 'legend-row';
       const swatch = document.createElement('div');
       swatch.className = 'legend-swatch';
-      swatch.style.background = color;
+      swatch.style.background = safeColor(color, '#ffffff');
       row.appendChild(swatch);
       row.appendChild(legendField(color));
       box.appendChild(row);
@@ -6340,7 +6508,7 @@ function buildLegendBox() {
       swatch.style.overflow = 'hidden';
       swatch.style.position = 'relative';
       // Build mini SVG pattern swatch
-      const pid = 'leg-' + sh.key.replace(/:/g, '-');
+      const pid = 'leg-' + sh.key.replace(/[^A-Za-z0-9-]/g, '-');
       let patDef = '';
       if (sh.pattern === 'dots') {
         patDef = `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="6" height="6"><circle cx="3" cy="3" r="1.2" fill="${STROKE_COLOR}"/></pattern>`;
@@ -6604,6 +6772,7 @@ function buildSessionData() {
 }
 
 function restoreSession(data) {
+  data = cleanSession(data);  // (before anything is cleared: a file that is not a drawing leaves this one as it is)
   deselectAll();
   document.getElementById('canvas').querySelectorAll('.person, .label, .legend-box').forEach(el => el.remove());
   document.getElementById('lines-layer').innerHTML = '';
@@ -6630,43 +6799,49 @@ function restoreSession(data) {
   legendWidth = clampLegendWidth(data.legendWidth);
   document.querySelectorAll('[data-lf]').forEach(b => b.classList.toggle('active', b.dataset.lf === legendFit));
 
-  (data.persons || []).forEach(pd => {
-    // Backward compat: old 'affected' boolean
-    let fm = pd.fillMode || 'none';
-    let fc = pd.fillColor || FILL_COLORS[0];
-    let q = pd.quarters || [null, null, null, null];
-    let h = pd.halves || [null, null];
-    if (pd.affected && fm === 'none') { fm = 'solid'; fc = '#1a2332'; }
-    addPerson(pd.id, pd.x, pd.y, pd.shape, pd.text, pd.deceased, pd.proband, fm, fc, q, pd.centerText || '', pd.miscarriageSex || 'unknown', h, pd.shadingPattern || 'stripes', pd.shadingCoverage || 'full');
-    if (pd.noSnap) { const pp = persons.get(pd.id); if (pp) pp.noSnap = true; }
-    if (pd.siblingFixed) { const pp = persons.get(pd.id); if (pp) pp.siblingFixed = true; }
-    if (pd.customLabel) { const pp = persons.get(pd.id); if (pp) pp.customLabel = pd.customLabel; }
-    const n = parseInt(pd.id.split('-')[1]) || 0; if (n > personIdCounter) personIdCounter = n;
-  });
-  (data.labels || []).forEach(ld => {
-    createLabel(ld.x, ld.y, ld.id, ld.text, ld.size, !!ld.bordered);
-    const n = parseInt(ld.id.split('-')[1]) || 0; if (n > labelIdCounter) labelIdCounter = n;
-  });
-  (data.partnerships || []).forEach(pd => {
-    addPartnership(pd.fromId, pd.toId, pd.id, pd.type || 'normal');
-    const n = parseInt(pd.id.split('-')[1]) || 0; if (n > lineIdCounter) lineIdCounter = n;
-  });
-  (data.childLinks || []).forEach(cd => {
-    addChildLink(cd.partnershipId, cd.childId, cd.id);
-    const cl = childLinks.find(c => c.id === cd.id);
-    if (cl) {
-      cl.branchYOffset = Number(cd.branchYOffset) || 0;
-      if (cd.dashed) {
-        cl.dashed = true;
-        cl.els[0].setAttribute('stroke-dasharray', '6 4');
+  loadingDrawing = true;  // (see addPerson: the numbering is done once, below)
+  try {
+    (data.persons || []).forEach(pd => {
+      // Backward compat: old 'affected' boolean
+      let fm = pd.fillMode || 'none';
+      let fc = pd.fillColor || FILL_COLORS[0];
+      let q = pd.quarters || [null, null, null, null];
+      let h = pd.halves || [null, null];
+      if (pd.affected && fm === 'none') { fm = 'solid'; fc = '#1a2332'; }
+      addPerson(pd.id, pd.x, pd.y, pd.shape, pd.text, pd.deceased, pd.proband, fm, fc, q, pd.centerText || '', pd.miscarriageSex || 'unknown', h, pd.shadingPattern || 'stripes', pd.shadingCoverage || 'full');
+      if (pd.noSnap) { const pp = persons.get(pd.id); if (pp) pp.noSnap = true; }
+      if (pd.siblingFixed) { const pp = persons.get(pd.id); if (pp) pp.siblingFixed = true; }
+      if (pd.customLabel) { const pp = persons.get(pd.id); if (pp) pp.customLabel = pd.customLabel; }
+      const n = parseInt(pd.id.split('-')[1]) || 0; if (n < 1e9 && n > personIdCounter) personIdCounter = n;
+    });
+    (data.labels || []).forEach(ld => {
+      createLabel(ld.x, ld.y, ld.id, ld.text, ld.size, !!ld.bordered);
+      const n = parseInt(ld.id.split('-')[1]) || 0; if (n < 1e9 && n > labelIdCounter) labelIdCounter = n;
+    });
+    (data.partnerships || []).forEach(pd => {
+      addPartnership(pd.fromId, pd.toId, pd.id, pd.type || 'normal');
+      const n = parseInt(pd.id.split('-')[1]) || 0; if (n < 1e9 && n > lineIdCounter) lineIdCounter = n;
+    });
+    (data.childLinks || []).forEach(cd => {
+      addChildLink(cd.partnershipId, cd.childId, cd.id);
+      const cl = childLinks.find(c => c.id === cd.id);
+      if (cl) {
+        cl.branchYOffset = Number(cd.branchYOffset) || 0;
+        if (cd.dashed) {
+          cl.dashed = true;
+          cl.els[0].setAttribute('stroke-dasharray', '6 4');
+        }
       }
-    }
-    const n = parseInt(cd.id.split('-')[1]) || 0; if (n > lineIdCounter) lineIdCounter = n;
-  });
-  (data.twinLinks || []).forEach(td => {
-    addTwinLink(td.child1Id, td.child2Id, td.type, td.id);
-    const n = parseInt(td.id.split('-')[1]) || 0; if (n > lineIdCounter) lineIdCounter = n;
-  });
+      const n = parseInt(cd.id.split('-')[1]) || 0; if (n < 1e9 && n > lineIdCounter) lineIdCounter = n;
+    });
+    (data.twinLinks || []).forEach(td => {
+      addTwinLink(td.child1Id, td.child2Id, td.type, td.id);
+      const n = parseInt(td.id.split('-')[1]) || 0; if (n < 1e9 && n > lineIdCounter) lineIdCounter = n;
+    });
+  } finally {
+    loadingDrawing = false;
+  }
+  updateAllConnections();  // (every line once, now that all are there: see addPartnership and addChildLink)
 
   normalizeRelatedPartnershipTypes();
 
@@ -6720,7 +6895,8 @@ function importJSON(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
+      // (a file that is not a drawing is turned away here, before Undo is touched)
+      const data = cleanSession(JSON.parse(e.target.result));
       deselectAll();
       pushUndo();
       isRestoring = true;
@@ -7160,7 +7336,7 @@ function saveAsImage() {
   // ── Draw legend ──
   const totalLegendItems = legendColors.length + legendShadings.length;
   if (legendVisible && totalLegendItems > 0) {
-    const lx = legendX, ly = legendY, lw = legendLayout.lw;
+    const lx = safeNumber(legendX, 100), ly = safeNumber(legendY, 100), lw = legendLayout.lw;
     const totalH = legendLayout.lh;
     const rowTop = (entry) => { let y = ly + 28; for (const r of legendLayout.rows) { if (r.entry === entry) return y; y += r.h; } return y; };
     const rowLines = (entry) => legendLayout.rows.find(r => r.entry === entry).lines;
@@ -7255,7 +7431,7 @@ function saveAsSVG() {
   const els = [];
 
   // Helper: escape text for SVG
-  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  const esc = escapeXML;
 
   // Helper: SVG line element
   function svgLine(x1,y1,x2,y2,stroke,sw,opacity) {
@@ -7373,21 +7549,21 @@ function saveAsSVG() {
 
     // Fill
     if (p.fillMode === 'solid' && p.fillColor) {
-      g.push(`<path d="${shapePathD(p.shape)}" fill="${p.fillColor}" stroke="none" transform="translate(${x},${y})"/>`);
+      g.push(`<path d="${shapePathD(p.shape)}" fill="${svgPaint(p.fillColor)}" stroke="none" transform="translate(${x},${y})"/>`);
     } else if (p.fillMode === 'half') {
       const hDs = halfPathDs(p.shape);
       hDs.forEach((hd, i) => {
-        g.push(`<path d="${hd}" fill="${p.halves[i] || '#ffffff'}" stroke="none" transform="translate(${x},${y})"/>`);
+        g.push(`<path d="${hd}" fill="${svgPaint(p.halves[i] || '#ffffff')}" stroke="none" transform="translate(${x},${y})"/>`);
       });
     } else if (p.fillMode === 'quartered') {
       const qDs = quarterPathDs(p.shape);
       qDs.forEach((qd, i) => {
-        g.push(`<path d="${qd}" fill="${p.quarters[i] || '#ffffff'}" stroke="none" transform="translate(${x},${y})"/>`);
+        g.push(`<path d="${qd}" fill="${svgPaint(p.quarters[i] || '#ffffff')}" stroke="none" transform="translate(${x},${y})"/>`);
       });
     } else if (p.fillMode === 'shading') {
       const sPat = p.shadingPattern || 'stripes';
       const sCov = p.shadingCoverage || 'full';
-      const patId = 'exp-pat-' + p.id;
+      const patId = 'exp-pat-' + String(p.id).replace(/[^A-Za-z0-9_-]/g, '_');
       let patDef = '';
       if (sPat === 'dots') {
         patDef = `<pattern id="${patId}" patternUnits="userSpaceOnUse" width="8" height="8"><circle cx="4" cy="4" r="1.6" fill="${STROKE_COLOR}"/></pattern>`;
@@ -7539,7 +7715,7 @@ function saveAsSVG() {
   // ── Legend ──
   const totalSvgLegendItems = legendColors.length + legendShadings.length;
   if (legendVisible && totalSvgLegendItems > 0) {
-    const lx = legendX, ly = legendY, lw = legendLayout.lw;
+    const lx = safeNumber(legendX, 100), ly = safeNumber(legendY, 100), lw = legendLayout.lw;
     const totalH = legendLayout.lh;
     const rowTop = (entry) => { let y = ly + 28; for (const r of legendLayout.rows) { if (r.entry === entry) return y; y += r.h; } return y; };
     const rowText = (entry, ry) => legendLayout.rows.find(r => r.entry === entry).lines.map((line, k) =>
@@ -7549,7 +7725,7 @@ function saveAsSVG() {
     let svgLegIdx = 0;
     legendColors.forEach((lc) => {
       const ry = rowTop(lc);
-      els.push(`<rect x="${lx + 12}" y="${ry}" width="16" height="16" fill="${lc.color}" stroke="#dde1e6" stroke-width="1"/>`);
+      els.push(`<rect x="${lx + 12}" y="${ry}" width="16" height="16" fill="${svgPaint(lc.color)}" stroke="#dde1e6" stroke-width="1"/>`);
       els.push(rowText(lc, ry));
       svgLegIdx++;
     });
@@ -7581,7 +7757,7 @@ function saveAsSVG() {
   // ── Freehand draw strokes (on top of everything) ──
   drawStrokes.forEach(s => {
     if (s.points.length < 2) return;
-    els.push(`<path d="${buildStrokePathD(s.points)}" stroke="${esc(s.color)}" stroke-width="${s.width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+    els.push(`<path d="${buildStrokePathD(s.points)}" stroke="${esc(safeColor(s.color, '#1a2332'))}" stroke-width="${safeNumber(s.width, 4, 0.5, 100)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
   });
 
   // ── Assemble SVG document ──

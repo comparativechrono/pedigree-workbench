@@ -2,14 +2,17 @@
 """Copy Pedigree Studio into the workbench: assets/studio/index.html.
 
 The Studio tab shows Pedigree Studio (github.com/comparativechrono/PedigreeStudio)
-in a frame. Its page is copied here unchanged except for two things:
+in a frame. Its page is copied here unchanged except for three things:
 
 1. it keeps its drawing in the browser under the name ``pedwb:studio-session``
    rather than ``pedigree-studio-session``, so that the workbench's drawing and
    one made in Pedigree Studio itself, on the same web address, never overwrite
    each other;
 2. it loads ``bridge.js`` (assets/studio/bridge.js), through which the workbench
-   opens files in it, saves its drawing and runs Tidy.
+   opens files in it, saves its drawing and runs Tidy;
+3. its Content Security Policy, which lets the page run only the code written
+   into it, also lets it run bridge.js from beside it ('self'). It still lets
+   the page load nothing else and send no request.
 
 To take a newer Pedigree Studio, run one of
 
@@ -34,6 +37,8 @@ OUT = os.path.join(ROOT, "assets", "studio")
 OLD_KEY = "'pedigree-studio-session'"
 NEW_KEY = "'pedwb:studio-session'"
 BRIDGE = '<script src="bridge.js"></script>\n'
+CSP_SCRIPTS = "script-src 'unsafe-inline'"
+CSP_SCRIPTS_WITH_BRIDGE = "script-src 'self' 'unsafe-inline'"
 
 
 def from_git(repo, ref):
@@ -56,12 +61,19 @@ def patch(text):
         if i < 0:
             raise SystemExit("index.html has no </body>")
         text = text[:i] + BRIDGE + text[i:]
+    # the Studio's Content Security Policy runs only code written into the page: let it run bridge.js too
+    csp = "Content-Security-Policy" in text
+    if csp:
+        if text.count(CSP_SCRIPTS) != 1:
+            raise SystemExit("Pedigree Studio's Content Security Policy no longer says {} once – look at it, and change "
+                             "this script so that the policy still lets bridge.js run".format(CSP_SCRIPTS))
+        text = text.replace(CSP_SCRIPTS, CSP_SCRIPTS_WITH_BRIDGE)
     # the functions bridge.js uses must still be there
     for fn in ("buildSessionData", "restoreSession", "runManagedPedigreeLayout", "fitToView", "scheduleSave",
                "pushUndo", "deselectAll"):
         if not re.search(r"function\s+{}\s*\(".format(fn), text):
             raise SystemExit("Pedigree Studio has no function {}() any more: bridge.js needs it".format(fn))
-    return text, n
+    return text, n, csp
 
 
 def main():
@@ -77,13 +89,16 @@ def main():
         text = open(a.file, encoding="utf-8").read()
         source = {"file": os.path.basename(a.file)}
     source["sha256_of_original"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    text, n = patch(text)
+    text, n, csp = patch(text)
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as fh:
         fh.write(text)
     source["copied"] = datetime.date.today().isoformat()
     source["changes"] = ["the browser-storage key {} became {} ({} places)".format(OLD_KEY, NEW_KEY, n),
                          "loads bridge.js before </body>"]
+    if csp:
+        source["changes"].append("its Content Security Policy lets it run bridge.js too ({} became {})".format(
+            CSP_SCRIPTS, CSP_SCRIPTS_WITH_BRIDGE))
     with open(os.path.join(OUT, "SOURCE.json"), "w", encoding="utf-8") as fh:
         json.dump(source, fh, indent=2)
         fh.write("\n")
