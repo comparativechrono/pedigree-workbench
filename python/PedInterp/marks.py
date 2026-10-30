@@ -135,13 +135,18 @@ def _slashed(ink, symbol, line_width):
             best, best_cover = (k, m), min(sides)
     if best_cover < SLASH_INSIDE:
         return False, False
-    # (hatching or shading: much ink inside away from the line, and from the middle, where a carrier's dot is)
+    # (hatching or shading: much ink inside away from the line, and from the middle, where a carrier's dot is; or many
+    # pieces of ink inside, each too big for a speck, as the dots of the Studio's shading are, where the inside is too
+    # small to tell a slash from a row of them: a slash is one piece, with a carrier's dot or a letter beside it at most)
     k, m = best
     ys, xs = np.nonzero(window & inner)
     dx, dy = xs - cx, ys - cy
     distance = np.abs(dx * across[k, 0] + dy * across[k, 1] - offsets[m])
     away = (distance > near + line_width) & (np.hypot(dx, dy) > 0.18 * size)
-    return float(away.sum()) <= 0.08 * float(inner.sum()), False
+    if float(away.sum()) > 0.08 * float(inner.sum()):
+        return False, False
+    _, _, stats, _ = cv2.connectedComponentsWithStats((window & inner).astype(np.uint8), connectivity=8)
+    return int((stats[1:, cv2.CC_STAT_AREA] >= line_width ** 2).sum()) < 5, False
 
 
 def _stubs(window, outer, centre, size, line_width):
@@ -341,59 +346,47 @@ def _arrow(points, line_width, size):
     return tip, point, bool(headed)
 
 
-def _arcs(ink, x, y, radius):
-    '''
-    Where ink crosses a circle round (x, y): the middle of each arc of ink on the circle, in degrees (anticlockwise from
-    the right, as the picture is seen), and how wide it is, in degrees
-    '''
-    step = 3
-    angles = np.arange(0, 360, step)
-    xs = np.round(x + radius * np.cos(np.radians(angles))).astype(np.int64)
-    ys = np.round(y - radius * np.sin(np.radians(angles))).astype(np.int64)
-    inside = (xs >= 0) & (ys >= 0) & (xs < ink.shape[1]) & (ys < ink.shape[0])
-    on = np.zeros(len(angles), bool)
-    on[inside] = ink[ys[inside], xs[inside]] > 0
-    if on.all() or not on.any():
-        return []
-    # (starting where the circle is off the ink, so no arc is cut in two)
-    start = int(np.argmin(on))
-    on = np.roll(on, -start)
-    arcs, k = [], 0
-    while k < len(on):
-        if on[k]:
-            j = k
-            while j < len(on) and on[j]:
-                j += 1
-            arcs.append(((angles[start] + step * (k + j - 1) / 2) % 360, step * (j - k)))
-            k = j
-        else:
-            k += 1
-    return arcs
-
-
 def _three_ways(ink, xs, ys, radii):
     '''
     Of the points (xs, ys), those round which ink runs three ways, as from the tip of an arrow's head: where circles at
-    two of the radii next to each other each cross the ink in three arcs, as _arcs finds them. The others can't be the
-    tip, and are looked at no further, which saves looking round each point of the ink, one by one, in a drawing with
-    much writing in it
+    two of the radii next to each other each cross the ink in three arcs. The others can't be the tip, and are looked at
+    no further. Returns each point kept, (x, y, arcs), with, for each radius, the middle of each arc and how wide it is,
+    in degrees (anticlockwise from the right, as the picture is seen), or None where the circle doesn't cross the ink in
+    three arcs. All the points are looked round at once, as looking round each in turn is slow in a drawing with much
+    writing in it.
     '''
     if len(radii) < 2 or not len(xs):
         return []
-    angles = np.radians(np.arange(0, 360, 3))
-    three = []
+    step = 3
+    angles = np.arange(0, 360, step)
+    ons, three = [], []
     for radius in radii:
-        sx = np.round(xs[:, None] + radius * np.cos(angles)[None, :]).astype(np.int64)
-        sy = np.round(ys[:, None] - radius * np.sin(angles)[None, :]).astype(np.int64)
+        sx = np.round(xs[:, None] + radius * np.cos(np.radians(angles))[None, :]).astype(np.int64)
+        sy = np.round(ys[:, None] - radius * np.sin(np.radians(angles))[None, :]).astype(np.int64)
         inside = (sx >= 0) & (sy >= 0) & (sx < ink.shape[1]) & (sy < ink.shape[0])
         on = np.zeros(sx.shape, bool)
         on[inside] = ink[sy[inside], sx[inside]] > 0
+        ons.append(on)
         # (the arcs, each counted where it starts, going round)
         three.append((on & ~np.roll(on, 1, axis=1)).sum(axis=1) == 3)
-    keep = np.zeros(len(xs), bool)
-    for near, far in zip(three, three[1:]):
-        keep |= near & far
-    return list(zip(xs[keep], ys[keep]))
+    three = np.stack(three, axis=1)
+    kept = np.nonzero((three[:, :-1] & three[:, 1:]).any(axis=1))[0]
+    arcs = {point: [None] * len(radii) for point in kept.tolist()}
+    for r, on in enumerate(ons):
+        rows = kept[three[kept, r]]
+        if not len(rows):
+            continue
+        # (each circle from where it is first off the ink, so no arc is cut in two: each arc runs from k up to j)
+        first = np.argmin(on[rows], axis=1)
+        turned = on[rows[:, None], (first[:, None] + np.arange(len(angles))[None, :]) % len(angles)]
+        edges = np.diff(np.pad(turned.astype(np.int8), ((0, 0), (1, 1))), axis=1)
+        k = np.nonzero(edges == 1)[1].reshape(-1, 3)
+        j = np.nonzero(edges == -1)[1].reshape(-1, 3)
+        middles = (angles[first][:, None] + step * (k + j - 1) / 2) % 360
+        widths = step * (j - k)
+        for row, middle, width in zip(rows.tolist(), middles, widths):
+            arcs[row][r] = list(zip(middle, width))
+    return [(xs[point], ys[point], arcs[point]) for point in kept.tolist()]
 
 
 def _runs_straight(ink, x, y, angle, start, end, line_width):
@@ -458,8 +451,19 @@ def _arrowhead(free, origin, symbol, line_width):
     # the three strokes are seen at two distances from the point next to each other: far enough from it to see them
     # apart, however thick the pen, and near enough not to pass the end of a short head, as Pedigree Studio draws it
     radii = [radius for radius in (r * size for r in (0.06, 0.08, 0.1, 0.12, 0.14)) if radius >= 1.8 * line_width + 2]
-    points = _three_ways(thick, xs[::2] + (x0 - ox), ys[::2] + (y0 - oy), radii)
-    for x, y in points:
+    fx, fy = xs[::2] + (x0 - ox), ys[::2] + (y0 - oy)
+    # (first, all at once and with a little to spare, the points on the symbol's lower left and near it, as each point
+    # must be below: so not the writing straight under the symbol, nor the lines further off)
+    sides = np.degrees(np.arctan2(-(fy + oy - cy), fx + ox - cx))
+    keep = (sides >= -171) & (sides <= -99)
+    bx, by, bw, bh = symbol['box']
+    if bx >= ox and by >= oy and bx + bw <= ox + free.shape[1] and by + bh <= oy + free.shape[0]:
+        filled = np.zeros(free.shape, np.uint8)
+        cv2.fillPoly(filled, [symbol['contour'] - np.array([ox, oy], np.int32)], 1)
+        off = cv2.distanceTransform(1 - filled, cv2.DIST_L2, 5)
+        keep &= off[fy, fx] <= 0.52 * size + 3
+    points = _three_ways(thick, fx[keep], fy[keep], radii)
+    for x, y, arcs_at in points:
         px, py = float(x + ox), float(y + oy)
         away = math.degrees(math.atan2(-(py - cy), px - cx))
         if not -170 <= away <= -100:
@@ -468,9 +472,8 @@ def _arrowhead(free, origin, symbol, line_width):
             continue
         # the three strokes, at each distance: straight, so the same ways at both
         seen = []
-        for radius in radii:
-            arcs = _arcs(thick, x, y, radius)
-            if len(arcs) != 3 or any(w * math.pi / 180 * radius > 3 * line_width + 4 for _, w in arcs):
+        for radius, arcs in zip(radii, arcs_at):
+            if arcs is None or any(w * math.pi / 180 * radius > 3 * line_width + 4 for _, w in arcs):
                 seen.append(None)
                 continue
             seen.append(sorted(_turn(away, a) for a, _ in arcs))

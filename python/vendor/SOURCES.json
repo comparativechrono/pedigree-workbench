@@ -19,11 +19,11 @@
   "pedinterp": {
     "package": "PedInterp",
     "folder": "PedInterp",
-    "version": "0.1.8.dev29+g7ac577d36",
-    "wheel": "pedinterp-0.1.8.dev29+g7ac577d36-py3-none-any.whl",
-    "sha256": "4d154a2df47b4a99a702124d1e251fc09ce1b2c5f4ea40ffd691e828a140a814",
+    "version": "0.1.8.dev32+g8795c9884",
+    "wheel": "pedinterp-0.1.8.dev32+g8795c9884-py3-none-any.whl",
+    "sha256": "794bdfe65c86f3f41022604027cda9b19ca5a106a2cc7e56736543d05632eec7",
     "from": "https://github.com/comparativechrono/pedigree-interpreter/pull/11",
-    "files_sha256": "c4868da83125cbf8022f4711a420e0347eb9c9c4cf4665a4ec93f8331bc6a02a"
+    "files_sha256": "daaf73f4a4f87842a93cdcf18e14fca88daffb137eba0889bf328e360fd22924"
   },
   "pednet": {
     "package": "pednet",
