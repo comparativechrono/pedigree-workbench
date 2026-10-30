@@ -1,10 +1,10 @@
 {
   "repository": "https://github.com/comparativechrono/pedigreestudio",
-  "ref": "key-long-entries",
-  "commit": "81dbf796c56b8ae698f7facb6402bccfb916b145",
-  "committed": "2026-10-19T15:04:13+01:00",
-  "sha256_of_original": "163579d88643293c76ba4c4405d55bd75245c835d7247ec76dbf404b966cb03f",
-  "copied": "2026-10-19",
+  "ref": "draw-defaults",
+  "commit": "45507a61cb58a78a1d5085b61004e5124b7b1333",
+  "committed": "2026-10-30T11:47:51+00:00",
+  "sha256_of_original": "f53c2bff3719619d416956a98d87f8349da80a9cbe0d86f46be99b8962ce246f",
+  "copied": "2026-10-30",
   "changes": [
     "the browser-storage key 'pedigree-studio-session' became 'pedwb:studio-session' (3 places)",
     "loads bridge.js before </body>"
