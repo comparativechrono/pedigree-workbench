@@ -790,7 +790,7 @@
       <div class="lbl">Inside the symbol</div>
       <div class="ct-row">
         <button class="ct-btn" type="button" data-ct="" onclick="setCenterText('')">None</button>
-        <button class="ct-btn" type="button" data-ct="dot" onclick="setCenterText('dot')">● Carrier</button>
+        <button class="ct-btn" type="button" data-ct="dot" onclick="setCenterText('dot')" title="A dot: the 2008 symbol for a carrier">● Carrier</button>
         <button class="ct-btn" type="button" data-ct="line" onclick="setCenterText('line')">│ Presymptomatic</button>
         <button class="ct-btn" type="button" data-ct="P" onclick="setCenterText('P')" title="Pregnancy">P</button>
         <button class="ct-btn" type="button" data-ct="D" onclick="setCenterText('D')" title="Donor">D</button>
@@ -1015,7 +1015,7 @@
       </section>
 
       <section class="help-pane" id="helpPane-symbols" role="tabpanel" aria-labelledby="helpTab-symbols" hidden>
-        <p>These are the symbols of the standard pedigree nomenclature (Bennett et al., 2008 and 2022), drawn as Pedigree Studio draws them. Write ages, diagnoses and test results under the symbol with <b>Notes</b>.</p>
+        <p>These are the symbols of the standard pedigree nomenclature (Bennett et al., 2008 and 2022, as corrected in 2025), drawn as Pedigree Studio draws them. Write ages, diagnoses and test results under the symbol with <b>Notes</b>.</p>
         <table class="sym-table" id="symbolTable"></table>
       </section>
 
@@ -10296,7 +10296,7 @@ function buildToolbarKey() {
 function buildSymbolTable() {
   const K = 0.7, ink = STROKE_COLOR, sw = 1.4;
   const S = SHAPE_SIZE * K, H = SHAPE_HALF * K, e0 = 4 * K, e1 = 48 * K;
-  const shapeInner = (shape, o) => makeShapeSVG(shape, !!o.dead, o.fill ? 'solid' : 'none', ink,
+  const shapeInner = (shape, o) => makeShapeSVG(shape, !!o.dead, o.fill ? 'solid' : o.shade ? 'shading' : 'none', ink,
     [null, null, null, null], o.ct || '', [null, null], 'stripes', 'full')
     .replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
   const P = (x, y, shape, o) => `<g transform="translate(${x} ${y}) scale(${K})">${shapeInner(shape, o || {})}</g>`;
@@ -10360,9 +10360,9 @@ function buildSymbolTable() {
     ['Proband, consultand', pic(134, 58, arrow(24, 2, true) + P(24, 2, 'male', { fill: 1 }) + arrow(96, 2) + P(96, 2, 'female')),
       'An arrow at the lower left. With a P, it marks the proband: the affected person through whom the family came to attention. On its own, it marks a consultand: someone seeking advice or testing.',
       'Proband or Consultand in the panel.'],
-    ['Carrier', pic(84, 41, P(...a, 'female', { ct: 'dot' }) + P(...b, 'male', { ct: 'dot' })),
-      'A dot: carries a variant but is not expected to develop the condition, for example a carrier of a recessive condition.',
-      'Inside the symbol: Carrier.'],
+    ['Carrier', pic(84, 41, P(...a, 'female', { shade: 1 }) + P(...b, 'male', { ct: 'dot' })),
+      'Since 2022, a carrier of a recessive condition can be shown with shading named in the key, as for an affected person (left). The dot (right) is the 2008 symbol for a carrier who is not expected to develop the condition.',
+      'Shading in the panel, with an entry such as CF carrier in the key; or, inside the symbol, Carrier for the dot.'],
     ['Presymptomatic carrier', pic(84, 41, P(...a, 'male', { ct: 'line' }) + P(...b, 'female', { ct: 'line' })),
       'A vertical line: has a variant and may develop the condition later, but has no signs of it at present.',
       'Inside the symbol: Presymptomatic.'],
