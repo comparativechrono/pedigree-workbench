@@ -95,6 +95,9 @@ const CASES = [
   // the drawing alone, with the condition in its colour key, and the PED file alone
   ['pedinterp', { input: EX + 'okafor.png', family: 'OKAC', condId: 'HP:0000365', condLabel: 'Hearing impairment' }],
   ['pedinterp', { input: EX + 'okafor-sketch.png', family: 'OKAP', handDrawn: true, studio: false }],
+  // who has died, the proband and carriers, which a PED file can't hold: the drawing and the GA4GH Pedigree only
+  ['pedinterp', { input: EX + 'okafor.png', family: 'OKAM', marks: true, ga4gh: true }],
+  ['pedinterp', { input: EX + 'okafor-sketch.png', family: 'OKASM', handDrawn: true, marks: true }],
   ['pednet-graph', { input: EX + 'okafor_ga4gh-pedigree.json' }],
   ['pednet-mode', { input: EX + 'okafor_ga4gh-pedigree.json', condition: 'HP:0000365' }],
   ['pednet-mode', { input: EX + 'okafor_phenopackets-family.json', condition: 'Hearing impairment', unrecorded: 'unknown' }],

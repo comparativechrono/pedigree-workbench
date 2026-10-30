@@ -205,6 +205,35 @@ def test_pedinterp_reads_the_okafor_pictures_and_their_twins():
             assert rows == [r[1:] for r in read], picture
 
 
+def test_pedinterp_reads_who_has_died_and_the_proband():
+    # with --marks, the Okafor family's five who have died and its proband (Chidi, IV-3), from the picture the Studio
+    # saves, among the names and ages written under its symbols, and from the sketch (--hand-drawn). A PED file can't
+    # hold them, so none is written, and --studio or --ga4gh must be given: the drawing and the GA4GH Pedigree have them
+    needs("numpy", "pandas", "cv2", "PIL")
+    died = {"I-1", "I-2", "II-2", "II-4", "III-4"}
+    for picture, options in (("okafor.png", []), ("okafor-sketch.png", ["--hand-drawn"])):
+        with tempfile.TemporaryDirectory() as tmp:
+            args = ["pedinterp", os.path.join(EXAMPLES, picture), "--labels", "none", "-f", "OKAFOR", "-d", tmp,
+                    "--marks"] + options
+            code, out, err = run(args)
+            assert code == 1 and "can't hold the marks" in err, picture
+            code, out, err = run(args + ["--studio", "--ga4gh"])
+            assert code == 0, err
+            assert out.splitlines()[0].split()[-3:] == ["Deceased", "Proband", "Carrier"], out
+            assert not os.path.exists(os.path.join(tmp, "OKAFOR.ped")), picture
+            doc = json.load(open(os.path.join(tmp, "OKAFOR_ga4gh-pedigree.json"), encoding="utf-8"))
+            status = {p["subject"]["id"]: p["subject"].get("vitalStatus", {}).get("status") for p in doc["individuals"]}
+            # (and IV-2, a pregnancy lost, has died too; the affected, whose symbols are filled in and so might hide a
+            # slash, have no vital status)
+            assert {who for who, s in status.items() if s == "DECEASED"} == died | {"IV-2"}, picture
+            assert {who for who, s in status.items() if s is None} == {"II-3", "IV-3", "IV-4"}, picture
+            assert doc["indexPatients"] == ["IV-3"], picture
+            assert "IV-2 is a pregnancy loss." in doc["narrative"] and "is a carrier" not in doc["narrative"], picture
+            drawing = json.load(open(os.path.join(tmp, "OKAFOR.studio.json"), encoding="utf-8"))
+            assert sum(p["deceased"] for p in drawing["persons"]) == len(died), picture
+            assert sum(p["proband"] for p in drawing["persons"]) == 1, picture
+
+
 def test_pednet_reads_what_pedgen_and_pedinterp_make():
     # in Python, their tables go straight to PedNet
     needs("numpy", "pandas", "cv2", "PIL")

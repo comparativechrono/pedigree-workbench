@@ -109,16 +109,24 @@ def studio_drawing(PED_df, condition=None):
     from the line between them; twins (attrs['twins']) are joined to one point, with a bar if they are identical. A
     child with only one parent in the table is given an unknown parent for the line to come from, as ga4gh2studio
     gives one. People numbered as the Studio numbers them (I-1, II-3) have no text of their own, as the Studio shows
-    its numbers, and anyone else's ID is written under their symbol.
+    its numbers, and anyone else's ID is written under their symbol. The marks of a dataframe read with marks=True are
+    drawn as the Studio draws them: a slash through the symbol of someone who has died, the proband's arrow, and a
+    carrier's dot.
     '''
-    from .core import ga4gh_condition, twin_groups
+    from .core import _marked, ga4gh_condition, has_marks, twin_groups
     layout = PED_df.attrs.get('layout') or {}
     people, sex, affected, parents = [], {}, {}, {}
+    marked = has_marks(PED_df)
+    deceased, proband, carrier = {}, {}, {}
     for row in PED_df.itertuples(index=False):
         person = _id(row.IndividualID)
         people.append(person)
         sex[person] = int(row.Sex)
         affected[person] = int(row.Phenotype) == 2
+        if marked:
+            deceased[person] = _marked(row, 'Deceased')
+            proband[person] = _marked(row, 'Proband')
+            carrier[person] = _marked(row, 'Carrier')
         parents[person] = tuple(p for p in (_id(row.PaternalID), _id(row.MaternalID)) if p not in ('0', ''))
     known = set(people)
     father_mother = {}
@@ -161,10 +169,10 @@ def studio_drawing(PED_df, condition=None):
         persons.append({
             'id': numbers[person], 'shape': shape, 'x': x, 'y': y,
             'text': 'unknown parent' if placeholder else ('' if _NUMBERED.fullmatch(person) else person),
-            'deceased': False, 'proband': False,
+            'deceased': deceased.get(person, False), 'proband': proband.get(person, False),
             'fillMode': 'solid' if affected.get(person) else 'none', 'fillColor': AFFECTED_COLOUR,
             'quarters': [None]*4, 'halves': [None, None], 'shadingPattern': 'stripes', 'shadingCoverage': 'full',
-            'centerText': '',
+            'centerText': 'dot' if carrier.get(person) else '',
             'miscarriageSex': {1: 'male', 2: 'female'}.get(sex.get(person), 'unknown') if shape == 'miscarriage'
             else 'unknown',
             'noSnap': False, 'siblingFixed': False, 'customLabel': 'Lbl'})

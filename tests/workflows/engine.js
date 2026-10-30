@@ -79,6 +79,18 @@ async function units() {
   read.params.ga4gh = true;
   read.params.studio = false;
   check(names() === 'ped,pedigree', '… and with its settings changed, the PED file and the GA4GH Pedigree');
+  // with the marks read (who has died, the proband, carriers), no PED file, which can't hold them: a step that read it
+  // has a problem, and so does the step itself if it writes neither the drawing nor the GA4GH Pedigree
+  const mode = E.addTool(w2, 'pednet-mode');
+  E.connect(w2, read.id, 'ped', mode.id, 'input');
+  read.params.marks = true;
+  check(names() === 'pedigree' && E.problems(w2).some((q) => q.step === mode.id && /doesn’t write with its settings as they are/.test(q.text)),
+    '… and with the marks read, the GA4GH Pedigree alone: a step that read the PED file says it isn’t written');
+  read.params.ga4gh = false;
+  check(E.problems(w2).some((q) => q.step === read.id && /can’t hold who has died/.test(q.text)), '… and the form says the marks need the drawing or the GA4GH Pedigree');
+  E.removeStep(w2, mode.id);
+  delete read.params.marks;
+  read.params.ga4gh = true;
   const tool = K.TOOL.pedinterp;
   check(E.fromInputName(tool, tool.fields.find((f) => f.key === 'family')) && !E.fromInputName(tool, tool.fields.find((f) => f.key === 'upscale')), 'its family id comes from the picture’s name, when it runs');
   const g = K.TOOL.pedgen;
