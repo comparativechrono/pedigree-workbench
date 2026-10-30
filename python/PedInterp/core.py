@@ -8,6 +8,7 @@ from PIL import Image, ImageChops
 from os import makedirs
 import pandas as pd
 from .lines import read_lines
+from .marks import read_marks
 from .shapes import SEX, TRIANGLE, find_sketched_symbols, shape_of, twins_bar
 #pytesseract is imported only when the labels are read with Tesseract (see tesseract_words), so that PedInterp
 #works without it, as in a browser under Pyodide, which can't run the tesseract program
@@ -21,10 +22,24 @@ from .shapes import SEX, TRIANGLE, find_sketched_symbols, shape_of, twins_bar
 #-----------------------------
 # PED FILE EXPORT
 #-----------------------------
+#: the columns of the marks that pedigree_processing reads when asked to (marks=True): whether each person has died,
+#: is the proband and is a carrier. A PED file can't hold them
+MARKS = ['Deceased', 'Proband', 'Carrier']
+MARKS_NOT_PED = ("A PED file can't hold the marks read from the picture (who has died, the proband and carriers): write "
+                 "the table as a GA4GH Pedigree (GA4GH_export) or a Pedigree Studio drawing (Studio_export), which hold "
+                 "them, or read the picture without marks for a PED file")
+
+def has_marks(PED_df):
+    '''Whether a dataframe from pedigree_processing holds the marks read from the picture (marks=True)'''
+    return any(column in PED_df.columns for column in MARKS)
+
 def PED_export(PED_df, output_dir = '.'):
     '''
-    Writes a PED file-formatted dataframe to output_dir/<FamilyID>.ped and returns the file's path
+    Writes a PED file-formatted dataframe to output_dir/<FamilyID>.ped and returns the file's path. A dataframe read
+    with marks=True holds marks that a PED file can't, and raises ValueError
     '''
+    if has_marks(PED_df):
+        raise ValueError(MARKS_NOT_PED)
     FamID = PED_df['FamilyID'].iloc[0]
     makedirs(output_dir, exist_ok= True)
     path = f'{output_dir}/{FamID}.ped'
@@ -63,6 +78,14 @@ def _id(value):
     if isinstance(value, float) and value.is_integer():
         value = int(value)
     return str(value)
+
+def _marked(row, column):
+    '''Whether a row of a dataframe has a mark: True in its column, or 1, or the like'''
+    value = getattr(row, column, False)
+    try:
+        return bool(value) and not pd.isna(value)
+    except (TypeError, ValueError):
+        return bool(value)
 
 def twin_groups(PED_df):
     '''
@@ -112,6 +135,10 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     them), as studio2ga4gh writes them: each twin is related to the first of their set, on the left, as an identical
     twin (KIN:010, isMonozygoticMultipleBirthSiblingOf) or a non-identical one (KIN:011,
     isPolyzygoticMultipleBirthSiblingOf).
+
+    The marks of a dataframe read with marks=True are written as studio2ga4gh writes them from a Pedigree Studio
+    drawing: each person's vital status is DECEASED if they have died, and ALIVE if not; the proband is an index
+    patient; and the narrative says who is a carrier, as a Phenopacket has no place for it.
     '''
     from pedigree_ga4gh import DISEASE, PHENOTYPE, Kindred, Member, Relation, Term, dumps, kin, ontology, to_ga4gh_pedigree
     from . import __version__
@@ -119,10 +146,20 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     kind = PHENOTYPE if ontology.prefix_of(cid) == 'HP' else DISEASE
     FamID = _id(PED_df['FamilyID'].iloc[0])
     members, relations = [], []
+    marked = has_marks(PED_df)
+    probands, carriers = [], []
     for row in PED_df.itertuples(index= False):
         person, phenotype = _id(row.IndividualID), int(row.Phenotype)
         terms = [Term(label, cid, kind= kind, excluded= phenotype == 1)] if phenotype in (1, 2) else []
-        members.append(Member(person, sex= {1: 'MALE', 2: 'FEMALE'}.get(int(row.Sex), 'UNKNOWN_SEX'), terms= terms))
+        member = Member(person, sex= {1: 'MALE', 2: 'FEMALE'}.get(int(row.Sex), 'UNKNOWN_SEX'), terms= terms)
+        if marked:
+            member.vital_status = 'DECEASED' if _marked(row, 'Deceased') else 'ALIVE'
+            member.index = _marked(row, 'Proband')
+            if member.index:
+                probands.append(person)
+            if _marked(row, 'Carrier'):
+                carriers.append(person)
+        members.append(member)
         for parent, code in ((row.PaternalID, kin.BIOLOGICAL_FATHER), (row.MaternalID, kin.BIOLOGICAL_MOTHER)):
             if _id(parent) not in ('0', ''):
                 relations.append(Relation(_id(parent), code, person))
@@ -137,13 +174,20 @@ def GA4GH_export(PED_df, output_dir = '.', condition = None):
     if PED_df.attrs.get('upscale_factor'):
         narrative += f', enlarged {PED_df.attrs["upscale_factor"]:g} times'
     affected = int((PED_df['Phenotype'] == 2).sum())
-    narrative += f'. {len(members)} people, {affected} affected with {label} ({cid}).'
+    narrative += f'. {len(members)} people, {affected} affected with {label} ({cid})'
+    if probands:
+        narrative += f'; proband {", ".join(probands)}'
+    narrative += '.'
     if twin_sets:
         narrative += ' Twins: ' + '; '.join(
             ', '.join([first] + [other for other, _ in others]) +
             (' (identical)' if all(identical for _, identical in others) else
              ' (not identical)' if not any(identical for _, identical in others) else '')
             for first, others in twin_sets) + '.'
+    if marked:
+        narrative += ' Deaths, probands and carriers were read from the marks drawn on the symbols.'
+        # (each note starts with a person's id, as studio2ga4gh writes them)
+        narrative += ''.join(f' {person} is a carrier.' for person in carriers)
     doc, _ = to_ga4gh_pedigree(Kindred(FamID, members= members, relations= relations, narrative= narrative),
                                created_by= f'PedInterp {__version__}')
     makedirs(output_dir, exist_ok= True)
@@ -924,7 +968,8 @@ def pedigree_processing(FamID,
                         image_path = None,
                         upscale_factor = None,
                         ocr = 'auto',
-                        hand_drawn = False):
+                        hand_drawn = False,
+                        marks = False):
     '''
     Reads a pedigree image into a dataframe laid out like a PED file
 
@@ -953,6 +998,11 @@ def pedigree_processing(FamID,
         filled ones may be scribbled in; the lines may wobble, slope, and stop short of what they join. The picture
         is read at a size where its symbols are about SKETCH_PIXELS across, and any colour darker than a light grey
         is taken as ink
+    marks (bool): whether to read the marks drawn on the symbols as well as their shapes and fills (default = False):
+        a slash through the symbol of someone who has died, an arrow pointing at the proband's symbol from below on
+        the left, and a dot in the middle of a carrier's symbol (see marks.read_marks). The dataframe then has three
+        more columns, Deceased, Proband and Carrier, each True or False, which a PED file can't hold: PED_export
+        refuses such a dataframe, and so does export=True, but GA4GH_export and Studio_export write the marks
 
     Twins are read from the lines that join them to their parents' line at one point, and identical twins from the bar
     between those lines; the result lists them in attrs['twins'], as [twin, twin, 'MZ' or 'DZ'], with the twin on the
@@ -968,9 +1018,12 @@ def pedigree_processing(FamID,
 
     RETURN:
     -------
-    pandas.DataFrame with the columns FamilyID, IndividualID, PaternalID, MaternalID, Sex and Phenotype,
-    with a row for each person, generation by generation, and from left to right in each
+    pandas.DataFrame with the columns FamilyID, IndividualID, PaternalID, MaternalID, Sex and Phenotype (and, with
+    marks=True, Deceased, Proband and Carrier), with a row for each person, generation by generation, and from left to
+    right in each
     '''
+    if marks and export:
+        raise ValueError(MARKS_NOT_PED)
     if isinstance(ocr, str) and ocr.lower() == 'auto':
         ocr = None if hand_drawn else 'tesseract'
     if ocr is None or (isinstance(ocr, str) and ocr.lower() == 'none'):
@@ -1095,6 +1148,10 @@ def pedigree_processing(FamID,
         IndvIDsDict[IDs[i]] = {'node_coords': (x,y,w,h), 'Phenotype': phenotype, 'Sex': sex, 'pad': pad, 'shape': shape}
         if outlines is not None:
             IndvIDsDict[IDs[i]]['outline'] = outlines[i]
+    if marks:
+        found_marks = read_marks(redacted_img, IndvIDsDict, line_width)
+        for person, found in found_marks.items():
+            IndvIDsDict[person].update(Deceased= found['deceased'], Proband= found['proband'], Carrier= found['carrier'])
 
     #clearing away any text left in the drawing (all of it, when the labels aren't read) and any stray marks: whatever
     #doesn't come near enough a symbol for the lines to be traced from it. A line is traced from the top of a symbol
@@ -1162,7 +1219,7 @@ def pedigree_processing(FamID,
         warnings.warn(HAND_DRAWN_HINT)
 
     #package pedigree data into dataframe structured like PED file
-    PedFileDataFields = ['PaternalID', 'MaternalID', 'Sex', 'Phenotype']
+    PedFileDataFields = ['PaternalID', 'MaternalID', 'Sex', 'Phenotype'] + (MARKS if marks else [])
     #constructs df and subsets to PED file format-relevant fields
     PedFileDF = pd.DataFrame.from_dict(IndvIDsDict, orient= 'index')[PedFileDataFields]
 

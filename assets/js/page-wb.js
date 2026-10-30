@@ -321,7 +321,9 @@
      data-example="okafor.studio.json"   copy an example into ~/examples
      data-studio="/data/examples/x"      open a drawing in Studio
      data-tool="studio2ga4gh"            open a tool (data-input="…" fills in its input; data-hand-drawn="true"
-                                         or "false" ticks Drawn by hand, or not, for Picture → PED file and drawing)
+                                         or "false" ticks Drawn by hand, or not, for Picture → PED file and drawing,
+                                         and data-marks="true" or "false" ticks Read who has died, the proband
+                                         and carriers, or not)
      data-new-nb / data-open-nb          a new notebook / open a notebook
      ------------------------------------------------------------------ */
   MG.actions.example = async (rel) => {
@@ -348,6 +350,11 @@
     if (btn && btn.dataset.variants) values.variants = btn.dataset.variants.replace(/^~(?=\/|$)/, HOME);
     // (a picture drawn by hand, or not, for Picture → PED file and drawing, whatever was ticked last)
     if (btn && btn.dataset.handDrawn != null) values.handDrawn = btn.dataset.handDrawn === 'true';
+    // (and whether to read who has died, the proband and carriers, with the drawing to hold them)
+    if (btn && btn.dataset.marks != null) {
+      values.marks = btn.dataset.marks === 'true';
+      if (values.marks) values.studio = true;
+    }
     return MG.app.useTool(id, values);
   };
   /* data-workflow="~/workflows/x.workflow.json" (data-view="edit" or "run", the default; data-input="…" a file to run

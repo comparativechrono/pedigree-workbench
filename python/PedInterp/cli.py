@@ -4,6 +4,8 @@
     pedinterp scan.jpg -f FAM2 --labels none    # people numbered by generation: I-1, I-2, II-1 ...
     pedinterp FAM1.png --ga4gh                  # FAM1.ped, and FAM1_ga4gh-pedigree.json
     pedinterp sketch.png --hand-drawn --studio  # a sketch: sketch.ped, and sketch.studio.json for Pedigree Studio
+    pedinterp sketch.png --hand-drawn --marks --studio   # who has died, the proband and carriers too: only
+                                                         # sketch.studio.json, as a PED file can't hold them
 
 does what pedigree_processing, PED_export, GA4GH_export and Studio_export do in Python.
 """
@@ -33,7 +35,9 @@ def parser():
         prog='pedinterp',
         description='Read a pedigree from a picture of one, drawn in the usual symbols on white or sketched by hand, '
                     'and write it as a PED file named after the family, whose table is printed too. A PED file can\'t '
-                    'hold twins, but a GA4GH Pedigree (--ga4gh) and a Pedigree Studio drawing (--studio) can.')
+                    'hold twins, but a GA4GH Pedigree (--ga4gh) and a Pedigree Studio drawing (--studio) can. With '
+                    '--marks, who has died, the proband and carriers are read too, and the pedigree is written only as one '
+                    'or both of those.')
     p.add_argument('--version', action='version', version=f'pedinterp {__version__}')
     p.add_argument('image', help='the picture: PNG, JPEG or any other format Pillow reads')
     p.add_argument('-f', '--family',
@@ -52,12 +56,20 @@ def parser():
     p.add_argument('--labels', choices=('tesseract', 'none'),
                    help='read the labels by the symbols with Tesseract, or number the people by generation instead: '
                         'I-1, I-2, II-1 and so on (default: tesseract, or none with --hand-drawn)')
+    p.add_argument('--marks', action='store_true',
+                   help='read the marks drawn on the symbols too: a slash through the symbol of someone who has died, '
+                        'an arrow pointing at the proband\'s symbol from below on the left, and a dot in the middle '
+                        'of a carrier\'s symbol. The table printed has three more columns, Deceased, Proband and '
+                        'Carrier. A PED file can\'t hold them, so none is written: give --studio, --ga4gh or both to '
+                        'say what to write')
     p.add_argument('--ga4gh', action='store_true',
                    help='also write the pedigree as a GA4GH Pedigree, FAMILY_ga4gh-pedigree.json, which the GA4GH '
-                        'tools read (ga4gh2studio, phenopacket-toolkit, PedNet)')
+                        'tools read (ga4gh2studio, phenopacket-toolkit, PedNet); with --marks, in place of the PED '
+                        'file, with who has died, the proband and carriers')
     p.add_argument('--studio', action='store_true',
                    help='also write the pedigree as a Pedigree Studio drawing, FAMILY.studio.json, laid out as the '
-                        'picture is, with any twins and couples without children, to open in the Studio')
+                        'picture is, with any twins and couples without children, to open in the Studio; with '
+                        '--marks, in place of the PED file, with who has died, the proband and carriers marked')
     p.add_argument('--condition', nargs=2, metavar=('ID', 'LABEL'),
                    help='with --ga4gh or --studio, the condition the pedigree is about, as an ontology term and its '
                         'label, such as MONDO:0007739 "Huntington disease" (default: MONDO:0000001 disease in the GA4GH '
@@ -83,6 +95,11 @@ def main(argv=None):
         print(f'pedinterp: the family ID {args.family!r} must be a word with no spaces, as PED files are split '
               'at spaces', file=sys.stderr)
         return 1
+    if args.marks and not (args.ga4gh or args.studio):
+        print('pedinterp: a PED file can\'t hold the marks that --marks reads (who has died, the proband and '
+              'carriers): give --studio, --ga4gh or both to write them in a Pedigree Studio drawing or a GA4GH '
+              'Pedigree', file=sys.stderr)
+        return 1
     if args.condition and not (args.ga4gh or args.studio):
         print('pedinterp: --condition is for the GA4GH Pedigree that --ga4gh writes, or the drawing --studio writes',
               file=sys.stderr)
@@ -97,7 +114,7 @@ def main(argv=None):
         warnings.simplefilter('always')
         try:
             df = pedigree_processing(family, image_path=args.image, upscale_factor=args.upscale,
-                                     ocr=args.labels or 'auto', hand_drawn=args.hand_drawn)
+                                     ocr=args.labels or 'auto', hand_drawn=args.hand_drawn, marks=args.marks)
         except (ValueError, OSError) as error:
             for warning in caught:
                 _warn(warning)
@@ -109,7 +126,8 @@ def main(argv=None):
     if not args.quiet:
         print(df.to_string(index=False))
         print(f'(the picture was read enlarged {df.attrs["upscale_factor"]:g} times)')
-    print(f'wrote {PED_export(df, args.output_dir)}')
+    if not args.marks:
+        print(f'wrote {PED_export(df, args.output_dir)}')
     if args.ga4gh:
         print(f'wrote {GA4GH_export(df, args.output_dir, condition=condition)}')
     if args.studio:

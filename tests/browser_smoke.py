@@ -148,10 +148,23 @@ async () => {
     let res = await tool('pedinterp', { input: '/data/examples/lynch.png' });
     const ped = (p) => MG.app.fs.readText(p).then((s) => s.trim().split('\n').map((l) => l.split('\t').slice(1).join(' ')).join('\n'));
     check(res.querySelector('.tl-done.ok') && (await ped('/home/user/results/lynch.ped')) === (await ped('/data/examples/lynch.ped')) && /read enlarged 5\.6 times/.test(res.innerText) && MG.app.fs.exists('/home/user/results/lynch.studio.json'), 'Tools: Picture → PED file and drawing reads the Lynch picture as lynch.ped, enlarged as its symbols need, and makes its drawing');
-    // the Okafor family sketched by hand, from the help's button, which ticks Drawn by hand
+    // the Okafor family sketched by hand, from the help's button that reads the marks too, and ticks Drawn by hand and
+    // the drawing: who has died and the proband, in the drawing and the table, and no PED file, which can't hold them
     MG.app.showHelp('h-tool-pedinterp');
     await sleep(200);
-    document.querySelector('#h-tool-pedinterp button[data-input="/data/examples/okafor-sketch.png"]').click();
+    document.querySelector('#h-tool-pedinterp button[data-input="/data/examples/okafor-sketch.png"][data-marks="true"]').click();
+    await wait(() => document.querySelector('.tl-title') && /Picture/.test(document.querySelector('.tl-title').textContent), 20000);
+    await sleep(400);
+    document.querySelector('.tl-run').click();
+    await wait(() => document.querySelector('.tl-done'), 300000);
+    res = document.querySelector('.tl-result');
+    const marked = MG.app.fs.exists('/home/user/results/okafor-sketch.studio.json') ? JSON.parse(await MG.app.fs.readText('/home/user/results/okafor-sketch.studio.json')) : { persons: [] };
+    const table = res.querySelector('.tl-main-out') ? res.querySelector('.tl-main-out').innerText : '';
+    check(res.querySelector('.tl-done.ok') && !MG.app.fs.exists('/home/user/results/okafor-sketch.ped') && /Deceased\s+Proband\s+Carrier/.test(table) && /IV-3\s+III-2\s+III-3\s+1\s+2\s+False\s+True\s+False/.test(table) && marked.persons.filter((p) => p.deceased).length === 5 && marked.persons.filter((p) => p.proband).length === 1, 'Tools: Picture → PED file and drawing reads who has died and the proband in the Okafor sketch, from the help, into the drawing and the table, and writes no PED file');
+    // the same sketch, from the help's button that reads its structure and fills only, as before
+    MG.app.showHelp('h-tool-pedinterp');
+    await sleep(200);
+    document.querySelector('#h-tool-pedinterp button[data-input="/data/examples/okafor-sketch.png"][data-marks="false"]').click();
     await wait(() => document.querySelector('.tl-title') && /Picture/.test(document.querySelector('.tl-title').textContent), 20000);
     await sleep(400);
     document.querySelector('.tl-run').click();
