@@ -12,7 +12,7 @@ in a frame. Its page is copied here unchanged except for three things:
    opens files in it, saves its drawing and runs Tidy;
 3. its Content Security Policy, which lets the page run only the code written
    into it, also lets it run bridge.js from beside it ('self'). It still lets
-   the page load or send nothing else.
+   the page load nothing else and send no request.
 
 To take a newer Pedigree Studio, run one of
 
