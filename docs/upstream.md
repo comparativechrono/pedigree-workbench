@@ -29,9 +29,9 @@ until they are released:
 
 | Package | On PyPI | Pull request | To be released |
 |---|---|---|---|
-| studio2ped | 0.2.0 | [studio2ped#2](https://github.com/comparativechrono/studio2ped/pull/2) | **0.2.1**, G read as a gestational carrier; thirds |
-| studio2ga4gh | 0.4.0 | [studio2ga4gh#2](https://github.com/comparativechrono/studio2ga4gh/pull/2) | **0.4.1**, G; twins of unknown zygosity; consultands; thirds |
-| ga4gh2studio | 0.4.0 | [ga4gh2studio#2](https://github.com/comparativechrono/ga4gh2studio/pull/2) | **0.4.1**, G; D for a surrogate; twins of unknown zygosity; consultands; thirds |
+| studio2ped | 0.2.0 | [#2](https://github.com/comparativechrono/studio2ped/pull/2), [#3](https://github.com/comparativechrono/studio2ped/pull/3) | **0.2.1**, G read as a gestational carrier; thirds |
+| studio2ga4gh | 0.4.0 | [#2](https://github.com/comparativechrono/studio2ga4gh/pull/2), [#3](https://github.com/comparativechrono/studio2ga4gh/pull/3) | **0.4.1**, G; twins of unknown zygosity; consultands; thirds |
+| ga4gh2studio | 0.4.0 | [#2](https://github.com/comparativechrono/ga4gh2studio/pull/2), [#3](https://github.com/comparativechrono/ga4gh2studio/pull/3) | **0.4.1**, G; D for a surrogate; twins of unknown zygosity; consultands; thirds |
 
 `docs/ga4gh.md` says what the correct form is and why.
 
@@ -517,10 +517,14 @@ mother. What each pull request does:
 [PedigreeStudio#9](https://github.com/comparativechrono/PedigreeStudio/pull/9)
 then lets a symbol be divided into thirds for three conditions, saved as
 `"thirds"`, draws triplets and more from one point, and puts pedigree numbers
-below the symbol (or to its lower right when something is in the way). All three pull requests read thirds (studio2ped and
-studio2ga4gh as a condition for each colour, as quarters are), and
-ga4gh2studio draws three conditions in thirds rather than in quarters with one
-empty. Triplets need nothing new: they are twin links, as before.
+below the symbol (or to its lower right when something is in the way). A
+further pull request in each converter reads thirds
+([studio2ped#3](https://github.com/comparativechrono/studio2ped/pull/3) and
+[studio2ga4gh#3](https://github.com/comparativechrono/studio2ga4gh/pull/3) as
+a condition for each colour, as quarters are), and
+[ga4gh2studio#3](https://github.com/comparativechrono/ga4gh2studio/pull/3)
+draws three conditions in thirds rather than in quarters with one empty.
+Triplets need nothing new: they are twin links, as before.
 
 Release them in this order: studio2ped, then studio2ga4gh, then ga4gh2studio,
 whose round-trip test needs studio2ga4gh 0.4.1 to read G back. Then copy the
