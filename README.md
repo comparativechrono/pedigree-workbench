@@ -215,8 +215,9 @@ does. The tests never contact EBI's Ontology Lookup Service.
 
 Each package the workbench changed had a pull request in its own repository
 making the same changes. The pull requests were merged, and the packages were
-released on PyPI on 18 October 2026, so `pip install` gives exactly what the
-workbench runs. The copies in
+released on PyPI on 18 October 2026, and studio2ped 0.2.1, studio2ga4gh 0.4.1
+and ga4gh2studio 0.4.1 on 31 October 2026, so `pip install` gives exactly what
+the workbench runs. The copies in
 `python/` are taken from those releases' wheels.
 **[docs/upstream.md](docs/upstream.md)** lists the pull requests with what each
 changed, and how to release new versions. They cover:
@@ -226,18 +227,18 @@ changed, and how to release new versions. They cover:
 - abusua2ga4gh and ga4gh2abusua, rewritten on pedigree-ga4gh;
 - studio2ped, ped2studio, hponorm and mondonorm.
 
-PedNet 2.0.0 is on PyPI. The workbench's copy is 2.1.0, built from
+PedNet 2.1.0, from
 [PedNet#6](https://github.com/comparativechrono/PedNet/pull/6), which reads
-GA4GH Pedigrees and Phenopackets Families as well as PED files, and is still
-to be released. What the workbench uses of PedGen and PedInterp isn't released
-yet either. Their commands, PedGen's rare allele by default and cousins who
+GA4GH Pedigrees and Phenopackets Families as well as PED files, was released
+on PyPI on 19 October 2026, and the workbench's copy is taken from its wheel.
+What the workbench uses of PedGen and PedInterp isn't released yet. Their commands, PedGen's rare allele by default and cousins who
 marry, and PedInterp's reading of children drawn straight under their parents,
 its choice of how much to enlarge a picture and its warnings when lines were
 missed are merged. Their GA4GH Pedigrees are in
 [pedigree-generator#5](https://github.com/comparativechrono/pedigree-generator/pull/5)
 and
 [pedigree-interpreter#7](https://github.com/comparativechrono/pedigree-interpreter/pull/7).
-So the workbench's copies of the three are built from those pull requests.
+So the workbench's copies of the two are built from GitHub (docs/upstream.md, section 10, says which pull requests).
 
 ## Files
 

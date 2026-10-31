@@ -5,8 +5,10 @@ give one correct GA4GH implementation, three of them were changed here and one,
 `pedigree_ga4gh`, was new. This file records what their own repositories needed
 so that `pip install` would give people the same code. Each package
 got a pull request making those changes, and all of them were merged and
-released on PyPI on 18 October 2026. The copies here are those releases, taken
-from their wheels, so `pip install` now gives exactly what the workbench runs.
+released on PyPI on 18 October 2026. studio2ped 0.2.1, studio2ga4gh 0.4.1 and
+ga4gh2studio 0.4.1 followed on 31 October 2026 (section 12). The copies here
+are those releases, the same as their wheels, so `pip install` now gives
+exactly what the workbench runs.
 
 | Package | On PyPI before | Pull request | Released |
 |---|---|---|---|
@@ -22,13 +24,12 @@ from their wheels, so `pip install` now gives exactly what the workbench runs.
 | mondonorm | 1.0.0 | [mondonorm#1](https://github.com/comparativechrono/mondonorm/pull/1) | **1.1.0**, the same as hponorm |
 | mpedtools | 0.1.0 | – | 0.1.0, unchanged |
 
-Three more packages have changes that are not released yet. They are for the
-symbols Pedigree Studio has drawn since the 2025 correction to the pedigree
-nomenclature, and for its numbering, which no longer counts the bars for no
-children and infertility (section 12). The workbench carries them from their
-branches until they are released:
+Three more were released on 31 October 2026, with Pedigree Studio 2.3.0. They
+are for the symbols the Studio has drawn since the 2025 correction to the
+pedigree nomenclature, and for its numbering, which no longer counts the bars
+for no children and infertility (section 12):
 
-| Package | On PyPI | Pull request | To be released |
+| Package | On PyPI before | Pull request | Released |
 |---|---|---|---|
 | studio2ped | 0.2.0 | [#2](https://github.com/comparativechrono/studio2ped/pull/2), [#3](https://github.com/comparativechrono/studio2ped/pull/3), [#4](https://github.com/comparativechrono/studio2ped/pull/4) | **0.2.1**, G read as a gestational carrier; thirds; only people numbered |
 | studio2ga4gh | 0.4.0 | [#2](https://github.com/comparativechrono/studio2ga4gh/pull/2), [#3](https://github.com/comparativechrono/studio2ga4gh/pull/3), [#4](https://github.com/comparativechrono/studio2ga4gh/pull/4) | **0.4.1**, G; twins of unknown zygosity; consultands; thirds; only people numbered |
@@ -540,7 +541,10 @@ which `tests/risk/readers.py` checks against both in each of the Studio's
 numberings. None of the example drawings changes: their bars are the last in
 their row. ga4gh2studio needs nothing, as it writes no numbers.
 
-Release them in this order: studio2ped, then studio2ga4gh, then ga4gh2studio,
-whose round-trip test needs studio2ga4gh 0.4.1 to read G back. Then copy the
-three into `python/` again from their wheels (`python/build_bundle.py`
-afterwards).
+They were released on 31 October 2026 in this order: studio2ped, then
+studio2ga4gh, then ga4gh2studio, whose round-trip test needs studio2ga4gh 0.4.1
+to read G back. (ga4gh2studio's release first ran before studio2ga4gh 0.4.1 had
+reached PyPI and failed to install it; run again, it passed and published.) The
+copies in `python/` are the same, file for file, as the three wheels on PyPI.
+Pedigree Studio 2.3.0, released the same day and archived on Zenodo, is the
+version the Studio tab carries (`assets/studio/SOURCE.json`).
