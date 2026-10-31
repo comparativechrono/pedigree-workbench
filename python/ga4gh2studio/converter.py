@@ -470,13 +470,17 @@ def build_session(inds: Dict[str, Individual], couple_notes, partner_rels, twins
         elif ind.is_adopted:
             shape = "adopted-" + shape
         cols = [colours[d] for d in ind.diseases if d in colours]
-        fill = {"fillMode": "none", "fillColor": STROKE_COLOR, "quarters": [None] * 4, "halves": [None, None]}
+        fill = {"fillMode": "none", "fillColor": STROKE_COLOR, "quarters": [None] * 4, "halves": [None, None],
+                "thirds": [None] * 3}
+        # one condition fills the symbol; two, three or four divide it into halves, thirds or quarters
         if len(cols) == 1:
             fill.update(fillMode="solid", fillColor=cols[0])
         elif len(cols) == 2:
             fill.update(fillMode="half", halves=cols[:2])
-        elif len(cols) > 2:
-            fill.update(fillMode="quartered", quarters=(cols + [None] * 4)[:4])
+        elif len(cols) == 3:
+            fill.update(fillMode="thirds", thirds=cols[:3])
+        elif len(cols) > 3:
+            fill.update(fillMode="quartered", quarters=cols[:4])
         text = "" if (ind.placeholder or re.fullmatch(r"[IVXL]+-\d+", iid)) else iid
         if ind.placeholder:
             text = "unknown parent"
@@ -522,7 +526,7 @@ def build_session(inds: Dict[str, Individual], couple_notes, partner_rels, twins
             persons.append({"id": mid, "shape": "no-offspring" if what == "no children" else "infertile",
                             "x": round(ax + SHAPE_SIZE, 1), "y": round(ay + CHILD_HEIGHT, 1), "text": "",
                             "deceased": False, "proband": False, "fillMode": "none", "fillColor": STROKE_COLOR,
-                            "quarters": [None] * 4, "halves": [None, None], "shadingPattern": "stripes",
+                            "quarters": [None] * 4, "halves": [None, None], "thirds": [None] * 3, "shadingPattern": "stripes",
                             "shadingCoverage": "full", "centerText": "", "miscarriageSex": "unknown",
                             "noSnap": False, "siblingFixed": False, "customLabel": "Lbl"})
             child_links.append({"id": "child-{}".format(n), "partnershipId": pid, "childId": mid,
