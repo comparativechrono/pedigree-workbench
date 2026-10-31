@@ -3,7 +3,8 @@
 (python/pedwb/risk.py). This checks that it reads them as the rest of the workbench does:
 
 - each example drawing as studio2ped reads it: the same people, sexes and genetic parents, and for each condition
-  in the key, the same affected, carrier and unaffected people as the PED or MPED file that studio2ped writes;
+  in the key, the same affected, carrier and unaffected people as the PED or MPED file that studio2ped writes (and
+  tests/risk/thirds.studio.json, the drawing with every kind of symbol with two people in thirds);
 - each example PED and MPED file as mpedtools reads it;
 - each example GA4GH Pedigree and Phenopackets Family as PedNet reads it, for each of its conditions: the same
   people, parents and phenotypes, with people who have no record of the condition taken as PedNet takes them.
@@ -136,6 +137,11 @@ for entry in page_reading():
         drawing(entry)
     else:
         ped_file(entry)
+# the drawing with every kind of symbol, with two people in thirds, which the Studio draws for three conditions
+thirds = subprocess.run(['node', os.path.join(HERE, 'read_examples.js'), os.path.join(HERE, 'thirds.studio.json')],
+                        capture_output=True, text=True, check=True)
+for entry in json.loads(thirds.stdout):
+    drawing(entry)
 ga4gh_files()
 print(f'\n{len(failures)} failed' if failures else '\nall the same')
 sys.exit(1 if failures else 0)

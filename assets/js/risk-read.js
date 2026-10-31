@@ -51,6 +51,7 @@
         text: pd.text || '', deceased: !!pd.deceased, proband: !!pd.proband,
         fillMode, fillColor, halves: Array.isArray(pd.halves) ? pd.halves : [null, null],
         quarters: Array.isArray(pd.quarters) ? pd.quarters : [null, null, null, null],
+        thirds: Array.isArray(pd.thirds) ? pd.thirds : [null, null, null],
         shadingPattern: pd.shadingPattern || 'stripes', shadingCoverage: pd.shadingCoverage || 'full',
         centre: String(pd.centerText || ''), lossSex: pd.miscarriageSex || 'unknown', customLabel: pd.customLabel || ''
       });
@@ -114,7 +115,8 @@
     const named = new Set(out.filter((c) => c.pattern).map((c) => c.pattern));
     for (const p of persons.values()) {
       if (p.shape in MARKERS) continue;
-      const cs = p.fillMode === 'solid' ? [p.fillColor] : p.fillMode === 'half' ? p.halves : p.fillMode === 'quartered' ? p.quarters : [];
+      const cs = p.fillMode === 'solid' ? [p.fillColor] : p.fillMode === 'half' ? p.halves : p.fillMode === 'thirds' ? p.thirds
+        : p.fillMode === 'quartered' ? p.quarters : [];
       for (const c of cs) {
         if (!c || WHITE.has(lc(c)) || seen.has(lc(c))) continue;
         seen.add(lc(c));
@@ -129,7 +131,7 @@
     return out;
   }
 
-  /** each condition's status for one symbol, as studio2ped classifies it: a solid fill, a quarter or full shading is
+  /** each condition's status for one symbol, as studio2ped classifies it: a solid fill, a third, a quarter or full shading is
       affected; one half filled (the other empty) or half shading is a carrier; and a dot in the symbol makes a carrier
       of every condition shown (or of the first, if none is) */
   function statusOf(p, conditions) {
@@ -138,7 +140,7 @@
     const colours = new Map();   // colour -> whether it fills only one half
     if (p.fillMode === 'solid' && p.fillColor) colours.set(lc(p.fillColor), false);
     else if (p.fillMode === 'half') p.halves.forEach((c, i) => { if (c) colours.set(lc(c), !p.halves[1 - i]); });
-    else if (p.fillMode === 'quartered') p.quarters.forEach((c) => { if (c) colours.set(lc(c), false); });
+    else if (p.fillMode === 'quartered' || p.fillMode === 'thirds') (p.fillMode === 'thirds' ? p.thirds : p.quarters).forEach((c) => { if (c) colours.set(lc(c), false); });
     for (const c of conditions) if (c.colour && colours.has(c.key)) out[c.key] = colours.get(c.key) ? 'carrier' : 'affected';
     if (p.fillMode === 'shading') {
       const key = `shading:${p.shadingPattern}:${p.shadingCoverage}`;

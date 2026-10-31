@@ -40,6 +40,7 @@ class StudioPerson:
     fill_color: Optional[str] = None
     halves: List[Optional[str]] = field(default_factory=lambda: [None, None])
     quarters: List[Optional[str]] = field(default_factory=lambda: [None] * 4)
+    thirds: List[Optional[str]] = field(default_factory=lambda: [None] * 3)   # a symbol in thirds: three conditions
     shading_pattern: str = "stripes"
     shading_coverage: str = "full"
     centre: str = ""                 # "", "dot", "line", "P", "D", "G" (or "S", in older files) or a number
@@ -72,6 +73,8 @@ class StudioPerson:
             cs = list(self.halves or [])
         elif self.fill_mode == "quartered":
             cs = list(self.quarters or [])
+        elif self.fill_mode == "thirds":
+            cs = list(self.thirds or [])
         else:
             cs = []
         out = []
@@ -241,6 +244,7 @@ def parse(data: dict) -> Session:
             consultand=bool(pd.get("consultand")),
             fill_mode=fill_mode, fill_color=fill_color,
             halves=list(pd.get("halves") or [None, None]), quarters=list(pd.get("quarters") or [None] * 4),
+            thirds=list(pd.get("thirds") or [None] * 3),
             shading_pattern=pd.get("shadingPattern") or "stripes",
             shading_coverage=pd.get("shadingCoverage") or "full",
             centre=str(pd.get("centerText") or ""), loss_sex=pd.get("miscarriageSex") or "unknown",
