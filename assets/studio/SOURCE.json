@@ -1,9 +1,9 @@
 {
   "repository": "https://github.com/comparativechrono/pedigreestudio",
   "ref": "thirds-triplets-numbers",
-  "commit": "52a239a3fb43f4412a4e930f3ee2b6b7a06694fb",
-  "committed": "2026-10-31T10:41:56+00:00",
-  "sha256_of_original": "9beea99f3c440c852a09c61a497b3b09370c0a6aeb50a5a14768e581b921d86a",
+  "commit": "19d92449968ac262e2a20a93d6be694d46fc3d33",
+  "committed": "2026-10-31T11:52:15+00:00",
+  "sha256_of_original": "9d38b47504d472120821f2dc4bf053d9802b9a400a0cd35f988724364d78cba1",
   "copied": "2026-10-31",
   "changes": [
     "the browser-storage key 'pedigree-studio-session' became 'pedwb:studio-session' (3 places)",

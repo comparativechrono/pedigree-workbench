@@ -517,7 +517,7 @@ mother. What each pull request does:
 [PedigreeStudio#9](https://github.com/comparativechrono/PedigreeStudio/pull/9)
 then lets a symbol be divided into thirds for three conditions, saved as
 `"thirds"`, draws triplets and more from one point, and puts pedigree numbers
-below the symbol. All three pull requests read thirds (studio2ped and
+below the symbol (or to its lower right when something is in the way). All three pull requests read thirds (studio2ped and
 studio2ga4gh as a condition for each colour, as quarters are), and
 ga4gh2studio draws three conditions in thirds rather than in quarters with one
 empty. Triplets need nothing new: they are twin links, as before.
