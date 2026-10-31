@@ -1,4 +1,4 @@
-<!-- id: h-kin | title: KIN, the kinship terms | group: Files and standards | summary: The Kinship Ontology's 48 relations, which the GA4GH Pedigree uses | keys: kin kinship ontology relations relationship terms codes labels mother father parent sibling twin cousin partner consanguineous donor surrogate adoptive foster retired draft version 1 v1 -->
+<!-- id: h-kin | title: KIN, the kinship terms | group: Files and standards | summary: The Kinship Ontology's 48 relations, which the GA4GH Pedigree uses | keys: kin kinship ontology relations relationship terms codes labels mother father parent sibling twin cousin partner consanguineous donor surrogate gestational carrier zygosity adoptive foster retired draft version 1 v1 -->
 <h1><!--ICON:network-->KIN, the kinship terms</h1>
 <p class="lede">The Kinship Ontology, KIN, is the GA4GH Pedigree Standard's vocabulary of relationships. Each relationship in a GA4GH Pedigree is one KIN term, such as <code>KIN:027</code> <i>isBiologicalMotherOf</i>.</p>
 
@@ -11,8 +11,8 @@
 <tr><th>In the drawing</th><th>KIN</th></tr>
 <tr><td>mother, father (a parent of unknown sex)</td><td><code>KIN:027</code> isBiologicalMotherOf, <code>KIN:028</code> isBiologicalFatherOf (<code>KIN:003</code> isBiologicalParentOf)</td></tr>
 <tr><td>adoption</td><td><code>KIN:022</code> isAdoptiveParentOf</td></tr>
-<tr><td>sperm and egg donors, a surrogate</td><td><code>KIN:004</code> isSpermDonorOf, <code>KIN:038</code> isOvumDonorOf, <code>KIN:005</code> isGestationalCarrierOf</td></tr>
-<tr><td>identical and non-identical twins</td><td><code>KIN:010</code> isMonozygoticMultipleBirthSiblingOf, <code>KIN:011</code> isPolyzygoticMultipleBirthSiblingOf</td></tr>
+<tr><td>sperm and egg donors, a gestational carrier</td><td><code>KIN:004</code> isSpermDonorOf, <code>KIN:038</code> isOvumDonorOf, <code>KIN:005</code> isGestationalCarrierOf (and, read by ga4gh2studio, <code>KIN:006</code> isSurrogateOvumDonorOf, drawn as an egg donor)</td></tr>
+<tr><td>identical and non-identical twins, and twins whose zygosity isn't known</td><td><code>KIN:010</code> isMonozygoticMultipleBirthSiblingOf, <code>KIN:011</code> isPolyzygoticMultipleBirthSiblingOf, <code>KIN:009</code> isMultipleBirthSiblingOf</td></tr>
 <tr><td>partners: consanguineous, separated, or with no children</td><td><code>KIN:030</code> isConsanguineousPartnerOf, <code>KIN:050</code> isSeparatedPartnerOf, <code>KIN:051</code> isSeparatedConsanguineousPartnerOf, <code>KIN:026</code> isPartnerOf</td></tr>
 </table>
 <p>Brothers and sisters, grandparents, aunts and cousins aren't written, because they follow from the parents.</p>

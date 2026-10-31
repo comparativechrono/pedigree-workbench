@@ -10,15 +10,18 @@ In Pedigree Studio                        In the GA4GH files
 ========================================  ==============================================
 square, circle, diamond                   sex MALE, FEMALE, UNKNOWN_SEX
 slash (deceased)                          vitalStatus DECEASED (otherwise ALIVE)
-arrow (proband)                           indexPatients; the Family's proband
+arrow with a P (proband)                  indexPatients; the Family's proband
+arrow alone (consultand)                  noted in the narrative
 fill, halves, quarters, shading           a disease or phenotype for each condition named
                                           in the colour key, once it has an ontology term
 child line from a couple                  isBiologicalMotherOf / isBiologicalFatherOf
                                           (isBiologicalParentOf if the parent's sex is unknown)
 dashed child line                         isAdoptiveParentOf
 D in a parent's symbol                    isSpermDonorOf / isOvumDonorOf
-S in a parent's symbol                    isGestationalCarrierOf (not a biological parent)
+G in a parent's symbol (S in older        isGestationalCarrierOf (not a biological parent)
+drawings)
 identical / non-identical twins           isMonozygotic- / isPolyzygoticMultipleBirthSiblingOf
+twins of unknown zygosity (?)             isMultipleBirthSiblingOf
 consanguineous couple                     isConsanguineousPartnerOf
 separated couple                          isSeparatedPartnerOf
 couple without children                   isPartnerOf
@@ -196,10 +199,33 @@ def _components(s: Session) -> List[List[str]]:
     return comps
 
 
+# G marks a gestational carrier, who carried a child but is not their genetic parent, since the 2025 correction to
+# the pedigree nomenclature; drawings from before it mark one S. (A woman who gives the egg and carries the
+# pregnancy is a donor, D, and a genetic parent.)
+GESTATIONAL_CARRIER_MARKS = ("G", "S")
+
+# Twins' zygosity, and the KIN term for each
+_TWIN_KIN = {"identical": kin.MONOZYGOTIC_MULTIPLE_BIRTH_SIBLING, "nonidentical": kin.POLYZYGOTIC_MULTIPLE_BIRTH_SIBLING,
+             "unknown": kin.MULTIPLE_BIRTH_SIBLING}
+
+
+def _twin_chain(a: str, b: str) -> str:
+    """The zygosity of X and Z when X and Y are twins of zygosity a, and Y and Z twins of zygosity b.
+
+    An identical twin shares the other's relation; a line of unknown zygosity leaves it unknown; and the
+    non-identical twin of a non-identical twin counts as non-identical, which is what a drawing of such a set
+    of twins means."""
+    if a == "identical":
+        return b
+    if b == "identical":
+        return a
+    return "unknown" if "unknown" in (a, b) else "nonidentical"
+
+
 def _parent_relation(parent: StudioPerson, dashed: bool, warnings: List[str], ids: Dict[str, str]) -> str:
     if dashed:
         return kin.ADOPTIVE_PARENT
-    if parent.centre == "S":
+    if parent.centre in GESTATIONAL_CARRIER_MARKS:
         return kin.GESTATIONAL_CARRIER
     if parent.centre == "D":
         if parent.sex == "MALE":
@@ -259,6 +285,8 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
                 notes.append("{} is a carrier".format(m.id))
             elif p.centre == "line":
                 notes.append("{} is a presymptomatic carrier".format(m.id))
+            if p.consultand:
+                notes.append("{} is a consultand".format(m.id))
             elif re.fullmatch(r"\d+|n", p.centre or "", flags=re.I):
                 warnings.append("{} stands for {} people in the drawing but is exported as one person".format(
                     m.id, p.centre))
@@ -328,13 +356,20 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
         for group in sets.values():
             group.sort(key=lambda pid: s.persons[pid].x)
             first = group[0]
-            links = [t for t in comp_twins if t.a in group]
+            # each twin's zygosity relative to the first: a twin line between them if there is one, else
+            # worked out along the shortest chain of twin lines that joins them (see _twin_chain)
+            zyg = {first: "identical"}
+            queue = [first]
+            while queue:
+                cur = queue.pop(0)
+                for t in comp_twins:
+                    if cur in (t.a, t.b):
+                        nxt = t.b if t.a == cur else t.a
+                        if nxt not in zyg:
+                            zyg[nxt] = _twin_chain(zyg[cur], t.zygosity)
+                            queue.append(nxt)
             for other in group[1:]:
-                direct = [t for t in links if {t.a, t.b} == {first, other}]
-                # twins joined only through a third count as identical only if every link is
-                identical = direct[0].identical if direct else all(t.identical for t in links)
-                code = kin.MONOZYGOTIC_MULTIPLE_BIRTH_SIBLING if identical else kin.POLYZYGOTIC_MULTIPLE_BIRTH_SIBLING
-                k.relations.append(Relation(idmap[first], code, idmap[other]))
+                k.relations.append(Relation(idmap[first], _TWIN_KIN[zyg.get(other, "unknown")], idmap[other]))
         index = [m.id for m in k.members if m.index]
         conds = sorted({t.label for m in k.members for t in m.terms})
         parts = ["Pedigree drawn in Pedigree Studio: {} people{}.".format(

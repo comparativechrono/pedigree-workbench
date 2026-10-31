@@ -1,4 +1,4 @@
-<!-- id: h-tool-ga4gh2studio | title: GA4GH or Phenopackets → drawing | group: Tools | summary: ga4gh2studio: a GA4GH file drawn in Pedigree Studio | keys: ga4gh2studio draw drawing ga4gh pedigree phenopackets family import open picture layout key terms -->
+<!-- id: h-tool-ga4gh2studio | title: GA4GH or Phenopackets → drawing | group: Tools | summary: ga4gh2studio: a GA4GH file drawn in Pedigree Studio | keys: ga4gh2studio draw drawing ga4gh pedigree phenopackets family import open picture layout key terms gestational carrier surrogate donor twins zygosity consultand -->
 <h1><!--ICON:pedigree-->GA4GH or Phenopackets → drawing</h1>
 <p class="lede">ga4gh2studio draws a GA4GH Pedigree or a Phenopackets Family in Pedigree Studio. Each condition gets a colour and is named in the colour key with its term, so the drawing converts back to the same terms.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="ga4gh2studio" data-input="/data/examples/okafor_ga4gh-pedigree.json">Try it with the Okafor GA4GH Pedigree</button></div>
@@ -12,7 +12,7 @@
 
 <h2>What comes back</h2>
 <ul>
-  <li>Everyone comes back, with their sex and whether they've died. So do the couples, including consanguineous and separated ones. Twins, adoptions (drawn as dashed lines), donors, surrogates, pregnancies and losses come back too, as do the markers the narrative records, such as a carrier.</li>
+  <li>Everyone comes back, with their sex and whether they've died. So do the couples, including consanguineous and separated ones. Twins (with ? when their zygosity isn't known), adoptions (drawn as dashed lines), donors (D), gestational carriers (G), pregnancies and losses come back too, as do the markers the narrative records, such as a carrier or a consultand. A surrogate, who gave the egg as well as carrying the pregnancy, is a genetic mother, so she's drawn as an egg donor (D), and the tool says so.</li>
   <li>Each condition gets a colour, and is named in the key as <i>label [ID]</i>. A person with two conditions is filled in halves, and a person with three or four in quarters.</li>
   <li>People are labelled with their ids, except when the ids are pedigree numbers such as II-3, because Pedigree Studio shows those itself.</li>
 </ul>

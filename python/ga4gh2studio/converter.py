@@ -9,11 +9,17 @@ workbench runs it as soon as the drawing opens).
 How relationships are drawn:
 
 * biological, sperm-donor and ovum-donor parents: a couple with a solid line
-  to the child (donors get a D in their symbol);
+  to the child (donors get a D in their symbol, and so does a surrogate who
+  gave the egg, KIN:006, as the 2025 correction to the pedigree nomenclature
+  has it);
 * a gestational carrier with no genetic mother recorded: drawn in the mother's
-  place with an S in her symbol;
+  place with a G in her symbol (the 2025 correction's mark; drawings from
+  before it used S);
 * adoptive parents: a dashed line, and the child's symbol in brackets;
-* twins: identical (KIN:010) or non-identical (KIN:009, KIN:011);
+* twins: identical (KIN:010), non-identical (KIN:011) or of unknown zygosity
+  (KIN:009, the Studio's "?");
+* a consultand that studio2ga4gh noted in the narrative: the consultand's
+  arrow;
 * partners, consanguineous and separated partners: the matching partnership line.
 
 A child with only one parent recorded gets an "unknown parent" partner so the
@@ -56,7 +62,7 @@ _PARTNER = {kin.PARTNER: "normal", kin.CONSANGUINEOUS_PARTNER: "consanguineous",
             kin.SEPARATED_PARTNER: "separated", kin.SEPARATED_CONSANGUINEOUS_PARTNER: "consanguineous-separated"}
 _TWINS = {kin.MONOZYGOTIC_MULTIPLE_BIRTH_SIBLING: "identical",
           kin.POLYZYGOTIC_MULTIPLE_BIRTH_SIBLING: "nonidentical",
-          kin.MULTIPLE_BIRTH_SIBLING: "nonidentical"}
+          kin.MULTIPLE_BIRTH_SIBLING: "unknown"}
 _DRAWN = ({kin.BIOLOGICAL_MOTHER, kin.BIOLOGICAL_FATHER, kin.BIOLOGICAL_PARENT, kin.SPERM_DONOR,
            kin.OVUM_DONOR, kin.SURROGATE_OVUM_DONOR, kin.GESTATIONAL_CARRIER} | _ADOPTIVE | set(_PARTNER)
           | set(_TWINS))
@@ -73,7 +79,8 @@ class Individual:
     mother_id: Optional[str] = None
     adoptive: Tuple[Optional[str], Optional[str]] = (None, None)   # adoptive father, mother
     is_adopted: bool = False
-    centre: str = ""                 # "D", "S", "dot", "line", "P"
+    centre: str = ""                 # "D", "G", "dot", "line", "P"
+    consultand: bool = False
     loss: bool = False
     placeholder: bool = False
     generation: int = -1
@@ -341,6 +348,7 @@ _NOTE_PATTERNS = [
     (re.compile(r"(\S+) is a pregnancy(?! loss)"), "P"),
 ]
 _COUPLE_NOTE = re.compile(r"(\S+) and (\S+): (no children|infertility)")
+_CONSULTAND_NOTE = re.compile(r"(\S+) is a consultand")
 
 
 def _notes(narrative: str):
@@ -352,6 +360,8 @@ def _notes(narrative: str):
             marks.setdefault(m.group(1), mark)
     for m in _COUPLE_NOTE.finditer(text):
         couples.append((m.group(1), m.group(2), m.group(3)))
+    for m in _CONSULTAND_NOTE.finditer(text):
+        marks.setdefault("consultand:" + m.group(1), True)
     return marks, couples
 
 
@@ -371,6 +381,7 @@ def kindred_to_individuals(k: Kindred, warnings: List[str]):
         ind = Individual(id=m.id, sex=SEX_TO_CODE.get(m.sex, 0),
                          deceased=(m.vital_status == "DECEASED"), proband=m.index,
                          diseases=[key_label(t) for t in m.terms if not t.excluded])
+        ind.consultand = bool(marks.get("consultand:" + m.id))
         mark = marks.get(m.id)
         if mark == "loss":
             ind.loss = True
@@ -395,11 +406,17 @@ def kindred_to_individuals(k: Kindred, warnings: List[str]):
             if parent is None:
                 continue
             if rel.kin in (kin.SPERM_DONOR, kin.OVUM_DONOR, kin.SURROGATE_OVUM_DONOR):
-                parent.centre = parent.centre or ("S" if rel.kin == kin.SURROGATE_OVUM_DONOR else "D")
+                # a surrogate gives the egg and carries the pregnancy: a genetic mother, whom the nomenclature
+                # (corrected in 2025) marks as an egg donor, D; G and S are for a carrier who is not a genetic parent
+                parent.centre = parent.centre or "D"
+                if rel.kin == kin.SURROGATE_OVUM_DONOR:
+                    warnings.append("{} gave the egg for {} and carried the pregnancy (a surrogate): she is drawn as "
+                                    "an egg donor, D, and the drawing does not show that she carried the pregnancy"
+                                    .format(rel.individual, m.id))
             if rel.kin == kin.GESTATIONAL_CARRIER:
                 if not mother:
                     mother = rel.individual
-                    parent.centre = "S"
+                    parent.centre = "G"
                 else:
                     warnings.append("{} carried {} for {}; a drawing has room for one mother, so the "
                                     "gestational carrier is not linked".format(rel.individual, m.id, mother))
@@ -467,7 +484,8 @@ def build_session(inds: Dict[str, Individual], couple_notes, partner_rels, twins
             "id": ps_id[iid], "shape": shape, "x": round(ind.x, 1), "y": round(ind.y, 1),
             "text": text, "deceased": ind.deceased, "proband": ind.proband,
             "shadingPattern": "stripes", "shadingCoverage": "full",
-            "centerText": ind.centre if ind.centre in ("D", "S", "dot", "line", "P") else "",
+            "centerText": ind.centre if ind.centre in ("D", "G", "dot", "line", "P") else "",
+            "consultand": ind.consultand,
             "miscarriageSex": {1: "male", 2: "female"}.get(ind.sex, "unknown") if ind.loss else "unknown",
             "noSnap": False, "siblingFixed": False, "customLabel": "Lbl"}, **fill))
     n = 0

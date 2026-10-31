@@ -175,8 +175,10 @@
       });
     }
     // parents, as studio2ped finds them: the man of a couple is the father (or, if the sexes don't say, the partner
-    // the line was drawn from); a dashed line, an adoption, gives no genetic parents; and a parent marked S, a
-    // surrogate, is not a genetic parent
+    // the line was drawn from); a dashed line, an adoption, gives no genetic parents; and a parent marked G, a
+    // gestational carrier (S in drawings from before the 2025 correction to the nomenclature), is not a genetic
+    // parent. Twins count as one genotype only when identical: neither non-identical twins nor twins whose
+    // zygosity is not known ("?") do.
     const couples = new Map();
     for (const pd of data.partnerships || []) {
       if (pd && persons.has(String(pd.fromId)) && persons.has(String(pd.toId))) couples.set(String(pd.id), [String(pd.fromId), String(pd.toId)]);
@@ -190,7 +192,7 @@
       const [father, mother] = sa === 'F' && sb === 'M' ? [b, a] : [a, b];
       if (cl.dashed) { notes.push(`${child.label} is adopted: their adoptive parents are not their genetic parents`); continue; }
       for (const [parent, role] of [[father, 'father'], [mother, 'mother']]) {
-        if (parent.centre === 'S') notes.push(`${shown[parent.id]} carried ${child.label} as a surrogate, so is not a genetic parent`);
+        if (parent.centre === 'G' || parent.centre === 'S') notes.push(`${shown[parent.id]} carried ${child.label} as a gestational carrier, so is not a genetic parent`);
         else if (people.has(parent.id)) child[role] = parent.id;
       }
     }

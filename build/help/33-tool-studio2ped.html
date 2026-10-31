@@ -1,4 +1,4 @@
-<!-- id: h-tool-studio2ped | title: Drawing → PED or MPED | group: Tools | summary: studio2ped: a drawing as a PED or MPED file | keys: studio2ped ped mped linkage export drawing affected status carrier column ids labels duplicate -->
+<!-- id: h-tool-studio2ped | title: Drawing → PED or MPED | group: Tools | summary: studio2ped: a drawing as a PED or MPED file | keys: studio2ped ped mped linkage export drawing affected status carrier column ids labels duplicate gestational carrier adopted genetic parents -->
 <h1><!--ICON:table-->Drawing → PED or MPED</h1>
 <p class="lede">studio2ped turns a drawing into a PED file, the table of a pedigree that linkage and association programs read. If the drawing shows several conditions or carriers, it writes an MPED file instead, which has a column for each.</p>
 <div class="tryrow"><button class="do" type="button" data-tool="studio2ped" data-input="/data/examples/cf-cousins.studio.json">Try it with the cystic fibrosis cousins</button></div>
@@ -13,7 +13,7 @@
 <h2>What it writes</h2>
 <p>The file has one line per person. Each line gives the family, the person, their father and mother, and their sex: 1 male, 2 female or 0 unknown. Then, for each condition, there's 1 for unaffected or 2 for affected, and in an MPED file 3 for a carrier.</p>
 <p>Each condition's column is named after the condition in the colour key, so <i>Hearing loss from birth</i> becomes <code>Hearing_loss_from_birth</code>. An ontology id written after the name is left out, so <i>Condition X [MONDO:0009061]</i> becomes <code>Condition_X</code>. Only an ontology's id is left out, though. <i>Hypertension (BP:160/95)</i> keeps what's in its brackets, as <code>Hypertension_BP16095</code>. <a href="#h-ped">The PED and MPED formats</a> has the details.</p>
-<p>The father and mother are the genetic parents, because that's how linkage programs read them. An adopted child, joined to a couple by a dashed line, gets 0 in place of those parents, with a note. So does a child carried by a surrogate (a parent marked S). The Phenopackets Family's pedigree does this too. A donor (D) is a genetic parent, and is written as one.</p>
+<p>The father and mother are the genetic parents, because that's how linkage programs read them. An adopted child, joined to a couple by a dashed line, gets 0 in place of those parents, with a note. So does a child carried by a gestational carrier (a parent marked G, or S in drawings made before the 2025 correction to the nomenclature). The Phenopackets Family's pedigree does this too. A donor (D) is a genetic parent, and is written as one.</p>
 <p>After writing the file, the tool checks it with mpedtools and shows the result underneath.</p>
 
 <div class="callout"><div class="co-t"><!--ICON:info-->The ids</div>

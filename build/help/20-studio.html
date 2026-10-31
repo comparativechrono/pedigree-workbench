@@ -1,4 +1,4 @@
-<!-- id: h-studio | title: The Studio tab | group: Pedigree Studio | summary: Pedigree Studio in the workbench: drawing, opening and saving | keys: studio pedigree studio draw drawing open save save as new tidy layout convert check file bar symbols key colour legend proband carrier twins consanguineous adoption export png svg picture -->
+<!-- id: h-studio | title: The Studio tab | group: Pedigree Studio | summary: Pedigree Studio in the workbench: drawing, opening and saving | keys: studio pedigree studio draw drawing open save save as new tidy layout convert check file bar symbols key colour legend proband consultand carrier gestational carrier donor twins zygosity consanguineous adoption export png svg picture -->
 <h1><!--ICON:pedigree-->The Studio tab</h1>
 <p class="lede">The Studio tab is Pedigree Studio, our program for drawing pedigrees in the standard nomenclature, running inside the workbench. The bar above it connects the Studio to your files. It shows which file the drawing you're working on belongs to, saves the drawing there and takes it to the Tools tab.</p>
 
@@ -30,7 +30,7 @@
   <li><b>Add the first person</b> with <b>Male</b>, <b>Female</b> or <b>Unknown</b> on the toolbar. This is usually the person the pedigree is for, and the one you mark as the <b>proband</b> in the panel.</li>
   <li><b>Build out from them</b> with <b>Add a relative</b>. With someone selected, it adds a partner, a child, parents, or a brother or sister, already joined up.</li>
   <li><b>Join people yourself</b> with <b>Partners</b>, <b>Child</b> and <b>Twins</b>.</li>
-  <li><b>Describe each person</b> in the panel. You can add notes under the symbol, mark someone as deceased and add shading for a condition. You can also put a mark inside the symbol for a carrier, a pregnancy, a donor or a surrogate.</li>
+  <li><b>Describe each person</b> in the panel. You can add notes under the symbol, mark someone as deceased and add shading for a condition. You can also put a mark inside the symbol for a carrier, a pregnancy, a donor (D) or a gestational carrier (G, which the 2025 correction to the nomenclature uses in place of S; drawings made before still show S, and the tools read it the same way).</li>
   <li><b>Click a line</b> to mark a couple as consanguineous or separated, or to make a line of descent dashed to show an adoption.</li>
   <li><b>Tidy</b> lays it all out again.</li>
 </ol>
@@ -40,7 +40,7 @@
   <li><b>The colour key names the conditions.</b> Give each condition its own colour (or a half, a quarter or a pattern), and name it in the key with the <b>Key</b> button. A colour that the key doesn't name isn't counted as a condition. An id in brackets after the name, as in <i>Breast cancer [MONDO:0007254]</i>, gives the condition its term (<a href="#h-terms">Ontology terms and terms files</a>). A long name widens the key to fit it on one line, unless you choose <b>Wrap the text</b> under <b>Long entries in the key</b> in the Studio's <b>File</b> menu; then drag the key's right edge to set its width.</li>
   <li><b>The proband</b> becomes the index patient in the GA4GH files.</li>
   <li><b>The notes under the symbols</b> stay in the drawing. The GA4GH and PED files name people by their pedigree numbers, unless you choose otherwise.</li>
-  <li><b>Carriers, pregnancies, losses, donors and surrogates</b> are written in the ways the standard allows. Losses and pregnancies are written as people, and donors and surrogates by their KIN relationships. Anything that has no place of its own, such as a carrier, goes in the GA4GH Pedigree's narrative.</li>
+  <li><b>Carriers, pregnancies, losses, donors and gestational carriers</b> are written in the ways the standard allows. Losses and pregnancies are written as people, and donors and gestational carriers by their KIN relationships, as are twins, including twins whose zygosity isn't known. Anything that has no place of its own, such as a carrier or a consultand, goes in the GA4GH Pedigree's narrative.</li>
   <li><b>A symbol that stands for several people</b>, shown by a number inside it, is written as one person, and the tool tells you so under the result.</li>
 </ul>
 <div class="tryrow"><button class="do" type="button" data-studio="/data/examples/features.studio.json">Open the drawing with every kind of symbol</button> <button class="do" type="button" data-tool="studio2ga4gh" data-input="/data/examples/features.studio.json" data-terms="/data/examples/example-terms.json">See how the tools write it</button></div>
