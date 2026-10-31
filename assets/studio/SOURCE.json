@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/comparativechrono/pedigreestudio",
-  "ref": "numbers-people-only",
-  "commit": "43f5146bcbaf4d73306b63bcb814a7dcd43d5c9e",
-  "committed": "2026-10-31T13:56:49+00:00",
+  "ref": "v2.3.0",
+  "commit": "df2b0332edc8b1e23a42826674e2b8e794f617f8",
+  "committed": "2026-10-31T14:42:26+00:00",
   "sha256_of_original": "013595ba7df6fa9dc16d53cf1db99bae8f46abe369ba16da6105eaf10e97df06",
   "copied": "2026-10-31",
   "changes": [

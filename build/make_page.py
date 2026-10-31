@@ -272,8 +272,11 @@ def versions_table():
                  f'<code>{html.escape(m.group(2))}</code>), not on PyPI yet' if m else html.escape(str(v)))
         rows.append(f'<tr><td>{html.escape(names.get(k, k))} <small>(loaded when first used)</small></td><td>{shown}</td></tr>')
     s = json.load(open(os.path.join(SITE, 'assets/studio/SOURCE.json'), encoding='utf-8'))
-    rows.append(f'<tr><td>Pedigree Studio</td><td>commit <code>{html.escape(s.get("commit", "")[:7])}</code> of '
-                f'{html.escape(s.get("committed", "")[:10])}</td></tr>')
+    commit = (f'commit <code>{html.escape(s.get("commit", "")[:7])}</code> of '
+              f'{html.escape(s.get("committed", "")[:10])}')
+    # (a copy taken from a release's tag, such as v2.3.0, is given as that version)
+    tag = re.fullmatch(r'v?(\d+\.\d+\.\d+)', str(s.get('ref', '')))
+    rows.append(f'<tr><td>Pedigree Studio</td><td>{html.escape(tag.group(1)) + " (" + commit + ")" if tag else commit}</td></tr>')
     rows.append('</table>')
     return '\n'.join(rows)
 
