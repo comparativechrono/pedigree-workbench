@@ -132,14 +132,12 @@ def person_ids(s: Session, ids: str = "numbers") -> Tuple[Dict[str, str], List[s
     if ids == "numbers":
         return dict(nums), []
     labels = s.drawing_labels() if ids == "drawing" else {pid: pid for pid in s.persons}
-    people = [pid for pid, p in s.persons.items() if not p.is_marker]
+    people = [pid for pid, p in s.persons.items() if not p.is_marker]   # (the bars are not people: no id)
     notes: List[str] = []
     out = {}
-    for pid in s.persons:
+    for pid in people:
         out[pid] = make_id(labels.get(pid) or "")
-        if pid not in people:
-            out[pid] = out[pid] or nums[pid]
-        elif out[pid] == "0":
+        if out[pid] == "0":
             out[pid] = nums[pid]
             notes.append("{} is labelled 0, which a PED-style pedigree reads as 'no parent', so their pedigree "
                          "number is used instead".format(nums[pid]))
@@ -319,7 +317,9 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
             real = [cl for cl in links if not s.persons[cl.child].is_marker]
             markers = [cl for cl in links if s.persons[cl.child].is_marker]
             a, b = s.persons[pr.a], s.persons[pr.b]
-            for cl in markers:
+            # a bar joined to someone by a partner line is not a couple: the bar is not a person, and has no id
+            couple = not (a.is_marker or b.is_marker)
+            for cl in markers if couple else []:
                 notes.append("{} and {}: {}".format(idmap[pr.a], idmap[pr.b], dict(
                     [("no-offspring", "no children"), ("infertile", "infertility")])[s.persons[cl.child].shape]))
             for cl in real:
@@ -328,6 +328,8 @@ def session_to_kindreds(session_data: dict, *, terms: Optional[dict] = None, kin
                         continue
                     rel = _parent_relation(parent, cl.dashed, warnings, idmap)
                     k.relations.append(Relation(idmap[parent.id], rel, idmap[cl.child]))
+            if not couple:
+                continue
             if pr.consanguineous:
                 code = kin.SEPARATED_CONSANGUINEOUS_PARTNER if pr.separated else kin.CONSANGUINEOUS_PARTNER
             elif pr.separated:

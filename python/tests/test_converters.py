@@ -1,4 +1,4 @@
-"""Tests for the workbench's copies of studio2ga4gh and ga4gh2studio."""
+"""Tests for the workbench's copies of studio2ga4gh and ga4gh2studio (and studio2ped's numbering)."""
 import json
 import os
 from collections import Counter
@@ -50,6 +50,21 @@ def test_ids_are_the_pedigree_numbers_studio_shows():
     assert sorted(set(v.split("-")[0] for v in nums.values())) == ["I", "II", "III", "IV"]
     r, ped, fam = convert("okafor")
     assert all(i["subject"]["id"].count("-") == 1 for i in ped["individuals"])
+
+
+def test_the_bars_have_no_number():
+    """As in Pedigree Studio and studio2ped, only people are numbered: the bars for no children and infertility
+    have no number and do not count in their row, and a row with nothing but a bar is not a generation."""
+    import studio2ped
+    drawing = {"persons": [
+        {"id": "f", "shape": "male", "x": 100, "y": 0}, {"id": "m", "shape": "female", "x": 200, "y": 0},
+        {"id": "bar", "shape": "no-offspring", "x": 0, "y": 150}, {"id": "c", "shape": "male", "x": 100, "y": 150},
+        {"id": "inf", "shape": "infertile", "x": 100, "y": 300}, {"id": "g", "shape": "female", "x": 50, "y": 450}],
+        "partnerships": [{"id": "pr", "fromId": "f", "toId": "m"}],
+        "childLinks": [{"id": "l1", "partnershipId": "pr", "childId": "c"}]}
+    want = {"f": "I-1", "m": "I-2", "c": "II-1", "g": "III-1"}
+    assert parse(drawing).numbers() == want
+    assert studio2ped.pedigree_numbers(studio2ped.parse_session(drawing)[0]) == want
 
 
 def test_features_drawing():
