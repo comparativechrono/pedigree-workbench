@@ -163,40 +163,41 @@ class Session:
             out.append("shading ({})".format(p.shading_pattern))
         return out
 
-    def numbers(self) -> Dict[str, str]:
-        """Pedigree numbers as Pedigree Studio draws them: generation in Roman
-        numerals, then position from the left (II-3). As in the Studio, a new
-        generation starts 80 px below the first symbol of the one above."""
-        items = sorted(self.persons.values(), key=lambda p: p.y)
+    def rows(self) -> List[List[StudioPerson]]:
+        """The people in each row (generation) of the drawing, from left to right, as Pedigree Studio numbers
+        them: a new row starts 80 px below the first person of the one above. The "no children" and
+        "infertility" symbols are not people, so they are left out and do not count in their row."""
+        items = sorted((p for p in self.persons.values() if not p.is_marker), key=lambda p: p.y)
         gens: List[List[StudioPerson]] = []
         for p in items:
             if gens and p.y - gens[-1][0].y < 80:
                 gens[-1].append(p)
             else:
                 gens.append([p])
+        return [sorted(gen, key=lambda q: q.x) for gen in gens]
+
+    def numbers(self) -> Dict[str, str]:
+        """Pedigree numbers as Pedigree Studio draws them: generation in Roman
+        numerals, then position from the left (II-3). As in the Studio, only
+        people are numbered (see :meth:`rows`)."""
         out = {}
-        for gi, gen in enumerate(gens):
+        for gi, gen in enumerate(self.rows()):
             g = _ROMAN[gi] if gi < len(_ROMAN) else str(gi + 1)
-            for pi, p in enumerate(sorted(gen, key=lambda q: q.x)):
+            for pi, p in enumerate(gen):
                 out[p.id] = "{}-{}".format(g, pi + 1)
         return out
 
     def drawing_labels(self) -> Dict[str, str]:
-        """The label each symbol shows in the drawing, whatever numbering it uses."""
+        """The label each person shows in the drawing, whatever numbering it uses (the "no children" and
+        "infertility" symbols have none)."""
         nums = self.numbers()
         if self.numbering_mode in ("numbers", "off"):
             return nums
         if self.numbering_mode == "freetext":
-            labels = {pid: (p.custom_label or "").strip() for pid, p in self.persons.items()}
+            labels = {pid: (self.persons[pid].custom_label or "").strip() for pid in nums}
             return {pid: (lab if lab and lab != "Lbl" else nums[pid]) for pid, lab in labels.items()}
         # letters / lettersonly
-        items = sorted(self.persons.values(), key=lambda p: p.y)
-        gens: List[List[StudioPerson]] = []
-        for p in items:
-            if gens and p.y - gens[-1][0].y < 80:
-                gens[-1].append(p)
-            else:
-                gens.append([p])
+        gens = self.rows()
 
         def letter(n):
             s = ""
@@ -208,7 +209,7 @@ class Session:
         out, k = {}, 0
         for gi, gen in enumerate(gens):
             g = _ROMAN[gi] if gi < len(_ROMAN) else str(gi + 1)
-            for pi, p in enumerate(sorted(gen, key=lambda q: q.x)):
+            for pi, p in enumerate(gen):
                 out[p.id] = letter(k) if self.numbering_mode == "lettersonly" else "{}-{}".format(g, letter(pi))
                 k += 1
         return out

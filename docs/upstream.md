@@ -22,15 +22,16 @@ from their wheels, so `pip install` now gives exactly what the workbench runs.
 | mondonorm | 1.0.0 | [mondonorm#1](https://github.com/comparativechrono/mondonorm/pull/1) | **1.1.0**, the same as hponorm |
 | mpedtools | 0.1.0 | – | 0.1.0, unchanged |
 
-Three more pull requests are open and not released yet. They are for the
+Three more packages have changes that are not released yet. They are for the
 symbols Pedigree Studio has drawn since the 2025 correction to the pedigree
-nomenclature (section 12), and the workbench carries them from their branches
-until they are released:
+nomenclature, and for its numbering, which no longer counts the bars for no
+children and infertility (section 12). The workbench carries them from their
+branches until they are released:
 
 | Package | On PyPI | Pull request | To be released |
 |---|---|---|---|
-| studio2ped | 0.2.0 | [#2](https://github.com/comparativechrono/studio2ped/pull/2), [#3](https://github.com/comparativechrono/studio2ped/pull/3) | **0.2.1**, G read as a gestational carrier; thirds |
-| studio2ga4gh | 0.4.0 | [#2](https://github.com/comparativechrono/studio2ga4gh/pull/2), [#3](https://github.com/comparativechrono/studio2ga4gh/pull/3) | **0.4.1**, G; twins of unknown zygosity; consultands; thirds |
+| studio2ped | 0.2.0 | [#2](https://github.com/comparativechrono/studio2ped/pull/2), [#3](https://github.com/comparativechrono/studio2ped/pull/3), [#4](https://github.com/comparativechrono/studio2ped/pull/4) | **0.2.1**, G read as a gestational carrier; thirds; only people numbered |
+| studio2ga4gh | 0.4.0 | [#2](https://github.com/comparativechrono/studio2ga4gh/pull/2), [#3](https://github.com/comparativechrono/studio2ga4gh/pull/3), [#4](https://github.com/comparativechrono/studio2ga4gh/pull/4) | **0.4.1**, G; twins of unknown zygosity; consultands; thirds; only people numbered |
 | ga4gh2studio | 0.4.0 | [#2](https://github.com/comparativechrono/ga4gh2studio/pull/2), [#3](https://github.com/comparativechrono/ga4gh2studio/pull/3) | **0.4.1**, G; D for a surrogate; twins of unknown zygosity; consultands; thirds |
 
 `docs/ga4gh.md` says what the correct form is and why.
@@ -525,6 +526,19 @@ a condition for each colour, as quarters are), and
 [ga4gh2studio#3](https://github.com/comparativechrono/ga4gh2studio/pull/3)
 draws three conditions in thirds rather than in quarters with one empty.
 Triplets need nothing new: they are twin links, as before.
+
+[PedigreeStudio#10](https://github.com/comparativechrono/PedigreeStudio/pull/10)
+stops numbering the bars for no children and infertility. The nomenclature
+numbers individuals, and the bars are not people, so they now have no number,
+letter or label of their own and do not count in their row: the person to the
+right of one is II-3, not II-4, and a row with nothing but bars is not a
+generation. studio2ped and studio2ga4gh give each person the number the
+drawing shows, so [studio2ped#4](https://github.com/comparativechrono/studio2ped/pull/4)
+and [studio2ga4gh#4](https://github.com/comparativechrono/studio2ga4gh/pull/4)
+number the same way, and so does the Risk tab (`assets/js/risk-read.js`),
+which `tests/risk/readers.py` checks against both in each of the Studio's
+numberings. None of the example drawings changes: their bars are the last in
+their row. ga4gh2studio needs nothing, as it writes no numbers.
 
 Release them in this order: studio2ped, then studio2ga4gh, then ga4gh2studio,
 whose round-trip test needs studio2ga4gh 0.4.1 to read G back. Then copy the

@@ -59,10 +59,11 @@
     return persons;
   }
 
-  /** each symbol's label as the drawing shows it: I-1, II-3 ... (a generation starts 80 px below the first symbol of
-      the one above, as in the Studio), I-A, letters, or the drawer's own */
+  /** each person's label as the drawing shows it: I-1, II-3 ... (a generation starts 80 px below the first person of
+      the one above, as in the Studio), I-A, letters, or the drawer's own. The bars for no children and infertility
+      are not people: they have none, and do not count in their row (as in the Studio, studio2ped and studio2ga4gh) */
   function labels(persons, mode) {
-    const items = [...persons.values()].sort((a, b) => a.y - b.y);
+    const items = [...persons.values()].filter((p) => !(p.shape in MARKERS)).sort((a, b) => a.y - b.y);
     const gens = [];
     for (const p of items) {
       if (gens.length && p.y - gens[gens.length - 1][0].y < 80) gens[gens.length - 1].push(p);
@@ -83,7 +84,7 @@
     if (mode === 'lettersonly') return only;
     if (mode === 'freetext') {
       const out = {};
-      for (const p of persons.values()) { const l = (p.customLabel || '').trim(); out[p.id] = l && l !== 'Lbl' ? l : nums[p.id]; }
+      for (const p of items) { const l = (p.customLabel || '').trim(); out[p.id] = l && l !== 'Lbl' ? l : nums[p.id]; }
       return out;
     }
     return nums;

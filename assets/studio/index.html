@@ -6768,7 +6768,16 @@ function placeNumbers() {
   });
 }
 
+// Pedigree numbers (or letters, or labels of your own) for people only. The nomenclature numbers individuals
+// (Bennett et al. 2022), and the bars for no children and infertility are not people, so they have none and do not
+// count in their row. (studio2ped, studio2ga4gh and the workbench's Risk tab number a drawing the same way.)
 function writeNumbers() {
+  const numbered = [];
+  persons.forEach(p => {
+    if (!isLineShape(p.shape)) { numbered.push(p); return; }
+    const ne = p.el.querySelector('.person-number');
+    if (ne) { ne.textContent = ''; ne.contentEditable = 'false'; ne.classList.remove('editable'); }
+  });
   if (numberingMode === 'off') {
     persons.forEach(p => {
       const ne = p.el.querySelector('.person-number');
@@ -6777,7 +6786,7 @@ function writeNumbers() {
     return;
   }
   if (numberingMode === 'freetext') {
-    persons.forEach(p => {
+    numbered.forEach(p => {
       const ne = p.el.querySelector('.person-number');
       if (!ne) return;
       ne.textContent = p.customLabel;
@@ -6839,9 +6848,8 @@ function writeNumbers() {
     const ne = p.el.querySelector('.person-number');
     if (ne) { ne.contentEditable = 'false'; ne.classList.remove('editable'); }
   });
-  if (persons.size === 0) return;
-  const list = [];
-  persons.forEach(p => { list.push({ id: p.id, x: parseFloat(p.el.style.left), y: parseFloat(p.el.style.top) }); });
+  if (!numbered.length) return;
+  const list = numbered.map(p => ({ id: p.id, x: parseFloat(p.el.style.left), y: parseFloat(p.el.style.top) }));
   list.sort((a, b) => a.y - b.y);
 
   const generations = [];
@@ -7250,11 +7258,11 @@ function clearAll() {
 
 function buildSessionData() {
   normalizeRelatedPartnershipTypes();
-  // Sync freetext labels from DOM before saving
+  // Sync freetext labels from DOM before saving (a bar shows none, so a label it has from an older file is kept as it was)
   if (numberingMode === 'freetext') {
     persons.forEach(p => {
       const ne = p.el.querySelector('.person-number');
-      if (ne && ne.textContent !== undefined) p.customLabel = ne.textContent.trim();
+      if (ne && ne.textContent !== undefined && !isLineShape(p.shape)) p.customLabel = ne.textContent.trim();
     });
   }
   const personArr = [];
@@ -10890,7 +10898,7 @@ function buildSymbolTable() {
       'A dashed line of descent joins an adopted child to the adoptive parents; a solid line joins a child to the birth parents.',
       'Click a line of descent, then Dashed (adopted).'],
     ['No children, infertility', noChildren(),
-      'One bar: no children, by choice or for a reason not known. Two bars: infertility. Write the reason underneath if it is known.',
+      'One bar: no children, by choice or for a reason not known. Two bars: infertility. Write the reason underneath if it is known. The bars are not people, so they have no pedigree number.',
       'Click a relationship line and use No children or Infertility, or add the symbol from More.']
   ];
   const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');

@@ -1,9 +1,9 @@
 {
   "repository": "https://github.com/comparativechrono/pedigreestudio",
-  "ref": "origin/main",
-  "commit": "097a38fe84e0505e02b76b6a2136945a2a1465db",
-  "committed": "2026-10-31T13:31:53+00:00",
-  "sha256_of_original": "260cdc6d2f3f091d20c798af48a6f50ac4a1d53adc74c671a1a3ef014666e9ca",
+  "ref": "numbers-people-only",
+  "commit": "43f5146bcbaf4d73306b63bcb814a7dcd43d5c9e",
+  "committed": "2026-10-31T13:56:49+00:00",
+  "sha256_of_original": "013595ba7df6fa9dc16d53cf1db99bae8f46abe369ba16da6105eaf10e97df06",
   "copied": "2026-10-31",
   "changes": [
     "the browser-storage key 'pedigree-studio-session' became 'pedwb:studio-session' (3 places)",

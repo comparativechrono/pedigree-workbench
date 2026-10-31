@@ -7,7 +7,9 @@
   tests/risk/thirds.studio.json, the drawing with every kind of symbol with two people in thirds);
 - each example PED and MPED file as mpedtools reads it;
 - each example GA4GH Pedigree and Phenopackets Family as PedNet reads it, for each of its conditions: the same
-  people, parents and phenotypes, with people who have no record of the condition taken as PedNet takes them.
+  people, parents and phenotypes, with people who have no record of the condition taken as PedNet takes them;
+- people labelled as studio2ped and studio2ga4gh label them, in each of the Studio's numberings, with the bars for
+  no children and infertility given no label and not counted in their row.
 
 usage: python3 tests/risk/readers.py      (needs Node, for the page's readers)
 """
@@ -80,6 +82,25 @@ def drawing(entry):
         compare(f"{entry['file']} ({name})", family['people'], parsed.individuals, codes, skip)
 
 
+def labels_as_the_converters(name, session):
+    """The page labels people as the drawing does (pedigree numbers, letters or the drawer's own), as studio2ped and
+    studio2ga4gh do, in each numbering; the bars for no children and infertility are not people and have none."""
+    from studio2ga4gh.session import parse
+    for mode in ('numbers', 'letters', 'lettersonly', 'freetext'):
+        drawn = dict(session, numberingMode=mode)
+        out = subprocess.run(['node', '-e', READ_STDIN], input=json.dumps(drawn), capture_output=True, text=True, check=True)
+        page = {p['id']: p['label'] for p in json.loads(out.stdout)['people']}
+        ped = s2p.drawing_labels(s2p.parse_session(drawn)[0], mode)
+        ga4gh = parse(drawn).drawing_labels()
+        check(page == ped == ga4gh, f'{name}, numbered {mode}: the same labels as studio2ped and studio2ga4gh'
+              + ('' if page == ped == ga4gh else f': page {page}, studio2ped {ped}, studio2ga4gh {ga4gh}'))
+
+
+READ_STDIN = ("const R = require(%s); let t = ''; process.stdin.on('data', (d) => { t += d; });"
+              " process.stdin.on('end', () => process.stdout.write(JSON.stringify(R.fromStudio(JSON.parse(t)))));"
+              % json.dumps(os.path.join(ROOT, 'assets', 'js', 'risk-read.js')))
+
+
 def ped_file(entry):
     with open(os.path.join(ROOT, entry['file']), encoding='utf-8') as fh:
         parsed = mped.parse(fh.read())
@@ -142,6 +163,20 @@ thirds = subprocess.run(['node', os.path.join(HERE, 'read_examples.js'), os.path
                         capture_output=True, text=True, check=True)
 for entry in json.loads(thirds.stdout):
     drawing(entry)
+for name in ('features', 'okafor'):
+    with open(os.path.join(ROOT, 'data', 'examples', name + '.studio.json'), encoding='utf-8') as fh:
+        labels_as_the_converters(name, json.load(fh))
+# a bar for no children at the left of a row, a bar for infertility in a row of its own, and labels of the drawer's
+# own, one of them on a bar (from a file made before the bars lost their numbers)
+labels_as_the_converters('a drawing with bars', {
+    'persons': [{'id': 'f', 'shape': 'male', 'x': 100, 'y': 0}, {'id': 'm', 'shape': 'female', 'x': 200, 'y': 0},
+                {'id': 'bar', 'shape': 'no-offspring', 'x': 0, 'y': 150, 'customLabel': 'old'},
+                {'id': 'c1', 'shape': 'male', 'x': 100, 'y': 150, 'customLabel': 'Kid'},
+                {'id': 'c2', 'shape': 'female', 'x': 200, 'y': 150},
+                {'id': 'inf', 'shape': 'infertile', 'x': 100, 'y': 300},
+                {'id': 'g', 'shape': 'male', 'x': 50, 'y': 450}],
+    'partnerships': [{'id': 'pr', 'fromId': 'f', 'toId': 'm'}],
+    'childLinks': [{'id': 'l1', 'partnershipId': 'pr', 'childId': 'c1'}, {'id': 'l2', 'partnershipId': 'pr', 'childId': 'c2'}]})
 ga4gh_files()
 print(f'\n{len(failures)} failed' if failures else '\nall the same')
 sys.exit(1 if failures else 0)
